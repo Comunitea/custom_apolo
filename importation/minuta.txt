@@ -1,0 +1,30 @@
+1. Importación de Proveedores: maestro_proveedores.xlsx
+
+- Añadir el código de país manualmente a los cifs ya que no son muchos.
+- Substituir en iva_concepto 1 por Régimen Nacional y 3 por Régimen Intracomunitario
+- Añadir una columna is_company igualada a True
+- Añadir una columna supplier igualada a True
+- Añadir una columna customer igualada a False
+- Se importará con el importador por defecto
+- Mapeo de campos:
+    - prv_codi: ref
+    - prv_nomb: name
+    - prv_sire: street
+    - prv_cpos: zip
+    - prv_pobl: city
+    - prv_pers:
+    - prv_ncif: vat
+    - prv_tlfo: phone
+    - prv_nfax: fax
+    - prv_fpag: comment
+    - prv_acpe:
+    - prv_acan:
+    - prv_ctac:
+    - prv_core:
+    - descuento_pp:
+    - prv_fpag: property_account_position
+- Convertir a csv
+- Importar
+- Ejecutar approve_partners.py: python approve_partners.py database user password "[('active','=', False),('supplier', '=', True)]"
+
+2. Importación de Clientes: maestro_clientes.xlsx y coordenadas clientes (GEO x y) v2.xls
