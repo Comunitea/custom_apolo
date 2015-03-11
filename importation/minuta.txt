@@ -28,3 +28,7 @@
 - Ejecutar approve_partners.py: python approve_partners.py database user password "[('active','=', False),('supplier', '=', True)]"
 
 2. Importación de Clientes: maestro_clientes.xlsx y coordenadas clientes (GEO x y) v2.xls
+
+- Ejecutar import_customers.py: python import_customers.py database user password maestro_clientes_path
+- Ejecutar approve_partners.py: python approve_partners.py database user password "[('customer','=',True),('active','=',False),('unregister_reason_id','=',False)]"
+- Ejecutar import_normalize_customer_adds.py: python import_normalize_customer_adds.py database user password maestro_direcciones_path
