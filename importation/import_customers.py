@@ -173,11 +173,15 @@ class import_customers(object):
                     "zip": record[4],
                     "phone": record[6],
                     "city":  record[9],
+                    "comment": False
                 }
                 if record[11]: #Baja
                     partner_vals['state2'] = "unregistered"
                     partner_vals['unregister_reason_id'] = unregister_id[0]
                     partner_vals['comment'] = "Fecha de baja: " + str(record[11])
+
+                if int(recod[0]) != int(record[10]):
+                    partner_vals['comment'] = partner_vals['comment'] and partner_vals['comment']  + u"\nCODIGO_AGRUPA: " + str(int(record[10])) or u"CODIGO_AGRUPA: " + str(int(record[10]))
 
                 if record[5] and int(record[5]):
                     if int(record[5]) > int(record[0]):
