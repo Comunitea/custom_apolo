@@ -32,3 +32,26 @@
 - Ejecutar import_customers.py: python import_customers.py database user password maestro_clientes_path
 - Ejecutar approve_partners.py: python approve_partners.py database user password "[('customer','=',True),('active','=',False),('unregister_reason_id','=',False)]"
 - Ejecutar import_normalize_customer_adds.py: python import_normalize_customer_adds.py database user password maestro_direcciones_path
+
+3. Importación de Familias: MAESTRO_FAMILIAS_PRODUCTOS_APD.xls
+
+- Copiar las columnas CÓDIGO GRUPO COMPRA y GRUPO VENTA a un nuevo fichero csv.
+- Eliminar duplicados con /Datos/Filtro/Filtro estándar, se igualan las dos columnas a: columna = no vacío y en más opciones se marca eliminar duplicados. Con el resultado se pisa el documentoa actual.
+- Se añade una columna nueva en este documento de nombre parent_id por ejemplo y la igualamos para todas las lineas a product.product_category_1
+- Importamos este fichero con el importador por defecto, mapeando:
+    - código grupo compra: external_id
+    - grupo compra: name
+    - parent_id: parent_id/external_id
+- Volviendo al xls anterior ya estamos listos para importar todas las demás categorías contra su categoría padre.
+- Lo convertimos a csv
+- Importamos con el importador por defecto mapeando:
+    - Código: external_id
+    - Nombre familia: name
+    - Código grupo compra: Si queremos unir por este campo con la categoría padre sería parent_id/external_id sino nada y lo unimos por Grupo Compra
+    - Código grupo venta:
+    - fam_rapp:
+    - fam_medi:
+    - Grupo compra: Si queremos unir por este campo con la categoría padre sería parent_id sino nada y lo unimos por Código grupo compra
+    - Grupo venta:
+
+4. Importación de Artículos: maestro_articulos.xlsx
