@@ -14,7 +14,7 @@ class import_customers(object):
         try:
             self.url_template = "http://%s:%s/xmlrpc/%s"
             self.server = "localhost"
-            self.port = 8069
+            self.port = 9069
             self.dbname = dbname
             self.user_name = user
             self.user_passwd = passwd
@@ -150,7 +150,7 @@ class import_customers(object):
 
     def import_customer(self):
         partner_hierarchy = {}
-        unregister_reason = "Baja en importación"
+        unregister_reason = u"Baja en importación"
         unregister_id = self.search("unregister.partner.reason", [("name", '=', unregister_reason)])
         if not unregister_id:
             print u"Por favor cree el motivo de baja '%s'" % unregister_reason
@@ -180,7 +180,7 @@ class import_customers(object):
                     partner_vals['unregister_reason_id'] = unregister_id[0]
                     partner_vals['comment'] = "Fecha de baja: " + str(record[11])
 
-                if int(recod[0]) != int(record[10]):
+                if int(record[0]) != int(record[10]):
                     partner_vals['comment'] = partner_vals['comment'] and partner_vals['comment']  + u"\nCODIGO_AGRUPA: " + str(int(record[10])) or u"CODIGO_AGRUPA: " + str(int(record[10]))
 
                 if record[5] and int(record[5]):
