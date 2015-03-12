@@ -55,3 +55,4 @@
     - Grupo venta:
 
 4. Importación de Artículos: maestro_articulos.xlsx
+    - Ejecutar import_products.py: python import_products.py database user password maestro_productos_path
