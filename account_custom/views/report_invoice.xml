@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <template id="report_invoice_add_cash_rigorous" inherit_id="account.report_invoice_document">
+            <xpath expr="//p[@t-if='o.fiscal_position.note']" position="after">
+                <t t-if="o.payment_term.cash_rigorous">
+                    <p>CASH RIGOROUS</p>
+                </t>
+            </xpath>
+        </template>
+    </data>
+</openerp>

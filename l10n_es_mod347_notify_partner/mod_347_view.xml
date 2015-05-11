@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+    <record id="mod_347_add_notify" model="ir.ui.view">
+        <field name="name">l10n_es.aeat.mod347.report.form</field>
+        <field name="model">l10n.es.aeat.mod347.report</field>
+        <field name="inherit_id" ref="l10n_es_aeat_mod347.view_l10n_es_aeat_mod347_report_form"/>
+        <field name="arch" type="xml">
+            <button name="%(l10n_es_aeat_mod347.action_wizard_aeat_mod347_export)d" position="after">
+                <button name="notify_partner" states="calculated,done" string="Notify partners" type="object" />
+            </button>
+        </field>
+    </record>
+
+    </data>
+</openerp>

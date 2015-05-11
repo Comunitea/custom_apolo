@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Copyright (C) 2015 Comunitea All Rights Reserved
-#    $Omar Castiñeira Saavedra <omar@comunitea.com>$
+#    $Jesús Ventosinos Mayor <jesus@comunitea.com>$
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published
@@ -20,18 +20,13 @@
 ##############################################################################
 
 {
-    'name': 'Account customizations',
+    'name': 'AEAT 347 notify partners',
     'version': '1.0',
-    'category': 'Account',
-    'description': """Small customizations to account modules""",
+    'category': 'Localisation/Accounting',
+    'description': """""",
     'author': 'Comunitea',
     'website': '',
-    "depends": ['base',
-                'account_payment',
-                'account_voucher'],
-    "data": ["account_payment_view.xml",
-             "account_voucher_view.xml",
-             "res_users_view.xml",
-             'views/report_invoice.xml'],
+    "depends": ['mail', 'l10n_es_aeat_mod347'],
+    "data": ['mod_347_view.xml', 'data/mod347_email_template.xml'],
     "installable": True
 }

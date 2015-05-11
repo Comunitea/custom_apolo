@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Copyright (C) 2015 Comunitea All Rights Reserved
-#    $Omar Castiñeira Saavedra <omar@comunitea.com>$
+#    $Jesús Ventosinos Mayor <jesus@comunitea.com>$
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published
@@ -18,20 +18,4 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
-{
-    'name': 'Account customizations',
-    'version': '1.0',
-    'category': 'Account',
-    'description': """Small customizations to account modules""",
-    'author': 'Comunitea',
-    'website': '',
-    "depends": ['base',
-                'account_payment',
-                'account_voucher'],
-    "data": ["account_payment_view.xml",
-             "account_voucher_view.xml",
-             "res_users_view.xml",
-             'views/report_invoice.xml'],
-    "installable": True
-}
+from . import mod347
