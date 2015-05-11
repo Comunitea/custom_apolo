@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="view_payment_order_form_add_amount_lines" model="ir.ui.view">
+            <field name="name">payment.order.form.add_amount_lines</field>
+            <field name="model">payment.order</field>
+            <field name="inherit_id" ref="account_payment.view_payment_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='line_ids']/tree/field[@name='amount']" position="attributes">
+                    <attribute name="invisible">False</attribute>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</openerp>
