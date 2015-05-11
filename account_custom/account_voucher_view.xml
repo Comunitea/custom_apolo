@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record model="ir.ui.view" id="view_voucher_tree_add_to_check">
+            <field name="name">account.voucher.tree.add_to_check</field>
+            <field name="model">account.voucher</field>
+            <field name="inherit_id" ref="account_voucher.view_voucher_tree"/>
+            <field name="arch" type="xml">
+                <field name="state" position="after">
+                    <field name="to_check" invisible="1"/>
+                </field>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_vendor_receipt_form_add_to_check">
+            <field name="name">account.voucher.receipt.form.add_to_check</field>
+            <field name="model">account.voucher</field>
+            <field name="inherit_id" ref="account_voucher.view_vendor_receipt_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_cancel_draft']" positon="before">
+                    <button name="validate_voucher" string="Validate" type="object" attrs="{'invisible': ['|',('state','!=','posted'),('to_check','!=',True)]}"/>
+                </xpath>
+                <field name="name" position="after">
+                    <field name="to_check"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_voucher_filter_customer_pay_add_to_check" model="ir.ui.view">
+            <field name="name">account.voucher.customer.pay.select.add_to_check</field>
+            <field name="model">account.voucher</field>
+            <field name="inherit_id" ref="account_voucher.view_voucher_filter_customer_pay"/>
+            <field name="arch" type="xml">
+                <filter string="Posted" position="after">
+                    <filter string="To Check" domain="[('to_check','=',True)]" help="Pending to check"/>
+                </filter>
+            </field>
+        </record>
+
+    </data>
+</openerp>

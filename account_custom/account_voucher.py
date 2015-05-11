@@ -19,18 +19,23 @@
 #
 ##############################################################################
 
-{
-    'name': 'Account customizations',
-    'version': '1.0',
-    'category': 'Account',
-    'description': """Small customizations to account modules""",
-    'author': 'Comunitea',
-    'website': '',
-    "depends": ['base',
-                'account_payment',
-                'account_voucher'],
-    "data": ["account_payment_view.xml",
-             "account_voucher_view.xml",
-             "res_users_view.xml"],
-    "installable": True
-}
+from openerp import models, api, fields
+
+
+class AccountVoucher(models.Model):
+
+    _inherit = "account.voucher"
+
+    to_check = fields.Boolean("To check", help="Pending to check",
+                              readonly=True)
+
+    @api.multi
+    def proforma_voucher(self):
+        if self.env.user.to_check_payments:
+            self.to_check = True
+
+        return super(AccountVoucher, self).proforma_voucher()
+
+    @api.multi
+    def validate_voucher(self):
+        self.to_check = False

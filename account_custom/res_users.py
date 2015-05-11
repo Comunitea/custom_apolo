@@ -19,18 +19,13 @@
 #
 ##############################################################################
 
-{
-    'name': 'Account customizations',
-    'version': '1.0',
-    'category': 'Account',
-    'description': """Small customizations to account modules""",
-    'author': 'Comunitea',
-    'website': '',
-    "depends": ['base',
-                'account_payment',
-                'account_voucher'],
-    "data": ["account_payment_view.xml",
-             "account_voucher_view.xml",
-             "res_users_view.xml"],
-    "installable": True
-}
+from openerp import models, fields
+
+
+class ResUsers(models.Model):
+
+    _inherit = "res.users"
+
+    to_check_payments = fields.Boolean("Check payments",
+                                       help="Always mark as pending to check "
+                                            "this users's payments")
