@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Copyright (C) 2015 Comunitea All Rights Reserved
-#    $Omar Castiñeira Saavedra <omar@comunitea.com>$
+#    $Jesús Ventosinos Mayor <jesus@comunitea.com>$
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published
@@ -18,15 +18,11 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from openerp import models, fields, api, exceptions, _
 
-{
-    'name': 'Account customizations',
-    'version': '1.0',
-    'category': 'Account',
-    'description': """Small customizations to account modules""",
-    'author': 'Comunitea',
-    'website': '',
-    "depends": ['account_payment'],
-    "data": ["account_payment_view.xml", 'views/report_invoice.xml'],
-    "installable": True
-}
+
+class account_payment_term(models.Model):
+
+    _inherit = 'account.payment.term'
+
+    cash_rigorous  = fields.Boolean('Cash rigorous')
