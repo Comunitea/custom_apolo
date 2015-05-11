@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<openerp>
+    <data noupdate="1">
+
+        <!--Email template -->
+        <record id="email_template_347" model="email.template">
+            <field name="name">Mod 347</field>
+            <field name="email_from">${(object.report_id.company_id.email or '')|safe}</field>
+            <field name="subject">AEAT 347 - ${object.report_id.fiscalyear_id.code}</field>
+            <field name="partner_to">${object.partner_id.id}</field>
+            <field name="model_id" ref="l10n_es_aeat_mod347.model_l10n_es_aeat_mod347_partner_record"/>
+            <field name="auto_delete" eval="True"/>
+            <field name="lang">${object.partner_id.lang}</field>
+            <field name="body_html"><![CDATA[
+<div style="font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); background-color: #FFF; ">
+
+    <p>Hola ${object.partner_id.name},</p>
+    <p>${object.amount}</p>
+</div>
+            ]]></field>
+        </record>
+    </data>
+</openerp>
