@@ -15,7 +15,9 @@
 <div style="font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); background-color: #FFF; ">
 
     <p>Hola ${object.partner_id.name},</p>
-    <p>${object.amount}</p>
+    <p>El importe de nuestras operaciones con usted en el 347 es: ${object.amount} €</p>
+    <p>Contacte con nosotros para cualquier aclaración.</p>
+    <p>Un saludo</p>
 </div>
             ]]></field>
         </record>
