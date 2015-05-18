@@ -7,7 +7,7 @@ import socket
 import traceback
 import unicsv
 from datetime import datetime
-import codecs
+import csv
 
 class integrate_accounting(object):
     def __init__(self, dbname, user, passwd, import_file):
@@ -151,7 +151,7 @@ class integrate_accounting(object):
 
 
     def import_accounting_file(self):
-        row_count = sum(1 for row in unicsv.UnicodeCSVReader(open(self.import_file))) - 2
+        row_count = sum(1 for row in csv.reader(open(self.import_file))) - 2
         cont = 0
         with open(self.import_file) as csvfile:
             reader = unicsv.UnicodeCSVDictReader(csvfile, delimiter=';', encoding="iso-8859-1")
