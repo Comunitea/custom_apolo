@@ -159,6 +159,7 @@ class integrate_accounting(object):
             last_date = False
             last_period_id = False
             last_move_id = False
+            posted = False
             journal_id = self.search("account.journal", [('name', '=', u"Diario Importación")])
             if not journal_id:
                 print u"EXCEPTION: Por favor, cree un diario con el nombre 'Diario Importación'"
