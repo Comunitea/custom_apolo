@@ -7,7 +7,7 @@ import socket
 import traceback
 import unicsv
 from datetime import datetime
-import codecs
+import csv
 
 class integrate_accounting(object):
     def __init__(self, dbname, user, passwd, import_file):
@@ -151,7 +151,7 @@ class integrate_accounting(object):
 
 
     def import_accounting_file(self):
-        row_count = sum(1 for row in unicsv.UnicodeCSVReader(open(self.import_file))) - 2
+        row_count = sum(1 for row in csv.reader(open(self.import_file))) - 2
         cont = 0
         with open(self.import_file) as csvfile:
             reader = unicsv.UnicodeCSVDictReader(csvfile, delimiter=';', encoding="iso-8859-1")
@@ -159,9 +159,10 @@ class integrate_accounting(object):
             last_date = False
             last_period_id = False
             last_move_id = False
+            posted = False
             journal_id = self.search("account.journal", [('name', '=', u"Diario Importación")])
             if not journal_id:
-                print "EXCEPTION: Por favor, cree un diario con el nombre 'Diario Importación'"
+                print u"EXCEPTION: Por favor, cree un diario con el nombre 'Diario Importación'"
                 sys.exit(1)
             for row in reader:
                 try:
@@ -176,6 +177,32 @@ class integrate_accounting(object):
                         else:
                             context = {}
                         last_period_id = self.execute('account.period', 'find', last_date, context)[0]
+
+                    if int(row['Asiento']) != last_move:
+                        if last_move_id and not posted:
+                            self.execute('account.move', 'post' ,[last_move_id])
+                        last_move = int(row['Asiento'])
+                        move_ids = self.search("account.move", [('name', '=', str(last_move)),('date', '=', last_date),('journal_id', '=', journal_id[0])])
+                        if move_ids:
+                            move_state = self.read("account.move", move_ids[0], ["state"])["state"]
+                            if move_state == "posted":
+                                last_move_id = move_ids[0]
+                                posted = True
+                                continue
+                            else:
+                                posted = False
+                                self.unlink("account.move", move_ids[0])
+                        move_vals = {
+                            'ref': row['Denominacion'],
+                            'journal_id': journal_id[0],
+                            'period_id': last_period_id,
+                            'date': last_date,
+                            'name': str(last_move)
+                        }
+                        last_move_id = self.create('account.move', move_vals)
+                    elif posted:
+                        continue
+
                     ref = row.get('Documento', "")
                     if not ref:
                         ref = row.get('Ampliacion', "")
@@ -187,6 +214,7 @@ class integrate_accounting(object):
                         partner_ref = int(partner_ref) and str(int(partner_ref)) or False
                     else:
                         partner_ref = False
+
                     if partner_ref:
                         partner_ids = self.search("res.partner", [("ref", '=', partner_ref),'|',('active','=',True),('active','=',False)])
                         if not partner_ids:
@@ -207,7 +235,7 @@ class integrate_accounting(object):
                         account_code = row['Cuenta']
                     account_ids = self.search('account.account', [('code', '=', account_code)])
                     if not account_ids:
-                        print "EXCEPTION: No hay ninguna cuenta contable creada con el código %s" % account_code
+                        print u"EXCEPTION: No hay ninguna cuenta contable creada con el código %s" % account_code
                         sys.exit(1)
 
                     debit = 0.0
@@ -224,6 +252,7 @@ class integrate_accounting(object):
                             debit = abs(credit_t)
                         else:
                             credit = credit_t
+
                     move_line_vals = {
                         'journal_id': journal_id[0],
                         'period_id': last_period_id,
@@ -235,6 +264,7 @@ class integrate_accounting(object):
                         'credit': credit,
                         'partner_id': partner_ids and partner_ids[0] or False,
                         'account_id': account_ids[0],
+                        'move_id': last_move_id
                     }
                     if row.get('Notas'):
                         analytic_code = row['Notas'].replace("-", "")
@@ -242,22 +272,8 @@ class integrate_accounting(object):
                         if analytic_acc_id:
                            move_line_vals['analytic_account_id'] =  analytic_acc_id[0]
                         else:
-                            print "EXCEPTION: No hay ninguna cuenta analítica creada con el código %s" % analytic_code
+                            print u"EXCEPTION: No hay ninguna cuenta analítica creada con el código %s" % analytic_code
 
-                    if int(row['Asiento']) != last_move:
-                        if last_move_id:
-                            self.execute('account.move', 'post' ,[last_move_id])
-                        last_move = int(row['Asiento'])
-                        move_vals = {
-                            'ref': row['Denominacion'],
-                            'journal_id': journal_id[0],
-                            'period_id': last_period_id,
-                            'date': last_date,
-                            'name': str(last_move)
-                        }
-                        last_move_id = self.create('account.move', move_vals)
-
-                    move_line_vals['move_id'] = last_move_id
                     self.create('account.move.line', move_line_vals)
 
                 except Exception, e:
