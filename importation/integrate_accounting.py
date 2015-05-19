@@ -162,26 +162,26 @@ class integrate_accounting(object):
             posted = False
             journal_id = self.search("account.journal", [('name', '=', u"Diario Importación")])
             if not journal_id:
-                print u"EXCEPTION: Por favor, cree un diario con el nombre 'Diario Importación'"
+                print "EXCEPTION: Por favor, cree un diario con el nombre 'Diario Importacion'"
                 sys.exit(1)
             for row in reader:
                 try:
-                    if not row.get('Asiento', False):
+                    if not row.get('Referencia', False) or not row.get('Cuenta', False):
                         continue
                     cont += 1
                     print "%s de %s" % (cont, row_count)
                     if row['Fecha'] != last_date:
                         last_date = datetime.strftime(datetime.strptime(row['Fecha'], "%d-%m-%Y"),"%Y-%m-%d")
-                        if row['Denominacion'] in ('APERTURA', 'CIERRE', 'PYG'):
+                        if row['Concepto'] in ('APERTURA', 'CIERRE', 'PYG', 'EXPLOTACIO'):
                             context = {'account_period_prefer_normal': False}
                         else:
                             context = {}
                         last_period_id = self.execute('account.period', 'find', last_date, context)[0]
 
-                    if int(row['Asiento']) != last_move:
+                    if int(row['Referencia']) != last_move:
                         if last_move_id and not posted:
                             self.execute('account.move', 'post' ,[last_move_id])
-                        last_move = int(row['Asiento'])
+                        last_move = int(row['Referencia'])
                         move_ids = self.search("account.move", [('name', '=', str(last_move)),('date', '=', last_date),('journal_id', '=', journal_id[0])])
                         if move_ids:
                             move_state = self.read("account.move", move_ids[0], ["state"])["state"]
@@ -193,7 +193,7 @@ class integrate_accounting(object):
                                 posted = False
                                 self.unlink("account.move", move_ids[0])
                         move_vals = {
-                            'ref': row['Denominacion'],
+                            'ref': row['Concepto'],
                             'journal_id': journal_id[0],
                             'period_id': last_period_id,
                             'date': last_date,
@@ -235,8 +235,25 @@ class integrate_accounting(object):
                         account_code = row['Cuenta']
                     account_ids = self.search('account.account', [('code', '=', account_code)])
                     if not account_ids:
-                        print u"EXCEPTION: No hay ninguna cuenta contable creada con el código %s" % account_code
-                        sys.exit(1)
+                        print "EXCEPTION: No hay ninguna cuenta contable creada con el codigo %s" % account_code
+                        parent_ids = False
+                        parent_account_code = account_code[:-1]
+                        while len(parent_account_code) > 0:
+                            parent_ids = self.search('account.account', [('code', '=', parent_account_code)])
+                            if parent_ids:
+                                parent_account_code = ""
+                            parent_account_code = parent_account_code[:-1]
+                        if parent_ids:
+                            parent_data = self.read('account.account', parent_ids[0], ["user_type"])
+                            account_id = self.create('account.account', {'code': account_code,
+                                                                         'name': row['Titulo'],
+                                                                         'type': "other",
+                                                                         'user_type': parent_data["user_type"][0],
+                                                                         'parent_id': parent_ids[0]})
+                            account_ids = [account_id]
+                        else:
+                            print "EXCEPTION: No se pudo crear la cuenta %s" % account_code
+                            sys.exit(1)
 
                     debit = 0.0
                     credit = 0.0
@@ -257,7 +274,7 @@ class integrate_accounting(object):
                         'journal_id': journal_id[0],
                         'period_id': last_period_id,
                         'date': row['Fecha'],
-                        'name': row['Denominacion'],
+                        'name': row['Concepto'],
                         'ref': ref,
                         'date': last_date,
                         'debit': debit,
@@ -272,7 +289,7 @@ class integrate_accounting(object):
                         if analytic_acc_id:
                            move_line_vals['analytic_account_id'] =  analytic_acc_id[0]
                         else:
-                            print u"EXCEPTION: No hay ninguna cuenta analítica creada con el código %s" % analytic_code
+                            print "EXCEPTION: No hay ninguna cuenta analítica creada con el codigo %s" % analytic_code
 
                     self.create('account.move.line', move_line_vals)
 
