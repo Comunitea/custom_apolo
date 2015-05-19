@@ -1,0 +1,83 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#   * cesce_view
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-05-19 10:17+0000\n"
+"PO-Revision-Date: 2015-05-19 10:17+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cesce_view
+#: field:account.invoice.cesce,amount:0
+msgid "Amount"
+msgstr "Cantidad"
+
+#. module: cesce_view
+#: model:ir.actions.act_window,name:cesce_view.action_account_invoice_cesce
+msgid "Cesce invoice"
+msgstr "Cesce invoice"
+
+#. module: cesce_view
+#: view:account.invoice.cesce:cesce_view.account_invoice_cesce_tree
+#: model:ir.ui.menu,name:cesce_view.account_invoice_menu_cesce
+msgid "Cesce invoices"
+msgstr "Cesce invoices"
+
+#. module: cesce_view
+#: field:account.invoice.cesce,city:0
+msgid "City"
+msgstr "Ciudad"
+
+#. module: cesce_view
+#: field:account.invoice.cesce,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: cesce_view
+#: view:account.invoice.cesce:cesce_view.account_invoice_cesce_filter
+msgid "Invoice"
+msgstr "Factura"
+
+#. module: cesce_view
+#: field:account.invoice.cesce,invoice_year:0
+msgid "Invoice year"
+msgstr "Año de factura"
+
+#. module: cesce_view
+#: field:account.invoice.cesce,nif:0
+msgid "NIF"
+msgstr "NIF"
+
+#. module: cesce_view
+#: field:account.invoice.cesce,partner_id:0
+msgid "Partner"
+msgstr "Cliente"
+
+#. module: cesce_view
+#: field:account.invoice.cesce,name:0
+msgid "Partner name"
+msgstr "Nombre de cliente"
+
+#. module: cesce_view
+#: field:account.invoice.cesce,reference:0
+msgid "Partner reference"
+msgstr "Referencia de cliente"
+
+#. module: cesce_view
+#: field:account.invoice.cesce,street:0
+msgid "Street"
+msgstr "Calle"
+
+#. module: cesce_view
+#: field:account.invoice.cesce,zip:0
+msgid "ZIP"
+msgstr "C.P."
+

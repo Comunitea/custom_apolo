@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="account_invoice_cesce_tree" model="ir.ui.view">
+            <field name="name">account.invoice.cesce.tree</field>
+            <field name="model">account.invoice.cesce</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Cesce invoices" create="false" edit="false" editable="top">
+                    <field name="reference"/>
+                    <field name="name"/>
+                    <field name="nif"/>
+                    <field name="street"/>
+                    <field name="city"/>
+                    <field name="zip"/>
+                    <field name="amount"/>
+                    <field name="payment_mode"/>
+                    <field name="invoice_year"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="account_invoice_cesce_filter" model="ir.ui.view">
+            <field name="name">account.invoice.cesce.search</field>
+            <field name="model">account.invoice.cesce</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Invoice">
+                   <field name="invoice_year"/>
+               </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_account_invoice_cesce">
+            <field name="name">Cesce invoice</field>
+            <field name="res_model">account.invoice.cesce</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="account_invoice_cesce_tree"/>
+            <field name="search_view_id" ref="account_invoice_cesce_filter"/>
+        </record>
+
+        <menuitem name="Cesce invoices" parent="account.menu_finance_receivables"
+            action="action_account_invoice_cesce" id="account_invoice_menu_cesce"/>
+
+    </data>
+</openerp>
