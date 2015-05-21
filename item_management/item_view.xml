@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="item_management_item_type_tree" model="ir.ui.view">
+            <field name="name">item.management.item.type.tree</field>
+            <field name="model">item.management.item.type</field>
+            <field name="arch" type="xml">
+                <tree string="Item types">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="item_management_item_type_filter" model="ir.ui.view">
+            <field name="name">item.management.item.type.search</field>
+            <field name="model">item.management.item.type</field>
+            <field name="arch" type="xml">
+                <search string="Item types">
+                    <field name="name"/>
+               </search>
+            </field>
+        </record>
+
+        <record id="item_management_item_type_form" model="ir.ui.view">
+            <field name="name">item.management.item.type.form</field>
+            <field name="model">item.management.item.type</field>
+            <field name="arch" type="xml">
+                <form string="Item type">
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_item_management_item_type">
+            <field name="name">Item types</field>
+            <field name="res_model">item.management.item.type</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="item_management_item_type_tree"/>
+            <field name="search_view_id" ref="item_management_item_type_filter"/>
+        </record>
+
+        <menuitem name="Configuration" parent="menu_items_managemnt" id="menu_items_configuration" sequence="77"/>
+
+        <menuitem name="Item types" parent="menu_items_configuration"
+            action="action_item_management_item_type" id="menu_items_managemnt_item_type"/>
+
+        <record id="item_management_item_tree" model="ir.ui.view">
+            <field name="name">item.management.item.tree</field>
+            <field name="model">item.management.item</field>
+            <field name="arch" type="xml">
+                <tree string="Items">
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="license_plate"/>
+                    <field name="situation"/>
+                    <field name="customer_id"/>
+                    <field name="location_id"/>
+                    <field name="partner_id"/>
+                    <field name="inactive_motive" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="item_management_item_filter" model="ir.ui.view">
+            <field name="name">item.management.item.search</field>
+            <field name="model">item.management.item</field>
+            <field name="arch" type="xml">
+                <search string="Items">
+                    <filter string="Without location" domain="[('situation','=','warehouse'),('location_id','=',False)]"/>
+                    <field name="license_plate"/>
+                    <field name="name"/>
+                    <field name="code"/>
+                    <filter string="Situation" context="{'group_by': 'situation'}"/>
+                    <filter string="Inactive motive" context="{'group_by': 'inactive_motive'}"/>
+                    <filter string="Owner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Customer" context="{'group_by': 'customer_id'}"/>
+               </search>
+            </field>
+        </record>
+
+        <record id="item_management_item_from" model="ir.ui.view">
+            <field name="name">item.management.item.from</field>
+            <field name="model">item.management.item</field>
+            <field name="arch" type="xml">
+                <form string="Item">
+                    <header>
+                        <button name="%(action_item_internal_move)d" type="action" string="Internal move" attrs="{'invisible': [('situation', '!=', 'warehouse')]}"/>
+                        <button name="%(action_item_deactivate)d" type="action" string="Deactivate item" attrs="{'invisible': [('situation', '!=', 'warehouse')]}"/>
+                        <field name="situation" widget="statusbar" statusbar_visible="warehouse,customer,transfer,inactive"/>
+                        <field name="inactive_motive" widget="statusbar" statusbar_visible="scrapping,theft,loss" attrs="{'invisible': [('situation','!=','inactive')]}"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="code" class="oe_edit_only"/>
+                            <h1>
+                                <field name="code" class="oe_inline" attrs="{'readonly': [('situation','=','inactive')]}"/>
+                            </h1>
+                            <label for="name" class="oe_edit_only"/>
+                            <h1>
+                                <field name="name" class="oe_inline" attrs="{'readonly': [('situation','=','inactive')]}"/>
+                            </h1>
+                            <label for="license_plate" class="oe_edit_only"/>
+                            <h1>
+                                <field name="license_plate" class="oe_inline" attrs="{'readonly': [('situation','=','inactive')]}"/>
+                            </h1>
+                        </div>
+                        <group name="main" colspan="4">
+                            <group>
+                                <field name="type_id" attrs="{'readonly': [('situation','=','inactive')]}"/>
+                                <field name="contract_id"/>
+                                <field name="location_date" attrs="{'readonly': [('situation','=','inactive')]}"/>
+                                <field name="asset_id" attrs="{'readonly': [('situation','=','inactive')]}"/>
+                                <field name="partner_id"/>
+                            </group>
+                            <group>
+                                <field name="purchase_date" attrs="{'readonly': [('situation','=','inactive')]}"/>
+                                <field name="customer_id"/>
+                                <field name="location_id"/>
+                                <field name="capacity" attrs="{'readonly': [('situation','=','inactive')]}"/>
+                            </group>
+                            <field name="count_ids" colspan="4" attrs="{'readonly': [('situation','=','inactive')]}">
+                                <tree editable="top">
+                                    <field name="recount_id"/>
+                                    <field name="recount_date"/>
+                                    <field name="notes"/>
+                                    <field name="user_id"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_item_management_item">
+            <field name="name">Items</field>
+            <field name="res_model">item.management.item</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="item_management_item_tree"/>
+            <field name="search_view_id" ref="item_management_item_filter"/>
+        </record>
+
+        <menuitem name="Items" parent="menu_items_managemnt"
+            action="action_item_management_item" id="menu_items_managemnt_item"/>
+
+    </data>
+</openerp>

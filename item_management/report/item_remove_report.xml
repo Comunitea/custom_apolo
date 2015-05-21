@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+    <template id="report_item_contract_remove">
+        <t t-call="report.html_container">
+        <t t-foreach="docs" t-as="o">
+            <div class="page">
+                <div class="oe_structure"/>
+                <div class="text-center">
+                <h3>
+                    <span>DOCUMENTO DE RETIRADA DE MEDIOS DE FRÍO EN DEPÓSITO DEL PUNTO DE VENTA</span>
+                </h3>
+                </div>
+
+                <span>En </span><span t-field="user.company_id.city"/><span>, </span><span t-esc="time.strftime('a %d del %m de %Y')"/>
+                <br/>
+                <br/>
+                <br/>
+                <p>Nº cliente: <span t-field="o.partner_id.ref"/></p>
+                <p>Nombre del cliente: <span t-field="o.partner_id.name"/></p>
+                <p>Dirección del cliente: <span t-field="o.partner_id.street"/></p>
+                <div class="col-xs-4 pull-right">
+                    <p>Nº Matrícula: .............................</p>
+                </div>
+                <br/>
+                <br/>
+                <p>Por medio del presente documento se hace constar que con esta fecha se retira el medio de frío tipo ...................................., cuya matrícula se halla arriba referenciada. Con la firma del presente documento queda extinguido el Acuerdo nº <strong><span t-field="o.name"/></strong> de cesión de medios de frío en depósito al punto de venta de fecha <span t-field="o.start_date"/> únicamente en cuanto al medio de frío relacionado en este documento.</p>
+                <br/>
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>EL PROPIETARIO</th>
+                            <th>EL CONCESIONARIO</th>
+                            <th>EL CLIENTE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="min-height:140px;display:block;">
+                            <td><p></p></td>
+                            <td><p></p></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="border: 1px double grey;min-height: 100px;outline: 2px solid black;outline-offset: 6px;">
+                    <span><strong>Observaciones:</strong></span>
+                </div>
+            </div>
+        </t>
+        </t>
+    </template>
+
+</data>
+</openerp>

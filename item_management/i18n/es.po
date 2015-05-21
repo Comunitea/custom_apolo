@@ -1,0 +1,641 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#       * item_management
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-05-21 10:02+0000\n"
+"PO-Revision-Date: 2015-05-21 10:02+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: item_management
+#: selection:item.management.contract,state:0
+msgid "Active"
+msgstr "Activo"
+
+#. module: item_management
+#: view:item.management.contract:item_management.item_management_contract_form
+msgid "Are you sure? Remember locate these items in warehouse later"
+msgstr "¿Está seguro? Recuerde ubicar estos medios en el almacén más tarde."
+
+#. module: item_management
+#: field:item.management.item,asset_id:0
+msgid "Asset"
+msgstr "Activo asociado"
+
+#. module: item_management
+#: code:addons/item_management/item.py:65
+#, python-format
+msgid "Cannot delete this item because has already been recounted"
+msgstr "No puede borrar este medio porque ya ha sido recontado"
+
+#. module: item_management
+#: code:addons/item_management/item.py:62
+#, python-format
+msgid "Cannot delete this item because is related to a contract"
+msgstr "No puede borrar este medio porque está relacionado a un contrato"
+
+#. module: item_management
+#: code:addons/item_management/item_count.py:55
+#, python-format
+msgid "Cannot delete this recount because has counts associated"
+msgstr "No puede borrar este recuento porque tiene contabilizaciones asociadas"
+
+#. module: item_management
+#: code:addons/item_management/item_contract.py:100
+#, python-format
+msgid "Only can delete contracts in draft or cancel state"
+msgstr "Sólo puede borrar contratos en estado borrador o cancelado"
+
+#. module: item_management
+#: view:item.management.item.assign.contract:item_management.item_management_item_assign_contract_form
+msgid "Assign item"
+msgstr "Asignar medio"
+
+#. module: item_management
+#: model:ir.actions.act_window,name:item_management.action_assign_item_tocontract
+#: view:item.management.contract:item_management.item_management_contract_form
+#: view:item.management.item.assign.contract:item_management.item_management_item_assign_contract_form
+msgid "Assign item to contract"
+msgstr "Asignar medio al contrato"
+
+#. module: item_management
+#: view:item.management.contract:item_management.item_management_contract_form
+#: view:item.management.item.assign.contract:item_management.item_management_item_assign_contract_form
+#: view:item.management.item.deactivate:item_management.item_management_item_deactivate_form
+#: view:item.management.item.internal.move:item_management.item_management_item_internal_move_form
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: item_management
+#: selection:item.management.contract,state:0
+msgid "Cancelled"
+msgstr "Cancelado"
+
+#. module: item_management
+#: code:addons/item_management/item_contract.py:73
+#, python-format
+msgid "Cannot cancel a contract with related items."
+msgstr "No puede cancelar un contrato con medios asociados."
+
+#. module: item_management
+#: field:item.management.item,capacity:0
+msgid "Capacity (l)"
+msgstr "Capacidad (l)"
+
+#. module: item_management
+#: field:item.management.contract,name:0
+#: field:item.management.item,code:0
+msgid "Code"
+msgstr "Código"
+
+#. module: item_management
+#: field:item.management.contract,company_agent:0
+msgid "Company agent"
+msgstr "Representante compañía"
+
+#. module: item_management
+#: model:ir.ui.menu,name:item_management.menu_items_configuration
+msgid "Configuration"
+msgstr "Configuración"
+
+#. module: item_management
+#: view:item.management.contract:item_management.item_management_contract_form
+#: field:item.management.item,contract_id:0
+msgid "Contract"
+msgstr "Contrato"
+
+#. module: item_management
+#: view:item.management.contract:item_management.item_management_contract_form
+msgid "Contract data"
+msgstr "Datos contrato"
+
+#. module: item_management
+#: view:item.management.contract:item_management.item_management_contract_filter
+#: field:item.management.contract,contract_type:0
+#: field:item.management.item.assign.contract,contract_type:0
+msgid "Contract type"
+msgstr "Tipo contrato"
+
+#. module: item_management
+#: model:ir.actions.act_window,name:item_management.action_item_management_contract
+#: model:ir.ui.menu,name:item_management.menu_items_managemnt_contracts
+#: view:item.management.contract:item_management.item_management_contract_filter
+#: view:item.management.contract:item_management.item_management_contract_tree
+msgid "Contracts"
+msgstr "Contratos"
+
+#. module: item_management
+#: field:item.management.contract,create_uid:0
+#: field:item.management.item,create_uid:0
+#: field:item.management.item.assign.contract,create_uid:0
+#: field:item.management.item.count,create_uid:0
+#: field:item.management.item.deactivate,create_uid:0
+#: field:item.management.item.internal.move,create_uid:0
+#: field:item.management.item.type,create_uid:0
+#: field:item.management.recount,create_uid:0
+#: field:item.management.recount.phase,create_uid:0
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: item_management
+#: field:item.management.contract,create_date:0
+#: field:item.management.item,create_date:0
+#: field:item.management.item.assign.contract,create_date:0
+#: field:item.management.item.count,create_date:0
+#: field:item.management.item.deactivate,create_date:0
+#: field:item.management.item.internal.move,create_date:0
+#: field:item.management.item.type,create_date:0
+#: field:item.management.recount,create_date:0
+#: field:item.management.recount.phase,create_date:0
+msgid "Created on"
+msgstr "Creado en"
+
+#. module: item_management
+#: view:item.management.contract:item_management.item_management_contract_filter
+#: selection:item.management.contract,contract_type:0
+#: field:item.management.contract,partner_id:0
+#: view:item.management.item:item_management.item_management_item_filter
+#: field:item.management.item,customer_id:0
+#: selection:item.management.item,situation:0
+#: selection:item.management.item.assign.contract,contract_type:0
+msgid "Customer"
+msgstr "Cliente"
+
+#. module: item_management
+#: field:item.management.contract,customer_agent:0
+msgid "Customer agent"
+msgstr "Representante cliente"
+
+#. module: item_management
+#: field:item.management.contract,customer_agent_vat:0
+msgid "Customer agent vat"
+msgstr "NIF representante cliente"
+
+#. module: item_management
+#: field:item.management.contract,customer_local_name:0
+msgid "Customer local name"
+msgstr "Nombre local cliente"
+
+#. module: item_management
+#: field:item.management.contract,customer_local_street:0
+msgid "Customer local street"
+msgstr "Dirección local cliente"
+
+#. module: item_management
+#: help:item.management.contract,message_last_post:0
+#: help:item.management.item,message_last_post:0
+#: help:item.management.recount,message_last_post:0
+msgid "Date of the last message posted on the record."
+msgstr "Fecha del último mensaje añadido al registro."
+
+#. module: item_management
+#: view:item.management.item.deactivate:item_management.item_management_item_deactivate_form
+msgid "Deactivate"
+msgstr "Dar de baja"
+
+#. module: item_management
+#: model:ir.actions.act_window,name:item_management.action_item_deactivate
+#: view:item.management.item:item_management.item_management_item_from
+msgid "Deactivate item"
+msgstr "Dar de baja medio"
+
+#. module: item_management
+#: view:item.management.contract:item_management.item_management_contract_form
+#: field:item.management.contract,description:0
+#: field:item.management.recount.phase,description:0
+msgid "Description"
+msgstr "Descripción"
+
+#. module: item_management
+#: field:item.management.item.internal.move,dest_location_id:0
+msgid "Dest. location"
+msgstr "Ubicaión dest."
+
+#. module: item_management
+#: view:item.management.recount:item_management.item_management_recount_form
+#: selection:item.management.recount,state:0
+msgid "Done"
+msgstr "Realizado"
+
+#. module: item_management
+#: selection:item.management.contract,state:0
+msgid "Draft"
+msgstr "Borrador"
+
+#. module: item_management
+#: model:ir.model,name:item_management.model_item_management_contract
+#: model:ir.model,name:item_management.model_item_management_item
+#: model:ir.model,name:item_management.model_item_management_recount
+msgid "Email Thread"
+msgstr "Hilo de mensajes"
+
+#. module: item_management
+#: field:item.management.contract,end_date:0
+#: field:item.management.recount,end_date:0
+msgid "End date"
+msgstr "Fecha fin"
+
+#. module: item_management
+#: view:item.management.contract:item_management.item_management_contract_form
+#: selection:item.management.contract,state:0
+msgid "Finished"
+msgstr "Finalizado"
+
+#. module: item_management
+#: field:item.management.contract,message_follower_ids:0
+#: field:item.management.item,message_follower_ids:0
+#: field:item.management.recount,message_follower_ids:0
+msgid "Followers"
+msgstr "Seguidores"
+
+#. module: item_management
+#: selection:item.management.item,situation:0
+msgid "Inactive"
+msgstr "Baja"
+
+#. module: item_management
+#: view:item.management.item.deactivate:item_management.item_management_item_deactivate_form
+msgid "Inactive item"
+msgstr "Dar de baja medio"
+
+#. module: item_management
+#: view:item.management.item:item_management.item_management_item_filter
+#: field:item.management.item,inactive_motive:0
+#: field:item.management.item.deactivate,inactive_motive:0
+msgid "Inactive motive"
+msgstr "Motivo baja"
+
+#. module: item_management
+#: view:item.management.item:item_management.item_management_item_from
+msgid "Internal move"
+msgstr "Movimiento interno"
+
+#. module: item_management
+#: field:item.management.contract,message_is_follower:0
+#: field:item.management.item,message_is_follower:0
+#: field:item.management.recount,message_is_follower:0
+msgid "Is a Follower"
+msgstr "Es un seguidor"
+
+#. module: item_management
+#: view:item.management.item:item_management.item_management_item_from
+#: field:item.management.item.assign.contract,item_id:0
+#: field:item.management.item.count,item_id:0
+msgid "Item"
+msgstr "Medio"
+
+#. module: item_management
+#: code:addons/item_management/wizard/item_deactivate.py:60
+#, python-format
+msgid "Item %s already is inactive."
+msgstr "El medio %s ya está dado de baja."
+
+#. module: item_management
+#: code:addons/item_management/wizard/item_internal_move.py:49
+#, python-format
+msgid "Item %s is deactivated."
+msgstr "El medio %s está dado de baja."
+
+#. module: item_management
+#: code:addons/item_management/wizard/item_internal_move.py:45
+#, python-format
+msgid "Item %s is related to contract %s, please move it from there."
+msgstr "El medio %s está relacionado al contrato %s, por favor muévalo de allí."
+
+#. module: item_management
+#: code:addons/item_management/wizard/item_deactivate.py:56
+#, python-format
+msgid "Item %s is related to contract %s, please recover it to warehouse."
+msgstr "El medio %s está relacionado al contrato %s, por favor recupérelo al almacén."
+
+#. module: item_management
+#: field:item.management.item,name:0
+msgid "Item name"
+msgstr "Nombre medio"
+
+#. module: item_management
+#: view:item.management.item.type:item_management.item_management_item_type_form
+msgid "Item type"
+msgstr "Tipo de medio"
+
+#. module: item_management
+#: model:ir.actions.act_window,name:item_management.action_item_management_item_type
+#: model:ir.ui.menu,name:item_management.menu_items_managemnt_item_type
+#: view:item.management.item.type:item_management.item_management_item_type_filter
+#: view:item.management.item.type:item_management.item_management_item_type_tree
+msgid "Item types"
+msgstr "Tipos de medios"
+
+#. module: item_management
+#: field:item.management.contract,item_value:0
+msgid "Item value"
+msgstr "Valor medio"
+
+#. module: item_management
+#: code:addons/item_management/wizard/item_deactivate.py:45
+#, python-format
+msgid "Item was marked to inactive in %s with motive %s"
+msgstr "El medio fue marcado como dado de baja a %s con el motivo %s"
+
+#. module: item_management
+#: model:ir.actions.act_window,name:item_management.action_item_management_item
+#: model:ir.ui.menu,name:item_management.menu_items_managemnt_item
+#: view:item.management.contract:item_management.item_management_contract_form
+#: field:item.management.contract,item_ids:0
+#: view:item.management.item:item_management.item_management_item_filter
+#: view:item.management.item:item_management.item_management_item_tree
+msgid "Items"
+msgstr "Medios"
+
+#. module: item_management
+#: model:ir.ui.menu,name:item_management.menu_items_managemnt
+msgid "Items management"
+msgstr "Gestión de medios"
+
+#. module: item_management
+#: field:item.management.contract,message_last_post:0
+#: field:item.management.item,message_last_post:0
+#: field:item.management.recount,message_last_post:0
+msgid "Last Message Date"
+msgstr "Fecha último mensaje"
+
+#. module: item_management
+#: field:item.management.contract,write_uid:0
+#: field:item.management.item,write_uid:0
+#: field:item.management.item.assign.contract,write_uid:0
+#: field:item.management.item.count,write_uid:0
+#: field:item.management.item.deactivate,write_uid:0
+#: field:item.management.item.internal.move,write_uid:0
+#: field:item.management.item.type,write_uid:0
+#: field:item.management.recount,write_uid:0
+#: field:item.management.recount.phase,write_uid:0
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: item_management
+#: field:item.management.contract,write_date:0
+#: field:item.management.item,write_date:0
+#: field:item.management.item.assign.contract,write_date:0
+#: field:item.management.item.count,write_date:0
+#: field:item.management.item.deactivate,write_date:0
+#: field:item.management.item.internal.move,write_date:0
+#: field:item.management.item.type,write_date:0
+#: field:item.management.recount,write_date:0
+#: field:item.management.recount.phase,write_date:0
+msgid "Last Updated on"
+msgstr "Última actualización en"
+
+#. module: item_management
+#: model:ir.actions.report.xml,name:item_management.action_report_lend_contract
+msgid "Lend contract"
+msgstr "Contrato cesión"
+
+#. module: item_management
+#: field:item.management.item,license_plate:0
+msgid "License plate"
+msgstr "Matrícula"
+
+#. module: item_management
+#: field:item.management.recount.phase,limit_date:0
+msgid "Limit date"
+msgstr "Fecha límite"
+
+#. module: item_management
+#: field:item.management.item,location_id:0
+msgid "Location"
+msgstr "Ubicación"
+
+#. module: item_management
+#: field:item.management.item.assign.contract,location_date:0
+msgid "Location date"
+msgstr "Fecha ubicación"
+
+#. module: item_management
+#: code:addons/item_management/wizard/item_deactivate.py:25
+#: selection:item.management.item,inactive_motive:0
+#: selection:item.management.item.deactivate,inactive_motive:0
+#, python-format
+msgid "Loss"
+msgstr "Pérdida"
+
+#. module: item_management
+#: field:item.management.contract,message_ids:0
+#: field:item.management.item,message_ids:0
+#: field:item.management.recount,message_ids:0
+msgid "Messages"
+msgstr "Mensajes"
+
+#. module: item_management
+#: help:item.management.contract,message_ids:0
+#: help:item.management.item,message_ids:0
+#: help:item.management.recount,message_ids:0
+msgid "Messages and communication history"
+msgstr "Histórico de mensajes y comunicación"
+
+#. module: item_management
+#: view:item.management.item.internal.move:item_management.item_management_item_internal_move_form
+msgid "Move"
+msgstr "Movimiento"
+
+#. module: item_management
+#: model:ir.actions.act_window,name:item_management.action_item_internal_move
+#: view:item.management.item.internal.move:item_management.item_management_item_internal_move_form
+msgid "Move item"
+msgstr "Mover medio"
+
+#. module: item_management
+#: field:item.management.item.type,name:0
+#: field:item.management.recount,name:0
+#: field:item.management.recount.phase,name:0
+msgid "Name"
+msgstr "Nombre"
+
+#. module: item_management
+#: field:item.management.item.count,notes:0
+msgid "Notes"
+msgstr "Notas"
+
+#. module: item_management
+#: view:item.management.contract:item_management.item_management_contract_form
+#: selection:item.management.recount,state:0
+msgid "Open"
+msgstr "Activo"
+
+#. module: item_management
+#: view:item.management.item:item_management.item_management_item_filter
+#: field:item.management.item,partner_id:0
+msgid "Owner"
+msgstr "Propietario"
+
+#. module: item_management
+#: field:item.management.contract,owner_agent:0
+msgid "Owner agent"
+msgstr "Representante propietario"
+
+#. module: item_management
+#: field:item.management.contract,owner_agent2:0
+msgid "Owner agent 2"
+msgstr "Representante propietario 2"
+
+#. module: item_management
+#: field:item.management.recount.phase,total_items:0
+msgid "Items #"
+msgstr "Nº medios"
+
+#. module: item_management
+#: field:item.management.recount.phase,percent_goal:0
+msgid "Percent goal"
+msgstr "% objetivo"
+
+#. module: item_management
+#: field:item.management.recount.phase,percent_count:0
+msgid "Percent count"
+msgstr "% recontado"
+
+#. module: item_management
+#: field:item.management.recount,phase_ids:0
+msgid "Phases"
+msgstr "Fases"
+
+#. module: item_management
+#: field:item.management.item,location_date:0
+msgid "Placement date"
+msgstr "Fecha ubicación"
+
+#. module: item_management
+#: field:item.management.item,purchase_date:0
+msgid "Purchase date"
+msgstr "Fecha compra"
+
+#. module: item_management
+#: field:item.management.item.count,recount_id:0
+#: view:item.management.recount:item_management.item_management_recount_form
+#: field:item.management.recount.phase,recount_id:0
+msgid "Recount"
+msgstr "Recuento"
+
+#. module: item_management
+#: model:ir.actions.act_window,name:item_management.action_item_management_recount
+#: model:ir.ui.menu,name:item_management.menu_items_managemnt_recounts
+#: field:item.management.item,count_ids:0
+#: view:item.management.recount:item_management.item_management_recount_filter
+#: view:item.management.recount:item_management.item_management_recount_tree
+msgid "Recounts"
+msgstr "Recuentos"
+
+#. module: item_management
+#: view:item.management.contract:item_management.item_management_contract_form
+msgid "Remove all items"
+msgstr "Borrar todos los medios"
+
+#. module: item_management
+#: model:ir.actions.report.xml,name:item_management.action_report_item_contract_remove
+msgid "Remove report"
+msgstr "Informe retirada"
+
+#. module: item_management
+#: view:item.management.recount:item_management.item_management_recount_form
+msgid "Reopen"
+msgstr "Reabrir"
+
+#. module: item_management
+#: view:item.management.contract:item_management.item_management_contract_form
+msgid "Return to draft"
+msgstr "Volver a borrador"
+
+#. module: item_management
+#: field:item.management.item.count,recount_date:0
+msgid "Review date"
+msgstr "Fecha revisión"
+
+#. module: item_management
+#: code:addons/item_management/wizard/item_deactivate.py:23
+#: selection:item.management.item,inactive_motive:0
+#: selection:item.management.item.deactivate,inactive_motive:0
+#, python-format
+msgid "Scrapping"
+msgstr "Desguace"
+
+#. module: item_management
+#: view:item.management.item:item_management.item_management_item_filter
+#: field:item.management.item,situation:0
+msgid "Situation"
+msgstr "Situación"
+
+#. module: item_management
+#: field:item.management.contract,start_date:0
+#: field:item.management.recount,start_date:0
+msgid "Start date"
+msgstr "Fecha inicio"
+
+#. module: item_management
+#: view:item.management.contract:item_management.item_management_contract_filter
+#: field:item.management.contract,state:0
+#: view:item.management.recount:item_management.item_management_recount_filter
+#: field:item.management.recount,state:0
+msgid "State"
+msgstr "Estado"
+
+#. module: item_management
+#: field:item.management.contract,message_summary:0
+#: field:item.management.item,message_summary:0
+#: field:item.management.recount,message_summary:0
+msgid "Summary"
+msgstr "Resumen"
+
+#. module: item_management
+#: code:addons/item_management/wizard/item_deactivate.py:24
+#: selection:item.management.item,inactive_motive:0
+#: selection:item.management.item.deactivate,inactive_motive:0
+#, python-format
+msgid "Theft"
+msgstr "Robo"
+
+#. module: item_management
+#: selection:item.management.contract,contract_type:0
+#: selection:item.management.item,situation:0
+#: selection:item.management.item.assign.contract,contract_type:0
+msgid "Transfer"
+msgstr "Traspaso"
+
+#. module: item_management
+#: field:item.management.item,type_id:0
+msgid "Type"
+msgstr "Tipo"
+
+#. module: item_management
+#: field:item.management.contract,message_unread:0
+#: field:item.management.item,message_unread:0
+#: field:item.management.recount,message_unread:0
+msgid "Unread Messages"
+msgstr "Mensajes no leídos"
+
+#. module: item_management
+#: field:item.management.item.count,user_id:0
+msgid "User"
+msgstr "Usuario"
+
+#. module: item_management
+#: selection:item.management.item,situation:0
+msgid "Warehouse"
+msgstr "Almacén"
+
+#. module: item_management
+#: view:item.management.item:item_management.item_management_item_filter
+msgid "Without location"
+msgstr "Sin ubicar"
+
+#. module: item_management
+#: view:item.management.item.assign.contract:item_management.item_management_item_assign_contract_form
+#: view:item.management.item.deactivate:item_management.item_management_item_deactivate_form
+#: view:item.management.item.internal.move:item_management.item_management_item_internal_move_form
+msgid "or"
+msgstr "o"

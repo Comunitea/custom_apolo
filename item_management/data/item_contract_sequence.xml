@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+
+        <record id="seq_type_item_management_contract_main" model="ir.sequence.type">
+            <field name="name">Item management contract</field>
+            <field name="code">item.management.contract</field>
+        </record>
+
+        <record id="seq_analytic_account_base" model="ir.sequence">
+            <field name="name">Item management contract sequence</field>
+            <field name="code">item.management.contract</field>
+            <field name="prefix">IC/%(year)s/</field>
+            <field name="padding">4</field>
+        </record>
+
+    </data>
+</openerp>

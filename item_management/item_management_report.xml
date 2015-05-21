@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <report
+            string="Lend contract"
+            id="action_report_lend_contract"
+            model="item.management.contract"
+            report_type="qweb-pdf"
+            name="item_management.report_item_contract_lend"
+            file="item_management.report_item_contract_lend"
+        />
+
+        <report
+            string="Remove report"
+            id="action_report_item_contract_remove"
+            model="item.management.contract"
+            report_type="qweb-pdf"
+            name="item_management.report_item_contract_remove"
+            file="item_management.report_item_contract_remove"
+        />
+
+    </data>
+</openerp>

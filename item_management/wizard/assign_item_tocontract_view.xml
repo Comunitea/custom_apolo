@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="item_management_item_assign_contract_form" model="ir.ui.view">
+            <field name="name">item.management.item.assign.contract.form</field>
+            <field name="model">item.management.item.assign.contract</field>
+            <field name="arch" type="xml">
+                <form string="Assign item to contract">
+                    <group>
+                        <field name="item_id"/>
+                        <field name="location_date"/>
+                    </group>
+                    <footer>
+                        <button name="assign_item_to_contract" type="object" string="Assign item" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_assign_item_tocontract" model="ir.actions.act_window">
+            <field name="name">Assign item to contract</field>
+            <field name="res_model">item.management.item.assign.contract</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+           <field name="view_id" ref="item_management_item_assign_contract_form"/>
+           <field name="target">new</field>
+        </record>
+
+    </data>
+</openerp>

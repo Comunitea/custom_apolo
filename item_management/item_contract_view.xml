@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="item_management_contract_tree" model="ir.ui.view">
+            <field name="name">item.management.contract.tree</field>
+            <field name="model">item.management.contract</field>
+            <field name="arch" type="xml">
+                <tree string="Contracts">
+                    <field name="name"/>
+                    <field name="partner_id"/>
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+                    <field name="contract_type"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="item_management_contract_filter" model="ir.ui.view">
+            <field name="name">item.management.contract.search</field>
+            <field name="model">item.management.contract</field>
+            <field name="arch" type="xml">
+                <search string="Contracts">
+                    <field name="partner_id"/>
+                    <field name="name"/>
+                    <filter string="State" context="{'group_by': 'state'}"/>
+                    <filter string="Customer" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Contract type" context="{'group_by': 'contract_type'}"/>
+               </search>
+            </field>
+        </record>
+
+        <record id="item_management_contract_form" model="ir.ui.view">
+            <field name="name">item.management.contract.form</field>
+            <field name="model">item.management.contract</field>
+            <field name="arch" type="xml">
+                <form string="Contract">
+                    <header>
+                        <button type="object" name="action_active" states="draft" string="Open"/>
+                        <button type="object" name="action_done" states="active" string="Finished"/>
+                        <button type="object" name="action_cancel" states="draft,active" string="Cancel"/>
+                        <button type="object" name="action_set_to_draft" states="cancel" string="Return to draft"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,active,done,cancel" statusbar_colors='{"cancel":"red","active":"green"}'/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h1>
+                                <field name="name" class="oe_inline"/>
+                            </h1>
+                        </div>
+                        <group name="main">
+                            <field name="partner_id"/>
+                            <field name="contract_type"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <notebook colspan="4">
+                                <page string="Description">
+                                    <field name="description" colspan="4" nolabel="1"/>
+                                </page>
+                                <page string="Items" attrs="{'invisible': [('state','=','done')]}">
+                                    <button name="%(action_assign_item_tocontract)d" type="action" string="Assign item to contract" states="active"/>
+                                    <button name="action_remove_items" type="object" string="Remove all items" confirm="Are you sure? Remember locate these items in warehouse later" attrs="{'invisible': [('item_ids', '=', [])]}"/>
+                                    <field name="item_ids" colspan="4" nolabel="1"/>
+                                </page>
+                                <page string="Contract data">
+                                    <group colspan="4">
+                                        <group>
+                                            <field name="owner_agent"/>
+                                            <field name="customer_agent"/>
+                                            <field name="customer_local_name"/>
+                                            <field name="company_agent"/>
+                                            <field name="item_value"/>
+                                        </group>
+                                        <group>
+                                            <field name="owner_agent2"/>
+                                            <field name="customer_agent_vat"/>
+                                            <field name="customer_local_street"/>
+                                        </group>
+                                    </group>
+                                </page>
+                            </notebook>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_item_management_contract">
+            <field name="name">Contracts</field>
+            <field name="res_model">item.management.contract</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="item_management_contract_tree"/>
+            <field name="search_view_id" ref="item_management_contract_filter"/>
+        </record>
+
+        <menuitem name="Items management" parent="stock.menu_stock_root" id="menu_items_managemnt" sequence="7"/>
+
+        <menuitem name="Contracts" parent="menu_items_managemnt"
+            action="action_item_management_contract" id="menu_items_managemnt_contracts"/>
+
+    </data>
+</openerp>

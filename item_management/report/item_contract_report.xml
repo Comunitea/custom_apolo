@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+    <template id="report_item_contract_lend">
+        <t t-call="report.html_container">
+        <t t-foreach="docs" t-as="o">
+        <t t-call="item_management.contract_item_header"/>
+            <div class="page">
+                <div class="oe_structure"/>
+                <div style="border-bottom: 1px solid black;" class="text-center">
+                <h3>
+                    <span>ACUERDO DE CESIÓN DE MEDIOS DE FRÍO EN DEPÓSITO AL PUNTO DE VENTA</span>
+                </h3>
+                </div>
+
+                <span>En </span><span t-field="user.company_id.city"/><span>, </span><span t-esc="time.strftime('%d del %m de %Y')"/>
+                <div class="row">
+                    <div class="col-xs-4 pull-right">
+                        <table class="table table-condensed">
+                            <tr>
+                                <td  style="border: none;"><strong>Nº cliente</strong></td>
+                                <td class="text-right" style="border: 1px solid black;">
+                                    <span t-field="o.partner_id.ref"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td  style="border: none;"><strong>Nº contrato</strong></td>
+                                <td class="text-right" style="border: 1px solid black;">
+                                    <span t-field="o.name"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td  style="border: none;"><strong>Nº Matrícula</strong></td>
+                                <td class="text-right" style="border: 1px solid black;">
+                                     <span></span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <h3>
+                        <span>REUNIDOS</span>
+                    </h3>
+                </div>
+                <p>De una parte, <strong>UNILEVER ESPAÑA, S.A.</strong>, con domicilio en la calle Tecnología, 19 de 08840-Viladecans, titular del NIF número A-28660520, y en su nombre y representación D. <span t-if="o.owner_agent"><strong><span t-field="o.owner_agent"/></strong></span><span t-if="not o.owner_agent">...................................</span> y D. <span t-if="o.owner_agent2"><strong><span t-field="o.owner_agent2"/></strong></span><span t-if="not o.owner_agent2">...................................</span></p>
+                <p>De otra, <strong><span t-field="user.company_id.name"/></strong>, Concesionario de Unilever  España S.A., para la zona de <span t-field="user.company_id.state_id.name"/> con domicilio en <span t-field="user.company_id.street"/>, CIF <span t-field="user.company_id.vat"/> y en su nombre y representación D. <span t-if="o.company_agent"><strong><span t-field="o.company_agent"/></strong></span><span t-if="not o.company_agent">...................................</span>, en adelante denominado, el “Concesionario”.</p>
+                <p>Y de la otra, D. <span t-if="o.customer_agent"><strong><span t-field="o.customer_agent"/></strong></span><span t-if="not o.customer_agent">...................................</span>, con DNI nº <span t-if="o.customer_agent_vat"><span t-field="o.customer_agent_vat"/></span><span t-if="not o.customer_agent_vat">......................</span>, en nombre y representación de <strong><span t-field="o.partner_id.name"/></strong>, con domicilio en <span t-field="o.partner_id.city"/> <span t-field="o.partner_id.street"/>, (en lo sucesivo denominado el “Cliente”).</p>
+
+                <div class="text-center">
+                    <h3>
+                        <span>EXPONEN</span>
+                    </h3>
+                </div>
+                <p>1. Que Unilever es propietaria en pleno dominio del medio de frío, cuyo número de matrícula se identifica en el encabezamiento de este Contrato, con un valor de <span t-if="o.item_value"><strong><span t-field="o.item_value"/></strong></span><span t-if="not o.item_value">...........</span> Euros, en adelante referido como “medios de frio”. Para cada nuevo medio de frio cedido o para cualquier modificación o cambio se firmará el correspondiente documento de cesión entre Unilever, el Concesionario y el Cliente.</p>
+                <p>2. Que el indicado medio de frío se encuentra puesto a disposición del Concesionario por parte de Unilever, en los términos regulados en el Contrato de Concesión suscrito entre ambas partes, para su posterior distribución a los puntos de venta de los helados con marca  registradas por Unilever, Frigo, Ben&amp;Jerry´s, Café Zero, Calippo® Slush o My Cornetto.</p>
+                <p>3. Que estando interesado el Cliente en realizar la venta al público de los helados que Unilever comercializa, en sus establecimientos, y resultándole necesario los medios de frío para su correcto almacenamiento, UNILEVER hace entrega al Cliente, a través de su Concesionario, de dichos medios de frío para su ubicación permanente en el establecimiento <span t-if="o.customer_local_name"><strong><span t-field="o.customer_local_name"/></strong></span><span t-if="not o.customer_local_name">...................................</span> sito en <span t-if="o.customer_local_street"><strong><span t-field="o.customer_local_street"/></strong></span><span t-if="not o.customer_local_street">..................................................................</span><br/>     Dicha cesión queda sujeta a las condiciones descritas a continuación en el presente Acuerdo.</p>
+
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>Por Unilever España, S.A.</th>
+                            <th>Por el concesionario</th>
+                            <th>Por el cliente</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="min-height:100px;display:block;">
+                            <td><p></p></td>
+                            <td><p></p></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="page-break-after:always;"></p>
+                <div style="border-bottom: 1px solid black;">
+                <h3>
+                    <span>CONDICIONES</span>
+                </h3>
+                </div>
+                <p></p>
+                <p><strong>PRIMERA. Operación accesoria.</strong> La cesión del medio de frío se realiza como operación accesoria a las operaciones de suministro de los productos marca Frigo, Ben&amp;Jerry´s, Café Zero, Calippo® Slush o My Cornetto, según proceda,  que el Concesionario efectuará al Cliente para que pueda desarrollar su actividad de venta al público de los mismos, manteniéndolos en condiciones óptimas para su consumo, para lo cual resulta esencial la compra por parte del Cliente de los productos directamente al Concesionario o, en su caso, a Unilever.</p>
+                <p><strong>SEGUNDA. Uso y destino.</strong> El uso del medio de frío será exclusivamente el almacenamiento, para su venta, de los productos marca Frigo, Ben&amp;Jerry´s, Café Zero, Calippo® Slush o My Cornetto que le suministrará al Cliente. Cualquier otro uso o cesión a terceros, así como cualquier cambio de ubicación del medio sin la previa autorización expresa del Concesionario o, en su caso, Unilever, queda totalmente prohibido, por lo que el Cliente será el único responsable de cualquier daño que dicho cambio de ubicación no autorizado cause sobre bienes y personas. Asimismo, Unilever queda autorizada, adicionalmente a cualquier otra acción, a exigir al Cliente una indemnización por el valor de reposición del medio.</p>
+                <p><strong>TERCERA. Vigencia.</strong> Este Contrato tendrá una duración de un mes, si bien se entenderá renovado tácitamente por periodos iguales,  siempre que no sea denunciado por ninguna de las partes con una antelación de quince (15) días. No obstante, la vigencia del presente contrato está plenamente condicionada a la vigencia del acuerdo comercial con el Cliente, por lo que la resolución de dicho acuerdo supondrá, en los mismos términos, la resolución automática de este Contrato. </p>
+                <p><strong>CUARTA. Precio de  la Cesión.</strong> El medio de frío se cede al Cliente a título oneroso, entendiéndose incluida la contraprestación por su uso en el precio de los productos marca Frigo, Ben&amp;Jerry´s, Café Zero, Calippo® Slush o My Cornetto que se venderán al Cliente para su reventa a los consumidores.</p>
+                <p><strong>QUINTA. Identificación y mantenimiento.</strong> Los medios de frío de Unilever llevan impresa la marca Frigo, Ben&amp;Jerry´s, Café Zero, Calippo® Slush o My Cornetto que junto con la matrícula no podrán ser alterados de ningún modo por parte del Cliente.</p>
+                <p>El Cliente se responsabiliza de la correcta instalación y mantenimiento del medio de frío. En todos los casos, el Cliente debe cumplir estrictamente con las siguientes normas de seguridad:</p>
+                <p>a) Todos los medios de frío deben conectarse siempre con un enchufe con toma de tierra</p>
+                <p>b) Enchufar el medio de frío a una toma de alimentación eléctrica reservada sólo para éste y sin adaptadores intermedios. La instalación donde se enchufe el medio de frío debe estar debidamente protegida de acuerdo con el actual Reglamento de Baja Tensión (magneto-térmico, diferencial de alta, etc.).</p>
+                <p>c) No obstaculizar las rejillas de ventilación del medio, debiendo dejar siempre un espacio libre de cómo mínimo 15 centímetros para que el equipo ventile bien. Las rejillas deberán mantenerse asimismo limpias y libres de obstrucciones debidas a polvo acumulado.</p>
+                <p>d) No enchufar el medio de frío a tomas de corrientes cercanas a fuentes de calor y/o elementos fácilmente inflamables.</p>
+                <p>Asimismo, el Cliente se obliga a utilizar el medio de frío con la diligencia de un buen comerciante, atendiendo los gastos de su reparación y conservación, cuando sufra averías motivadas por negligencia, mal uso o abandono.</p>
+                <p>En caso de avería no causada por negligencia, mal uso o abandono, el Cliente deberá notificarlo a Unilever o a quién ésta designe en cada momento, el cual tomará las acciones oportunas para llevar a cabo la reparación del mismo.</p>
+                <p>En el caso de cualquier siniestro en que el medio de frío se vea involucrado, <strong>el Cliente deberá comunicarlo de inmediato a Unilever (900 81 25 10)</strong> para que esta pueda tomar las medidas adecuadas. En caso de que Unilever no sea notificada inmediatamente desde que hubiese ocurrido el evento antes citado y ello causara que no pueda intervenir activamente en el estudio de sus causas y su solución, Unilever quedará completamente exonerada de cualquier responsabilidad, renunciando el Cliente a cualquier cantidad o indemnización o compensación que le pudiera corresponder reclamar. </p>
+                <p><strong>SEXTA.- Comunicación de la propiedad del medio:</strong> En caso de tener arrendado el Cliente el establecimiento donde se sitúe el medio de frío, en calidad de arrendatario, se obliga a comunicar a su arrendador que el mismo es propiedad de Unilever. En caso de cierre, traspaso o venta del local o de cualquier otra incidencia, el cliente se obliga a notificarlo por escrito con una antelación mínima de (7) días laborales.</p>
+                <p>En caso de cualquier actuación judicial o embargo que pueda afectar a los bienes del Cliente, este vendrá obligado a avisar inmediatamente a Unilever de tales eventos y pondrá en conocimiento de los adquirentes, demandantes, acreedores y personal judicial, que el medio de frío es propiedad de Unilever.</p>
+                <p><strong>SÉPTIMA. Verificaciones.</strong> El Cliente, en cualquier momento, permitirá al personal del Concesionario o, en su caso, de Unilever, la inspección del medio o medios de frío  tanto por lo que respecta a su estado de conservación como a su contenido. Asimismo, el Cliente se obliga a informar inmediatamente al Concesionario o, en su caso, a  Unilever sobre cualquier cambio de ubicación del medio o medios propiedad de Unilever.</p>
+                <p><strong>OCTAVA. Responsabilidades.</strong> El Cliente pagará al propietario del medio de frio los daños y perjuicios que sufran, y  será responsable por los daños y perjuicios o lesiones que pudiera causar, como consecuencia de no seguir las instrucciones sobre la correcta instalación, mantenimiento y/o utilización del medio de frío. Salvo caso fortuito o de fuerza mayor, el Cliente responderá de la pérdida  del medio de frío y de los desperfectos que puedan sufrir los productos por cualquier causa dentro del medio de frío.</p>
+                <p><strong>NOVENA.- Consecuencias de la resolución:</strong> Resuelto este Acuerdo será exigible la devolución del medio o medios de frío en un plazo máximo de siete (7) días naturales, siendo el Cliente responsable tanto de su devolución como de los daños o averías debidas a negligencia o incorrecto uso, por lo que Unilever queda facultada para utilizar todas las acciones necesarias para hacer efectiva esta restitución de los medios, así como exigir los daños y perjuicios irrogados o que se irroguen desde ese momento. En este sentido, el Cliente permitirá que el personal de Unilever, lo desmonte y lo transporte. Unilever se reserva el derecho de reclamar al Cliente las cantidades que procedan si, desmontado el medio de frío, se aprecian en él daños ajenos a su uso. En caso contrario las partes acuerdan expresamente que será de aplicación una penalización equivalente a diez euros (€ 10) por cada día de retraso que transcurra desde la finalización, por la causa que fuere, del Contrato hasta la efectiva entrega del medio/s a Unilever o a quien ésta designe. </p>
+                <p><strong>DÉCIMA.- Subrogación:</strong> El cambio de Concesionario Frigo en la zona del Cliente supondrá la subrogación automática del nuevo concesionario a la posición del concesionario saliente, por lo que no se producirá la resolución de este Contrato en este supuesto y el Cliente deberá seguir únicamente las indicaciones de Unilever.</p>
+                <p><strong>UNDÉCIMA.- Seguro:</strong> los medios de frio están asegurados por Unilever como titular del bien. En caso de siniestro el Cliente está obligado a comunicar el siniestro dentro de las 48 horas siguientes al siniestro. En caso contrario, Unilever no será responsable de los daños que hubiere podido causar dicho medio en el Cliente o en cualquier tercero.</p>
+                <p><strong>DUODÉCIMA.- Fuero:</strong> Las partes, con renuncia expresa al fuero que pudiera corresponderles, se someten, para cualesquiera controversias que pudieran surgir en la interpretación y ejecución de ese documento, a los Juzgados y Tribunales de Barcelona.</p>
+                <p>Las partes, conformes, firman el presente  Acuerdo en tres versiones originales, en el lugar y fecha indicados en el encabezamiento.</p>
+
+
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>Por Unilever España, S.A.</th>
+                            <th>Por el concesionario</th>
+                            <th>Por el cliente</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="min-height:100px;display:block;">
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </t>
+        </t>
+    </template>
+
+</data>
+</openerp>

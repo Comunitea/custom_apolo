@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="item_management_recount_tree" model="ir.ui.view">
+            <field name="name">item.management.recount.tree</field>
+            <field name="model">item.management.recount</field>
+            <field name="arch" type="xml">
+                <tree string="Recounts">
+                    <field name="name"/>
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="item_management_recount_filter" model="ir.ui.view">
+            <field name="name">item.management.recount.search</field>
+            <field name="model">item.management.recount</field>
+            <field name="arch" type="xml">
+                <search string="Recounts">
+                    <field name="name"/>
+                    <filter string="State" context="{'group_by': 'state'}"/>
+               </search>
+            </field>
+        </record>
+
+        <record id="item_management_recount_form" model="ir.ui.view">
+            <field name="name">item.management.recount.form</field>
+            <field name="model">item.management.recount</field>
+            <field name="arch" type="xml">
+                <form string="Recount">
+                    <header>
+                        <button type="object" name="action_done" states="open" string="Done"/>
+                        <button type="object" name="action_reopen" states="done" string="Reopen"/>
+
+                        <field name="state" widget="statusbar" statusbar_visible="open,done"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h1>
+                                <field name="name" class="oe_inline"/>
+                            </h1>
+                        </div>
+                        <group name="main">
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <field name="phase_ids" colspan="4">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                    <field name="percent_goal"/>
+                                    <field name="limit_date"/>
+                                    <field name="description"/>
+                                    <field name="total_items"/>
+                                    <field name="percent_count"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_item_management_recount">
+            <field name="name">Recounts</field>
+            <field name="res_model">item.management.recount</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="item_management_recount_tree"/>
+            <field name="search_view_id" ref="item_management_recount_filter"/>
+        </record>
+
+        <menuitem name="Recounts" parent="menu_items_managemnt"
+            action="action_item_management_recount" id="menu_items_managemnt_recounts"/>
+
+    </data>
+</openerp>

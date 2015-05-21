@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+       <template id="contract_item_header">
+            <div class="header">
+                <div class="row">
+                    <div class="col-xs-2 text-left">
+                        <img src="/item_management/static/src/img/unilever_logo.jpg" style="max-height: 70px;"/>
+                    </div>
+                    <div class="col-xs-3 col-xs-offset-3 text-right">
+                        <img src="/item_management/static/src/img/frigo_logo.jpg" style="max-height: 70px;"/>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+    </data>
+</openerp>

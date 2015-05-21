@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="item_management_item_deactivate_form" model="ir.ui.view">
+            <field name="name">item.management.item.deactivate.form</field>
+            <field name="model">item.management.item.deactivate</field>
+            <field name="arch" type="xml">
+                <form string="Inactive item">
+                    <group>
+                        <field name="inactive_motive"/>
+                    </group>
+                    <footer>
+                        <button name="action_deactive" type="object" string="Deactivate" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_item_deactivate" model="ir.actions.act_window">
+            <field name="name">Deactivate item</field>
+            <field name="res_model">item.management.item.deactivate</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+           <field name="view_id" ref="item_management_item_deactivate_form"/>
+           <field name="target">new</field>
+        </record>
+
+    </data>
+</openerp>
