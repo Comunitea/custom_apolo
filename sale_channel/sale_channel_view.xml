@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="sale_channel_tree" model="ir.ui.view">
+            <field name="name">sale.channel.tree</field>
+            <field name="model">sale.channel</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Sale channels">
+                    <field name="name"/>
+                    <field name="pricelist_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="sale_channel_form" model="ir.ui.view">
+            <field name="name">sale.channel.form</field>
+            <field name="model">sale.channel</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Sale channel">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="pricelist_id"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="sale_channel_filter" model="ir.ui.view">
+            <field name="name">sale.channel.search</field>
+            <field name="model">sale.channel</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="">
+                   <field name="name"/>
+                   <field name="pricelist_id"/>
+               </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_sale_channel">
+            <field name="name">Sale channel</field>
+            <field name="res_model">sale.channel</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="sale_channel_tree"/>
+            <field name="search_view_id" ref="sale_channel_filter"/>
+        </record>
+
+        <menuitem name="Sale channels" parent="product.menu_product_pricelist_main"
+            action="action_sale_channel" id="sale_channel_menu"/>
+
+    </data>
+</openerp>
