@@ -283,8 +283,8 @@ class integrate_accounting(object):
                         'account_id': account_ids[0],
                         'move_id': last_move_id
                     }
-                    if row.get('Notas'):
-                        analytic_code = row['Notas'].replace("-", "")
+                    if row.get('Obsv'):
+                        analytic_code = row['Obsv'].replace("-", "")
                         analytic_acc_id = self.search("account.analytic.account", [('code', '=', analytic_code)])
                         if analytic_acc_id:
                            move_line_vals['analytic_account_id'] =  analytic_acc_id[0]
