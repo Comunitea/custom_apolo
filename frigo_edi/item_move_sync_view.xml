@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record id="item_move_sync_tree" model="ir.ui.view">
+            <field name="name">item.management.item.move.sync.tree</field>
+            <field name="model">item.management.item.move.sync</field>
+            <field name="arch" type="xml">
+                <tree string="Item moves syncs" create="0" write="0">
+                    <field name="date"/>
+                    <field name="operation_type"/>
+                    <field name="item_id"/>
+                    <field name="customer_id"/>
+                    <field name="user_id"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="item_move_sync_filter" model="ir.ui.view">
+            <field name="name">item.management.item.move.sync.search</field>
+            <field name="model">item.management.item.move.sync</field>
+            <field name="arch" type="xml">
+                <search string="Item moves syncs">
+                    <filter name="to_sync" string="To sync" domain="[('state', '!=', 'sync')]"/>
+                    <field name="item_id"/>
+                    <field name="date"/>
+                    <field name="user_id"/>
+                    <field name="customer_id"/>
+                    <filter string="State" context="{'group_by': 'state'}"/>
+                    <filter string="Item" context="{'group_by': 'item_id'}"/>
+                    <filter string="User" context="{'group_by': 'user_id'}"/>
+               </search>
+            </field>
+        </record>
+
+        <record id="item_move_sync_form" model="ir.ui.view">
+            <field name="name">item.management.item.move.sync.form</field>
+            <field name="model">item.management.item.move.sync</field>
+            <field name="arch" type="xml">
+                <form string="Item move sync">
+                    <group colspan="4">
+                        <group>
+                            <field name="item_id"/>
+                            <field name="operation_type"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="user_id"/>
+                            <field name="customer_id"/>
+                            <field name="inactive_motive"/>
+                            <field name="contract_id"/>
+                            <field name="state"/>
+                        </group>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_item_move_sync">
+            <field name="name">Item moves syncs</field>
+            <field name="res_model">item.management.item.move.sync</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="item_move_sync_tree"/>
+            <field name="search_view_id" ref="item_move_sync_filter"/>
+            <field name="context">{'search_default_to_sync': True}</field>
+        </record>
+
+        <menuitem id="menu_frigo_med" parent="menu_edi_frigo" name="Item moves syncs" action="action_item_move_sync"/>
+
+    </data>
+</openerp>

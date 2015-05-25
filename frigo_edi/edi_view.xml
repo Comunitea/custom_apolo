@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+         <record model="ir.ui.view" id="edi_form_add_partner">
+            <field name="name">edi.form.add_partner</field>
+            <field name="model">edi</field>
+            <field name="inherit_id" ref="depot_edi.edi_from"/>
+            <field name="arch" type="xml">
+                <field name="active" position="after">
+                    <field name="related_partner_id"/>
+                </field>
+            </field>
+        </record>
+
+    </data>
+</openerp>

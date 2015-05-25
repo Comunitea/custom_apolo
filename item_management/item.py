@@ -30,8 +30,9 @@ class ItemManagementItem(models.Model):
     type_id = fields.Many2one('item.management.item.type', 'Type',
                               required=True)
     code = fields.Char("Code")
-    license_plate = fields.Char("License plate", track_visibility='onchange')
-    partner_id = fields.Many2one("res.partner", "Owner")
+    license_plate = fields.Char("License plate", track_visibility='onchange',
+                                size=13, required=True)
+    partner_id = fields.Many2one("res.partner", "Owner", required=True)
     purchase_date = fields.Date("Purchase date")
     contract_id = fields.Many2one('item.management.contract', 'Contract',
                                   readonly=True, track_visibility='onchange')
@@ -54,6 +55,9 @@ class ItemManagementItem(models.Model):
                                         ('theft', 'Theft'),
                                         ('loss', 'Loss')], 'Inactive motive',
                                        readonly=True)
+    license_history_ids = fields.\
+        One2many("item.management.item.license.plate.history", "item_id",
+                 "History", readonly=True)
 
     @api.multi
     def unlink(self):
@@ -65,3 +69,28 @@ class ItemManagementItem(models.Model):
                 raise exceptions.Warning(_("Cannot delete this item because "
                                            "has already been recounted"))
         return super(ItemManagementItem, self).unlink()
+
+    @api.multi
+    def write(self, vals):
+        if vals.get("license_plate"):
+            lp_history_obj = \
+                self.env["item.management.item.license.plate.history"]
+            for item in self:
+                if item.license_plate != vals["license_plate"]:
+                    lp_history_obj.create({'item_id': item.id,
+                                           'old_license_plate':
+                                           item.license_plate})
+        return super(ItemManagementItem, self).write(vals)
+
+
+class ItemManagementItemLicensePlateHistory(models.Model):
+
+    _name = "item.management.item.license.plate.history"
+    _order = "date desc"
+
+    date = fields.Date("Change date", default=fields.Date.today(),
+                       required=True, readonly=True)
+    item_id = fields.Many2one('item.management.item', 'Item', required=True,
+                              readonly=True)
+    old_license_plate = fields.Char("License plate", size=13, required=True,
+                                    readonly=True)

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <menuitem id="menu_edi_frigo" parent="depot_edi.menu_edi" name="Frigo" sequence="40"/>
+
+    </data>
+</openerp>

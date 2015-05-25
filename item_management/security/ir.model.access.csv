@@ -11,3 +11,4 @@ access_item_management_item_count_manager,item.management.item.count manager,mod
 access_item_management_item_count_user,item.management.item.count user,model_item_management_item_count,stock.group_stock_user,1,0,1,0
 access_item_management_item_type_manager,item.management.item.type manager,model_item_management_item_type,stock.group_stock_manager,1,1,1,1
 access_item_management_item_type_user,item.management.item.type user,model_item_management_item_type,stock.group_stock_user,1,0,0,0
+access_item_management_item_license_plate_history,item_management_item_license_plate_history,model_item_management_item_license_plate_history,stock.group_stock_manager,1,1,1,1

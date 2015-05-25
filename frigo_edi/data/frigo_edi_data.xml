@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="0">
+
+        <record id="ir_cron_weekly_edi" model="ir.cron">
+            <field name="name">Frigo weekly edi</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">weeks</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+            <field eval="'export.frigo.edi.file'" name="model"/>
+            <field eval="'export_weekly_files'" name="function"/>
+        </record>
+
+        <record id="edi_doc_type_cli" model="edi.doc.type">
+            <field name="code">cli</field>
+            <field name="name">Customers</field>
+        </record>
+
+        <record id="edi_doc_type_ven" model="edi.doc.type">
+            <field name="code">ven</field>
+            <field name="name">Sales</field>
+        </record>
+
+        <record id="edi_doc_type_alb" model="edi.doc.type">
+            <field name="code">alb</field>
+            <field name="name">Pickings</field>
+        </record>
+
+        <record id="edi_doc_type_med" model="edi.doc.type">
+            <field name="code">med</field>
+            <field name="name">Items moves</field>
+        </record>
+
+        <record id="edi_doc_type_mef" model="edi.doc.type">
+            <field name="code">mef</field>
+            <field name="name">Items photos</field>
+        </record>
+
+        <record id="edi_doc_type_sto" model="edi.doc.type">
+            <field name="code">sto</field>
+            <field name="name">Stocks</field>
+        </record>
+
+        <record id="edi_doc_type_dto" model="edi.doc.type">
+            <field name="code">dto</field>
+            <field name="name">Discounts</field>
+        </record>
+
+        <record id="edi_doc_type_col" model="edi.doc.type">
+            <field name="code">col</field>
+            <field name="name">Pref. agreements</field>
+        </record>
+
+        <record id="edi_doc_type_pol" model="edi.doc.type">
+            <field name="code">pol</field>
+            <field name="name">Tourism Customers</field>
+        </record>
+
+        <record id="edi_doc_type_pro" model="edi.doc.type">
+            <field name="code">pro</field>
+            <field name="name">Products</field>
+        </record>
+
+        <record id="edi_doc_type_rco" model="edi.doc.type">
+            <field name="code">rco</field>
+            <field name="name">Customer coding</field>
+        </record>
+
+        <record id="edi_doc_type_rme" model="edi.doc.type">
+            <field name="code">rme</field>
+            <field name="name">Items coding</field>
+        </record>
+
+        <record id="edi_doc_type_abo" model="edi.doc.type">
+            <field name="code">abo</field>
+            <field name="name">Refund</field>
+        </record>
+
+        <record id="edi_doc_type_tur" model="edi.doc.type">
+            <field name="code">tur</field>
+            <field name="name">Tourism</field>
+        </record>
+
+        <record id="edi_doc_type_alc" model="edi.doc.type">
+            <field name="code">alc</field>
+            <field name="name">Incoming Pickings</field>
+        </record>
+
+        <record id="edi_doc_type_grp" model="edi.doc.type">
+            <field name="code">grp</field>
+            <field name="name">Groups</field>
+        </record>
+
+        <record id="edi_doc_type_clp" model="edi.doc.type">
+            <field name="code">clp</field>
+            <field name="name">Indirect customers</field>
+        </record>
+
+        <record id="edi_doc_type_lpr" model="edi.doc.type">
+            <field name="code">lpr</field>
+            <field name="name">Customer products</field>
+        </record>
+
+        <record id="edi_doc_type_tor" model="edi.doc.type">
+            <field name="code">tor</field>
+            <field name="name">Indirect sales</field>
+        </record>
+
+    </data>
+</openerp>

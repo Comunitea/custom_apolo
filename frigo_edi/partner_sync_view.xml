@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record id="res_partner_sync_tree" model="ir.ui.view">
+            <field name="name">res.partner.sync.tree</field>
+            <field name="model">res.partner.sync</field>
+            <field name="arch" type="xml">
+                <tree string="Partner syncs" create="0" write="0">
+                    <field name="date"/>
+                    <field name="operation_type"/>
+                    <field name="partner_id"/>
+                    <field name="user_id"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="res_partner_sync_filter" model="ir.ui.view">
+            <field name="name">res.partner.sync.search</field>
+            <field name="model">res.partner.sync</field>
+            <field name="arch" type="xml">
+                <search string="Partner syncs">
+                    <filter name="to_sync" string="To sync" domain="[('state', '!=', 'sync')]"/>
+                    <field name="partner_id"/>
+                    <field name="date"/>
+                    <field name="user_id"/>
+                    <filter string="State" context="{'group_by': 'state'}"/>
+                    <filter string="Partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="User" context="{'group_by': 'user_id'}"/>
+               </search>
+            </field>
+        </record>
+
+        <record id="res_partner_sync_form" model="ir.ui.view">
+            <field name="name">res.partner.sync.form</field>
+            <field name="model">res.partner.sync</field>
+            <field name="arch" type="xml">
+                <form string="Partner sync">
+                    <group colspan="4">
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="operation_type"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="user_id"/>
+                            <field name="state"/>
+                        </group>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_res_partner_sync">
+            <field name="name">Partner syncs</field>
+            <field name="res_model">res.partner.sync</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="res_partner_sync_tree"/>
+            <field name="search_view_id" ref="res_partner_sync_filter"/>
+            <field name="context">{'search_default_to_sync': True}</field>
+        </record>
+
+        <menuitem id="menu_frigo_cli" parent="menu_edi_frigo" name="Partner syncs" action="action_res_partner_sync"/>
+
+    </data>
+</openerp>

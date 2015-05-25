@@ -1,0 +1,3 @@
+%for obj in items:
+${ obj.license_plate[:13].ljust(13, " ") }${ user.company_id.frigo_code.rjust(3, " ") }${ obj.customer_id and obj.customer_id.ref[:7].rjust(7, "0") or "".rjust(7, "0") }${ obj.last_move_id.operation_type }${ datetime.strftime(datetime.strptime(obj.last_move_id.date, "%Y-%m-%d"),"%d%m%Y") }${ obj.last_move_id.contract_id and obj.last_move_id.contract_id.name[:8].ljust(8, " ") or "".ljust(8, "0") }${ obj.last_move_id.inactive_motive or " " }${ obj.count_ids and datetime.strftime(datetime.strptime(obj.count_ids[0].recount_date, "%Y-%m-%d %H:%M:%S"),"%d%m%Y") or "".ljust(8, "0") }${ obj.count_ids and datetime.strftime(datetime.strptime(obj.count_ids[0].recount_date, "%Y-%m-%d %H:%M:%S"),"%d%m%Y") or "".ljust(8, "0") }
+%endfor

@@ -1,0 +1,3 @@
+%for obj in o:
+${ obj.item_id.license_plate[:13].ljust(13, " ") }${ obj.user_id.company_id.frigo_code.rjust(3, " ") }${ obj.customer_id and obj.customer_id.ref[:7].rjust(7, " ") or "".rjust(7, "0") }${ obj.operation_type }${ datetime.strftime(datetime.strptime(obj.date, "%Y-%m-%d"),"%d%m%Y") }${ obj.contract_id and obj.contract_id.name[:8].ljust(8, " ") or "".ljust(8, "0") }${ obj.inactive_motive or " " }
+%endfor

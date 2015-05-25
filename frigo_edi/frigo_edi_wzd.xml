@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record id="act_export_frigo_cli_file" model="ir.actions.act_window">
+            <field name="name">Export Frigo file</field>
+            <field name="res_model">export.frigo.edi.file</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="export_frigo_edi_file_form"/>
+            <field name="target">new</field>
+            <field name="context">{'doc_type': 'cli'}</field>
+        </record>
+
+        <record id="ir_export_partner_sync" model="ir.values">
+            <field name="name">Export Frigo file</field>
+            <field name="key2">client_action_multi</field>
+            <field name="model">res.partner.sync</field>
+            <field name="value" eval="'ir.actions.act_window,%d'%act_export_frigo_cli_file" />
+            <field name="object" eval="True" />
+        </record>
+
+        <record id="act_export_frigo_med_file" model="ir.actions.act_window">
+            <field name="name">Export Frigo file</field>
+            <field name="res_model">export.frigo.edi.file</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="export_frigo_edi_file_form"/>
+            <field name="target">new</field>
+            <field name="context">{'doc_type': 'med'}</field>
+        </record>
+
+        <record id="ir_export_item_move_sync" model="ir.values">
+            <field name="name">Export Frigo file</field>
+            <field name="key2">client_action_multi</field>
+            <field name="model">item.management.item.move.sync</field>
+            <field name="value" eval="'ir.actions.act_window,%d'%act_export_frigo_med_file" />
+            <field name="object" eval="True" />
+        </record>
+
+        <record id="act_export_frigo_rme_file" model="ir.actions.act_window">
+            <field name="name">Export Frigo RME</field>
+            <field name="res_model">export.frigo.edi.file</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="export_frigo_edi_file_form"/>
+            <field name="target">new</field>
+            <field name="context">{'doc_type': 'rme'}</field>
+        </record>
+
+        <record id="ir_export_item_move_sync" model="ir.values">
+            <field name="name">Export Frigo RME</field>
+            <field name="key2">client_action_multi</field>
+            <field name="model">item.management.item</field>
+            <field name="value" eval="'ir.actions.act_window,%d'%act_export_frigo_rme_file" />
+            <field name="object" eval="True" />
+        </record>
+
+
+    </data>
+</openerp>

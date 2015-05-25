@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="item_management_item_from_add_to_sync" model="ir.ui.view">
+            <field name="name">item.management.item.from_add_to_sync</field>
+            <field name="model">item.management.item</field>
+            <field name="inherit_id" ref="item_management.item_management_item_from"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="after">
+                    <field name="to_sync"/>
+                </field>
+            </field>
+        </record>
+
+    </data>
+</openerp>

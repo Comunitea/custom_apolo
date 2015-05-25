@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record id="midban_view_partner_form_add_frigo_fields" model="ir.ui.view">
+            <field name="name">midban.view.partner.form</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="midban_partner.midban_view_partner_form"/>
+            <field name="arch" type="xml">
+                <field name="ref" position="after">
+                    <field name="unilever_code"/>
+                    <field name="favorite"/>
+                </field>
+                <field name="group_pickings" position="after">
+                    <group string="Closure Days">
+                        <field name="close_days" widget="many2many_checkboxes" nolabel="1"/>
+                    </group>
+                    <group colspan="4" string="Timetable">
+                        <group>
+                            <field name="morning_open_time" widget="float_time"/>
+                            <field name="afternoon_open_time" widget="float_time"/>
+                        </group>
+                        <group>
+                            <field name="morning_close_time" widget="float_time"/>
+                            <field name="afternoon_close_time" widget="float_time"/>
+                        </group>
+                    </group>
+                </field>
+            </field>
+        </record>
+
+    </data>
+</openerp>

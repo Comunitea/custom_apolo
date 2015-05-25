@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_res_partner_sync,res_partner_sync,model_res_partner_sync,,1,1,1,0
+access_res_partner_sync_manager,res_partner_sync_manager,model_res_partner_sync,base.group_erp_manager,1,1,1,1
+access_item_management_item_move_sync,item_management_item_move_sync,model_item_management_item_move_sync,stock.group_stock_user,1,1,1,0
+access_item_management_item_move_sync_manager,item_management_item_move_sync_manager,model_item_management_item_move_sync,stock.group_stock_manager,1,1,1,1

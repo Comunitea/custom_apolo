@@ -1,0 +1,3 @@
+%for obj in o:
+${ user.company_id.frigo_code.rjust(3, " ") }${ obj.license_history_ids[0].old_license_plate[:13].rjust(13, " ") }${ "".ljust(30, " ") }${ obj.license_plate[:13].rjust(13, " ") }${ "".ljust(9, " ") }${ datetime.strftime(datetime.strptime(obj.license_history_ids[0].date, "%Y-%m-%d"),"%d%m%Y") }
+%endfor
