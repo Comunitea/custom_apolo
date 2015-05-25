@@ -289,7 +289,7 @@ class integrate_accounting(object):
                         if analytic_acc_id:
                            move_line_vals['analytic_account_id'] =  analytic_acc_id[0]
                         else:
-                            print "EXCEPTION: No hay ninguna cuenta analítica creada con el codigo %s" % analytic_code
+                            print "EXCEPTION: No hay ninguna cuenta analitica creada con el codigo %s" % analytic_code
 
                     self.create('account.move.line', move_line_vals)
 
