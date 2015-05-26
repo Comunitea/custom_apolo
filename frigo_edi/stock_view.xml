@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="view_picking_internal_search_add_sync" model="ir.ui.view">
+            <field name="name">stock.picking.internal.search.add_sync</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="indirect_sale.view_picking_internal_search_add_indirect"/>
+            <field name="arch" type="xml">
+                <filter name="indirect" position="after">
+                    <filter name="indirect_sync" string="Indirect pending to Sync" domain="[('indirect', '=', True),('sync', '=', False),('state', '=', 'done')]"/>
+                </filter>
+            </field>
+        </record>
+
+    </data>
+</openerp>

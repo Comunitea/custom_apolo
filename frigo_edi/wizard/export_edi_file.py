@@ -243,7 +243,6 @@ class ExportFrigoEdiCli(models.TransientModel):
 
     @api.model
     def export_file_rme(self, active_model, objs=False):
-        mod = self.env[active_model]
         doc_obj = self.env["edi.doc"]
         if not objs:
             return
@@ -283,7 +282,6 @@ class ExportFrigoEdiCli(models.TransientModel):
 
     @api.model
     def export_file_rco(self, active_model, objs=False):
-        mod = self.env[active_model]
         doc_obj = self.env["edi.doc"]
         if not objs:
             return
@@ -322,6 +320,63 @@ class ExportFrigoEdiCli(models.TransientModel):
         file_obj.count = count
 
     @api.model
+    def export_file_alb(self, active_model, objs=False):
+        mod = self.env[active_model]
+        doc_obj = self.env["edi.doc"]
+        if not objs:
+            objs = mod.search([("sync", "=", False), ('indirect', '=', True),
+                               ('state', '=', 'done'),
+                               ('picking_type_code', 'in', ['outgoing',
+                                                            'incoming'])])
+        if not objs:
+            return
+
+        doc_type_obj = self.env["edi.doc.type"]
+        doc_type = doc_type_obj.search([("code", '=', "alb")])[0]
+        last_alb_file = doc_obj.search([("doc_type", '=', doc_type.id)],
+                                       order="date desc", limit=1)
+        if last_alb_file:
+            count = last_alb_file.count + 1
+        else:
+            count = 1
+        tmp_name = "export_alb.txt"
+        objs2 = []
+        for pick in objs:
+            if not pick.indirect:
+                raise exceptions.Warning(_("Picking %s isn't an indirect "
+                                           "sale") % pick.name)
+            elif pick.state != "done":
+                raise exceptions.Warning(_("Picking %s isn't in done "
+                                           "state") % pick.name)
+            for move in pick.move_lines:
+                if move.state == "done":
+                    objs2.append(move)
+        if objs2:
+            filename = "%sALB%s.%s" % (self.env.user.company_id.frigo_code,
+                                       str(len(objs2) + len(objs) + 1).
+                                       zfill(4), str(count).zfill(4))
+            templates_path = self.addons_path('frigo_edi') + os.sep + \
+                'wizard' + os.sep + 'templates' + os.sep
+            mylookup = TemplateLookup(input_encoding='utf-8',
+                                      output_encoding='utf-8',
+                                      encoding_errors='replace')
+            tmp = Template(filename=templates_path + tmp_name,
+                           lookup=mylookup,
+                           default_filters=['decode.utf8'])
+
+            doc = tmp.render_unicode(objs=objs, datetime=datetime,
+                                     user=self.env.user).encode('utf-8',
+                                                                'replace')
+            file_name = self[0].service_id.output_path + os.sep + filename
+            f = file(file_name, 'w')
+            f.write(doc)
+            f.close()
+            file_obj = self.create_doc(filename, file_name, doc_type)
+            file_obj.count = count
+            for obj in objs:
+                obj.sync = True
+
+    @api.model
     def export_weekly_files(self):
         edi_obj = self.env["edi"]
         edis = edi_obj.search([])
@@ -334,3 +389,4 @@ class ExportFrigoEdiCli(models.TransientModel):
                     wzd.export_file_med("item.management.item.move.sync")
                     wzd.export_file_sto()
                     wzd.export_file_mef()
+                    wzd.export_file_alb("stock.picking")

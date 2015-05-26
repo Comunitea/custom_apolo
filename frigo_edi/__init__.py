@@ -26,3 +26,4 @@ from . import res_partner
 from . import item_move_sync
 from . import wizard
 from . import item
+from . import stock
