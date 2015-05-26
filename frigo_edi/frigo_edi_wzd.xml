@@ -46,11 +46,28 @@
             <field name="context">{'doc_type': 'rme'}</field>
         </record>
 
-        <record id="ir_export_item_move_sync" model="ir.values">
+        <record id="ir_export_rme_file" model="ir.values">
             <field name="name">Export Frigo RME</field>
             <field name="key2">client_action_multi</field>
             <field name="model">item.management.item</field>
             <field name="value" eval="'ir.actions.act_window,%d'%act_export_frigo_rme_file" />
+        </record>
+
+        <record id="act_export_frigo_rco_file" model="ir.actions.act_window">
+            <field name="name">Export Frigo RCO</field>
+            <field name="res_model">export.frigo.edi.file</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="export_frigo_edi_file_form"/>
+            <field name="target">new</field>
+            <field name="context">{'doc_type': 'rco'}</field>
+        </record>
+
+        <record id="ir_export_rco_file" model="ir.values">
+            <field name="name">Export Frigo RCO</field>
+            <field name="key2">client_action_multi</field>
+            <field name="model">res.partner</field>
+            <field name="value" eval="'ir.actions.act_window,%d'%act_export_frigo_rco_file" />
         </record>
 
 

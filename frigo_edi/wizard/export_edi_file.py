@@ -282,6 +282,46 @@ class ExportFrigoEdiCli(models.TransientModel):
         file_obj.count = count
 
     @api.model
+    def export_file_rco(self, active_model, objs=False):
+        mod = self.env[active_model]
+        doc_obj = self.env["edi.doc"]
+        if not objs:
+            return
+        doc_type_obj = self.env["edi.doc.type"]
+        doc_type = doc_type_obj.search([("code", '=', "rco")])[0]
+        last_rco_file = doc_obj.search([("doc_type", '=', doc_type.id)],
+                                       order="date desc", limit=1)
+        if last_rco_file:
+            count = last_rco_file.count + 1
+        else:
+            count = 1
+        tmp_name = "export_rco.txt"
+        filename = "%sRCO%s.%s" % (self.env.user.company_id.frigo_code,
+                                   str(len(objs)).zfill(4),
+                                   str(count).zfill(4))
+        templates_path = self.addons_path('frigo_edi') + os.sep + 'wizard' + \
+            os.sep + 'templates' + os.sep
+        mylookup = TemplateLookup(input_encoding='utf-8',
+                                  output_encoding='utf-8',
+                                  encoding_errors='replace')
+        tmp = Template(filename=templates_path + tmp_name,
+                       lookup=mylookup, default_filters=['decode.utf8'])
+        objs2 = []
+        for o in objs:
+            if not o.ref_history_ids:
+                raise exceptions.Warning(_("Any ref history to export in "
+                                           "%s") % o.name)
+            objs2.append(o)
+        doc = tmp.render_unicode(o=objs2, datetime=datetime,
+                                 user=self.env.user).encode('utf-8', 'replace')
+        file_name = self[0].service_id.output_path + os.sep + filename
+        f = file(file_name, 'w')
+        f.write(doc)
+        f.close()
+        file_obj = self.create_doc(filename, file_name, doc_type)
+        file_obj.count = count
+
+    @api.model
     def export_weekly_files(self):
         edi_obj = self.env["edi"]
         edis = edi_obj.search([])

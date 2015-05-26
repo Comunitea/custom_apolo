@@ -86,7 +86,7 @@ class ItemManagementItem(models.Model):
 class ItemManagementItemLicensePlateHistory(models.Model):
 
     _name = "item.management.item.license.plate.history"
-    _order = "date desc"
+    _order = "date desc, id desc"
 
     date = fields.Date("Change date", default=fields.Date.today(),
                        required=True, readonly=True)
