@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record id="view_picking_form_add_indirect" model="ir.ui.view">
+            <field name="name">stock.picking.form_add_indirect</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+                <field name="group_id" position="after">
+                    <field name="indirect"/>
+                    <field name="supplier_id"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_picking_internal_search_add_indirect" model="ir.ui.view">
+            <field name="name">stock.picking.internal.search.add_indirect</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+            <field name="arch" type="xml">
+                <filter name="done" position="after">
+                    <filter name="indirect" string="Indirect" domain="[('indirect', '=', True)]"/>
+                </filter>
+                <field name="group_id" position="after">
+                    <field name="supplier_id"/>
+                </field>
+            </field>
+        </record>
+
+    </data>
+</openerp>

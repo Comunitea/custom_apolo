@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <record id="view_order_form_inherit_add_supplier" model="ir.ui.view">
+            <field name="name">sale.order.form.sale.stock_add_supplier</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale_stock.view_order_form_inherit"/>
+            <field name="arch" type="xml">
+                <field name="warehouse_id" position="after">
+                    <field name="supplier_id"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_sales_order_filter_add_indirect" model="ir.ui.view">
+            <field name="name">sale.order.list.select.add_indirect</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+            <field name="arch" type="xml">
+                <field name="product_id" position="after">
+                    <field name="supplier_id"/>
+                </field>
+                <filter string="Done" position="after">
+                    <filter string="Indirect sales" name="indirect_sales" domain="[('supplier_id', '!=', False)]"/>
+                </filter>
+            </field>
+        </record>
+
+    </data>
+</openerp>
