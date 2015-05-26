@@ -39,7 +39,8 @@
              "data/frigo_edi_data.xml",
              "item_move_sync_view.xml",
              "item_view.xml",
-             "edi_view.xml"],
+             "edi_view.xml",
+             "partner_competence_view.xml"],
     "installable": True,
     "application": True,
 }

@@ -17,7 +17,6 @@
             <field name="key2">client_action_multi</field>
             <field name="model">res.partner.sync</field>
             <field name="value" eval="'ir.actions.act_window,%d'%act_export_frigo_cli_file" />
-            <field name="object" eval="True" />
         </record>
 
         <record id="act_export_frigo_med_file" model="ir.actions.act_window">
@@ -35,7 +34,6 @@
             <field name="key2">client_action_multi</field>
             <field name="model">item.management.item.move.sync</field>
             <field name="value" eval="'ir.actions.act_window,%d'%act_export_frigo_med_file" />
-            <field name="object" eval="True" />
         </record>
 
         <record id="act_export_frigo_rme_file" model="ir.actions.act_window">
@@ -53,7 +51,6 @@
             <field name="key2">client_action_multi</field>
             <field name="model">item.management.item</field>
             <field name="value" eval="'ir.actions.act_window,%d'%act_export_frigo_rme_file" />
-            <field name="object" eval="True" />
         </record>
 
 

@@ -11,7 +11,14 @@
                     <field name="unilever_code"/>
                     <field name="favorite"/>
                 </field>
+                <field name="category_id" position="after">
+                    <group>
+                        <field name="from_competence_id"/>
+                        <field name="to_competence_id"/>
+                    </group>
+                </field>
                 <field name="group_pickings" position="after">
+                    <field name="local_share_partner_id"/>
                     <group string="Closure Days">
                         <field name="close_days" widget="many2many_checkboxes" nolabel="1"/>
                     </group>

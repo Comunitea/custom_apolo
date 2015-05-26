@@ -107,5 +107,70 @@
             <field name="name">Indirect sales</field>
         </record>
 
+        <record id="res_partner_competence_A" model="res.partner.competence">
+            <field name="code">A</field>
+            <field name="name">Alacant</field>
+        </record>
+
+        <record id="res_partner_competence_CL" model="res.partner.competence">
+            <field name="code">CL</field>
+            <field name="name">Competidor Local</field>
+        </record>
+
+        <record id="res_partner_competence_ES" model="res.partner.competence">
+            <field name="code">ES</field>
+            <field name="name">Estiu</field>
+        </record>
+
+        <record id="res_partner_competence_EX" model="res.partner.competence">
+            <field name="code">EX</field>
+            <field name="name">Cliente Helado</field>
+        </record>
+
+        <record id="res_partner_competence_FA" model="res.partner.competence">
+            <field name="code">FA</field>
+            <field name="name">Farggi</field>
+        </record>
+
+        <record id="res_partner_competence_HD" model="res.partner.competence">
+            <field name="code">HD</field>
+            <field name="name">Haagen Dazs</field>
+        </record>
+
+        <record id="res_partner_competence_J" model="res.partner.competence">
+            <field name="code">J</field>
+            <field name="name">Jijonenca</field>
+        </record>
+
+        <record id="res_partner_competence_K" model="res.partner.competence">
+            <field name="code">K</field>
+            <field name="name">Kalise-Menorquina</field>
+        </record>
+
+        <record id="res_partner_competence_KT" model="res.partner.competence">
+            <field name="code">KT</field>
+            <field name="name">KTC</field>
+        </record>
+
+        <record id="res_partner_competence_N" model="res.partner.competence">
+            <field name="code">N</field>
+            <field name="name">Nestle</field>
+        </record>
+
+        <record id="res_partner_competence_O" model="res.partner.competence">
+            <field name="code">O</field>
+            <field name="name">Otros</field>
+        </record>
+
+        <record id="res_partner_competence_O" model="res.partner.competence">
+            <field name="code">R</field>
+            <field name="name">Royne</field>
+        </record>
+
+        <record id="res_partner_competence_O" model="res.partner.competence">
+            <field name="code">XC</field>
+            <field name="name">Cliente congelado</field>
+        </record>
+
     </data>
 </openerp>

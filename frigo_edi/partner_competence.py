@@ -18,11 +18,12 @@
 #
 ##############################################################################
 
-from . import edi
-from . import partner_sync
-from . import res_company
-from . import partner_competence
-from . import res_partner
-from . import item_move_sync
-from . import wizard
-from . import item
+from openerp import models, fields
+
+
+class ResPartnerCompetence(models.Model):
+
+    _name = "res.partner.competence"
+
+    name = fields.Char("Name", required=True)
+    code = fields.Char("Code", required=True, size=2)

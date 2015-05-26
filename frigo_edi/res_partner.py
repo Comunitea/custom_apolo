@@ -35,18 +35,29 @@ class ResPartner(models.Model):
     morning_close_time = fields.Float('Morning close time')
     afternoon_open_time = fields.Float('Afternoon open time')
     afternoon_close_time = fields.Float('Afternoon close time')
+    from_competence_id = fields.Many2one("res.partner.competence",
+                                         "From Competence",
+                                         help="Origin competitor of customer")
+    to_competence_id = fields.Many2one("res.partner.competence",
+                                       "To Competence",
+                                       help="New competitor of customer")
+    local_share_partner_id = fields.Many2one('res.partner',
+                                             'Partner local share')
+
+    _constraints = [(models.Model._check_recursion,
+                    'You cannot create recursive Partner hierarchies.',
+                    ['local_share_partner_id'])]
 
     @api.multi
     def act_active(self):
         res = super(ResPartner, self).act_active(self)
         sync_obj = self.env["res.partner.sync"]
         for partner in self:
-            part = partner.commercial_partner_id
-            if part.customer:
-                if not part.ref:
+            if partner.customer and partner.is_company:
+                if not partner.ref:
                     raise exceptions.Warning(_("Please set a reference to "
-                                               "partner %s") % part.name)
-                sync_obj.register_partner_op(part.id, 'A')
+                                               "partner %s") % partner.name)
+                sync_obj.register_partner_op(partner.id, 'A')
         return res
 
     @api.multi
@@ -54,12 +65,11 @@ class ResPartner(models.Model):
         res = super(ResPartner, self).register_again()
         sync_obj = self.env["res.partner.sync"]
         for partner in self:
-            part = partner.commercial_partner_id
-            if part.customer:
-                if not part.ref:
+            if partner.customer and partner.is_company:
+                if not partner.ref:
                     raise exceptions.Warning(_("Please set a reference to "
-                                               "partner %s") % part.name)
-                sync_obj.register_partner_op(part.id, 'A')
+                                               "partner %s") % partner.name)
+                sync_obj.register_partner_op(partner.id, 'A')
         return res
 
     @api.multi
@@ -76,9 +86,9 @@ class ResPartner(models.Model):
         res = super(ResPartner, self).write(vals)
         sync_obj = self.env["res.partner.sync"]
         for partner in self:
-            part = partner.commercial_partner_id
-            if part.customer and part.state2 == "registered":
-                sync_obj.register_partner_op(part.id, 'M')
+            if partner.customer and partner.state2 == "registered" and \
+                    partner.is_company:
+                sync_obj.register_partner_op(partner.id, 'M')
 
         return res
 

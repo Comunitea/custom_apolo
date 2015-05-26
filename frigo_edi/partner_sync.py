@@ -52,10 +52,10 @@ class ResPartnerSync(models.Model):
         limit = 3
         cont = 0
         while (cont < limit):
-            if contacts and len(contacts) >= cont:
+            if contacts and len(contacts) > cont:
                 res += contacts[cont].function and contacts[cont].\
                     function[:15].ljust(15, " ") or "".ljust(15, " ")
-                res += contacts[cont].function[:30].ljust(30, " ")
+                res += contacts[cont].name[:30].ljust(30, " ")
                 res += contacts[cont].email and contacts[cont].\
                     email[:50].ljust(50, " ") or "".ljust(50, " ")
                 res += contacts[cont].phone and contacts[cont].\
@@ -89,7 +89,7 @@ class ResPartnerSync(models.Model):
     def register_partner_op(self, partner_id, opt_type):
         exists_obj = self.search([("state", "=", "pending"),
                                   ("partner_id", "=", partner_id),
-                                  ('operation_type', '=', 'M')])
+                                  ('operation_type', '=', opt_type)])
         if exists_obj:
             exists_obj.write({'date': fields.Date.today(),
                               'user_id': self.env.user.id})
