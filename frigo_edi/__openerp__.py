@@ -33,7 +33,6 @@
     "data": ["res_partner_view.xml",
              "edi_menu.xml",
              "partner_sync_view.xml",
-             "wizard/export_edi_file_view.xml",
              "frigo_edi_wzd.xml",
              "res_company_view.xml",
              "security/ir.model.access.csv",

@@ -4,10 +4,10 @@
 
         <record id="act_export_frigo_cli_file" model="ir.actions.act_window">
             <field name="name">Export Frigo file</field>
-            <field name="res_model">export.frigo.edi.file</field>
+            <field name="res_model">edi.export.wizard</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="export_frigo_edi_file_form"/>
+            <field name="view_id" ref="depot_edi.export_edi_file_form"/>
             <field name="target">new</field>
             <field name="context">{'doc_type': 'cli'}</field>
         </record>
@@ -21,10 +21,10 @@
 
         <record id="act_export_frigo_med_file" model="ir.actions.act_window">
             <field name="name">Export Frigo file</field>
-            <field name="res_model">export.frigo.edi.file</field>
+            <field name="res_model">edi.export.wizard</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="export_frigo_edi_file_form"/>
+            <field name="view_id" ref="depot_edi.export_edi_file_form"/>
             <field name="target">new</field>
             <field name="context">{'doc_type': 'med'}</field>
         </record>
@@ -38,10 +38,10 @@
 
         <record id="act_export_frigo_rme_file" model="ir.actions.act_window">
             <field name="name">Export Frigo RME</field>
-            <field name="res_model">export.frigo.edi.file</field>
+            <field name="res_model">edi.export.wizard</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="export_frigo_edi_file_form"/>
+            <field name="view_id" ref="depot_edi.export_edi_file_form"/>
             <field name="target">new</field>
             <field name="context">{'doc_type': 'rme'}</field>
         </record>
@@ -55,10 +55,10 @@
 
         <record id="act_export_frigo_rco_file" model="ir.actions.act_window">
             <field name="name">Export Frigo RCO</field>
-            <field name="res_model">export.frigo.edi.file</field>
+            <field name="res_model">edi.export.wizard</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="export_frigo_edi_file_form"/>
+            <field name="view_id" ref="depot_edi.export_edi_file_form"/>
             <field name="target">new</field>
             <field name="context">{'doc_type': 'rco'}</field>
         </record>
@@ -72,10 +72,10 @@
 
         <record id="act_export_frigo_alb_file" model="ir.actions.act_window">
             <field name="name">Export Frigo ALB</field>
-            <field name="res_model">export.frigo.edi.file</field>
+            <field name="res_model">edi.export.wizard</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="export_frigo_edi_file_form"/>
+            <field name="view_id" ref="depot_edi.export_edi_file_form"/>
             <field name="target">new</field>
             <field name="context">{'doc_type': 'alb'}</field>
         </record>

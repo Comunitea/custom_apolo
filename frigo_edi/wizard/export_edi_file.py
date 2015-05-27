@@ -32,53 +32,28 @@ def chunks(l, n):
         yield l[i:i+n]
 
 
-class ExportFrigoEdiCli(models.TransientModel):
+class ExportEdiFile(models.TransientModel):
 
-    _name = "export.frigo.edi.file"
-
-    service_id = fields.Many2one('edi', 'Service', required=True)
-
-    @api.model
-    def create_doc(self, doc_name, file_name, doc_type, obj=False):
-        doc_objs = self.env['edi.doc'].search([('name', '=', doc_name)])
-        doc_objs.unlink()
-        f = open(file_name)
-        values = {
-            'name': doc_name,
-            'file_name': file_name.split(os.sep)[-1],
-            'state': 'export',
-            'date': fields.Datetime.now(),
-            'date_process': fields.Datetime.now(),
-            'doc_type': doc_type.id,
-            'message': f.read(),
-        }
-        f.close()
-        file_obj = self.env['edi.doc'].create(values)
-        if obj:
-            obj.write({'document_id': file_obj.id})
-        return file_obj
-
-    @staticmethod
-    def addons_path(path):
-        report_module = path.split(os.path.sep)[0]
-        for addons_path in tools.config['addons_path'].split(','):
-            if os.path.lexists(addons_path+os.path.sep+report_module):
-                return os.path.normpath(addons_path+os.path.sep+path)
+    _inherit = "edi.export.wizard"
 
     @api.multi
-    def export_file(self):
-        active_model = self.env.context["active_model"]
-        active_ids = self.env.context["active_ids"]
-        if active_ids:
-            objs = self.env[active_model].browse(active_ids)
+    def export_files(self):
+        if self.env.context.get("doc_type", False):
+            active_model = self.env.context["active_model"]
+            active_ids = self.env.context["active_ids"]
+            if active_ids:
+                objs = self.env[active_model].browse(active_ids)
+            else:
+                objs = False
+            doc_type = self.env.context["doc_type"]
+            func_name = "self.export_file_" + doc_type + \
+                "(active_model, objs)"
+            exec_dic = locals()
+            exec_dic["active_model"] = active_model
+            exec_dic["active_objs"] = objs
+            eval(func_name, exec_dic)
         else:
-            objs = False
-        doc_type = self.env.context["doc_type"]
-        func_name = "self.export_file_" + doc_type + "(active_model, objs)"
-        exec_dic = locals()
-        exec_dic["active_model"] = active_model
-        exec_dic["active_objs"] = objs
-        eval(func_name, exec_dic)
+            super(ExportEdiFile, self).export_files()
 
     @api.model
     def export_file_cli(self, active_model, objs=False):
@@ -383,10 +358,11 @@ class ExportFrigoEdiCli(models.TransientModel):
         for service in edis:
             wzd = False
             for dtype in service.doc_type_ids:
-                if dtype.code in ["cli"]:
+                if dtype.code in ["cli", "med", "sto", "mef", "alb"]:
                     wzd = self.create({'service_id': service.id})
                     wzd.export_file_cli("res.partner.sync")
                     wzd.export_file_med("item.management.item.move.sync")
                     wzd.export_file_sto()
                     wzd.export_file_mef()
                     wzd.export_file_alb("stock.picking")
+                    break

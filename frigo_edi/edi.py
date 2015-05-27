@@ -34,3 +34,32 @@ class Edi(models.Model):
 
     related_partner_id = fields.Many2one("res.partner", "Related partner",
                                          domain=[('is_company', '=', True)])
+
+
+    @api.model
+    def _get_file_type(self, filename):
+        ftype = super(Edi, self)._get_file_type(filename)
+        if not ftype:
+            doc_type_obj = self.env['edi.doc.type']
+            if 'PRO' in filename:
+                ftype = doc_type_obj.search([('code', '=', 'pro')])[0]
+            elif 'ABO' in filename:
+                ftype = doc_type_obj.search([('code', '=', 'abo')])[0]
+            elif 'TUR' in filename:
+                ftype = doc_type_obj.search([('code', '=', 'tur')])[0]
+            elif 'ALC' in filename:
+                ftype = doc_type_obj.search([('code', '=', 'alc')])[0]
+            elif 'CLP' in filename:
+                ftype = doc_type_obj.search([('code', '=', 'clp')])[0]
+            elif 'LPR' in filename:
+                ftype = doc_type_obj.search([('code', '=', 'lpr')])[0]
+            elif 'TOR' in filename:
+                ftype = doc_type_obj.search([('code', '=', 'tor')])[0]
+        return ftype
+
+    @api.model
+    def _get_file_name(self, filename, type):
+        if type.code in ('PRO', 'ABO', 'TUR', 'ALC', 'CLP', 'LPR', 'TOR'):
+            return filename
+        else:
+            return super(Edi, self)._get_file_name(filename, type)
