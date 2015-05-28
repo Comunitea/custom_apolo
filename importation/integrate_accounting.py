@@ -194,6 +194,8 @@ class integrate_accounting(object):
                             else:
                                 posted = False
                                 self.unlink("account.move", move_ids[0])
+                        else:
+                            posted = False
                         move_vals = {
                             'ref': row['Concepto'],
                             'journal_id': journal_id[0],
