@@ -18,31 +18,20 @@
 #
 ##############################################################################
 
-{
-    "name": "Frigo EDI",
-    "version": "1.0",
-    "author": "Comunitea",
-    "category": "EDI",
-    "website": "www.comunitea.com",
-    "description": """* This module implements Frigo's EDI""",
-    "depends": ["depot_edi",
-                "midban_partner",
-                "item_management",
-                "stock",
-                "indirect_sale"],
-    "data": ["res_partner_view.xml",
-             "edi_menu.xml",
-             "partner_sync_view.xml",
-             "frigo_edi_wzd.xml",
-             "res_company_view.xml",
-             "security/ir.model.access.csv",
-             "data/frigo_edi_data.xml",
-             "item_move_sync_view.xml",
-             "item_view.xml",
-             "edi_view.xml",
-             "partner_competence_view.xml",
-             "stock_view.xml",
-             "product_unilever_family_view.xml"],
-    "installable": True,
-    "application": True,
-}
+from openerp import models, fields
+
+
+class ProductUnileverFamily(models.Model):
+
+    _name = "product.unilever.family"
+
+    name = fields.Char("Name", size=30, required=True)
+    code = fields.Char("Code", size=6, required=True)
+
+
+class ProductTemplate(models.Model):
+
+    _inherit = "product.template"
+
+    unilever_family_id = fields.Many2one("product.unilever.family",
+                                         "Unilever family")
