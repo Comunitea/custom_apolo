@@ -27,3 +27,4 @@ from . import item_move_sync
 from . import wizard
 from . import item
 from . import stock
+from . import product_unilever_family
