@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_rappel_type,access_rappel_type,model_rappel_type,base.group_user,1,1,1,1
+access_rappel,access_rappel,model_rappel,base.group_user,1,1,1,1
+access_rappel_section,access_rappel_section,model_rappel_section,base.group_user,1,1,1,1
+access_rappel_consumptions,access_rappel_consumptions,model_rappel_consumption,base.group_user,1,1,1,1
+access_rappel_calculated,access_rappel_calculated,model_rappel_calculated,base.group_user,1,1,1,1
+access_rappel_deal,access_rappel_deal,model_rappel_deal,base.group_user,1,1,1,1
+access_rappel_external_consumption,access_rappel_external_consumption,model_rappel_external_consumption,base.group_user,1,1,1,1
+access_external_consumption,access_external_consumption,model_external_consumption,base.group_user,1,1,1,1
+access_invoice_calculated_rappel,access_invoice_calculated_rappel,model_invoice_calculated_rappel,base.group_user,1,1,1,1

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+
+        <record id="invoice_joint_promotion_form" model="ir.ui.view">
+            <field name="name">invoice.joint.promotion.form</field>
+            <field name="model">invoice.joint.promotion</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Invoice joint promotion">
+                    <group>
+                        <field name="date_start"/>
+                        <field name="date_end"/>
+                        <field name="invoice_type"/>
+                    </group>
+                    <button string="Invoice" name="invoice" type="object"
+                        icon="gtk-ok"/>
+                    <button string="Cancel" special="cancel" icon="gtk-cancel"/>
+                </form>
+            </field>
+        </record>
+
+        <act_window name="Invoice promotion"
+            res_model="invoice.joint.promotion"
+            src_model="sale.joint.promotion"
+            view_id="invoice_joint_promotion_form"
+            view_mode="form"
+            target="new"
+            key2="client_action_multi"
+            id="action_invoice_joint_promotion"/>
+
+    </data>
+</openerp>
+

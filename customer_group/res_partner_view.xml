@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="res_partner_form_company" model="ir.ui.view">
+            <field name="name">res.partner.form</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <field name="parent_id" position="attributes">
+                    <attribute name="attrs"></attribute>
+                </field>
+                <page string="Contacts" position="attributes">
+                    <attribute name="attrs"></attribute>
+                </page>
+            </field>
+        </record>
+
+    </data>
+</openerp>

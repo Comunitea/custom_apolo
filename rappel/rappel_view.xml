@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<openerp>
+    <data>
+        <record id="view_rappel_filter" model="ir.ui.view">
+            <field name="name">rappel.filter</field>
+            <field name="model">rappel</field>
+            <field name="arch" type="xml">
+                <search string="Search Rappel">
+                    <field name="name"/>
+                    <field name="type_id"/>
+                    <field name="date_start"/>
+                    <field name="date_stop"/>
+                </search>
+            </field>
+        </record>
+        <record id="view_rappel_tree" model="ir.ui.view">
+            <field name="name">rappel.tree</field>
+            <field name="model">rappel</field>
+            <field name="arch" type="xml">
+                <tree string="Rappel">
+                    <field name="name"/>
+                    <field name="type_id"/>
+                    <field name="periodicity"/>
+                    <field name="calc_mode"/>
+                    <field name="date_start"/>
+                    <field name="date_stop"/>
+                </tree>
+            </field>
+        </record>
+        <record id="rappel_form" model="ir.ui.view">
+            <field name="name">rappel.form</field>
+            <field name="model">rappel</field>
+            <field name="arch" type="xml">
+                <form string="Rappel" version="7.0">
+                   <header>
+                   </header>
+                   <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Concept..." />
+                            </h1>
+                            <h2>
+                                <field name="type_id" placeholder="Rappel type..."/>
+                            </h2>
+                        </div>
+                        <group>
+                            <group string="Dates">
+                                <field name="date_start" placeholder="01/01/2014"/>
+                                <field name="date_stop" placeholder="31/01/2014"/>
+                            </group>
+                            <group string="Other data">
+                                <field name="periodicity"/>
+                                <field name="global_application"/>
+                                <field name="product_id" attrs="{'invisible':[('global_application','=', True)]}"/>
+                                <field name="product_categ_id" attrs="{'invisible':[('global_application','=', True)]}"/>
+                            </group>
+                       </group>
+                        <notebook>
+                            <page string="Calc Configuration">
+                                <group>
+                                    <field name="calc_amount" string="Percent/Quantity"/>
+                                    <field name="calc_mode" string="Fixed/Variable"/>
+                                    <field name="calc_type" string="€/Uom" attrs="{'invisible':[('calc_mode','!=','variable')]}"/>
+                                    <field name="uom_id" attrs="{'invisible':[('calc_type','!=','qty')], 'required':[('calc_type','==','qty')]}"/>
+                                    <field name="fix_qty" attrs="{'invisible':[('calc_mode','!=','fixed')]}" string="Fix"/>
+                                </group>
+                                <field name="sections" attrs="{'invisible':[('calc_mode','!=','variable')]}" colspan="4" nolabel="1">
+                                    <tree string="By sections" editable="top">
+                                        <field name="rappel_from"/>
+                                        <field name="rappel_until"/>
+                                        <field name="percent"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Customers">
+                                <field name="customer_ids" nolabel="1" colspan="4"
+                                    domain="[('customer', '=', True)]"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+      <record id="action_rappel_sales" model="ir.actions.act_window">
+            <field name="name">Rappel</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">rappel</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{"default_partner_type":"sales", "search_default_partner_type":"sales"}</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to create a new rappel.
+              </p>
+            </field>
+        </record>
+        <record id="action_rappel_purchases" model="ir.actions.act_window">
+            <field name="name">Rappel</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">rappel</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{"default_partner_type":"purchases", "search_default_partner_type":"purchases"}</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to create a new rappel.
+              </p>
+            </field>
+        </record>
+
+
+        <record id="view_rappel_calculated_tree" model="ir.ui.view">
+            <field name="name">rappel.calculated.tree</field>
+            <field name="model">rappel.calculated</field>
+            <field name="arch" type="xml">
+                <tree string="Rappel" create="0" edit="0">
+                    <field name="customer_id"/>
+                    <field name="rappel_id"/>
+                    <field name="period"/>
+                    <field name="quantity"/>
+                    <field name="invoiced"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="rappel_calculated_form" model="ir.ui.view">
+            <field name="name">rappel.calculated.form</field>
+            <field name="model">rappel.calculated</field>
+            <field name="arch" type="xml">
+                <form string="Rappel calculated" version="7.0">
+                   <header>
+                   </header>
+                   <sheet>
+                       <group>
+                            <group>
+                               <field name="customer_id" readonly="1"/>
+                               <field name="rappel_id" readonly="1"/>
+                            </group>
+                            <group>
+                               <field name="period" readonly="1"/>
+                               <field name="quantity" readonly="1"/>
+                               <field name="invoiced" readonly="1"/>
+                               <field name="invoice_id" readonly="1"/>
+                            </group>
+                        </group>
+                   </sheet>
+                </form>
+            </field>
+        </record>
+
+        <act_window id="invoice_rappel" name="Invoice rappel"
+            src_model="rappel.calculated" res_model="rappel.invoice.wizard"
+            target="new" multi="True" view_id="invoice_rappel_wizard_view" />
+
+        <record model="ir.actions.act_window" id="action_rappel_calculated">
+            <field name="name">Rappel calculated</field>
+            <field name="res_model">rappel.calculated</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_rappel_calculated_tree"/>
+        </record>
+
+    </data>
+</openerp>

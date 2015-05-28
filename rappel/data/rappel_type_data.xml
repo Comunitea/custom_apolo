@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<openerp>
+    <data noupdate="1">
+        <record id="type1" model="rappel.type">
+            <field name="name">Nuevas referencias fresco</field>
+            <field name="code">NRF</field>
+        </record>
+        <record id="type2" model="rappel.type">
+            <field name="name">Nuevas referencias congelado</field>
+            <field name="code">NRC</field>
+        </record>
+        <record id="type3" model="rappel.type">
+            <field name="name">Nuevas referencias seca</field>
+            <field name="code">NRS</field>
+        </record>
+        <record id="type4" model="rappel.type">
+            <field name="name">Nuevas referencias refrigerado</field>
+            <field name="code">NRR</field>
+        </record>
+        <record id="type5" model="rappel.type">
+            <field name="name">Publicidad</field>
+            <field name="code">PUBLI</field>
+        </record>
+        <record id="type6" model="rappel.type">
+            <field name="name">Catálogo</field>
+            <field name="code">CAT</field>
+        </record>
+    </data>
+</openerp>
