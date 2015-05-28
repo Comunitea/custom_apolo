@@ -31,16 +31,16 @@ class account_invoice_cesce(models.Model):
     def _get_payment_mode(self):
         self.payment_mode = self.partner_id.customer_payment_mode.name
 
-    partner_id = fields.Many2one('res.partner', 'Partner')
-    reference = fields.Char('Partner reference')
-    name = fields.Char('Partner name')
-    nif = fields.Char('NIF')
-    street = fields.Char('Street')
-    city = fields.Char('City')
-    zip = fields.Char('ZIP')
-    amount = fields.Float('Amount')
-    invoice_year = fields.Char('Invoice year')
-    payment_mode = fields.Char('Payment mode', compute='_get_payment_mode')
+    partner_id = fields.Many2one('res.partner', 'Partner', readonly=True)
+    reference = fields.Char('Partner reference', readonly=True)
+    name = fields.Char('Partner name', readonly=True)
+    nif = fields.Char('NIF', readonly=True)
+    street = fields.Char('Street', readonly=True)
+    city = fields.Char('City', readonly=True)
+    zip = fields.Char('ZIP', readonly=True)
+    amount = fields.Float('Amount', readonly=True)
+    invoice_year = fields.Char('Invoice year', readonly=True)
+    payment_mode = fields.Char('Payment mode', compute='_get_payment_mode', readonly=True)
 
     def init(self, cr):
         tools.drop_view_if_exists(cr, self._table)
