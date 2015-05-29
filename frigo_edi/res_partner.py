@@ -43,6 +43,7 @@ class ResPartner(models.Model):
                                        help="New competitor of customer")
     local_share_partner_id = fields.Many2one('res.partner',
                                              'Partner local share')
+    indirect_customer = fields.Boolean("Indirect customer")
 
     _constraints = [(models.Model._check_recursion,
                     'You cannot create recursive Partner hierarchies.',
@@ -50,10 +51,11 @@ class ResPartner(models.Model):
 
     @api.multi
     def act_active(self):
-        res = super(ResPartner, self).act_active(self)
+        res = super(ResPartner, self).act_active()
         sync_obj = self.env["res.partner.sync"]
         for partner in self:
-            if partner.customer and partner.is_company:
+            if partner.customer and partner.is_company and \
+                    not partner.indirect_customer:
                 if not partner.ref:
                     raise exceptions.Warning(_("Please set a reference to "
                                                "partner %s") % partner.name)
@@ -65,7 +67,8 @@ class ResPartner(models.Model):
         res = super(ResPartner, self).register_again()
         sync_obj = self.env["res.partner.sync"]
         for partner in self:
-            if partner.customer and partner.is_company:
+            if partner.customer and partner.is_company and \
+                    not partner.indirect_customer:
                 if not partner.ref:
                     raise exceptions.Warning(_("Please set a reference to "
                                                "partner %s") % partner.name)
@@ -76,7 +79,7 @@ class ResPartner(models.Model):
     def unlink(self):
         for partner in self:
             if partner.customer and partner.state2 == "registered":
-                raise exceptions.Warning(_("Cannot delete partener %s because "
+                raise exceptions.Warning(_("Cannot delete partner %s because "
                                            "is registered, please unregister "
                                            "it") % partner.name)
         return super(ResPartner, self).unlink()
@@ -87,7 +90,7 @@ class ResPartner(models.Model):
         sync_obj = self.env["res.partner.sync"]
         for partner in self:
             if partner.customer and partner.state2 == "registered" and \
-                    partner.is_company:
+                    partner.is_company and not partner.indirect_customer:
                 sync_obj.register_partner_op(partner.id, 'M')
 
         return res
@@ -104,5 +107,10 @@ class ProcessUnregisterPartner(models.TransientModel):
         partner_obj = self.env["res.partner"]
         sync_obj = self.env["res.partner.sync"]
         for partner in partner_obj.browse(partner_ids):
-            sync_obj.register_partner_op(partner.id, 'B')
+            if partner.customer and partner.is_company and \
+                    not partner.indirect_customer:
+                if not partner.ref:
+                    raise exceptions.Warning(_("Please set a reference to "
+                                               "partner %s") % partner.name)
+                sync_obj.register_partner_op(partner.id, 'B')
         return res
