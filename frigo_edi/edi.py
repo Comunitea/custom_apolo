@@ -18,11 +18,12 @@
 #
 ##############################################################################
 
-from openerp import models, fields, api, _
+from openerp import models, fields, api, _, workflow
 import os
 from openerp.addons.depot_edi.wizard.edi_logging import logger
 import codecs
 from openerp.addons.product.product import check_ean
+from datetime import datetime
 
 log = logger("frigo_edi")
 
@@ -82,7 +83,7 @@ class Edi(models.Model):
             search([('name', 'child_of', [self[0].related_partner_id.id])])
         supplier_product_ids = [x.id for x in supplier_products]
 
-        purchase_uom = uom_obj.search(['|',('name', '=', "Caja(s)"),
+        purchase_uom = uom_obj.search(['|', ('name', '=', "Caja(s)"),
                                        ('name', '=', 'Box(es)')])
         purchase_uom = purchase_uom[0]
 
@@ -203,6 +204,91 @@ class Edi(models.Model):
         return
 
     @api.model
+    def parse_indirect_customers_file(self, file_path, doc):
+        f = codecs.open(file_path, "r", "ISO-8859-1", 'ignore')
+        partner_obj = self.env["res.partner"]
+        partners_to_activate = []
+        for line in f:
+            parts = partner_obj.search([('indirect_customer', '=', True),
+                                        ('ref', '=', str(int(line[9:19]))),
+                                        '|', ('active', '=', True),
+                                        ('active', '=', False)])
+            vat = line[119:134].strip()
+            valid = False
+            if vat:
+                valid = partner_obj.simple_vat_check("es", vat)
+                if not valid:
+                    log.error("Invalid vat %s for line %s" % (vat, line))
+            date = datetime.strftime(datetime.strptime(line[1:9], "%Y%m%d"),
+                                     "%Y-%m-%d")
+
+            if parts:
+                part = parts[0]
+                part.name = line[19:49].strip()
+                part.street = line[49:79].strip()
+                part.city = line[79:109].strip()
+                part.zip = line[109:119].strip()
+                part.phone = line[135:150].strip()
+                part.fax = line[151:166].strip()
+                if valid:
+                    part.vat = "ES" + vat
+                if line[134] == "B":
+                    part.state2 = "unregistered"
+                    part.comment = (part.comment or "") + \
+                        "\nFecha de baja: " + str(date)
+                else:
+                    part.date = date
+                    if part.state2 != "registered" and valid:
+                        partners_to_activate.append(part)
+            else:
+                create_vals = {"name": line[19:49].strip(),
+                               "ref": str(int(line[9:19])),
+                               "street": line[49:79].strip(),
+                               "city": line[79:109].strip(),
+                               "zip": line[109:119].strip(),
+                               "phone": line[135:151].strip(),
+                               "fax": line[151:167].strip(),
+                               "is_company": True,
+                               "customer": True,
+                               "indirect_customer": True}
+                if valid:
+                    create_vals['vat'] = "ES" + vat
+                if line[134] == "B":
+                    create_vals["state2"] = "unregistered"
+                    create_vals["comment"] = "Fecha de baja: " + str(date)
+                else:
+                    create_vals["date"] = date
+                part = partner_obj.create(create_vals)
+                if line[134] != "B" and valid:
+                    partners_to_activate.append(part)
+
+            if int(line[167:177]) and int(line[167:177]) != int(line[9:19]):
+                parent_part = partner_obj.search([('indirect_customer', '=',
+                                                   True),
+                                                  ('ref', '=',
+                                                   str(int(line[167:177]))),
+                                                  '|', ('active', '=', True),
+                                                  ('active', '=', False)])
+                if parent_part:
+                    part.parent_id = parent_part[0].id
+                else:
+                    parent = partner_obj.\
+                        create({"name": line[177:207].strip(),
+                                "ref": str(int(line[167:177])),
+                                "is_company": True,
+                                "customer": True})
+                    part.parent_id = parent.id
+        partners_to_activate = list(set(partners_to_activate))
+        for part in partners_to_activate:
+            part.signal_workflow("logic_validated")
+            part.signal_workflow("commercial_validated")
+            part.signal_workflow("active")
+        doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
+        self.make_backup(file_path, doc.file_name)
+        os.remove(file_path)
+        return
+
+    @api.model
     def process_files(self, path):
         """
         Search all edi docs in error or draft state and process it depending
@@ -222,6 +308,9 @@ class Edi(models.Model):
                 file_path = path + os.sep + doc.file_name
                 if doc.doc_type.code == 'pro':
                     service.parse_products_file(file_path, doc)
+                    process = True
+                elif doc.doc_type.code == 'clp':
+                    service.parse_indirect_customers_file(file_path, doc)
                     process = True
                 if process:
                     doc.write({'errors': log.get_errors()})
