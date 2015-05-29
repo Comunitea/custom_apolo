@@ -79,7 +79,7 @@ class ResPartner(models.Model):
     def unlink(self):
         for partner in self:
             if partner.customer and partner.state2 == "registered":
-                raise exceptions.Warning(_("Cannot delete partener %s because "
+                raise exceptions.Warning(_("Cannot delete partner %s because "
                                            "is registered, please unregister "
                                            "it") % partner.name)
         return super(ResPartner, self).unlink()

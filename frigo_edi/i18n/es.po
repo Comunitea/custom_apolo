@@ -1,0 +1,502 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#       * frigo_edi
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-05-29 09:17+0000\n"
+"PO-Revision-Date: 2015-05-29 09:17+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: frigo_edi
+#: code:addons/frigo_edi/edi.py:303
+#, python-format
+msgid "%s: File not found in folder. File: %s"
+msgstr "%s: Fichero no encontrado en la carpeta. Fichero: %s"
+
+#. module: frigo_edi
+#: field:res.partner,afternoon_close_time:0
+msgid "Afternoon close time"
+msgstr "Horario cierre tarde"
+
+#. module: frigo_edi
+#: field:res.partner,afternoon_open_time:0
+msgid "Afternoon open time"
+msgstr "Horario apertura tarde"
+
+#. module: frigo_edi
+#: code:addons/frigo_edi/wizard/export_edi_file.py:246
+#, python-format
+msgid "Any license history to export in %s"
+msgstr "Ningún cambio de matrícula para exportar en %s"
+
+#. module: frigo_edi
+#: code:addons/frigo_edi/wizard/export_edi_file.py:285
+#, python-format
+msgid "Any ref history to export in %s"
+msgstr "Ninguna recodificación para exportar en %s"
+
+#. module: frigo_edi
+#: code:addons/frigo_edi/res_partner.py:82
+#, python-format
+msgid "Cannot delete partner %s because is registered, please unregister it"
+msgstr "No puede borrar la empresa %s porque está registrada, por favor desregístrela."
+
+#. module: frigo_edi
+#: code:addons/frigo_edi/item.py:84
+#, python-format
+msgid "Cannot delete this item %s because it is synced with Frigo"
+msgstr "No puede borrar este medio %s porque está sincronizado con Frigo"
+
+#. module: frigo_edi
+#: code:addons/frigo_edi/item.py:53
+#, python-format
+msgid "Cannot desynchronize this item %s because it is synced with Frigo yet"
+msgstr "No puede desincronizar este medio %s porque ya está sincronizado con Frigo"
+
+#. module: frigo_edi
+#: help:item.management.item,to_sync:0
+msgid "Check it to sync moves with Frigo"
+msgstr "Márquelo para sincronizar movimientos con Frigo"
+
+#. module: frigo_edi
+#: view:res.partner:frigo_edi.midban_view_partner_form_add_frigo_fields
+msgid "Closure Days"
+msgstr "Días cierre"
+
+#. module: frigo_edi
+#: field:res.partner,close_days:0
+msgid "Closure days"
+msgstr "Días cierre"
+
+#. module: frigo_edi
+#: field:product.unilever.family,code:0
+#: field:res.partner.competence,code:0
+msgid "Code"
+msgstr "Código"
+
+#. module: frigo_edi
+#: model:ir.model,name:frigo_edi.model_res_company
+msgid "Companies"
+msgstr "Compañías"
+
+#. module: frigo_edi
+#: view:res.partner.competence:frigo_edi.res_partner_competence_form
+msgid "Competence"
+msgstr "Competencia"
+
+#. module: frigo_edi
+#: model:ir.actions.act_window,name:frigo_edi.action_res_partner_competence
+#: model:ir.ui.menu,name:frigo_edi.menu_res_partner_competence
+#: view:res.partner.competence:frigo_edi.res_partner_competence_filter
+#: view:res.partner.competence:frigo_edi.res_partner_competence_tree
+msgid "Competences"
+msgstr "Competencias"
+
+#. module: frigo_edi
+#: selection:item.management.item.move.sync,operation_type:0
+msgid "Concession change"
+msgstr "Cambio concesión"
+
+#. module: frigo_edi
+#: field:item.management.item.move.sync,contract_id:0
+msgid "Contract"
+msgstr "Contrato"
+
+#. module: frigo_edi
+#: field:item.management.item.move.sync,create_uid:0
+#: field:product.unilever.family,create_uid:0
+#: field:res.partner.competence,create_uid:0
+#: field:res.partner.sync,create_uid:0
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: frigo_edi
+#: field:item.management.item.move.sync,create_date:0
+#: field:product.unilever.family,create_date:0
+#: field:res.partner.competence,create_date:0
+#: field:res.partner.sync,create_date:0
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: frigo_edi
+#: field:item.management.item.move.sync,customer_id:0
+msgid "Customer"
+msgstr "Cliente"
+
+#. module: frigo_edi
+#: selection:item.management.item.move.sync,operation_type:0
+msgid "Customer lent"
+msgstr "Prestado cliente"
+
+#. module: frigo_edi
+#: selection:item.management.item.move.sync,operation_type:0
+msgid "Customer removed"
+msgstr "Retirado cliente"
+
+#. module: frigo_edi
+#: field:item.management.item.move.sync,date:0
+#: field:res.partner.sync,date:0
+msgid "Date"
+msgstr "Fecha"
+
+#. module: frigo_edi
+#: selection:res.partner.sync,operation_type:0
+msgid "Delete"
+msgstr "Borrado"
+
+#. module: frigo_edi
+#: model:ir.model,name:frigo_edi.model_edi_doc
+msgid "EDI document"
+msgstr "Documento EDI"
+
+#. module: frigo_edi
+#: model:ir.model,name:frigo_edi.model_item_management_contract
+#: model:ir.model,name:frigo_edi.model_item_management_item
+msgid "Email Thread"
+msgstr "Hilo de mensajes"
+
+#. module: frigo_edi
+#: model:ir.actions.act_window,name:frigo_edi.act_export_frigo_alb_file
+msgid "Export Frigo ALB"
+msgstr "Exportar ALB Frigo"
+
+#. module: frigo_edi
+#: model:ir.actions.act_window,name:frigo_edi.act_export_frigo_rco_file
+msgid "Export Frigo RCO"
+msgstr "Exportar RCO Frigo"
+
+#. module: frigo_edi
+#: model:ir.actions.act_window,name:frigo_edi.act_export_frigo_rme_file
+msgid "Export Frigo RME"
+msgstr "Exportar RME Frigo"
+
+#. module: frigo_edi
+#: model:ir.actions.act_window,name:frigo_edi.act_export_frigo_cli_file
+#: model:ir.actions.act_window,name:frigo_edi.act_export_frigo_med_file
+msgid "Export Frigo file"
+msgstr "Exportar fichero Frigo"
+
+#. module: frigo_edi
+#: field:res.partner,favorite:0
+msgid "Favorite"
+msgstr "Favorito"
+
+#. module: frigo_edi
+#: model:ir.ui.menu,name:frigo_edi.menu_edi_frigo
+msgid "Frigo"
+msgstr "Frigo"
+
+#. module: frigo_edi
+#: field:res.company,frigo_code:0
+msgid "Frigo code"
+msgstr "Código Frigo"
+
+#. module: frigo_edi
+#: field:res.partner,from_competence_id:0
+msgid "From Competence"
+msgstr "Competencia previa"
+
+#. module: frigo_edi
+#: field:res.partner,high_competition:0
+msgid "High competition"
+msgstr "Alta competencia"
+
+#. module: frigo_edi
+#: field:item.management.item,license_history_ids:0
+msgid "History"
+msgstr "Histórico"
+
+#. module: frigo_edi
+#: field:item.management.item.move.sync,id:0
+#: field:product.unilever.family,id:0
+#: field:res.partner.competence,id:0
+#: field:res.partner.sync,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: frigo_edi
+#: selection:item.management.item.move.sync,operation_type:0
+msgid "Inactive"
+msgstr "Inactivo"
+
+#. module: frigo_edi
+#: field:item.management.item.move.sync,inactive_motive:0
+msgid "Inactive motive"
+msgstr "Motivo inactividad"
+
+#. module: frigo_edi
+#: model:ir.actions.act_window,name:frigo_edi.action_indirect_customer_form
+msgid "Indirect Customers"
+msgstr "Clientes indirectos"
+
+#. module: frigo_edi
+#: field:res.partner,indirect_customer:0
+msgid "Indirect customer"
+msgstr "Cliente indirecto"
+
+#. module: frigo_edi
+#: model:ir.ui.menu,name:frigo_edi.indirect_customer_menu
+msgid "Indirect customers"
+msgstr "Clientes indirectos"
+
+#. module: frigo_edi
+#: view:stock.picking:frigo_edi.view_picking_internal_search_add_sync
+msgid "Indirect pending to Sync"
+msgstr "Indirectos pendientes de sincronizar"
+
+#. module: frigo_edi
+#: view:item.management.item.move.sync:frigo_edi.item_move_sync_filter
+#: field:item.management.item.move.sync,item_id:0
+msgid "Item"
+msgstr "Medio"
+
+#. module: frigo_edi
+#: view:item.management.item.move.sync:frigo_edi.item_move_sync_form
+msgid "Item move sync"
+msgstr "Sinc. movimientos medios"
+
+#. module: frigo_edi
+#: model:ir.actions.act_window,name:frigo_edi.action_item_move_sync
+#: model:ir.ui.menu,name:frigo_edi.menu_frigo_med
+#: view:item.management.item.move.sync:frigo_edi.item_move_sync_filter
+#: view:item.management.item.move.sync:frigo_edi.item_move_sync_tree
+msgid "Item moves syncs"
+msgstr "Sinc. movimientos medios"
+
+#. module: frigo_edi
+#: field:item.management.item.move.sync,write_uid:0
+#: field:product.unilever.family,write_uid:0
+#: field:res.partner.competence,write_uid:0
+#: field:res.partner.sync,write_uid:0
+msgid "Last Updated by"
+msgstr "Últ. actualización por"
+
+#. module: frigo_edi
+#: field:item.management.item.move.sync,write_date:0
+#: field:product.unilever.family,write_date:0
+#: field:res.partner.competence,write_date:0
+#: field:res.partner.sync,write_date:0
+msgid "Last Updated on"
+msgstr "Últ. actualización el"
+
+#. module: frigo_edi
+#: selection:item.management.item.move.sync,inactive_motive:0
+msgid "Loss"
+msgstr "Pérdida"
+
+#. module: frigo_edi
+#: field:res.partner,morning_close_time:0
+msgid "Morning close time"
+msgstr "Horario cierre mañana"
+
+#. module: frigo_edi
+#: field:res.partner,morning_open_time:0
+msgid "Morning open time"
+msgstr "Horario apertura mañana"
+
+#. module: frigo_edi
+#: field:product.unilever.family,name:0
+#: field:res.partner.competence,name:0
+msgid "Name"
+msgstr "Nombre"
+
+#. module: frigo_edi
+#: selection:item.management.item.move.sync,operation_type:0
+#: selection:res.partner.sync,operation_type:0
+msgid "New"
+msgstr "Nuevo"
+
+#. module: frigo_edi
+#: help:res.partner,to_competence_id:0
+msgid "New competitor of customer"
+msgstr "Nuevo competencia en cliente"
+
+#. module: frigo_edi
+#: field:item.management.item.move.sync,operation_type:0
+#: field:res.partner.sync,operation_type:0
+msgid "Operation type"
+msgstr "Tipo operación"
+
+#. module: frigo_edi
+#: help:res.partner,from_competence_id:0
+msgid "Origin competitor of customer"
+msgstr "Competencia anterior en cliente"
+
+#. module: frigo_edi
+#: model:ir.model,name:frigo_edi.model_res_partner
+#: view:res.partner.sync:frigo_edi.res_partner_sync_filter
+#: field:res.partner.sync,partner_id:0
+msgid "Partner"
+msgstr "Empresa"
+
+#. module: frigo_edi
+#: field:res.partner,local_share_partner_id:0
+msgid "Partner local share"
+msgstr "Empresa local compartido"
+
+#. module: frigo_edi
+#: view:res.partner.sync:frigo_edi.res_partner_sync_form
+msgid "Partner sync"
+msgstr "Sinc. cliente"
+
+#. module: frigo_edi
+#: model:ir.actions.act_window,name:frigo_edi.action_res_partner_sync
+#: model:ir.ui.menu,name:frigo_edi.menu_frigo_cli
+#: view:res.partner.sync:frigo_edi.res_partner_sync_filter
+#: view:res.partner.sync:frigo_edi.res_partner_sync_tree
+msgid "Partner syncs"
+msgstr "Sinc. clientes"
+
+#. module: frigo_edi
+#: selection:item.management.item.move.sync,state:0
+#: selection:res.partner.sync,state:0
+msgid "Pending"
+msgstr "Pendiente"
+
+#. module: frigo_edi
+#: code:addons/frigo_edi/wizard/export_edi_file.py:321
+#, python-format
+msgid "Picking %s isn't an indirect sale"
+msgstr "El albarán %s no es una venta indirecta"
+
+#. module: frigo_edi
+#: code:addons/frigo_edi/wizard/export_edi_file.py:324
+#, python-format
+msgid "Picking %s isn't in done state"
+msgstr "El albarán %s no está realizado"
+
+#. module: frigo_edi
+#: model:ir.model,name:frigo_edi.model_stock_picking
+msgid "Picking List"
+msgstr "Albarán"
+
+#. module: frigo_edi
+#: code:addons/frigo_edi/res_partner.py:60
+#: code:addons/frigo_edi/res_partner.py:73
+#: code:addons/frigo_edi/res_partner.py:113
+#, python-format
+msgid "Please set a reference to partner %s"
+msgstr "Por favor, asigne una referencia a la empresa %s"
+
+#. module: frigo_edi
+#: model:ir.model,name:frigo_edi.model_product_template
+msgid "Product Template"
+msgstr "Plantilla de producto"
+
+#. module: frigo_edi
+#: model:ir.model,name:frigo_edi.model_edi
+msgid "Provides general functions to impor edi files"
+msgstr "Provee funciones generales para importar ficheros edi"
+
+#. module: frigo_edi
+#: selection:item.management.item.move.sync,operation_type:0
+msgid "Recovered"
+msgstr "Recuperado"
+
+#. module: frigo_edi
+#: field:edi,related_partner_id:0
+msgid "Related partner"
+msgstr "Empresa relacionada"
+
+#. module: frigo_edi
+#: selection:item.management.item.move.sync,inactive_motive:0
+msgid "Scrapping"
+msgstr "Desguace"
+
+#. module: frigo_edi
+#: field:edi.doc,count:0
+msgid "Seq. count"
+msgstr "Secuencia"
+
+#. module: frigo_edi
+#: view:item.management.item.move.sync:frigo_edi.item_move_sync_filter
+#: field:item.management.item.move.sync,state:0
+#: view:res.partner.sync:frigo_edi.res_partner_sync_filter
+#: field:res.partner.sync,state:0
+msgid "State"
+msgstr "Estado"
+
+#. module: frigo_edi
+#: field:stock.picking,sync:0
+msgid "Sync"
+msgstr "Sincronizar"
+
+#. module: frigo_edi
+#: selection:item.management.item.move.sync,state:0
+#: selection:res.partner.sync,state:0
+msgid "Synchronized"
+msgstr "Sincronizado"
+
+#. module: frigo_edi
+#: selection:item.management.item.move.sync,inactive_motive:0
+msgid "Theft"
+msgstr "Robo"
+
+#. module: frigo_edi
+#: view:res.partner:frigo_edi.midban_view_partner_form_add_frigo_fields
+#: field:res.partner.sync,timetable_str:0
+msgid "Timetable"
+msgstr "Horario"
+
+#. module: frigo_edi
+#: field:res.partner,to_competence_id:0
+msgid "To Competence"
+msgstr "Competencia destino"
+
+#. module: frigo_edi
+#: field:item.management.item,to_sync:0
+#: view:item.management.item.move.sync:frigo_edi.item_move_sync_filter
+#: view:res.partner.sync:frigo_edi.res_partner_sync_filter
+msgid "To sync"
+msgstr "Pendiente de sincronizar"
+
+#. module: frigo_edi
+#: field:res.partner,unilever_code:0
+msgid "Unilever code"
+msgstr "Código Unilever"
+
+#. module: frigo_edi
+#: model:ir.actions.act_window,name:frigo_edi.action_product_unilever_family
+#: model:ir.ui.menu,name:frigo_edi.menu_product_unilever_family
+#: view:product.unilever.family:frigo_edi.product_unilever_family_filter
+#: view:product.unilever.family:frigo_edi.product_unilever_family_tree
+msgid "Unilever families"
+msgstr "Familias Unilever"
+
+#. module: frigo_edi
+#: field:product.template,unilever_family_id:0
+#: view:product.unilever.family:frigo_edi.product_unilever_family_form
+msgid "Unilever family"
+msgstr "Familia Unilever"
+
+#. module: frigo_edi
+#: model:ir.model,name:frigo_edi.model_process_unregister_partner
+msgid "Unregister partner and update the associated reasons"
+msgstr "Dar de baja y crear el motivo asociado"
+
+#. module: frigo_edi
+#: selection:res.partner.sync,operation_type:0
+msgid "Update"
+msgstr "Actualizado"
+
+#. module: frigo_edi
+#: view:item.management.item.move.sync:frigo_edi.item_move_sync_filter
+#: field:item.management.item.move.sync,user_id:0
+#: view:res.partner.sync:frigo_edi.res_partner_sync_filter
+#: field:res.partner.sync,user_id:0
+msgid "User"
+msgstr "Usuario"
+
+#. module: frigo_edi
+#: constraint:res.partner:0
+msgid "You cannot create recursive Partner hierarchies."
+msgstr "No puede crear jerarquías de empresas recursivas."
+
