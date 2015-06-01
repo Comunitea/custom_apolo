@@ -265,4 +265,4 @@ class AccountIntegrateWzd(models.TransientModel):
                 src_file = file_name
                 dst_file = backup_path + os.sep + file_name.split(os.sep)[-1]
                 shutil.copy(src_file, dst_file)
-                os.remove(src_file)
+                shutil.rmtree(src_file)
