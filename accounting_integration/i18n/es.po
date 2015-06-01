@@ -1,0 +1,84 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#       * accounting_integration
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-06-01 11:58+0000\n"
+"PO-Revision-Date: 2015-06-01 11:58+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: accounting_integration
+#: code:addons/accounting_integration/wizard/account_integrate_wzd.py:242
+#, python-format
+msgid "%s: Any analytic account with code %s"
+msgstr "%s: Ninguna cuenta analítica con el código %s"
+
+#. module: accounting_integration
+#: code:addons/accounting_integration/wizard/account_integrate_wzd.py:197
+#, python-format
+msgid "%s: Cannot create account with code %s."
+msgstr "%s: No puede crear una cuneta con el código %s."
+
+#. module: accounting_integration
+#: code:addons/accounting_integration/wizard/account_integrate_wzd.py:254
+#, python-format
+msgid "%s: Exception %s in row %s"
+msgstr "%s: Excepción %s en la fila %s"
+
+#. module: accounting_integration
+#: code:addons/accounting_integration/wizard/account_integrate_wzd.py:71
+#, python-format
+msgid "%s: Please, create an account journal with name 'Diario Importación'."
+msgstr "%s: Por favor, cree un diario contable con el nombre 'Diario Importación'."
+
+#. module: accounting_integration
+#: code:addons/accounting_integration/wizard/account_integrate_wzd.py:76
+#, python-format
+msgid "%s: Processing."
+msgstr "%s: Procesando."
+
+#. module: accounting_integration
+#: code:addons/accounting_integration/wizard/account_integrate_wzd.py:177
+#, python-format
+msgid "%s: There isn't any account created with code %s"
+msgstr "%s: No hay ninguna cuenta creada con el código %s"
+
+#. module: accounting_integration
+#: field:accout.integrate.wzd,create_uid:0
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: accounting_integration
+#: field:accout.integrate.wzd,create_date:0
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: accounting_integration
+#: field:accout.integrate.wzd,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: accounting_integration
+#: field:accout.integrate.wzd,write_uid:0
+msgid "Last Updated by"
+msgstr "Últ. actualización por"
+
+#. module: accounting_integration
+#: field:accout.integrate.wzd,write_date:0
+msgid "Last Updated on"
+msgstr "Últ. actualización el"
+
+#. module: accounting_integration
+#: code:addons/accounting_integration/wizard/account_integrate_wzd.py:48
+#, python-format
+msgid "You must define the system parameter integrate.accounting.path with the path of accounting files"
+msgstr "Debe definir un parámetro de sistema con el nombre 'integrate.accounting.path' con la ruta a los ficheros de contabilidad"
+

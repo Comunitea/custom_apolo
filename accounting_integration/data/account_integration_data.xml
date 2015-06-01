@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="0">
+
+        <record id="ir_cron_daily_accounting_integration" model="ir.cron">
+            <field name="name">Daily accounting integration</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+            <field eval="'accout.integrate.wzd'" name="model"/>
+            <field eval="'import_files'" name="function"/>
+        </record>
+
+        <record id="accounting_integration_path" model="ir.config_parameter">
+            <field name="key">integrate.accounting.path</field>
+            <field name="value">/home/gesdiman</field>
+        </record>
+
+    </data>
+</openerp>

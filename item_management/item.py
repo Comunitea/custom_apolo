@@ -33,7 +33,7 @@ class ItemManagementItem(models.Model):
     license_plate = fields.Char("License plate", track_visibility='onchange',
                                 size=13, required=True)
     partner_id = fields.Many2one("res.partner", "Owner", required=True)
-    purchase_date = fields.Date("Purchase date")
+    purchase_date = fields.Date("Purchase date", required=True)
     contract_id = fields.Many2one('item.management.contract', 'Contract',
                                   readonly=True, track_visibility='onchange')
     location_id = fields.Many2one('stock.location', 'Location', readonly=True,
