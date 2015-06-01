@@ -48,6 +48,53 @@
 
         <menuitem id="menu_product_unilever_family" parent="product.prod_config_main" name="Unilever families" action="action_product_unilever_family"/>
 
+        <record id="product_rappel_group_tree" model="ir.ui.view">
+            <field name="name">product.rappel.group.tree</field>
+            <field name="model">product.rappel.group</field>
+            <field name="arch" type="xml">
+                <tree string="Product rappel groups">
+                    <field name="code"/>
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="product_rappel_group_filter" model="ir.ui.view">
+            <field name="name">product.rappel.group.search</field>
+            <field name="model">product.rappel.group</field>
+            <field name="arch" type="xml">
+                <search string="Product rappel groups">
+                    <field name="code"/>
+                    <field name="name"/>
+               </search>
+            </field>
+        </record>
+
+        <record id="product_rappel_group_form" model="ir.ui.view">
+            <field name="name">product.rappel.group.form</field>
+            <field name="model">product.rappel.group</field>
+            <field name="arch" type="xml">
+                <form string="Product rappel group">
+                    <group colspan="4">
+                        <field name="code"/>
+                        <field name="name"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_product_rappel_group">
+            <field name="name">Rappel product group</field>
+            <field name="res_model">product.rappel.group</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="product_rappel_group_tree"/>
+            <field name="search_view_id" ref="product_rappel_group_filter"/>
+        </record>
+
+        <menuitem id="menu_product_rappel_group" parent="product.prod_config_main" name="Rappel product groups" action="action_product_rappel_group"/>
+
+
         <record id="product_template_form_view_add_unilever_family" model="ir.ui.view">
             <field name="name">product.template.common.form_add_unilever_family</field>
             <field name="model">product.template</field>
@@ -55,6 +102,7 @@
             <field name="arch" type="xml">
                 <field name="active" position="after">
                     <field name="unilever_family_id"/>
+                    <field name="rappel_group_id"/>
                 </field>
             </field>
         </record>

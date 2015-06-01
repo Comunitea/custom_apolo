@@ -41,17 +41,10 @@ class sale_joint_promotion(models.Model):
     discount = fields.Float('Discount', required=True)
     customer_id = fields.Many2one('res.partner', 'Customer', required=True)
     discount_assumed = fields.Float('Discount assumed', required=True)
-    active = fields.Boolean('Active', default=True)
+    start_date = fields.Date('Start date')
+    end_date = fields.Date('End date')
     invoiced_amounts = fields.One2many('sale.joint.promotion.history',
                                        'joint_id', 'Invoiced amounts')
-
-    @api.one
-    def deactivate(self):
-        self.active = False
-
-    @api.one
-    def activate(self):
-        self.active = True
 
     @api.multi
     def _get_invoice(self, amount):

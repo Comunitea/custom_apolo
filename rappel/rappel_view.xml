@@ -54,6 +54,7 @@
                                 <field name="global_application"/>
                                 <field name="product_id" attrs="{'invisible':[('global_application','=', True)]}"/>
                                 <field name="product_categ_id" attrs="{'invisible':[('global_application','=', True)]}"/>
+                                <field name="rappel_group_id" attrs="{'invisible':[('global_application','=', True)]}"/>
                             </group>
                        </group>
                         <notebook>
@@ -148,6 +149,26 @@
                         </group>
                    </sheet>
                 </form>
+            </field>
+        </record>
+
+        <record id="rappel_calculated_filter" model="ir.ui.view">
+            <field name="name">rappel.calculated.search</field>
+            <field name="model">rappel.calculated</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Rappel calculated">
+                   <field name="customer_id"/>
+                   <field name="rappel_id"/>
+                   <field name="invoice_id"/>
+                   <filter name="to_invoice" string="To invoice" domain="[('invoiced', '=', False)]"/>
+                   <filter name="invoiced" string="Invoiced" domain="[('invoiced', '=', True)]"/>
+                   <group expand="0" string="Group By">
+                       <filter string="Rappel" domain="[]" context="{'group_by':'rappel_id'}"/>
+                       <filter string="Customer" domain="[]" context="{'group_by':'customer_id'}"/>
+                       <filter string="Period" domain="[]" context="{'group_by':'period'}"/>
+                    </group>
+               </search>
             </field>
         </record>
 

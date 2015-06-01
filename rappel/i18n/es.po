@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-05-28 14:44+0000\n"
-"PO-Revision-Date: 2015-05-28 14:44+0000\n"
+"POT-Creation-Date: 2015-05-28 15:38+0000\n"
+"PO-Revision-Date: 2015-05-28 15:38+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -168,6 +168,7 @@ msgid "Created on"
 msgstr "Created on"
 
 #. module: rappel
+#: view:rappel.calculated:rappel.rappel_calculated_filter
 #: field:rappel.calculated,customer_id:0
 msgid "Customer"
 msgstr "Cliente"
@@ -255,6 +256,11 @@ msgid "Global"
 msgstr "Global"
 
 #. module: rappel
+#: view:rappel.calculated:rappel.rappel_calculated_filter
+msgid "Group By"
+msgstr "Agrupar"
+
+#. module: rappel
 #: model:ir.model,name:rappel.model_rappel_calculated
 msgid "History Rappels"
 msgstr "History Rappels"
@@ -286,6 +292,7 @@ msgid "Invoice to group"
 msgstr "Facturar a grupo"
 
 #. module: rappel
+#: view:rappel.calculated:rappel.rappel_calculated_filter
 #: field:rappel.calculated,invoiced:0
 msgid "Invoiced"
 msgstr "Facturado"
@@ -360,6 +367,7 @@ msgid "Percent/Quantity"
 msgstr "Porcentaje/Cantidad"
 
 #. module: rappel
+#: view:rappel.calculated:rappel.rappel_calculated_filter
 #: field:rappel.calculated,period:0
 msgid "Period"
 msgstr "Periodo"
@@ -405,6 +413,7 @@ msgstr "Trimestral"
 #: model:ir.ui.menu,name:rappel.menu_rappel_sale
 #: view:rappel:rappel.rappel_form
 #: view:rappel:rappel.view_rappel_tree
+#: view:rappel.calculated:rappel.rappel_calculated_filter
 #: view:rappel.calculated:rappel.view_rappel_calculated_tree
 #: field:rappel.calculated,rappel_id:0
 #: field:rappel.section,rappel_id:0
@@ -436,6 +445,7 @@ msgstr "Tipos de rappel"
 #. module: rappel
 #: model:ir.actions.act_window,name:rappel.action_rappel_calculated
 #: model:ir.ui.menu,name:rappel.rappel_calculated_menu
+#: view:rappel.calculated:rappel.rappel_calculated_filter
 #: view:rappel.calculated:rappel.rappel_calculated_form
 msgid "Rappel calculated"
 msgstr "Rappel calculados"
@@ -502,6 +512,11 @@ msgid "The type %s dont have an product configured"
 msgstr "El tipo %s no tiene un producto configurado"
 
 #. module: rappel
+#: view:rappel.calculated:rappel.rappel_calculated_filter
+msgid "To invoice"
+msgstr "A facturar"
+
+#. module: rappel
 #: field:rappel,type_id:0
 msgid "Type"
 msgstr "Tipo"
@@ -550,3 +565,4 @@ msgstr "Valor/Cantidad"
 #: view:rappel:rappel.rappel_form
 msgid "€/Uom"
 msgstr "€/UdM"
+

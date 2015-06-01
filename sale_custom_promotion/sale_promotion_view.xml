@@ -24,9 +24,6 @@
             <field name="arch" type="xml">
                 <form string="Joint promotion">
                     <header>
-                        <field name="active" invisible="1"/>
-                        <button name="deactivate" type="object" string="Desactivate" attrs="{'invisible': [('active', '=', False)]}"/>
-                        <button name="activate" type="object" string="Activate" attrs="{'invisible': [('active', '=', True)]}"/>
                     </header>
                     <sheet>
                         <group>

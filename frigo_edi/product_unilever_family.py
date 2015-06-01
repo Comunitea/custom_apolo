@@ -29,9 +29,18 @@ class ProductUnileverFamily(models.Model):
     code = fields.Char("Code", size=6, required=True)
 
 
+class ProductRappelGroup(models.Model):
+
+    _name = 'product.rappel.group'
+
+    name = fields.Char("Name", size=30, required=True)
+    code = fields.Char("Code", size=6, required=True)
+
+
 class ProductTemplate(models.Model):
 
     _inherit = "product.template"
 
     unilever_family_id = fields.Many2one("product.unilever.family",
                                          "Unilever family")
+    rappel_group_id = fields.Many2one('product.rappel.group', 'Rappel group')
