@@ -264,5 +264,5 @@ class AccountIntegrateWzd(models.TransientModel):
                     os.mkdir(backup_path)
                 src_file = file_name
                 dst_file = backup_path + os.sep + file_name.split(os.sep)[-1]
-                shutil.copy(src_file, dst_file)
-                shutil.rmtree(src_file)
+                shutil.move(src_file, dst_file)
+                #shutil.rmtree(src_file)
