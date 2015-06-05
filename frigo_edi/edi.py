@@ -89,11 +89,18 @@ class Edi(models.Model):
 
         visited_supp_ids = []
         for line in f:
+            import ipdb; ipdb.set_trace()
             product_code = str(int(line[:10]))
             product_ids = supp_obj.search([('id', 'in', supplier_product_ids),
                                            ('product_code', '=',
                                             product_code)])
-
+            rappel_group_code = line[10:12]
+            rappel_group = self.env['product.rappel.group'].search([('code', '=', rappel_group_code)])
+            if rappel_group:
+                rappel_group = rappel_group[0]
+            else:
+                log.error("Rappel subgroup invalid %s for line %s" % (rappel_group_code, line))
+                rappel_group = self.env['product.rappel.group']
             family = prod_uf.search([("code", '=', line[12:18])])
             if family:
                 family = family[0]
@@ -143,7 +150,7 @@ class Edi(models.Model):
             if product_ids:
                 visited_supp_ids.append(product_ids[0].id)
                 prod = product_ids[0].product_tmpl_id.product_variant_ids[0]
-                #TODO: Actualizar grupo de rappel line[10:12]
+                prod.rappel_group_id = rappel_group.id
                 prod.unilever_family_id = family.id
                 product_ids[0].product_name = line[50:80].strip()
                 prod.supplier_un_ca = int(line[98:106])
@@ -163,9 +170,9 @@ class Edi(models.Model):
                                  "min_quantity": 1,
                                  "price": int(line[80:90]) / 100.0})
             else:
-                #TODO: Añadir en el create el grupo de rappel line[10:12]
                 create_vals = {'unilever_family_id': family.id,
                                'name': line[50:80].strip(),
+                               'rappel_group_id': rappel_group.id,
                                'standard_price': int(line[80:90]) / 100.0,
                                'volume': volume,
                                'weight': weight,
@@ -289,6 +296,14 @@ class Edi(models.Model):
         return
 
     @api.model
+    def parse_purchase_picking_file(self, file_path, doc):
+        f = codecs.open(file_path, "r", "ISO-8859-1", 'ignore')
+        # Cada linea representa un movimiento del albaran, un fichero puede
+        # contener varios albaranes.
+        for line in f:
+            pass
+
+    @api.model
     def process_files(self, path):
         """
         Search all edi docs in error or draft state and process it depending
@@ -312,5 +327,7 @@ class Edi(models.Model):
                 elif doc.doc_type.code == 'clp':
                     service.parse_indirect_customers_file(file_path, doc)
                     process = True
+                elif doc.doc_type.code == 'alc':
+                    service.parse_purchase_picking_file(file_path, doc)
                 if process:
                     doc.write({'errors': log.get_errors()})

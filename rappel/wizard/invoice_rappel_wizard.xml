@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+        <record id="invoice_rappel_wizard_view" model="ir.ui.view">
+            <field name="name">Invoice rappels</field>
+            <field name="model">rappel.invoice.wizard</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="">
+                    <group>
+                        <field name="invoice_to_group"/>
+                    </group>
+                    <button string="invoice" name="invoice" type="object" icon="gtk-ok"/>
+                    <button string="Cancel" special="cancel" icon="gtk-cancel"/>
+                </form>
+            </field>
+        </record>
+    </data>
+</openerp>

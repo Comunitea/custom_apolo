@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+        <record id="rappel_product1" model="product.product">
+            <field name="name">Rappel</field>
+            <field name="categ_id" ref="product.product_category_all"/>
+            <field name="type">service</field>
+            <field name="uom_id" ref="product.product_uom_unit"/>
+            <field name="kg_un">1</field>
+            <field name="un_ca">1</field>
+            <field name="ca_ma">1</field>
+            <field name="ma_pa">1</field>
+            <field name="un_width">1</field>
+            <field name="ca_width">1</field>
+            <field name="ma_width">1</field>
+            <field name="pa_width">1</field>
+            <field name="un_height">1</field>
+            <field name="ca_height">1</field>
+            <field name="ma_height">1</field>
+            <field name="pa_height">1</field>
+            <field name="un_length">1</field>
+            <field name="ca_length">1</field>
+            <field name="ma_length">1</field>
+            <field name="pa_length">1</field>
+            <field name="supplier_kg_un">1</field>
+            <field name="supplier_un_width">1</field>
+            <field name="supplier_un_height">1</field>
+            <field name="supplier_un_length">1</field>
+            <field name="supplier_ca_ma">1</field>
+            <field name="supplier_ma_width">1</field>
+            <field name="supplier_ma_height">1</field>
+            <field name="supplier_ma_length">1</field>
+            <field name="supplier_ma_pa">1</field>
+            <field name="supplier_pa_width">1</field>
+            <field name="supplier_pa_height">1</field>
+            <field name="supplier_pa_length">1</field>
+            <field name="supplier_un_ca">1</field>
+            <field name="supplier_ca_width">1</field>
+            <field name="supplier_ca_height">1</field>
+            <field name="supplier_ca_length">1</field>
+        </record>
+    </data>
+</openerp>

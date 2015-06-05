@@ -1,0 +1,174 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#   * sale_custom_promotion
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-06-03 14:14+0000\n"
+"PO-Revision-Date: 2015-06-03 14:14+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: sale_custom_promotion
+#: field:sale.joint.promotion.history,amount:0
+msgid "Amount"
+msgstr "Cantidad"
+
+#. module: sale_custom_promotion
+#: view:invoice.joint.promotion:sale_custom_promotion.invoice_joint_promotion_form
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: sale_custom_promotion
+#: field:sale.joint.promotion,category_id:0
+msgid "Category"
+msgstr "Categoría"
+
+#. module: sale_custom_promotion
+#: field:invoice.joint.promotion,create_uid:0
+#: field:sale.joint.promotion,create_uid:0
+#: field:sale.joint.promotion.history,create_uid:0
+msgid "Created by"
+msgstr "Created by"
+
+#. module: sale_custom_promotion
+#: field:invoice.joint.promotion,create_date:0
+#: field:sale.joint.promotion,create_date:0
+#: field:sale.joint.promotion.history,create_date:0
+msgid "Created on"
+msgstr "Created on"
+
+#. module: sale_custom_promotion
+#: field:sale.joint.promotion,customer_id:0
+msgid "Customer"
+msgstr "Cliente"
+
+#. module: sale_custom_promotion
+#: field:sale.joint.promotion,discount:0
+#: selection:sale.joint.promotion,type:0
+msgid "Discount"
+msgstr "Descuento"
+
+#. module: sale_custom_promotion
+#: field:sale.joint.promotion,discount_assumed:0
+msgid "Discount assumed"
+msgstr "Descuento asumido por proveedor"
+
+#. module: sale_custom_promotion
+#: selection:invoice.joint.promotion,invoice_type:0
+msgid "Draft"
+msgstr "Borrador"
+
+#. module: sale_custom_promotion
+#: field:invoice.joint.promotion,date_end:0
+#: field:sale.joint.promotion.history,date_end:0
+msgid "End"
+msgstr "Final"
+
+#. module: sale_custom_promotion
+#: field:sale.joint.promotion,end_date:0
+msgid "End date"
+msgstr "Fecha fin"
+
+#. module: sale_custom_promotion
+#: view:sale.joint.promotion:sale_custom_promotion.sale_joint_promotion_form
+msgid "History"
+msgstr "Historial"
+
+#. module: sale_custom_promotion
+#: field:invoice.joint.promotion,id:0
+#: field:sale.joint.promotion,id:0
+#: field:sale.joint.promotion.history,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: sale_custom_promotion
+#: view:invoice.joint.promotion:sale_custom_promotion.invoice_joint_promotion_form
+msgid "Invoice"
+msgstr "Facturar"
+
+#. module: sale_custom_promotion
+#: view:invoice.joint.promotion:sale_custom_promotion.invoice_joint_promotion_form
+msgid "Invoice joint promotion"
+msgstr "Facturar promociones conjuntas"
+
+#. module: sale_custom_promotion
+#: model:ir.actions.act_window,name:sale_custom_promotion.action_invoice_joint_promotion
+msgid "Invoice promotion"
+msgstr "Facturar promoción"
+
+#. module: sale_custom_promotion
+#: field:invoice.joint.promotion,invoice_type:0
+msgid "Invoice type"
+msgstr "Tipo de factura"
+
+#. module: sale_custom_promotion
+#: field:sale.joint.promotion,invoiced_amounts:0
+msgid "Invoiced amounts"
+msgstr "Cantidades facturadas"
+
+#. module: sale_custom_promotion
+#: view:sale.joint.promotion:sale_custom_promotion.sale_joint_promotion_form
+#: field:sale.joint.promotion.history,joint_id:0
+msgid "Joint promotion"
+msgstr "Promoción conjunta"
+
+#. module: sale_custom_promotion
+#: model:ir.actions.act_window,name:sale_custom_promotion.action_sale_joint_promotion
+#: model:ir.ui.menu,name:sale_custom_promotion.joint_promotion_menu
+#: view:sale.joint.promotion:sale_custom_promotion.sale_joint_promotion_tree
+msgid "Joint promotions"
+msgstr "Promociones conjuntas"
+
+#. module: sale_custom_promotion
+#: field:invoice.joint.promotion,write_uid:0
+#: field:sale.joint.promotion,write_uid:0
+#: field:sale.joint.promotion.history,write_uid:0
+msgid "Last Updated by"
+msgstr "Last Updated by"
+
+#. module: sale_custom_promotion
+#: field:invoice.joint.promotion,write_date:0
+#: field:sale.joint.promotion,write_date:0
+#: field:sale.joint.promotion.history,write_date:0
+msgid "Last Updated on"
+msgstr "Last Updated on"
+
+#. module: sale_custom_promotion
+#: field:sale.joint.promotion,rappel_id:0
+#: selection:sale.joint.promotion,type:0
+msgid "Rappel"
+msgstr "Rappel"
+
+#. module: sale_custom_promotion
+#: field:invoice.joint.promotion,date_start:0
+#: field:sale.joint.promotion.history,date_start:0
+msgid "Start"
+msgstr "Inicio"
+
+#. module: sale_custom_promotion
+#: field:sale.joint.promotion,start_date:0
+msgid "Start date"
+msgstr "Fecha inicio"
+
+#. module: sale_custom_promotion
+#: field:sale.joint.promotion,supplier_id:0
+msgid "Supplier"
+msgstr "Proveedor"
+
+#. module: sale_custom_promotion
+#: field:sale.joint.promotion,type:0
+msgid "Type"
+msgstr "Tipo"
+
+#. module: sale_custom_promotion
+#: selection:invoice.joint.promotion,invoice_type:0
+msgid "pro-forma"
+msgstr "pro-forma"
+

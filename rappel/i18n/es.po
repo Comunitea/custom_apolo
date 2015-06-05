@@ -1,0 +1,568 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#   * rappel
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-05-28 15:38+0000\n"
+"PO-Revision-Date: 2015-05-28 15:38+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: rappel
+#: code:addons/rappel/rappel.py:87
+#, python-format
+msgid " Product and category are empty"
+msgstr " El producto y la categoría están vacíos"
+
+#. module: rappel
+#: view:rappel:rappel.rappel_form
+msgid "01/01/2014"
+msgstr "01/01/2014"
+
+#. module: rappel
+#: view:rappel:rappel.rappel_form
+msgid "31/01/2014"
+msgstr "31/01/2014"
+
+#. module: rappel
+#: model:ir.actions.act_window,help:rappel.action_rappel_type
+msgid "<p class=\"oe_view_nocontent_create\">\n"
+"                Click to create a new rappel type.\n"
+"              </p>\n"
+"            "
+msgstr "<p class=\"oe_view_nocontent_create\">\n"
+"                Click to create a new rappel type.\n"
+"              </p>\n"
+"            "
+
+#. module: rappel
+#: model:ir.actions.act_window,help:rappel.action_rappel_purchases
+#: model:ir.actions.act_window,help:rappel.action_rappel_sales
+msgid "<p class=\"oe_view_nocontent_create\">\n"
+"                Click to create a new rappel.\n"
+"              </p>\n"
+"            "
+msgstr "<p class=\"oe_view_nocontent_create\">\n"
+"                Click to create a new rappel.\n"
+"              </p>\n"
+"            "
+
+#. module: rappel
+#: code:addons/rappel/wizard/invoice_rappel_wizard.py:108
+#, python-format
+msgid "Account not found"
+msgstr "Cuenta no encontrada"
+
+#. module: rappel
+#: selection:rappel,periodicity:0
+msgid "Annual"
+msgstr "Anual"
+
+#. module: rappel
+#: model:ir.ui.menu,name:rappel.menu_rappel_assistants_sale
+msgid "Assistants"
+msgstr "Asistentes"
+
+#. module: rappel
+#: view:rappel:rappel.rappel_form
+msgid "By sections"
+msgstr "Por tramos"
+
+#. module: rappel
+#: view:rappel:rappel.rappel_form
+msgid "Calc Configuration"
+msgstr "Configuración Cálculo"
+
+#. module: rappel
+#: view:rappel.calculate.wizard:rappel.calculate_rappel_wizard_form
+msgid "Calculate"
+msgstr "Calcular"
+
+#. module: rappel
+#: model:ir.actions.act_window,name:rappel.action_rappel_calculate_sales
+msgid "Calculate rappel"
+msgstr "Calcular rappel"
+
+#. module: rappel
+#: model:ir.ui.menu,name:rappel.menu_rappel_calculate_sale
+#: view:rappel.calculate.wizard:rappel.calculate_rappel_wizard_form
+msgid "Calculate rappels"
+msgstr "Calcular rappels"
+
+#. module: rappel
+#: view:rappel.calculate.wizard:rappel.calculate_rappel_wizard_form
+#: view:rappel.invoice.wizard:rappel.invoice_rappel_wizard_view
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: rappel
+#: field:rappel,product_categ_id:0
+msgid "Category"
+msgstr "Categoría"
+
+#. module: rappel
+#: field:product.rappel.group,code:0
+#: field:rappel.type,code:0
+msgid "Code"
+msgstr "Código"
+
+#. module: rappel
+#: view:rappel.type:rappel.rappel_type_form
+msgid "Code..."
+msgstr "Código..."
+
+#. module: rappel
+#: field:rappel,name:0
+msgid "Concept"
+msgstr "Concepto"
+
+#. module: rappel
+#: view:rappel:rappel.rappel_form
+msgid "Concept..."
+msgstr "Concepto..."
+
+#. module: rappel
+#: code:addons/rappel/wizard/invoice_rappel_wizard.py:99
+#, python-format
+msgid "Configure error"
+msgstr "Error de configuración"
+
+#. module: rappel
+#: code:addons/rappel/wizard/calculate_rappel_wizard.py:51
+#, python-format
+msgid "Conversion from Product UoM %s to Default UoM %s is not possible as they both belong to different Category!."
+msgstr "¡La conversión de la UdM %s del producto a UdM por defecto %s no es posible  debido a que no pertenecen a la misma categoría!"
+
+#. module: rappel
+#: help:rappel.invoice.wizard,invoice_to_group:0
+msgid "Create the invoice for the group of sub-partners"
+msgstr "Crear la factura para el grupo de sub-partners"
+
+#. module: rappel
+#: field:product.rappel.group,create_uid:0
+#: field:rappel,create_uid:0
+#: field:rappel.calculate.wizard,create_uid:0
+#: field:rappel.calculated,create_uid:0
+#: field:rappel.invoice.wizard,create_uid:0
+#: field:rappel.section,create_uid:0
+#: field:rappel.type,create_uid:0
+msgid "Created by"
+msgstr "Created by"
+
+#. module: rappel
+#: field:product.rappel.group,create_date:0
+#: field:rappel,create_date:0
+#: field:rappel.calculate.wizard,create_date:0
+#: field:rappel.calculated,create_date:0
+#: field:rappel.invoice.wizard,create_date:0
+#: field:rappel.section,create_date:0
+#: field:rappel.type,create_date:0
+msgid "Created on"
+msgstr "Created on"
+
+#. module: rappel
+#: view:rappel.calculated:rappel.rappel_calculated_filter
+#: field:rappel.calculated,customer_id:0
+msgid "Customer"
+msgstr "Cliente"
+
+#. module: rappel
+#: view:rappel:rappel.rappel_form
+#: field:rappel,customer_ids:0
+#: field:rappel.calculate.wizard,customer_ids:0
+msgid "Customers"
+msgstr "Clientes"
+
+#. module: rappel
+#: field:rappel,date_start:0
+msgid "Date Start"
+msgstr "Inicio"
+
+#. module: rappel
+#: field:rappel,date_stop:0
+msgid "Date Stop"
+msgstr "Fin"
+
+#. module: rappel
+#: field:rappel.calculate.wizard,date_start:0
+msgid "Date start"
+msgstr "Fecha de inicio"
+
+#. module: rappel
+#: field:rappel.calculate.wizard,date_stop:0
+msgid "Date stop"
+msgstr "Fecha final"
+
+#. module: rappel
+#: view:rappel:rappel.rappel_form
+msgid "Dates"
+msgstr "Fechas"
+
+#. module: rappel
+#: model:ir.model,name:rappel.model_rappel_deal
+msgid "Deal of rappels for customers"
+msgstr "Reparto de rappels a clientes"
+
+#. module: rappel
+#: code:addons/rappel/rappel.py:71
+#: code:addons/rappel/rappel.py:86
+#, python-format
+msgid "Error"
+msgstr "Error"
+
+#. module: rappel
+#: code:addons/rappel/wizard/calculate_rappel_wizard.py:50
+#, python-format
+msgid "Error!"
+msgstr "Error!"
+
+#. module: rappel
+#: view:rappel:rappel.rappel_form
+#: field:rappel,fix_qty:0
+msgid "Fix"
+msgstr "Fijo"
+
+#. module: rappel
+#: selection:rappel,calc_mode:0
+msgid "Fixed"
+msgstr "Fijo"
+
+#. module: rappel
+#: view:rappel:rappel.rappel_form
+#: field:rappel,calc_mode:0
+msgid "Fixed/Variable"
+msgstr "Fijo/Variable"
+
+#. module: rappel
+#: field:rappel.section,rappel_from:0
+msgid "From"
+msgstr "Desde"
+
+#. module: rappel
+#: view:rappel.type:rappel.rappel_type_form
+msgid "General Information"
+msgstr "Información General"
+
+#. module: rappel
+#: field:rappel,global_application:0
+msgid "Global"
+msgstr "Global"
+
+#. module: rappel
+#: view:rappel.calculated:rappel.rappel_calculated_filter
+msgid "Group By"
+msgstr "Agrupar"
+
+#. module: rappel
+#: model:ir.model,name:rappel.model_rappel_calculated
+msgid "History Rappels"
+msgstr "History Rappels"
+
+#. module: rappel
+#: field:product.rappel.group,id:0
+#: field:rappel,id:0
+#: field:rappel.calculate.wizard,id:0
+#: field:rappel.calculated,id:0
+#: field:rappel.invoice.wizard,id:0
+#: field:rappel.section,id:0
+#: field:rappel.type,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: rappel
+#: field:rappel.calculated,invoice_id:0
+msgid "Invoice"
+msgstr "Factura"
+
+#. module: rappel
+#: model:ir.actions.act_window,name:rappel.invoice_rappel
+msgid "Invoice rappel"
+msgstr "Facturar rappel"
+
+#. module: rappel
+#: field:rappel.invoice.wizard,invoice_to_group:0
+msgid "Invoice to group"
+msgstr "Facturar a grupo"
+
+#. module: rappel
+#: view:rappel.calculated:rappel.rappel_calculated_filter
+#: field:rappel.calculated,invoiced:0
+msgid "Invoiced"
+msgstr "Facturado"
+
+#. module: rappel
+#: field:product.rappel.group,write_uid:0
+#: field:rappel,write_uid:0
+#: field:rappel.calculate.wizard,write_uid:0
+#: field:rappel.calculated,write_uid:0
+#: field:rappel.invoice.wizard,write_uid:0
+#: field:rappel.section,write_uid:0
+#: field:rappel.type,write_uid:0
+msgid "Last Updated by"
+msgstr "Last Updated by"
+
+#. module: rappel
+#: field:product.rappel.group,write_date:0
+#: field:rappel,write_date:0
+#: field:rappel.calculate.wizard,write_date:0
+#: field:rappel.calculated,write_date:0
+#: field:rappel.invoice.wizard,write_date:0
+#: field:rappel.section,write_date:0
+#: field:rappel.type,write_date:0
+msgid "Last Updated on"
+msgstr "Last Updated on"
+
+#. module: rappel
+#: field:rappel,last_execution:0
+msgid "Last execution"
+msgstr "Última ejecución"
+
+#. module: rappel
+#: field:rappel,last_use:0
+msgid "Last use of the rappel"
+msgstr "Último uso del rappel"
+
+#. module: rappel
+#: selection:rappel,periodicity:0
+msgid "Monthly"
+msgstr "Mensual"
+
+#. module: rappel
+#: field:product.rappel.group,name:0
+#: field:rappel.type,name:0
+msgid "Name"
+msgstr "Nombre"
+
+#. module: rappel
+#: view:rappel.type:rappel.rappel_type_form
+msgid "Name..."
+msgstr "Nombre..."
+
+#. module: rappel
+#: view:rappel:rappel.rappel_form
+msgid "Other data"
+msgstr "Otros datos"
+
+#. module: rappel
+#: model:ir.model,name:rappel.model_res_partner
+msgid "Partner"
+msgstr "Empresa"
+
+#. module: rappel
+#: selection:rappel,calc_amount:0
+msgid "Percent"
+msgstr "Porcentaje"
+
+#. module: rappel
+#: view:rappel:rappel.rappel_form
+#: field:rappel,calc_amount:0
+msgid "Percent/Quantity"
+msgstr "Porcentaje/Cantidad"
+
+#. module: rappel
+#: view:rappel.calculated:rappel.rappel_calculated_filter
+#: field:rappel.calculated,period:0
+msgid "Period"
+msgstr "Periodo"
+
+#. module: rappel
+#: field:rappel,periodicity:0
+msgid "Periodicity"
+msgstr "Periodicidad"
+
+#. module: rappel
+#: field:rappel,product_id:0
+#: field:rappel.type,product_id:0
+msgid "Product"
+msgstr "Producto"
+
+#. module: rappel
+#: model:ir.model,name:rappel.model_product_template
+msgid "Product Template"
+msgstr "Plantilla de producto"
+
+#. module: rappel
+#: code:addons/rappel/rappel.py:72
+#, python-format
+msgid "Product and category are empty"
+msgstr "El producto y la categoría están vacías"
+
+#. module: rappel
+#: selection:rappel,calc_amount:0
+#: selection:rappel,calc_type:0
+#: field:rappel.calculated,quantity:0
+msgid "Quantity"
+msgstr "Cantidad"
+
+#. module: rappel
+#: selection:rappel,periodicity:0
+msgid "Quarterly"
+msgstr "Trimestral"
+
+#. module: rappel
+#: model:ir.actions.act_window,name:rappel.action_rappel_purchases
+#: model:ir.actions.act_window,name:rappel.action_rappel_sales
+#: model:ir.ui.menu,name:rappel.menu_rappel_config_sale
+#: model:ir.ui.menu,name:rappel.menu_rappel_sale
+#: view:rappel:rappel.rappel_form
+#: view:rappel:rappel.view_rappel_tree
+#: view:rappel.calculated:rappel.rappel_calculated_filter
+#: view:rappel.calculated:rappel.view_rappel_calculated_tree
+#: field:rappel.calculated,rappel_id:0
+#: field:rappel.section,rappel_id:0
+msgid "Rappel"
+msgstr "Rappel"
+
+#. module: rappel
+#: model:ir.model,name:rappel.model_rappel
+msgid "Rappel Model"
+msgstr "Rappel"
+
+#. module: rappel
+#: view:rappel.type:rappel.rappel_type_form
+msgid "Rappel Type"
+msgstr "Tipo de rappel"
+
+#. module: rappel
+#: model:ir.model,name:rappel.model_rappel_type
+msgid "Rappel Type Model"
+msgstr "Tipo de Rappel"
+
+#. module: rappel
+#: model:ir.actions.act_window,name:rappel.action_rappel_type
+#: model:ir.ui.menu,name:rappel.menu_rappel_types_sale
+#: view:rappel.type:rappel.view_rappel_type_tree
+msgid "Rappel Types"
+msgstr "Tipos de rappel"
+
+#. module: rappel
+#: model:ir.actions.act_window,name:rappel.action_rappel_calculated
+#: model:ir.ui.menu,name:rappel.rappel_calculated_menu
+#: view:rappel.calculated:rappel.rappel_calculated_filter
+#: view:rappel.calculated:rappel.rappel_calculated_form
+msgid "Rappel calculated"
+msgstr "Rappel calculados"
+
+#. module: rappel
+#: field:product.template,rappel_group_id:0
+#: field:rappel,rappel_group_id:0
+msgid "Rappel group"
+msgstr "Rappel group"
+
+#. module: rappel
+#: model:ir.model,name:rappel.model_rappel_section
+msgid "Rappel section model"
+msgstr "Tramos Rappel"
+
+#. module: rappel
+#: view:rappel:rappel.rappel_form
+msgid "Rappel type..."
+msgstr "Tipo de rappel..."
+
+#. module: rappel
+#: model:ir.ui.menu,name:rappel.menu_rappel_rappel_sale
+#: field:rappel.invoice.wizard,rappel_calculated_ids:0
+#: view:res.partner:rappel.res_partner_form_add_rappels
+#: field:res.partner,rappel_ids:0
+msgid "Rappels"
+msgstr "Rappels"
+
+#. module: rappel
+#: view:rappel:rappel.view_rappel_filter
+msgid "Search Rappel"
+msgstr "Buscar Rappel"
+
+#. module: rappel
+#: view:rappel.type:rappel.view_rappel_type_filter
+msgid "Search Rappel Type"
+msgstr "Buscar tipos de rappel"
+
+#. module: rappel
+#: field:rappel,sections:0
+msgid "Sections"
+msgstr "Tramos"
+
+#. module: rappel
+#: help:rappel.calculate.wizard,customer_ids:0
+msgid "Select customers to calculate rappels.  If left blank is calculated for all"
+msgstr "Selecctionar los clientes para los que calcular rappels. Si se deja en blanco se calcula para todos"
+
+#. module: rappel
+#: selection:rappel,periodicity:0
+msgid "Semiannual"
+msgstr "Semestral"
+
+#. module: rappel
+#: code:addons/rappel/wizard/invoice_rappel_wizard.py:109
+#, python-format
+msgid "The rappel product not have an account configured."
+msgstr "El producto de rappel no tiene una cuenta configurada."
+
+#. module: rappel
+#: code:addons/rappel/wizard/invoice_rappel_wizard.py:100
+#, python-format
+msgid "The type %s dont have an product configured"
+msgstr "El tipo %s no tiene un producto configurado"
+
+#. module: rappel
+#: view:rappel.calculated:rappel.rappel_calculated_filter
+msgid "To invoice"
+msgstr "A facturar"
+
+#. module: rappel
+#: field:rappel,type_id:0
+msgid "Type"
+msgstr "Tipo"
+
+#. module: rappel
+#: field:rappel.section,rappel_until:0
+msgid "Until"
+msgstr "Hasta"
+
+#. module: rappel
+#: field:rappel,uom_id:0
+msgid "UoM"
+msgstr "UdM"
+
+#. module: rappel
+#: field:rappel.section,percent:0
+msgid "Value"
+msgstr "Valor"
+
+#. module: rappel
+#: selection:rappel,calc_mode:0
+msgid "Variable"
+msgstr "Variable"
+
+#. module: rappel
+#: view:rappel.invoice.wizard:rappel.invoice_rappel_wizard_view
+msgid "invoice"
+msgstr "Facturar"
+
+#. module: rappel
+#: model:ir.model,name:rappel.model_rappel_consumption
+msgid "keeps the consumption for calculate the rappel"
+msgstr "mantiene el consumo para calcular el rappe"
+
+#. module: rappel
+#: selection:rappel,calc_type:0
+msgid "value"
+msgstr "Valor"
+
+#. module: rappel
+#: field:rappel,calc_type:0
+msgid "value/quantity"
+msgstr "Valor/Cantidad"
+
+#. module: rappel
+#: view:rappel:rappel.rappel_form
+msgid "€/Uom"
+msgstr "€/UdM"
+

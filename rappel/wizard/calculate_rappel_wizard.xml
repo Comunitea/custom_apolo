@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+
+        <record id="calculate_rappel_wizard_form" model="ir.ui.view">
+            <field name="name">Calculate rappels</field>
+            <field name="model">rappel.calculate.wizard</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Calculate rappels">
+                    <group>
+                        <group>
+                            <field name="date_start"/>
+                            <field name="date_stop"/>
+                        </group>
+                        <group>
+                            <field name="customer_ids" widget="many2many_tags" domain="[('customer', '=', 1)]"/>
+                        </group>
+                        <button string="Calculate" name="calculate_rappel" type="object" icon="gtk-ok"/>
+                        <button string="Cancel" special="cancel" icon="gtk-cancel"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_rappel_calculate_sales" model="ir.actions.act_window">
+            <field name="name">Calculate rappel</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">rappel.calculate.wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+    </data>
+</openerp>
