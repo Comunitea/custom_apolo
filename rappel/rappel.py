@@ -132,9 +132,20 @@ class rappel_calculation(models.Model):
 
     _name = 'rappel.calculated'
 
+    @api.one
+    @api.depends('period_start', 'period_end')
+    def _get_period_str(self):
+        if self.period_start and self.period_end:
+            self.period = self.period_start + ' - ' + \
+                self.period_end
+        else:
+            self.period = ''
+
     rappel_id = fields.Many2one('rappel', 'Rappel', required=True)
     customer_id = fields.Many2one('res.partner', 'Customer', required=True)
-    period = fields.Char('Period', required=True)
+    period_start = fields.Date('Period start', required=True)
+    period_end = fields.Date('Period end', required=True)
+    period = fields.Char('Period', compute='_get_period_str', store=True)
     quantity = fields.Float('Quantity', required=True)
     invoiced = fields.Boolean('Invoiced')
     invoice_id = fields.Many2one('account.invoice', 'Invoice')

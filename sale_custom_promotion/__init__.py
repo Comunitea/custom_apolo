@@ -19,4 +19,9 @@
 #
 ##############################################################################
 from . import sale_promotion
+from . import tourism
+from . import sale
+from . import account_invoice
+from . import res_partner
+from . import rules
 from . import wizard

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="rules_promotion_add_customers" model="ir.ui.view">
+            <field name="name">promos.rules.form</field>
+            <field name="model">promos.rules</field>
+            <field name="inherit_id" ref="sale_promotions.view_promotion_rules_form"/>
+            <field name="arch" type="xml">
+                <page string="Partner Categories" position="replace">
+                    <page string="Customers">
+                        <field name="customer_ids" nolabel="1" colspan="4" domain="[('customer', '=', True)]"/>
+                    </page>
+                </page>
+            </field>
+        </record>
+
+    </data>
+</openerp>

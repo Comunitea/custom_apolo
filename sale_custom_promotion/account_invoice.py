@@ -18,5 +18,12 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import invoice_joint_promotion
-from . import invoice_tourism
+from openerp import models, fields, api, exceptions, _
+
+
+class AccountInvoice(models.Model):
+
+    _inherit = 'account.invoice'
+
+    tourism = fields.Boolean('Tourism')
+    promotion_line = fields.Boolean('Promotion line')

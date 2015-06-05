@@ -32,8 +32,11 @@ class invoice_joint_promotion(models.TransientModel):
 
     @api.multi
     def invoice(self):
-        for promotion in self.env['sale.joint.promotion'].search([]):
-            invoice = promotion.create_invoice(self.date_start, self.date_end)
-            if invoice and self.invoice_type == 'proforma':
-                invoice.signal_workflow('invoice_proforma2')
+        for promotion in self.env['sale.joint.promotion'].search(
+                [('start_date', '<', self.date_end),
+                 ('end_date', '>=', self.date_start),
+                 ('id', 'in', self._context.get('active_ids', []))]):
+            invoices = promotion.create_invoice(self.date_start, self.date_end)
+            if invoices and self.invoice_type == 'proforma':
+                invoices.signal_workflow('invoice_proforma2')
         return {'type': 'ir.actions.act_window_close'}

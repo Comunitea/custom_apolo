@@ -18,5 +18,19 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import invoice_joint_promotion
-from . import invoice_tourism
+from openerp import models, fields, api, exceptions, _
+
+
+class InvoiceTourism(models.TransientModel):
+
+    _name = 'invoice.tourism'
+
+    date_start = fields.Date('Start', required=True)
+    date_end = fields.Date('End', required=True)
+
+    @api.multi
+    def invoice(self):
+        for tourism in self.env['sale.promotion.tourism'].search(
+                [('id', 'in', self._context.get('active_ids', []))]):
+            tourism.create_invoice(self.date_start, self.date_end)
+        return {'type': 'ir.actions.act_window_close'}

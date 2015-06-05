@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_sale_joint_promotion,access_sale_joint_promotion,model_sale_joint_promotion,base.group_user,1,1,1,1
 access_sale_joint_promotion_history,access_sale_joint_promotion_history,model_sale_joint_promotion_history,base.group_user,1,1,1,1
+access_tourism_group,access_tourism_group,model_tourism_group,base.group_user,1,1,1,1
+access_tourism_line,access_tourism_line,model_tourism_line,base.group_user,1,1,1,1

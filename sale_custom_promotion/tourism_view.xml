@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="tourism_tree" model="ir.ui.view">
+            <field name="name">tourism.group.tree</field>
+            <field name="model">tourism.group</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Tourism">
+                    <field name="date_start"/>
+                    <field name="date_end"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="tourism_form" model="ir.ui.view">
+            <field name="name">tourism.group.form</field>
+            <field name="model">tourism.group</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Tourism">
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                        </group>
+                        <notebook>
+                            <page string="Products">
+                                <field name="line_ids" nolabel="1" colspan="4">
+                                    <tree editable="top">
+                                        <field name="product" domain="[('sale_ok', '=', True)]"/>
+                                        <field name="min_price"/>
+                                        <field name="guar_price"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Customers">
+                                <field name="customer_ids" nolabel="1" colspan="4" domain="[('customer', '=', True)]"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_tourism">
+            <field name="name">Tourism</field>
+            <field name="res_model">tourism.group</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="tourism_tree"/>
+        </record>
+
+        <menuitem name="Tourism" parent="base.menu_sale_config_sales" action="action_tourism" id="tourism_menu"/>
+
+    </data>
+</openerp>

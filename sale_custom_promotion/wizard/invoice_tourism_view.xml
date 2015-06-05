@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+
+        <record id="invoice_tourism_form" model="ir.ui.view">
+            <field name="name">invoice.tourism.form</field>
+            <field name="model">invoice.tourism</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Invoice tourism">
+                    <group>
+                        <field name="date_start"/>
+                        <field name="date_end"/>
+                    </group>
+                    <button string="Invoice" name="invoice" type="object" icon="gtk-ok"/>
+                    <button string="Cancel" special="cancel" icon="gtk-cancel"/>
+                </form>
+            </field>
+        </record>
+
+        <act_window name="Invoice Tourism"
+            res_model="invoice.tourism"
+            src_model="tourism.group"
+            view_id="invoice_tourism_form"
+            view_mode="form"
+            target="new"
+            key2="client_action_multi"
+            id="invoice_tourism_action"/>
+
+    </data>
+</openerp>
+

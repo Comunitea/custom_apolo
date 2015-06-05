@@ -9,8 +9,8 @@
             <field name="arch" type="xml">
                 <tree string="Joint promotions">
                     <field name="supplier_id"/>
-                    <field name="category_id"/>
-                    <field name="discount"/>
+                    <field name="promotion_id"/>
+                    <field name="rappel_id"/>
                     <field name="customer_id"/>
                     <field name="discount_assumed"/>
                 </tree>
@@ -27,10 +27,13 @@
                     </header>
                     <sheet>
                         <group>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
                             <field name="supplier_id" domain="[('supplier', '=', True)]"/>
-                            <field name="category_id"/>
-                            <field name="discount"/>
-                            <field name="customer_id" domain="[('customer', '=', True)]"/>
+                            <field name="type"/>
+                            <field name="promotion_id" attrs="{'invisible': [('type', '!=', 'discount')], 'required': [('type', '=', 'discount')]}"/>
+                            <field name="rappel_id" attrs="{'invisible': [('type', '!=', 'rappel')], 'required': [('type', '=', 'rappel')]}"/>
+                            <field name="customer_id" domain="[('customer', '=', True)]" attrs="{'invisible': [('type', '!=', 'discount')], 'required': [('type', '=', 'discount')]}"/>
                             <field name="discount_assumed"/>
                         </group>
                         <notebook>
@@ -56,9 +59,9 @@
             <field name="arch" type="xml">
                 <search string="">
                     <field name="supplier_id"/>
-                    <field name="category_id"/>
+                    <field name="rappel_id"/>
+                    <field name="promotion_id"/>
                     <field name="customer_id"/>
-                    <filter name="inactive" domain="[('active', '=', False)]"/>
                </search>
             </field>
         </record>

@@ -18,5 +18,16 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import invoice_joint_promotion
-from . import invoice_tourism
+from openerp import models, fields, api, exceptions, _
+
+
+class ResPartner(models.Model):
+
+    _inherit = 'res.partner'
+
+    tourism_group_ids = fields.Many2many(
+        'tourism.group',
+        'tourism_partner_rel',
+        'partner_id',
+        'tourism_id',
+        'Tourism groups')

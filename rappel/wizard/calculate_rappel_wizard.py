@@ -150,11 +150,11 @@ Category!.') % (from_unit.name, to_unit.name,))
                                 to_invoice = sum([x.price_subtotal
                                                   for x in inv_lines]) * \
                                                 (used_section.percent / 100)
-                        period_str = interval_start + ' - ' + interval_stop
                         calculations = self.env['rappel.calculated'].search(
                             [('customer_id', '=', customer.id),
                              ('rappel_id', '=', rappel.id),
-                             ('period', '=', period_str)])
+                             ('period_start', '=', period[0].date()),
+                             ('period_end', '=', period[1].date())])
                         if calculations.invoiced:
                             continue
                         calculations.unlink()
@@ -162,7 +162,8 @@ Category!.') % (from_unit.name, to_unit.name,))
                             self.env['rappel.calculated'].create({
                                 'customer_id': customer.id,
                                 'rappel_id': rappel.id,
-                                'period': period_str,
+                                'period_start': period[0].date(),
+                                'period_end': period[1].date(),
                                 'quantity': to_invoice,
                             })
         return {'type': 'ir.actions.act_window_close'}

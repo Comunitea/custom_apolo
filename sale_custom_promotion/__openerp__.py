@@ -26,9 +26,13 @@
     'description': """""",
     'author': 'Comunitea',
     'website': '',
-    "depends": ['base', 'sale'],
+    "depends": ['base', 'sale', 'rappel'],
     "data": ['sale_promotion_view.xml',
+             'tourism_view.xml',
+             'rules_view.xml',
+             'sale_view.xml',
              'wizard/invoice_joint_promotion_view.xml',
+             'wizard/invoice_tourism_view.xml',
              'security/ir.model.access.csv'],
     "installable": True
 }
