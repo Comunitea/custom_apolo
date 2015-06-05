@@ -160,7 +160,6 @@ class integrate_accounting(object):
             last_period_id = False
             last_move_id = False
             posted = False
-            analytic_account = False
             journal_id = self.search("account.journal", [('name', '=', u"Diario Importación")])
             if not journal_id:
                 print "EXCEPTION: Por favor, cree un diario con el nombre 'Diario Importacion'"
@@ -182,7 +181,6 @@ class integrate_accounting(object):
                     if int(row['Referencia']) != last_move:
                         if last_move_id and not posted:
                             self.execute('account.move', 'post' ,[last_move_id])
-                            analytic_account = False
                         last_move = int(row['Referencia'])
                         move_ids = self.search("account.move", [('name', '=', str(last_move)),('date', '=', last_date),('journal_id', '=', journal_id[0])])
                         if move_ids:
@@ -287,18 +285,14 @@ class integrate_accounting(object):
                         'account_id': account_ids[0],
                         'move_id': last_move_id
                     }
-                    if row.get('Obsv'):
-                        analytic_code = row['Obsv'].replace("-", "")
+                    if row.get('Analitica'):
+                        analytic_code = row['Analitica'].replace("-", "")
                         analytic_acc_id = self.search("account.analytic.account", [('code', '=', analytic_code)])
                         if analytic_acc_id:
-                           analytic_account = analytic_acc_id[0]
                            if account_code.startswith('7') or account_code.startswith('6'):
-                               move_line_vals['analytic_account_id'] = analytic_account
+                               move_line_vals['analytic_account_id'] = analytic_acc_id[0]
                         else:
                             print "EXCEPTION: No hay ninguna cuenta analitica creada con el codigo %s" % analytic_code
-                    elif analytic_account:
-                        if account_code.startswith('7') or account_code.startswith('6'):
-                            move_line_vals['analytic_account_id'] = analytic_account
 
                     self.create('account.move.line', move_line_vals)
 
