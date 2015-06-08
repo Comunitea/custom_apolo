@@ -67,7 +67,8 @@ class SaleOrderLine(models.Model):
             cr, uid, [('product', '=', product.id),
                       ('tourism_id.date_start', '<=', date.today()),
                       ('tourism_id.date_end', '>=', date.today()),
-                      ('tourism_id.id', 'in', partner.tourism_group_ids._ids)],
+                      ('tourism_id.id', 'in', partner.tourism_group_ids._ids),
+                      ('tourism_id.state', '=', 'approved')],
             context=context)
         tourism = self.pool.get('tourism.line').browse(cr, uid, tourism_ids,
                                                        context)
@@ -78,6 +79,39 @@ class SaleOrderLine(models.Model):
                 res['value']['price_unit'] = tourism.min_price
             res['value']['discount'] = 0
             res['value']['tourism'] = True
-        else:
-            res['value']['tourism'] = True
+        return res
+
+    @api.model
+    def create(self, vals):
+        res = super(SaleOrderLine, self).create(vals)
+        tourism_ids = self.env['tourism.line'].search(
+            [('product', '=', res.product_id.id),
+             ('tourism_id.date_start', '<=', date.today()),
+             ('tourism_id.date_end', '>=', date.today()),
+             ('tourism_id.id', 'in',
+              res.order_id.partner_id.tourism_group_ids._ids),
+             ('tourism_id.state', '=', 'approved')])
+        if tourism_ids:
+            if res.price_unit < tourism_ids[0].min_price:
+                raise exceptions.Warning(_('Price error'),
+                                         _('can not sell below the \
+minimum price'))
+        return res
+
+    @api.multi
+    def write(self, vals):
+        res = super(SaleOrderLine, self).write(vals)
+        for line in self:
+            tourism_ids = self.env['tourism.line'].search(
+                [('product', '=', line.product_id.id),
+                 ('tourism_id.date_start', '<=', date.today()),
+                 ('tourism_id.date_end', '>=', date.today()),
+                 ('tourism_id.id', 'in',
+                  line.order_id.partner_id.tourism_group_ids._ids),
+                 ('tourism_id.state', '=', 'approved')])
+            if tourism_ids:
+                if line.price_unit < tourism_ids[0].min_price:
+                    raise exceptions.Warning(_('Price error'),
+                                             _('can not sell below the \
+minimum price'))
         return res

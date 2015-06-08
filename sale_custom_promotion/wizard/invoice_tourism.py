@@ -30,7 +30,8 @@ class InvoiceTourism(models.TransientModel):
 
     @api.multi
     def invoice(self):
-        for tourism in self.env['sale.promotion.tourism'].search(
-                [('id', 'in', self._context.get('active_ids', []))]):
+        for tourism in self.env['tourism.group'].search(
+                [('id', 'in', self._context.get('active_ids', [])),
+                 ('state', '=', 'approved')]):
             tourism.create_invoice(self.date_start, self.date_end)
         return {'type': 'ir.actions.act_window_close'}

@@ -26,7 +26,7 @@
     'description': """""",
     'author': 'Comunitea',
     'website': '',
-    "depends": ['base', 'sale', 'rappel'],
+    "depends": ['base', 'sale', 'account', 'sale_promotions'],
     "data": ['sale_promotion_view.xml',
              'tourism_view.xml',
              'rules_view.xml',

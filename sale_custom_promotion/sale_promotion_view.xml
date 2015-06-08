@@ -11,7 +11,6 @@
                     <field name="supplier_id"/>
                     <field name="promotion_id"/>
                     <field name="rappel_id"/>
-                    <field name="customer_id"/>
                     <field name="discount_assumed"/>
                 </tree>
             </field>
@@ -33,7 +32,6 @@
                             <field name="type"/>
                             <field name="promotion_id" attrs="{'invisible': [('type', '!=', 'discount')], 'required': [('type', '=', 'discount')]}"/>
                             <field name="rappel_id" attrs="{'invisible': [('type', '!=', 'rappel')], 'required': [('type', '=', 'rappel')]}"/>
-                            <field name="customer_id" domain="[('customer', '=', True)]" attrs="{'invisible': [('type', '!=', 'discount')], 'required': [('type', '=', 'discount')]}"/>
                             <field name="discount_assumed"/>
                         </group>
                         <notebook>
@@ -61,7 +59,6 @@
                     <field name="supplier_id"/>
                     <field name="rappel_id"/>
                     <field name="promotion_id"/>
-                    <field name="customer_id"/>
                </search>
             </field>
         </record>

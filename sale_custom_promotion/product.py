@@ -18,11 +18,20 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import sale_promotion
-from . import tourism
-from . import sale
-from . import product
-from . import account_invoice
-from . import res_partner
-from . import rules
-from . import wizard
+from openerp import models, fields, api, exceptions, _
+
+
+class ProductTemplate(models.Model):
+
+    _inherit = 'product.template'
+
+    supplier_id = fields.Many2one('res.partner', 'Supplier',
+                                  compute='_get_supplier', store=True)
+
+    @api.one
+    @api.depends('seller_ids.name')
+    def _get_supplier(self):
+        if self.seller_ids:
+            self.supplier = self.seller_ids[0].name
+        else:
+            self.supplier = False

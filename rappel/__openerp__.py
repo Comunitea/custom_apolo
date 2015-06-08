@@ -36,6 +36,7 @@ Rappel Management
                 "purchase",
                 "product",
                 "frigo_edi",
+                "sale_custom_promotion",
                 ],
     "data": ["rappel_type_view.xml",
              "res_partner_view.xml",

@@ -25,5 +25,11 @@ class AccountInvoice(models.Model):
 
     _inherit = 'account.invoice'
 
+    tourism_id = fields.Many2one('tourism.group', 'Tourism')
+
+
+class AccountInvoiceLine(models.Model):
+    _inherit = 'account.invoice.line'
+
     tourism = fields.Boolean('Tourism')
     promotion_line = fields.Boolean('Promotion line')

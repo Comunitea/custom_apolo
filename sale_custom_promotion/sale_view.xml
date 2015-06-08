@@ -8,7 +8,7 @@
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='order_line']/tree" position="inside">
-                    <field name="tourism" invisible="0"/>
+                    <field name="tourism" invisible="1"/>
                 </xpath>
             </field>
         </record>

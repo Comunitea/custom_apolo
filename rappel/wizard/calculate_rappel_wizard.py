@@ -113,7 +113,9 @@ Category!.') % (from_unit.name, to_unit.name,))
                              ('invoice_id.state', 'in', ('open', 'paid')),
                              ('invoice_id.type', '=', 'out_invoice'),
                              ('product_id.product_tmpl_id', 'in',
-                              rappel.get_products())
+                              rappel.get_products()),
+                             ('tourism', '=', False),
+                             ('promotion_line', '=', False)
                              ])
                         to_invoice = 0.0
                         # Se calcula la cantidad a facturar del rappel para el

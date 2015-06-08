@@ -22,6 +22,9 @@
             <field name="arch" type="xml">
                 <form string="Tourism">
                     <header>
+                        <button name="validate" states="new" string="Validate" type="object"/>
+                        <button name="approve" states="validated" string="Approve" type="object"/>
+                        <button name="cancel" states="new,validated" string="Cancel" type="object"/>
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>
@@ -41,6 +44,9 @@
                             </page>
                             <page string="Customers">
                                 <field name="customer_ids" nolabel="1" colspan="4" domain="[('customer', '=', True)]"/>
+                            </page>
+                            <page string="Created invoices">
+                                <field name="invoice_ids" nolabel="1" colspan="4"/>
                             </page>
                         </notebook>
                     </sheet>

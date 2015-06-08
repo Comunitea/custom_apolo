@@ -39,7 +39,7 @@ class sale_joint_promotion(models.Model):
     # category_id = fields.Many2one('product.category', 'Category')
     promotion_id = fields.Many2one('promos.rules', 'Pomotion')
     # discount = fields.Float('Discount')
-    customer_id = fields.Many2one('res.partner', 'Customer')
+    # customer_id = fields.Many2one('res.partner', 'Customer')
     discount_assumed = fields.Float('Discount assumed', required=True)
     start_date = fields.Date('Start date', required=True)
     end_date = fields.Date('End date', required=True)
@@ -67,33 +67,20 @@ class sale_joint_promotion(models.Model):
             'fiscal_position': self.supplier_id.property_account_position.id
         })
         for product_id in amount.keys():
-            product = self.env['product.product'].browse(product_id)
-            self.env['account.invoice.line'].create({
-                'product_id': product_id,
+            invoice_line_vals = {
                 'name': u'Joint discount',
                 'invoice_id': invoice.id,
                 'account_id': account_id,
                 'price_unit': amount[product_id],
-                'invoice_line_tax_id': [(4, x.id) for x in
-                                        product.taxes_id],
                 'quantity': 1,
-            })
-        # Se parsean los descuentos creados en lineas a parte
-        lines = self.env['account.invoice.line'].search(
-                        [('invoice_id.state', 'in', ('open', 'paid')),
-                         ('invoice_id.date_invoice', '>=', date_start),
-                         ('invoice_id.date_invoice', '<=', date_end),
-                         ('invoice_id.partner_id', 'in', invoice_partner._ids),
-                         ('promotion_line', '=', True)])
-        if lines:
-            total_lines = sum([abs(x.price_subtotal) for x in lines])
-            self.env['account.invoice.line'].create({
-                'name': u'Joint discount',
-                'invoice_id': invoice.id,
-                'account_id': account_id,
-                'price_unit': total_lines * (self.discount_assumed / 100),
-                'quantity': 1,
-                })
+            }
+            if product_id:
+                product = self.env['product.product'].browse(product_id)
+                invoice_line_vals['product_id'] = product_id
+                invoice_line_vals['invoice_line_tax_id'] = [(4, x.id) for x in
+                                                            product.taxes_id],
+            self.env['account.invoice.line'].create(invoice_line_vals)
+
         return invoice
 
     @api.multi
@@ -118,17 +105,16 @@ class sale_joint_promotion(models.Model):
 
     @api.multi
     def get_discount_amount(self, date_start, date_end):
-        products = self.env['product.template'].search([('categ_id', '=',
-                                                        self.category_id.id)])
         partners = self.env['res.partner'].search(
-            [('id', 'child_of', self.customer_id.id),
+            [('id', 'child_of', self.promotion_id.customer_ids._ids),
              ('is_company',  '=', True)])
         amount_to_invoice = {}
         for partner in partners:
             invoice_partner = self.env['res.partner'].search(
                 [('parent_id', '=', partner.id),
                  ('is_company',  '=', False)]) + partner
-            amount_to_invoice = {}
+            products = self.env['product.template'].search([('supplier_id',
+                                                             '=', partner.id)])
             for product in products:
                 if product.seller_ids and \
                         product.seller_ids[0].name == self.supplier_id:
@@ -138,11 +124,21 @@ class sale_joint_promotion(models.Model):
                          ('invoice_id.date_invoice', '>=', date_start),
                          ('invoice_id.date_invoice', '<=', date_end),
                          ('invoice_id.partner_id', 'in', invoice_partner._ids),
-                         ('discount', '>=', self.discount)])
+                         ('discount', '=', self.discount)])
                     amount_to_invoice[product.id] = self._get_total_discount(
                         lines)
                     if not amount_to_invoice[product.id]:
                         amount_to_invoice.pop(product.id, False)
+        lines = self.env['account.invoice.line'].search(
+                        [('invoice_id.state', 'in', ('open', 'paid')),
+                         ('invoice_id.date_invoice', '>=', date_start),
+                         ('invoice_id.date_invoice', '<=', date_end),
+                         ('invoice_id.partner_id', 'in', invoice_partner._ids),
+                         ('promotion_line', '=', True)])
+        if lines:
+            amount_to_invoice[False] = sum([abs(x.price_subtotal)
+                                            for x in lines]) * \
+                (self.discount_assumed / 100)
         return amount_to_invoice
 
     @api.multi

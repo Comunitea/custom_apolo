@@ -89,7 +89,6 @@ class Edi(models.Model):
 
         visited_supp_ids = []
         for line in f:
-            import ipdb; ipdb.set_trace()
             product_code = str(int(line[:10]))
             product_ids = supp_obj.search([('id', 'in', supplier_product_ids),
                                            ('product_code', '=',
