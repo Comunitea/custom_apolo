@@ -62,8 +62,8 @@ class AccountIntegrateWzd(models.TransientModel):
             last_date = False
             last_period_id = False
             last_move_id = False
+            last_op = False
             posted = False
-            analytic_account = False
             error = False
             journal_id = jounal_obj.search([('name', '=',
                                              u"Diario Importación")])
@@ -83,11 +83,11 @@ class AccountIntegrateWzd(models.TransientModel):
                     if row.get('Sit', False) == 'T':
                         error = True
                         break
-                    if not row.get('Referencia', False) or not \
-                            row.get('Cuenta', False):
+
+                    if not row.get('Referencia', False):
                         continue
 
-                    if row['Fecha'] != last_date:
+                    if row['Fecha'] and row['Fecha'] != last_date:
                         last_date = datetime.\
                             strftime(datetime.strptime(row['Fecha'],
                                                        "%d-%m-%Y"), "%Y-%m-%d")
@@ -99,10 +99,11 @@ class AccountIntegrateWzd(models.TransientModel):
                         last_period_id = period_obj.with_context(ctx).\
                             find(last_date)[0]
 
-                    if int(row['Referencia']) != last_move:
+                    if int(row['Referencia']) != last_move or row['Sit'] != last_op:
                         if last_move_id and not posted:
                             last_move_id.post()
-                            analytic_account = False
+                            last_move_id = False
+                            last_op = False
                         last_move = int(row['Referencia'])
                         move_ids = acc_move_obj.search([('name', '=',
                                                          str(last_move)),
@@ -124,6 +125,7 @@ class AccountIntegrateWzd(models.TransientModel):
                             'name': str(last_move)
                         }
                         last_move_id = acc_move_obj.create(move_vals)
+                        last_op = row['Sit']
                         posted = False
                     elif posted:
                         continue
@@ -228,25 +230,19 @@ class AccountIntegrateWzd(models.TransientModel):
                         'account_id': account_ids[0].id,
                         'move_id': last_move_id.id
                     }
-                    if row.get('Obsv'):
-                        analytic_code = row['Obsv'].replace("-", "")
+                    if row.get('Analitica'):
+                        analytic_code = row['Analitica'].replace("-", "")
                         analytic_acc_id = analytic_acc_obj.\
                             search([('code', '=', analytic_code)])
                         if analytic_acc_id:
-                            analytic_account = analytic_acc_id[0]
                             if account_code.startswith('7') or \
                                     account_code.startswith('6'):
                                 move_line_vals['analytic_account_id'] = \
-                                    analytic_account.id
+                                    analytic_acc_id[0].id
                         else:
                             _logger.warning(_("%s: Any analytic account with "
                                               "code %s") %
                                             (file_name, analytic_code))
-                    elif analytic_account:
-                        if account_code.startswith('7') or \
-                                account_code.startswith('6'):
-                            move_line_vals['analytic_account_id'] = \
-                                analytic_account.id
 
                     move_line_obj.create(move_line_vals)
 
@@ -265,4 +261,3 @@ class AccountIntegrateWzd(models.TransientModel):
                 src_file = file_name
                 dst_file = backup_path + os.sep + file_name.split(os.sep)[-1]
                 shutil.move(src_file, dst_file)
-                #shutil.rmtree(src_file)
