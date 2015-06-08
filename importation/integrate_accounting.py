@@ -180,7 +180,10 @@ class integrate_accounting(object):
 
                     if int(row['Referencia']) != last_move:
                         if last_move_id and not posted:
-                            self.execute('account.move', 'post' ,[last_move_id])
+                            try:
+                                self.execute('account.move', 'post' ,[last_move_id])
+                            except Exception, e:
+                                print "No se puede asentar el asiento %s", str(last_move)
                         last_move = int(row['Referencia'])
                         move_ids = self.search("account.move", [('name', '=', str(last_move)),('date', '=', last_date),('journal_id', '=', journal_id[0])])
                         if move_ids:
