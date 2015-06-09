@@ -19,6 +19,8 @@
 #
 ##############################################################################
 from openerp import models, api
+from openerp.exceptions import except_orm
+from openerp.tools.translate import _
 
 
 class StockTask(models.Model):
@@ -26,9 +28,19 @@ class StockTask(models.Model):
 
     @api.multi
     def get_location_gun_operations(self, my_args):
-        # import ipdb; ipdb.set_trace()
+        """
+        Get a location task for a user defined in my args.
+        """
         user_id = my_args.get('user_id', False)
         camera_id = my_args.get('camera_id', False)
+        domain = [
+            ('user_id', '=', user_id),
+            ('state', '=', 'assigned')
+        ]
+        task_obj = self.search(domain)
+        if task_obj:
+            print "Te doy la que tenias"
+            return task_obj.id
 
         vals = {
             'operator_id': user_id,
@@ -53,12 +65,18 @@ class StockTask(models.Model):
             ('state', '=', 'assigned')
         ]
         task_obj = self.search(domain)
+        if not task_obj:
+            raise except_orm(_("Error"), _("Task not founded after create it"))
         for op in task_obj.operation_ids:
-            op.write({'to_process': False, 'visited': False})
+            op.write({'visited': False})
+        print "te doy una creada"
         return task_obj.id
 
     @api.multi
     def get_op_data(self, my_args):
+        """
+        Return data for next operation not visited.
+        """
         # user_id = my_args.get('user_id', False)
         task_id = my_args.get('task_id', False)
         task_obj = self.browse(task_id)
@@ -70,7 +88,7 @@ class StockTask(models.Model):
                 'ID': op.id,
                 'PRODUCTO': op.product_id and op.product_id.name or "",
                 'CANTIDAD': str(op.product_qty),
-                'LOTE': op.lot_id and op.lot_id.name or "",
+                'LOTE': op.packed_lot_id and op.packed_lot_id.name or "",
                 'PAQUETE': op.package_id and op.package_id.name or "",
                 'ORIGEN': op.location_id.name,
                 'DESTINO': op.location_dest_id.name,
@@ -86,10 +104,14 @@ class StockTask(models.Model):
         op_id = my_args.get('op_id')
         task_obj = self.browse(task_id)
         op_obj = False
+        # import ipdb; ipdb.set_trace()
         for op in task_obj.operation_ids:
             if op.id == op_id:
                 op_obj = op
                 break
+        if not op_obj:
+            raise except_orm(_("Error"),
+                             _("Operation not founded in the task"))
         if mode == "pack_prod":
             if op_obj.package_id:
                 if op.package_id.name == scan_code:
