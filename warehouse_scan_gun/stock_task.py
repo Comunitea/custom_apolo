@@ -27,12 +27,13 @@ class StockTask(models.Model):
     _inherit = 'stock.task'
 
     @api.multi
-    def get_location_gun_operations(self, my_args):
+    def get_task_of_type(self, my_args):
         """
-        Get a location task for a user defined in my args.
+        Get a task for a user and type defined in my args.
         """
         user_id = my_args.get('user_id', False)
         camera_id = my_args.get('camera_id', False)
+        task_type = my_args.get('task_type', False)
         domain = [
             ('user_id', '=', user_id),
             ('state', '=', 'assigned')
@@ -59,10 +60,17 @@ class StockTask(models.Model):
         wzd_obj = t_wzd.create(vals)
         env2 = wzd_obj.env(self._cr, user_id, self._context)
         wzd_obj_uid = wzd_obj.with_env(env2)
-        wzd_obj_uid.get_location_task()
+        if task_type == 'ubication':
+            wzd_obj_uid.get_location_task()
+        elif task_type == 'reposition':
+            wzd_obj_uid.get_reposition_task()
+        elif task_type == 'picking':
+            wzd_obj_uid.get_picking_task()
+
         domain = [
             ('user_id', '=', user_id),
-            ('state', '=', 'assigned')
+            ('state', '=', 'assigned'),
+            ('type', '=', task_type),
         ]
         task_obj = self.search(domain)
         if not task_obj:
@@ -106,7 +114,7 @@ class StockTask(models.Model):
         op_obj = False
         # import ipdb; ipdb.set_trace()
         for op in task_obj.operation_ids:
-            if op.id == op_id:
+            if op.id == op_id or op.old_id == op_id:
                 op_obj = op
                 break
         if not op_obj:

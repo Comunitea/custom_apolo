@@ -19,6 +19,8 @@
 #
 ##############################################################################
 from openerp import models, fields, api
+from openerp.exceptions import except_orm
+from openerp.tools.translate import _
 
 
 class stock_pack_operation(models.Model):
@@ -37,9 +39,15 @@ class stock_pack_operation(models.Model):
         op_id = my_args.get('op_id', False)
         task_id = my_args.get('task_id', False)
         to_process = my_args.get('to_process', False)
+        # approve_pack_operations2 method maybe delete the original operation
+        # so we need to search the new
+        domain = ['|', ('id', '=', op_id), ('old_id', '=', op_id)]
+        op_obj = self.search(domain, limit=1)
+        if not op_obj:
+            raise except_orm(_('Error'),
+                             _('No operation founded to set as visited'))
 
         # Browse with correct uid, an mark as visited
-        op_obj = self.browse(op_id)
         env2 = op_obj.env(self._cr, user_id, self._context)
         op_obj_uid = op_obj.with_env(env2)
         op_obj_uid.write({'visited': True, 'to_process': to_process})
