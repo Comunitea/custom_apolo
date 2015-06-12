@@ -454,7 +454,7 @@ msgstr "Rappel calculados"
 #: field:product.template,rappel_group_id:0
 #: field:rappel,rappel_group_id:0
 msgid "Rappel group"
-msgstr "Rappel group"
+msgstr "Grupo de rappel"
 
 #. module: rappel
 #: model:ir.model,name:rappel.model_rappel_section

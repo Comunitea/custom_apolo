@@ -1,0 +1,27 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#   * hidde_fields
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-06-12 10:54+0000\n"
+"PO-Revision-Date: 2015-06-12 10:54+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: hidde_fields
+#: model:ir.model,name:hidde_fields.model_product_template
+msgid "Product Template"
+msgstr "Plantilla de producto"
+
+#. module: hidde_fields
+#: model:res.groups,name:hidde_fields.group_show_unnused
+msgid "Show unnused fields"
+msgstr "Mostrar campos no usados"
+
