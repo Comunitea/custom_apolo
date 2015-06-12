@@ -26,7 +26,7 @@
     'description': """""",
     'author': 'Comunitea',
     'website': '',
-    "depends": ['base', 'product'],
+    "depends": ['base', 'product', 'midban_depot_stock', 'price_system_variable'],
     "data": ['security/hidde_security.xml'],
     "installable": True
 }
