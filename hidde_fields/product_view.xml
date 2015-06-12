@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+       <record id="product_template_hidde_fields" model="ir.ui.view">
+           <field name="name">product.normal.form</field>
+            <field name="model">product.template</field>
+           <field name="inherit_id" ref="price_system_variable.product_normal_add_cmc_form_view"/>
+           <field name="arch" type="xml">
+                <button name="%(price_system_variable.action_update_cmc)d" position="attributes">
+                    <attribute name="groups">hidde_fields.group_show_unnused</attribute>
+                </button>
+                <button name="show_pvp_changes" position="attributes">
+                    <attribute name="groups">hidde_fields.group_show_unnused</attribute>
+                </button>
+           </field>
+       </record>
+
+    </data>
+</openerp>
