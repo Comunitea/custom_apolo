@@ -21,7 +21,7 @@
             </field>
         </record>
 
-        <record id="" model="ir.ui.view">
+        <record id="purchase_order_price_variable_delete_update" model="ir.ui.view">
             <field name="name">purchase.order.form</field>
             <field name="model">purchase.order</field>
             <field name="inherit_id" ref="price_system_variable.purchase_order_form_add_update_pricelist_to_line"/>
@@ -29,6 +29,17 @@
                 <field name="update_pricelist" position="attributes">
                     <attribute name="groups">hidde_fields.group_show_unnused</attribute>
                 </field>
+            </field>
+        </record>
+
+        <record id="purchase_order_price_variable_delete_update2" model="ir.ui.view">
+            <field name="name">purchase.order.form</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="price_system_variable.purchase_order_2_stock_picking_add_link"/>
+            <field name="arch" type="xml">
+                <button name="change_pricelist_open" position="attributes">
+                    <attribute name="groups">hidde_fields.group_show_unnused</attribute>
+                </button>
             </field>
         </record>
 
