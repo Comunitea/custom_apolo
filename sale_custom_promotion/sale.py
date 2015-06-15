@@ -92,7 +92,8 @@ class SaleOrderLine(models.Model):
               res.order_id.partner_id.tourism_group_ids._ids),
              ('tourism_id.state', '=', 'approved')])
         if tourism_ids:
-            if res.price_unit < tourism_ids[0].min_price:
+            if res.price_unit * (res.discount and res.discount / 100 or 1) < \
+                    tourism_ids[0].min_price:
                 raise exceptions.Warning(_('Price error'),
                                          _('can not sell below the \
 minimum price'))
@@ -110,7 +111,8 @@ minimum price'))
                   line.order_id.partner_id.tourism_group_ids._ids),
                  ('tourism_id.state', '=', 'approved')])
             if tourism_ids:
-                if line.price_unit < tourism_ids[0].min_price:
+                if line.price_unit * (line.discount and line.discount /
+                                      100 or 1) < tourism_ids[0].min_price:
                     raise exceptions.Warning(_('Price error'),
                                              _('can not sell below the \
 minimum price'))
