@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="purchase_order_delete_fields" model="ir.ui.view">
+            <field name="name">purchase.order.form</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="midban_ultra_fresh.ultrafresh_purchase_order_form"/>
+            <field name="arch" type="xml">
+                <field name="purchased_kg" position="attributes">
+                    <attribute name="groups">hidde_fields.group_show_unnused</attribute>
+                </field>
+
+                <label string="UltraFresh Purchase" position="attributes">
+                    <attribute name="groups">hidde_fields.group_show_unnused</attribute>
+                </label>
+
+                <field name="ultrafresh_purchase" position="attributes">
+                    <attribute name="groups">hidde_fields.group_show_unnused</attribute>
+                </field>
+            </field>
+        </record>
+
+        <record id="" model="ir.ui.view">
+            <field name="name">purchase.order.form</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="price_system_variable.purchase_order_form_add_update_pricelist_to_line"/>
+            <field name="arch" type="xml">
+                <field name="update_pricelist" position="attributes">
+                    <attribute name="groups">hidde_fields.group_show_unnused</attribute>
+                </field>
+            </field>
+        </record>
+
+        <menuitem groups="hidde_fields.group_show_unnused" action="midban_ultra_fresh.action_ultrafresh_purchase" id="midban_ultra_fresh.menu_ultrafresh_purchase" parent="purchase.menu_procurement_management" sequence="7"/>
+
+    </data>
+</openerp>
