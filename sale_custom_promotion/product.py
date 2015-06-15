@@ -25,13 +25,4 @@ class ProductTemplate(models.Model):
 
     _inherit = 'product.template'
 
-    supplier_id = fields.Many2one('res.partner', 'Supplier',
-                                  compute='_get_supplier', store=True)
-
-    @api.one
-    @api.depends('seller_ids.name')
-    def _get_supplier(self):
-        if self.seller_ids:
-            self.supplier = self.seller_ids[0].name
-        else:
-            self.supplier = False
+    supplier_id = fields.Many2one('res.partner', 'Supplier', related='seller_ids.name')

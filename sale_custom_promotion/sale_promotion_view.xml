@@ -10,7 +10,6 @@
                 <tree string="Joint promotions">
                     <field name="supplier_id"/>
                     <field name="promotion_id"/>
-                    <field name="rappel_id"/>
                     <field name="discount_assumed"/>
                 </tree>
             </field>
@@ -29,9 +28,7 @@
                             <field name="start_date"/>
                             <field name="end_date"/>
                             <field name="supplier_id" domain="[('supplier', '=', True)]"/>
-                            <field name="type"/>
-                            <field name="promotion_id" attrs="{'invisible': [('type', '!=', 'discount')], 'required': [('type', '=', 'discount')]}"/>
-                            <field name="rappel_id" attrs="{'invisible': [('type', '!=', 'rappel')], 'required': [('type', '=', 'rappel')]}"/>
+                            <field name="promotion_id" required="1"/>
                             <field name="discount_assumed"/>
                         </group>
                         <notebook>
@@ -55,9 +52,8 @@
             <field name="model">sale.joint.promotion</field>
             <field name="type">search</field>
             <field name="arch" type="xml">
-                <search string="">
+                <search string="Joint promotions">
                     <field name="supplier_id"/>
-                    <field name="rappel_id"/>
                     <field name="promotion_id"/>
                </search>
             </field>
@@ -72,7 +68,8 @@
             <field name="search_view_id" ref="sale_joint_promotion_filter"/>
         </record>
 
-        <menuitem name="Joint promotions" parent="base.menu_sale_config_sales" action="action_sale_joint_promotion" id="joint_promotion_menu"/>
+        <menuitem name="Joint promotions" parent="base.menu_sale_config_sales"
+                  action="action_sale_joint_promotion" id="joint_promotion_menu"/>
 
     </data>
 </openerp>

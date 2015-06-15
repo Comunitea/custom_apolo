@@ -36,18 +36,12 @@ class sale_joint_promotion(models.Model):
     _name = 'sale.joint.promotion'
 
     supplier_id = fields.Many2one('res.partner', 'Supplier', required=True)
-    # category_id = fields.Many2one('product.category', 'Category')
     promotion_id = fields.Many2one('promos.rules', 'Pomotion')
-    # discount = fields.Float('Discount')
-    # customer_id = fields.Many2one('res.partner', 'Customer')
     discount_assumed = fields.Float('Discount assumed', required=True)
     start_date = fields.Date('Start date', required=True)
     end_date = fields.Date('End date', required=True)
     invoiced_amounts = fields.One2many('sale.joint.promotion.history',
                                        'joint_id', 'Invoiced amounts')
-    rappel_id = fields.Many2one('rappel', 'Rappel')
-    type = fields.Selection((('discount', 'Discount'), ('rappel', 'Rappel')),
-                            'Type', required=True)
 
     @api.multi
     def _get_invoice(self, amount):
@@ -92,18 +86,6 @@ class sale_joint_promotion(models.Model):
         return total
 
     @api.multi
-    def get_rappel_amount(self, date_start, date_end):
-        calculated = self.env['rappel.calculated'].read_group(
-            [('rappel_id', '=', self.rappel_id.id),
-             ('period_start', '>=', date_start),
-             ('period_end', '<=', date_end), ('invoiced', '=', True)],
-            ['rappel_id', 'quantity'], ['rappel_id'], limit=1)
-        if not calculated:
-            return 0
-        return {self.rappel_id.type_id.product_id.id:
-                calculated[0]['quantity'] * (self.discount_assumed / 100)}
-
-    @api.multi
     def get_discount_amount(self, date_start, date_end):
         partners = self.env['res.partner'].search(
             [('id', 'child_of', self.promotion_id.customer_ids._ids),
@@ -113,22 +95,19 @@ class sale_joint_promotion(models.Model):
             invoice_partner = self.env['res.partner'].search(
                 [('parent_id', '=', partner.id),
                  ('is_company',  '=', False)]) + partner
-            products = self.env['product.template'].search([('supplier_id',
-                                                             '=', partner.id)])
+            products = self.env['product.template'].search(
+                [('supplier_id', '=', self.supplier_id.id)])
             for product in products:
-                if product.seller_ids and \
-                        product.seller_ids[0].name == self.supplier_id:
-                    lines = self.env['account.invoice.line'].search(
-                        [('product_id.product_tmpl_id', '=', product.id),
-                         ('invoice_id.state', 'in', ('open', 'paid')),
-                         ('invoice_id.date_invoice', '>=', date_start),
-                         ('invoice_id.date_invoice', '<=', date_end),
-                         ('invoice_id.partner_id', 'in', invoice_partner._ids),
-                         ('discount', '=', self.discount)])
-                    amount_to_invoice[product.id] = self._get_total_discount(
-                        lines)
-                    if not amount_to_invoice[product.id]:
-                        amount_to_invoice.pop(product.id, False)
+                lines = self.env['account.invoice.line'].search(
+                    [('product_id.product_tmpl_id', '=', product.id),
+                     ('invoice_id.state', 'in', ('open', 'paid')),
+                     ('invoice_id.date_invoice', '>=', date_start),
+                     ('invoice_id.date_invoice', '<=', date_end),
+                     ('invoice_id.partner_id', 'in', invoice_partner._ids)])
+                amount_to_invoice[product.id] = self._get_total_discount(
+                    lines)
+                if not amount_to_invoice[product.id]:
+                    amount_to_invoice.pop(product.id, False)
         lines = self.env['account.invoice.line'].search(
                         [('invoice_id.state', 'in', ('open', 'paid')),
                          ('invoice_id.date_invoice', '>=', date_start),
@@ -142,12 +121,20 @@ class sale_joint_promotion(models.Model):
         return amount_to_invoice
 
     @api.multi
+    def get_amount(self, date_start, date_end):
+        '''Funcion para facilitar el heredar para otro tipo de descuentos,
+           No se utiliza campo type porque un campo selection con 1 unica
+           opcion falla.
+        '''
+        if self.promotion_id:
+            return self.get_discount_amount(date_start, date_end)
+        else:
+            return 0
+
+    @api.multi
     def create_invoice(self, date_start, date_end):
         invoices = self.env['account.invoice']
-        if self.type == 'rappel':
-            amount_to_invoice = self.get_rappel_amount(date_start, date_end)
-        elif self.type == 'discount':
-            amount_to_invoice = self.get_discount_amount(date_start, date_end)
+        amount_to_invoice = self.get_amount(date_start, date_end)
 
         if amount_to_invoice:
             invoice = self._get_invoice(amount_to_invoice)
