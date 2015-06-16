@@ -22,4 +22,4 @@ from . import wizard
 from . import res_partner
 from . import rappel_type
 from . import rappel
-
+from . import sale_promotion

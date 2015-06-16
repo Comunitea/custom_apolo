@@ -129,7 +129,7 @@ class sale_joint_promotion(models.Model):
         if self.promotion_id:
             return self.get_discount_amount(date_start, date_end)
         else:
-            return 0
+            return None
 
     @api.multi
     def create_invoice(self, date_start, date_end):

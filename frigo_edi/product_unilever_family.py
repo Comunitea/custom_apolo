@@ -34,7 +34,18 @@ class ProductRappelGroup(models.Model):
     _name = 'product.rappel.group'
 
     name = fields.Char("Name", size=30, required=True)
-    code = fields.Char("Code", size=6, required=True)
+    code = fields.Char("Code", size=2, required=True)
+    subgroup_ids = fields.One2many('product.rappel.subgroup', 'group_id',
+                                   'Subgroups')
+
+
+class ProductRappelSubgroup(models.Model):
+
+    _name = 'product.rappel.subgroup'
+
+    name = fields.Char('name', required=True)
+    code = fields.Char('Code', size=2, required=True)
+    group_id = fields.Many2one('product.rappel.group', 'Group')
 
 
 class ProductTemplate(models.Model):
@@ -44,3 +55,5 @@ class ProductTemplate(models.Model):
     unilever_family_id = fields.Many2one("product.unilever.family",
                                          "Unilever family")
     rappel_group_id = fields.Many2one('product.rappel.group', 'Rappel group')
+    rappel_subgroup_id = fields.Many2one('product.rappel.subgroup',
+                                         'Rappel subgroup')

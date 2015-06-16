@@ -34,7 +34,9 @@ class rappel(models.Model):
     type_id = fields.Many2one('rappel.type', 'Type', required=True)
     date_start = fields.Date('Date Start', required=True)
     date_stop = fields.Date('Date Stop')
-    last_use = fields.Date('Last use of the rappel')
+    last_use = fields.Date('Last use of the rappel')  # !!!
+    grouped = fields.Boolean('Grouped by sub customer')
+    invoice_grouped = fields.Boolean('Group invoice of sub customers')
     periodicity = fields.Selection(PERIODICITIES,
                                    'Periodicity',
                                    required=True)
@@ -148,4 +150,8 @@ class rappel_calculation(models.Model):
     period = fields.Char('Period', compute='_get_period_str', store=True)
     quantity = fields.Float('Quantity', required=True)
     invoiced = fields.Boolean('Invoiced')
-    invoice_id = fields.Many2one('account.invoice', 'Invoice')
+    invoice_ids = fields.Many2many('account.invoice',
+                                          'rappel_calculated_invoice_rel',
+                                          'calculated_id', 'invoice_id',
+                                          'Invoices')
+    total_consumed = fields.Float('Total consumed')
