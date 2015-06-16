@@ -147,7 +147,6 @@ class ScanGunHandler(Shell):
         elif cmd == "ee":
             self._twr(self.variable)
         elif cmd == '3' and self.state == 'menu':
-            # import ipdb; ipdb.set_trace()
             aa = self.manager.odoo_con.connection.read('res.users', self.manager.user_id, ['name'])
             self._twr(aa[0]['name'])
         elif cmd == '4' and self.state == 'menu':

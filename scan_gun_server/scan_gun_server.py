@@ -125,7 +125,7 @@ class ScanGunProtocol(LineReceiver):
         Método que devuelve el menú principal
         """
         delimiter = "\n********************\n"
-        menu_str = u"1 -> Tarea de ubicacion\n2 -> Tarea de reposicion\n3 -> Tarea de picking\n4 -> Transferencia manual\n5 -> Quien soy"
+        menu_str = u"1 -> Tarea de ubicacion\n2 -> Tarea de reposicion\n3 -> Tarea de picking\n4 -> Transferencia manual\n"
         return delimiter + menu_str + delimiter
 
     def handle_menu1(self, line):
@@ -192,7 +192,6 @@ class ScanGunProtocol(LineReceiver):
                 op_str = self.get_operation_str(mode='scan_op')
                 self._snd(op_str)
             except Exception, e:
-                # import ipdb; ipdb.set_trace()
                 expt_str = e.message
                 str_error = expt_str + u"\nIntroduzca camara de nuevo\n"
                 self._snd(str_error + self.get_cameras_menu())

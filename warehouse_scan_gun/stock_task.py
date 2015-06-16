@@ -112,7 +112,6 @@ class StockTask(models.Model):
         op_id = my_args.get('op_id')
         task_obj = self.browse(task_id)
         op_obj = False
-        # import ipdb; ipdb.set_trace()
         for op in task_obj.operation_ids:
             if op.id == op_id or op.old_id == op_id:
                 op_obj = op
