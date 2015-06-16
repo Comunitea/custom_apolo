@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="joint_promotion_add_rappel" model="ir.ui.view">
+            <field name="name">sale.joint.promotion.form</field>
+            <field name="model">sale.joint.promotion</field>
+            <field name="inherit_id" ref="sale_custom_promotion.sale_joint_promotion_form"/>
+            <field name="arch" type="xml">
+                <field name="promotion_id" position="replace">
+                        <field name="type"/>
+                        <field name="promotion_id" attrs="{'invisible': [('type', '!=', 'discount')], 'required': [('type', '=', 'discount')]}"/>
+                        <field name="rappel_id" attrs="{'invisible': [('type', '!=', 'rappel')], 'required': [('type', '=', 'rappel')]}"/>
+                </field>
+            </field>
+        </record>
+
+    </data>
+</openerp>

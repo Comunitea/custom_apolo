@@ -18,3 +18,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+
+{
+    'name': 'Stock Inventory add packs',
+    'version': '1.0',
+    'category': 'Stock',
+    'description': """""",
+    'author': 'Comunitea',
+    'website': '',
+    "depends": ['base', 'stock'],
+    "installable": True
+}

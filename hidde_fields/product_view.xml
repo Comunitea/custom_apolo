@@ -13,6 +13,45 @@
                 <button name="show_pvp_changes" position="attributes">
                     <attribute name="groups">hidde_fields.group_show_unnused</attribute>
                 </button>
+                <field name="sec_margin" position="attributes">
+                    <attribute name="groups">hidde_fields.group_show_unnused</attribute>
+                </field>
+                <field name="cmc" position="attributes">
+                    <attribute name="groups">hidde_fields.group_show_unnused</attribute>
+                </field>
+           </field>
+       </record>
+
+       <record id="midban_depot_stock_delete_fields" model="ir.ui.view">
+           <field name="name">product.normal.form</field>
+            <field name="model">product.template</field>
+           <field name="inherit_id" ref="midban_depot_stock.product_template_form_view_add_volume_decimals"/>
+           <field name="arch" type="xml">
+               <field name="price_kg" position="attributes">
+                    <attribute name="groups">hidde_fields.group_show_unnused</attribute>
+                </field>
+           </field>
+       </record>
+
+       <record id="midban_product_delete_fields" model="ir.ui.view">
+           <field name="name">product.normal.form</field>
+            <field name="model">product.template</field>
+           <field name="inherit_id" ref="midban_product.midban_view_product_extra_form"/>
+           <field name="arch" type="xml">
+               <field name="margin" position="attributes">
+                    <attribute name="groups">hidde_fields.group_show_unnused</attribute>
+                </field>
+           </field>
+       </record>
+
+       <record id="product_delete-fields" model="ir.ui.view">
+           <field name="name">product.normal.form</field>
+            <field name="model">product.template</field>
+           <field name="inherit_id" ref="product.product_template_form_view"/>
+           <field name="arch" type="xml">
+               <field name="mes_type" position="attributes">
+                    <attribute name="groups">hidde_fields.group_show_unnused</attribute>
+                </field>
            </field>
        </record>
 

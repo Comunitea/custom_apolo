@@ -97,7 +97,8 @@ Category!.') % (from_unit.name, to_unit.name,))
         customers = self.customer_ids
         rappels = self.env['rappel'].search([])
         for rappel in rappels:
-            for customer in rappel.get_partners():
+            partner_calc = {}
+            for customer in rappel.customer_ids:
                 if customers and customer not in customers:
                     continue
                 if (rappel.date_stop and rappel.date_stop >= self.date_start
@@ -106,10 +107,11 @@ Category!.') % (from_unit.name, to_unit.name,))
                     for period in self._get_periods(rappel):
                         interval_start = period[0].date().strftime('%Y-%m-%d')
                         interval_stop = period[1].date().strftime('%Y-%m-%d')
-                        inv_lines = self.env['account.invoice.line'].search(
+                        if rappel.grouped:
+                            inv_lines = self.env['account.invoice.line'].search(
                             [('invoice_id.date_invoice', '>=', interval_start),
                              ('invoice_id.date_invoice', '<=', interval_stop),
-                             ('invoice_id.partner_id', '=', customer.id),
+                             ('invoice_id.partner_id', 'child_of', customer.id),
                              ('invoice_id.state', 'in', ('open', 'paid')),
                              ('invoice_id.type', '=', 'out_invoice'),
                              ('product_id.product_tmpl_id', 'in',
@@ -117,55 +119,82 @@ Category!.') % (from_unit.name, to_unit.name,))
                              ('tourism', '=', False),
                              ('promotion_line', '=', False)
                              ])
-                        to_invoice = 0.0
-                        # Se calcula la cantidad a facturar del rappel para el
-                        # cliente en el periodo.
-                        if rappel.calc_mode == 'fixed':
-                            if rappel.calc_amount == 'qty':
-                                to_invoice = rappel.fix_qty
-                            else:
-                                total_consumed = sum([x.price_subtotal for x in
-                                                      inv_lines])
-                                to_invoice = total_consumed * \
-                                    (rappel.fix_qty / 100)
+                            partner_calc[customer.id] = inv_lines
                         else:
-                            if rappel.calc_type == 'monetary':
-                                total_consumed = sum([x.price_subtotal for x in
-                                                      inv_lines])
+                            all_partners = self.env['res.partner'].search(
+                                [('id', 'child_of', customer.id),
+                                 ('is_company', '=', True)])
+                            for partner in all_partners:
+                                invoice_partners = self.env['res.partner'].search(
+                                    [('parent_id', '=', partner.id),
+                                     ('is_company', '=', False)]) + partner
+                                inv_lines = self.env['account.invoice.line'].search(
+                                [('invoice_id.date_invoice', '>=', interval_start),
+                                 ('invoice_id.date_invoice', '<=', interval_stop),
+                                 ('invoice_id.partner_id', 'in', invoice_partners._ids),
+                                 ('invoice_id.state', 'in', ('open', 'paid')),
+                                 ('invoice_id.type', '=', 'out_invoice'),
+                                 ('product_id.product_tmpl_id', 'in',
+                                  rappel.get_products()),
+                                 ('tourism', '=', False),
+                                 ('promotion_line', '=', False)
+                                 ])
+                                partner_calc[partner.id] = inv_lines
+                        for partner_id in partner_calc.keys():
+                            inv_lines = partner_calc[partner_id]
+                            to_invoice = 0.0
+                            # Se calcula la cantidad a facturar del rappel
+                            # para el cliente en el periodo.
+                            if rappel.calc_mode == 'fixed':
+                                if rappel.calc_amount == 'qty':
+                                    to_invoice = rappel.fix_qty
+                                else:
+                                    total_consumed = sum([x.price_subtotal
+                                                          for x in inv_lines])
+                                    to_invoice = total_consumed * \
+                                        (rappel.fix_qty / 100)
                             else:
-                                total_consumed = 0.0
-                                for line in inv_lines:
-                                    total_consumed += self._compute_qty_obj(
-                                        line.uos_id, line.quantity,
-                                        rappel.uom_id)
-                            used_section = self.env['rappel.section']
-                            for section in rappel.sections:
-                                if section.rappel_until >= \
-                                        section.rappel_until and \
-                                        section.rappel_from <= total_consumed:
-                                    used_section = section
-                            if not used_section:
+                                if rappel.calc_type == 'monetary':
+                                    total_consumed = sum([x.price_subtotal
+                                                          for x in inv_lines])
+                                else:
+                                    total_consumed = 0.0
+                                    for line in inv_lines:
+                                        total_consumed += self._compute_qty_obj(
+                                            line.uos_id, line.quantity,
+                                            rappel.uom_id)
+                                used_section = self.env['rappel.section']
+                                for section in rappel.sections:
+                                    if section.rappel_until >= \
+                                            section.rappel_until and \
+                                            section.rappel_from <= \
+                                            total_consumed:
+                                        used_section = section
+                                if not used_section:
+                                    continue
+                                if rappel.calc_amount == 'qty':
+                                    to_invoice = used_section.percent
+                                else:
+                                    to_invoice = sum([x.price_subtotal
+                                                      for x in inv_lines]) * \
+                                                    (used_section.percent /
+                                                     100)
+                            calculations = self.env['rappel.calculated'].search(
+                                [('customer_id', '=', customer.id),
+                                 ('rappel_id', '=', rappel.id),
+                                 ('period_start', '=', period[0].date()),
+                                 ('period_end', '=', period[1].date())])
+                            if calculations.invoiced:
                                 continue
-                            if rappel.calc_amount == 'qty':
-                                to_invoice = used_section.percent
-                            else:
-                                to_invoice = sum([x.price_subtotal
-                                                  for x in inv_lines]) * \
-                                                (used_section.percent / 100)
-                        calculations = self.env['rappel.calculated'].search(
-                            [('customer_id', '=', customer.id),
-                             ('rappel_id', '=', rappel.id),
-                             ('period_start', '=', period[0].date()),
-                             ('period_end', '=', period[1].date())])
-                        if calculations.invoiced:
-                            continue
-                        calculations.unlink()
-                        if to_invoice > 0:
-                            self.env['rappel.calculated'].create({
-                                'customer_id': customer.id,
-                                'rappel_id': rappel.id,
-                                'period_start': period[0].date(),
-                                'period_end': period[1].date(),
-                                'quantity': to_invoice,
-                            })
+                            calculations.unlink()
+                            if to_invoice > 0:
+                                self.env['rappel.calculated'].create({
+                                    'customer_id': customer.id,
+                                    'rappel_id': rappel.id,
+                                    'period_start': period[0].date(),
+                                    'period_end': period[1].date(),
+                                    'quantity': to_invoice,
+                                    'total_consumed':
+                                    sum([x.price_subtotal for x in inv_lines]),
+                                })
         return {'type': 'ir.actions.act_window_close'}

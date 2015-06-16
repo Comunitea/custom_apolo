@@ -8,9 +8,6 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string="">
-                    <group>
-                        <field name="invoice_to_group"/>
-                    </group>
                     <button string="invoice" name="invoice" type="object" icon="gtk-ok"/>
                     <button string="Cancel" special="cancel" icon="gtk-cancel"/>
                 </form>

@@ -18,23 +18,4 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, fields, api, exceptions, _
-import openerp.addons.decimal_precision as dp
-
-
-class ProductTemplate(models.Model):
-
-    _inherit = 'product.template'
-
-    price_kg = fields.Float('Price Kg',
-                            groups='hidde_fields.group_show_unnused')
-    sec_margin = fields.Float('Security Margin', readonly=True,
-                              digits_compute=dp.get_precision
-                              ('Product Price'),
-                              groups='hidde_fields.group_show_unnused')
-    margin = fields.Float('Margin ', groups='hidde_fields.group_show_unnused')
-    cmc = fields.Float('CMC', digits_compute=dp.get_precision('Product Cost'),
-                       readonly=True, groups='hidde_fields.group_show_unnused')
-    mes_type = fields.Selection((('fixed', 'Fixed'), ('variable', 'Variable')),
-                                'Measure Type',
-                                groups='hidde_fields.group_show_unnused')
+from . import stock

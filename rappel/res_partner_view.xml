@@ -7,7 +7,7 @@
             <field name="inherit_id" ref="base.view_partner_form"/>
             <field name="arch" type="xml">
                 <notebook position="inside">
-                    <page string="Rappels" attrs="{'invisible': [('customer', '=', False)]}">
+                    <page string="Rappels" attrs="{'invisible': [('customer', '=', False)]}" groups="rappel.group_manage_rappel">
                         <field name="rappel_ids" nolabel="1" colspan="4"/>
                     </page>
                 </notebook>

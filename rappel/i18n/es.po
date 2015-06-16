@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-05-28 15:38+0000\n"
-"PO-Revision-Date: 2015-05-28 15:38+0000\n"
+"POT-Creation-Date: 2015-06-16 09:40+0000\n"
+"PO-Revision-Date: 2015-06-16 09:40+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: rappel
-#: code:addons/rappel/rappel.py:87
+#: code:addons/rappel/rappel.py:89
 #, python-format
 msgid " Product and category are empty"
 msgstr " El producto y la categoría están vacíos"
@@ -55,7 +55,7 @@ msgstr "<p class=\"oe_view_nocontent_create\">\n"
 "            "
 
 #. module: rappel
-#: code:addons/rappel/wizard/invoice_rappel_wizard.py:108
+#: code:addons/rappel/wizard/invoice_rappel_wizard.py:118
 #, python-format
 msgid "Account not found"
 msgstr "Cuenta no encontrada"
@@ -129,7 +129,7 @@ msgid "Concept..."
 msgstr "Concepto..."
 
 #. module: rappel
-#: code:addons/rappel/wizard/invoice_rappel_wizard.py:99
+#: code:addons/rappel/wizard/invoice_rappel_wizard.py:110
 #, python-format
 msgid "Configure error"
 msgstr "Error de configuración"
@@ -211,8 +211,8 @@ msgid "Deal of rappels for customers"
 msgstr "Reparto de rappels a clientes"
 
 #. module: rappel
-#: code:addons/rappel/rappel.py:71
-#: code:addons/rappel/rappel.py:86
+#: code:addons/rappel/rappel.py:73
+#: code:addons/rappel/rappel.py:88
 #, python-format
 msgid "Error"
 msgstr "Error"
@@ -261,6 +261,16 @@ msgid "Group By"
 msgstr "Agrupar"
 
 #. module: rappel
+#: field:rappel,invoice_grouped:0
+msgid "Group invoice of sub customers"
+msgstr "Agrupar facturación de subclientes"
+
+#. module: rappel
+#: field:rappel,grouped:0
+msgid "Grouped by sub customer"
+msgstr "Agrupar cálculo de subclientes"
+
+#. module: rappel
 #: model:ir.model,name:rappel.model_rappel_calculated
 msgid "History Rappels"
 msgstr "History Rappels"
@@ -277,9 +287,10 @@ msgid "ID"
 msgstr "ID"
 
 #. module: rappel
-#: field:rappel.calculated,invoice_id:0
-msgid "Invoice"
-msgstr "Factura"
+#: code:addons/rappel/wizard/invoice_rappel_wizard.py:87
+#, python-format
+msgid "Invoice error"
+msgstr "Error al crear factura"
 
 #. module: rappel
 #: model:ir.actions.act_window,name:rappel.invoice_rappel
@@ -296,6 +307,12 @@ msgstr "Facturar a grupo"
 #: field:rappel.calculated,invoiced:0
 msgid "Invoiced"
 msgstr "Facturado"
+
+#. module: rappel
+#: view:rappel.calculated:rappel.rappel_calculated_form
+#: field:rappel.calculated,invoice_ids:0
+msgid "Invoices"
+msgstr "Facturas"
 
 #. module: rappel
 #: field:product.rappel.group,write_uid:0
@@ -328,6 +345,11 @@ msgstr "Última ejecución"
 #: field:rappel,last_use:0
 msgid "Last use of the rappel"
 msgstr "Último uso del rappel"
+
+#. module: rappel
+#: model:res.groups,name:rappel.group_manage_rappel
+msgid "Manage rappel"
+msgstr "Gestionar rappel"
 
 #. module: rappel
 #: selection:rappel,periodicity:0
@@ -373,6 +395,16 @@ msgid "Period"
 msgstr "Periodo"
 
 #. module: rappel
+#: field:rappel.calculated,period_end:0
+msgid "Period end"
+msgstr "Period end"
+
+#. module: rappel
+#: field:rappel.calculated,period_start:0
+msgid "Period start"
+msgstr "Period start"
+
+#. module: rappel
 #: field:rappel,periodicity:0
 msgid "Periodicity"
 msgstr "Periodicidad"
@@ -389,7 +421,7 @@ msgid "Product Template"
 msgstr "Plantilla de producto"
 
 #. module: rappel
-#: code:addons/rappel/rappel.py:72
+#: code:addons/rappel/rappel.py:74
 #, python-format
 msgid "Product and category are empty"
 msgstr "El producto y la categoría están vacías"
@@ -492,7 +524,7 @@ msgstr "Tramos"
 #. module: rappel
 #: help:rappel.calculate.wizard,customer_ids:0
 msgid "Select customers to calculate rappels.  If left blank is calculated for all"
-msgstr "Selecctionar los clientes para los que calcular rappels. Si se deja en blanco se calcula para todos"
+msgstr "Seleccionar los clientes para los que calcular rappels. Si se deja en blanco se calcula para todos"
 
 #. module: rappel
 #: selection:rappel,periodicity:0
@@ -500,13 +532,19 @@ msgid "Semiannual"
 msgstr "Semestral"
 
 #. module: rappel
-#: code:addons/rappel/wizard/invoice_rappel_wizard.py:109
+#: code:addons/rappel/wizard/invoice_rappel_wizard.py:88
+#, python-format
+msgid "The deal quantity is greater than the total quantity"
+msgstr "La cantidad repartida es mayor a la cantidad total"
+
+#. module: rappel
+#: code:addons/rappel/wizard/invoice_rappel_wizard.py:119
 #, python-format
 msgid "The rappel product not have an account configured."
 msgstr "El producto de rappel no tiene una cuenta configurada."
 
 #. module: rappel
-#: code:addons/rappel/wizard/invoice_rappel_wizard.py:100
+#: code:addons/rappel/wizard/invoice_rappel_wizard.py:111
 #, python-format
 msgid "The type %s dont have an product configured"
 msgstr "El tipo %s no tiene un producto configurado"
@@ -515,6 +553,11 @@ msgstr "El tipo %s no tiene un producto configurado"
 #: view:rappel.calculated:rappel.rappel_calculated_filter
 msgid "To invoice"
 msgstr "A facturar"
+
+#. module: rappel
+#: field:rappel.calculated,total_consumed:0
+msgid "Total consumed"
+msgstr "Total consumed"
 
 #. module: rappel
 #: field:rappel,type_id:0

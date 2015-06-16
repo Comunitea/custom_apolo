@@ -8,3 +8,4 @@ access_res_partner_competence_group_partner_manager,res_partner_competence group
 access_product_unilever_family_user,product.unilever.family.user,model_product_unilever_family,base.group_user,1,0,0,0
 access_product_unilever_family_sale_manager,product.unilever.family salemanager,model_product_unilever_family,base.group_sale_manager,1,1,1,1
 access_product_rappel_group,access_product_rappel_group,model_product_rappel_group,base.group_user,1,1,1,1
+access_product_rappel_subgroup,access_product_rappel_subgroup,model_product_rappel_subgroup,base.group_user,1,1,1,1

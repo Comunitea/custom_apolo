@@ -124,6 +124,7 @@ class TourismLine(models.Model):
     guar_price = fields.Float('Guaranteed price', required=True)
     tourism_id = fields.Many2one('tourism.group', 'Group')
 
+    @api.one
     @api.depends('product.seller_ids')
     def _get_supplier_id(self):
         if self.product.seller_ids:
