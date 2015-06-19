@@ -47,6 +47,7 @@ class rappel(models.Model):
     product_id = fields.Many2one('product.product', 'Product')
     product_categ_id = fields.Many2one('product.category', 'Category')
     rappel_group_id = fields.Many2one('product.rappel.group', 'Rappel group')
+    rappel_subgroup_id = fields.Many2one('product.rappel.subgroup', 'Rappel subgroup')
     calc_amount = fields.Selection(CALC_AMOUNT, 'Percent/Quantity')
     calc_type = fields.Selection(CALC_TYPE, 'value/quantity')
     uom_id = fields.Many2one('product.uom', 'UoM')
@@ -69,7 +70,8 @@ class rappel(models.Model):
         if vals.get('global_application', False) is False:
             if not vals.get('product_id', False) and not \
                     vals.get('product_categ_id', False) and not \
-                    vals.get('rappel_group_id', False):
+                    vals.get('rappel_group_id', False) and not \
+                    vals.get('rappel_subgroup_id', False):
                 raise exceptions.Warning(_('Error'),
                                          _('Product and category are empty'))
         return super(rappel, self).create(vals)
@@ -84,7 +86,8 @@ class rappel(models.Model):
                 if rappel_o['global_application'] is False:
                     if not rappel_o['product_id'] and not \
                             rappel_o['product_categ_id'] and not \
-                            rappel_o['rappel_group_id']:
+                            rappel_o['rappel_group_id'] and not \
+                            rappel_o['rappel_subgroup_id']:
                         raise exceptions.Warning(_('Error'),
                                                  _(' Product and category are \
 empty'))
@@ -105,6 +108,10 @@ empty'))
                     product_ids = product_obj.search(
                         [('rappel_group_id', '=',
                           rappel.rappel_group_id.id)])._ids
+                elif rappel.rappel_subgroup_id:
+                    product_ids = product_obj.search(
+                        [('rappel_subgroup_id', '=',
+                          rappel.rappel_subgroup_id.id)])._ids
                 elif rappel.product_id:
                     product_ids = [rappel.product_id.id]
             else:

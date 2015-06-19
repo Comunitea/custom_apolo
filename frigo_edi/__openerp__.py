@@ -42,6 +42,7 @@
              "edi_view.xml",
              "partner_competence_view.xml",
              "stock_view.xml",
+             "preferential_agreement_view.xml",
              "product_unilever_family_view.xml"],
     "installable": True,
     "application": True,

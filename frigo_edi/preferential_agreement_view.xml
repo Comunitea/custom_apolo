@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="preferential_agreement_tree" model="ir.ui.view">
+            <field name="name">preferential.agreement.tree</field>
+            <field name="model">preferential.agreement</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Preferential Agreements">
+                    <field name="customer_id"/>
+                    <field name="init_date"/>
+                    <field name="end_date"/>
+                    <field name="type"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="preferential_agreement_form" model="ir.ui.view">
+            <field name="name">preferential.agreement.form</field>
+            <field name="model">preferential.agreement</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Preferential Agreement">
+                    <header>
+                        <button name="confirm" type="object" string="Confirm" states="draft"/>
+                        <button name="cancel" type="object" string="Cancel" states="confirmed"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="customer_id" domain="[('customer', '=', True)]"/>
+                                <field name="date"/>
+                                <field name="amount"/>
+                                <field name="joint_percentage"/>
+                            </group>
+                            <group>
+                                <field name="init_date"/>
+                                <field name="end_date"/>
+                                <field name="type"/>
+                                <field name="rappel_group_id"/>
+                                <field name="rappel_subgroup_id" domain="[('group_id', '=', rappel_group_id)]"/>
+                                <field name="cons_est"/>
+                            </group>
+                        </group>
+                        <field name="note" placeholder="Notes"/>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="preferential_agreement_filter" model="ir.ui.view">
+            <field name="name">preferential.agreement.search</field>
+            <field name="model">preferential.agreement</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search>
+                   <field name="customer_id"/>
+                   <field name="type"/>
+               </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_preferential_agreement">
+            <field name="name">Preferential Agreement</field>
+            <field name="res_model">preferential.agreement</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="preferential_agreement_tree"/>
+            <field name="search_view_id" ref="preferential_agreement_filter"/>
+        </record>
+
+        <menuitem name="Preferential agreement" parent="base.menu_sale_config_sales" action="action_preferential_agreement" id="preferential_agreement_menu"/>
+
+    </data>
+</openerp>

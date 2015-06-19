@@ -9,3 +9,5 @@ access_product_unilever_family_user,product.unilever.family.user,model_product_u
 access_product_unilever_family_sale_manager,product.unilever.family salemanager,model_product_unilever_family,base.group_sale_manager,1,1,1,1
 access_product_rappel_group,access_product_rappel_group,model_product_rappel_group,base.group_user,1,1,1,1
 access_product_rappel_subgroup,access_product_rappel_subgroup,model_product_rappel_subgroup,base.group_user,1,1,1,1
+access_preferential_agreement,access_preferential_agreement,model_preferential_agreement,base.group_user,1,1,1,1
+access_agreement_type,access_agreement_type,model_agreement_type,base.group_user,1,1,1,1

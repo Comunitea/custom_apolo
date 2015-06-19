@@ -56,6 +56,7 @@
                                 <field name="product_id" attrs="{'invisible':[('global_application','=', True)]}"/>
                                 <field name="product_categ_id" attrs="{'invisible':[('global_application','=', True)]}"/>
                                 <field name="rappel_group_id" attrs="{'invisible':[('global_application','=', True)]}"/>
+                                <field name="rappel_subgroup_id" attrs="{'invisible':[('global_application','=', True)]}"/>
                             </group>
                        </group>
                         <notebook>

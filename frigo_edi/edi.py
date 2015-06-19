@@ -85,6 +85,7 @@ class Edi(models.Model):
 
         purchase_uom = uom_obj.search(['|', ('name', '=', "Caja(s)"),
                                        ('name', '=', 'Box(es)')])
+
         purchase_uom = purchase_uom[0]
 
         visited_supp_ids = []
@@ -94,12 +95,14 @@ class Edi(models.Model):
                                            ('product_code', '=',
                                             product_code)])
             rappel_group_code = line[10:12]
-            rappel_group = self.env['product.rappel.group'].search([('code', '=', rappel_group_code)])
-            if rappel_group:
-                rappel_group = rappel_group[0]
+            rappel_subgroup = self.env['product.rappel.subgroup'].search(
+                [('code', '=', rappel_group_code)])
+            if rappel_subgroup:
+                rappel_subgroup = rappel_subgroup[0]
             else:
-                log.error("Rappel subgroup invalid %s for line %s" % (rappel_group_code, line))
-                rappel_group = self.env['product.rappel.group']
+                log.error("Rappel subgroup invalid %s for line %s" %
+                          (rappel_group_code, line))
+                rappel_subgroup = self.env['product.rappel.subgroup']
             family = prod_uf.search([("code", '=', line[12:18])])
             if family:
                 family = family[0]
@@ -149,7 +152,8 @@ class Edi(models.Model):
             if product_ids:
                 visited_supp_ids.append(product_ids[0].id)
                 prod = product_ids[0].product_tmpl_id.product_variant_ids[0]
-                prod.rappel_group_id = rappel_group.id
+                prod.rappel_subgroup_id = rappel_subgroup.id
+                prod.rappel_group_id = rappel_subgroup.group_id.id
                 prod.unilever_family_id = family.id
                 product_ids[0].product_name = line[50:80].strip()
                 prod.supplier_un_ca = int(line[98:106])
@@ -171,7 +175,8 @@ class Edi(models.Model):
             else:
                 create_vals = {'unilever_family_id': family.id,
                                'name': line[50:80].strip(),
-                               'rappel_group_id': rappel_group.id,
+                               'rappel_subgroup_id': rappel_subgroup.id,
+                               'rappel_group_id': rappel_subgroup.group_id.id,
                                'standard_price': int(line[80:90]) / 100.0,
                                'volume': volume,
                                'weight': weight,
@@ -299,8 +304,59 @@ class Edi(models.Model):
         f = codecs.open(file_path, "r", "ISO-8859-1", 'ignore')
         # Cada linea representa un movimiento del albaran, un fichero puede
         # contener varios albaranes.
+        picking_code = ''
         for line in f:
+            if not picking_code:
+                picking_code = line[117:127]
             pass
+
+    @api.model
+    def parse_tourism(self, file_path, doc):
+        f = codecs.open(file_path, "r", "ISO-8859-1", 'ignore')
+        for line in f:
+            """En los ficheros de ejemplo se marca el final del archivo con una
+               linea de 0"""
+            if line == '0' * 69:
+                break
+            product_code = line[:10].strip()
+            group_code = line[10:16].strip()
+            description = line[16:46].strip()
+            year = line[46:50].strip()
+            sec_price = float(line[50:58])
+            min_price = float(line[58:68])
+            group = self.env['tourism.group'].search([('name', '=',
+                                                       group_code)])
+            if not group:
+                group = self.env['tourism.group'].create(
+                    {'name': group_code,
+                     'description': description,
+                     'date_start': '%s-01-01' % year,
+                     'date_end': '%s-12-31' % year,
+                     'min_price': min_price,
+                     'guar_price': sec_price,
+                     })
+            else:
+                if group.name != group_code:
+                    group.name = group_code
+                if group.description != description:
+                    group.description = description
+                if group.date_start != '%s-01-01' % year:
+                    group.date_start = '%s-01-01' % year
+                if group.date_end != '%s-12-31' % year:
+                    group.date_end = '%s-12-31' % year
+                if group.min_price != min_price:
+                    group.min_price = min_price
+                if group.guar_price != sec_price:
+                    group.sec_price = sec_price
+            supplierinfo = self.env['product.supplierinfo'].search([('product_code', '=', product_code)])
+            if not supplierinfo:
+                log.error("Product with code %s not found." % product_code)
+                continue
+            product = supplierinfo.product_tmpl_id
+            group.write({'product_ids': [(4, product.id)]})
+        doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
+        self.make_backup(file_path, doc.file_name)
+        os.remove(file_path)
 
     @api.model
     def process_files(self, path):
@@ -328,5 +384,12 @@ class Edi(models.Model):
                     process = True
                 elif doc.doc_type.code == 'alc':
                     service.parse_purchase_picking_file(file_path, doc)
+                elif doc.doc_type.code == 'tur':
+                    service.parse_tourism(file_path, doc)
+                    process = True
+                # No es necesario hacer este desarrollo para el fichero TOR,
+                # ya que no lo estan usando. Se hara en otra fase
+                # cuando se haya implantado el ERP.
+                # elif doc.doc_type.code == 'tor':
                 if process:
                     doc.write({'errors': log.get_errors()})

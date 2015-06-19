@@ -97,7 +97,6 @@ Category!.') % (from_unit.name, to_unit.name,))
         customers = self.customer_ids
         rappels = self.env['rappel'].search([])
         for rappel in rappels:
-            partner_calc = {}
             for customer in rappel.customer_ids:
                 if customers and customer not in customers:
                     continue
@@ -105,6 +104,7 @@ Category!.') % (from_unit.name, to_unit.name,))
                         or not rappel.date_stop) and \
                         rappel.date_start < self.date_stop:
                     for period in self._get_periods(rappel):
+                        partner_calc = {}
                         interval_start = period[0].date().strftime('%Y-%m-%d')
                         interval_stop = period[1].date().strftime('%Y-%m-%d')
                         if rappel.grouped:

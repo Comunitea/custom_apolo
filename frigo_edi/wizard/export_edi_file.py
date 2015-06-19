@@ -351,6 +351,72 @@ class ExportEdiFile(models.TransientModel):
             for obj in objs:
                 obj.sync = True
 
+    @api.multi
+    def export_file_col(self, active_model, objs=False, type='A'):
+        doc_type_obj = self.env["edi.doc.type"]
+        doc_obj = self.env["edi.doc"]
+        doc_type = doc_type_obj.search([("code", '=', "col")])[0]
+        last_col_file = doc_obj.search([("doc_type", '=', doc_type.id)],
+                                       order="date desc", limit=1)
+        if last_col_file:
+            count = last_col_file.count + 1
+        else:
+            count = 1
+        tmp_name = "export_col.txt"
+        filename = "%sCOL%s.%s" % (self.env.user.company_id.frigo_code,
+                                   str(len(objs)).zfill(4),
+                                   str(count).zfill(4))
+        templates_path = self.addons_path('frigo_edi') + os.sep + 'wizard' + \
+            os.sep + 'templates' + os.sep
+        mylookup = TemplateLookup(input_encoding='utf-8',
+                                  output_encoding='utf-8',
+                                  encoding_errors='replace')
+        tmp = Template(filename=templates_path + tmp_name,
+                       lookup=mylookup, default_filters=['decode.utf8'])
+
+        objs = [o for o in objs]
+        doc = tmp.render_unicode(o=objs, datetime=datetime, user=self.env.user,
+                                 type_=type).encode('utf-8', 'replace')
+        file_name = self[0].service_id.output_path + os.sep + filename
+        f = file(file_name, 'w')
+        f.write(doc)
+        f.close()
+        file_obj = self.create_doc(filename, file_name, doc_type)
+        file_obj.count = count
+
+    @api.multi
+    def export_file_pol(self, active_model, objs=False):
+        doc_type_obj = self.env["edi.doc.type"]
+        doc_obj = self.env["edi.doc"]
+        doc_type = doc_type_obj.search([("code", '=', "pol")])[0]
+        last_pol_file = doc_obj.search([("doc_type", '=', doc_type.id)],
+                                       order="date desc", limit=1)
+        if last_pol_file:
+            count = last_pol_file.count + 1
+        else:
+            count = 1
+        tmp_name = "export_pol.txt"
+        filename = "%sPOL%s.%s" % (self.env.user.company_id.frigo_code,
+                                   str(len(objs)).zfill(4),
+                                   str(count).zfill(4))
+        templates_path = self.addons_path('frigo_edi') + os.sep + 'wizard' + \
+            os.sep + 'templates' + os.sep
+        mylookup = TemplateLookup(input_encoding='utf-8',
+                                  output_encoding='utf-8',
+                                  encoding_errors='replace')
+        tmp = Template(filename=templates_path + tmp_name,
+                       lookup=mylookup, default_filters=['decode.utf8'])
+
+        objs = [o for o in objs]
+        doc = tmp.render_unicode(o=objs, datetime=datetime,
+                                 user=self.env.user).encode('utf-8', 'replace')
+        file_name = self[0].service_id.output_path + os.sep + filename
+        f = file(file_name, 'w')
+        f.write(doc)
+        f.close()
+        file_obj = self.create_doc(filename, file_name, doc_type)
+        file_obj.count = count
+
     @api.model
     def export_weekly_files(self):
         edi_obj = self.env["edi"]
