@@ -1,13 +1,13 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#       * frigo_edi
+#   * frigo_edi
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-05-29 09:17+0000\n"
-"PO-Revision-Date: 2015-05-29 09:17+0000\n"
+"POT-Creation-Date: 2015-06-19 12:27+0000\n"
+"PO-Revision-Date: 2015-06-19 12:27+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: frigo_edi
-#: code:addons/frigo_edi/edi.py:303
+#: code:addons/frigo_edi/edi.py:373
 #, python-format
 msgid "%s: File not found in folder. File: %s"
 msgstr "%s: Fichero no encontrado en la carpeta. Fichero: %s"
@@ -32,6 +32,16 @@ msgid "Afternoon open time"
 msgstr "Horario apertura tarde"
 
 #. module: frigo_edi
+#: field:preferential.agreement,date:0
+msgid "Agreement date"
+msgstr "Fecha de acuerdo"
+
+#. module: frigo_edi
+#: field:preferential.agreement,amount:0
+msgid "Amount"
+msgstr "Cantidad"
+
+#. module: frigo_edi
 #: code:addons/frigo_edi/wizard/export_edi_file.py:246
 #, python-format
 msgid "Any license history to export in %s"
@@ -42,6 +52,16 @@ msgstr "Ningún cambio de matrícula para exportar en %s"
 #, python-format
 msgid "Any ref history to export in %s"
 msgstr "Ninguna recodificación para exportar en %s"
+
+#. module: frigo_edi
+#: view:preferential.agreement:frigo_edi.preferential_agreement_form
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: frigo_edi
+#: selection:preferential.agreement,state:0
+msgid "Cancelled"
+msgstr "Cancelado"
 
 #. module: frigo_edi
 #: code:addons/frigo_edi/res_partner.py:82
@@ -77,6 +97,8 @@ msgid "Closure days"
 msgstr "Días cierre"
 
 #. module: frigo_edi
+#: field:agreement.type,code:0
+#: field:product.rappel.subgroup,code:0
 #: field:product.unilever.family,code:0
 #: field:res.partner.competence,code:0
 msgid "Code"
@@ -106,12 +128,25 @@ msgid "Concession change"
 msgstr "Cambio concesión"
 
 #. module: frigo_edi
+#: view:preferential.agreement:frigo_edi.preferential_agreement_form
+msgid "Confirm"
+msgstr "Confirmar"
+
+#. module: frigo_edi
+#: selection:preferential.agreement,state:0
+msgid "Confirmed"
+msgstr "Confirmado"
+
+#. module: frigo_edi
 #: field:item.management.item.move.sync,contract_id:0
 msgid "Contract"
 msgstr "Contrato"
 
 #. module: frigo_edi
+#: field:agreement.type,create_uid:0
 #: field:item.management.item.move.sync,create_uid:0
+#: field:preferential.agreement,create_uid:0
+#: field:product.rappel.subgroup,create_uid:0
 #: field:product.unilever.family,create_uid:0
 #: field:res.partner.competence,create_uid:0
 #: field:res.partner.sync,create_uid:0
@@ -119,7 +154,10 @@ msgid "Created by"
 msgstr "Creado por"
 
 #. module: frigo_edi
+#: field:agreement.type,create_date:0
 #: field:item.management.item.move.sync,create_date:0
+#: field:preferential.agreement,create_date:0
+#: field:product.rappel.subgroup,create_date:0
 #: field:product.unilever.family,create_date:0
 #: field:res.partner.competence,create_date:0
 #: field:res.partner.sync,create_date:0
@@ -128,6 +166,7 @@ msgstr "Creado el"
 
 #. module: frigo_edi
 #: field:item.management.item.move.sync,customer_id:0
+#: field:preferential.agreement,customer_id:0
 msgid "Customer"
 msgstr "Cliente"
 
@@ -153,6 +192,11 @@ msgid "Delete"
 msgstr "Borrado"
 
 #. module: frigo_edi
+#: selection:preferential.agreement,state:0
+msgid "Draft"
+msgstr "Borrador"
+
+#. module: frigo_edi
 #: model:ir.model,name:frigo_edi.model_edi_doc
 msgid "EDI document"
 msgstr "Documento EDI"
@@ -162,6 +206,16 @@ msgstr "Documento EDI"
 #: model:ir.model,name:frigo_edi.model_item_management_item
 msgid "Email Thread"
 msgstr "Hilo de mensajes"
+
+#. module: frigo_edi
+#: field:preferential.agreement,end_date:0
+msgid "End date"
+msgstr "Fecha fin"
+
+#. module: frigo_edi
+#: field:preferential.agreement,cons_est:0
+msgid "Estimated consumptions"
+msgstr "Consumo estimado"
 
 #. module: frigo_edi
 #: model:ir.actions.act_window,name:frigo_edi.act_export_frigo_alb_file
@@ -205,17 +259,20 @@ msgid "From Competence"
 msgstr "Competencia previa"
 
 #. module: frigo_edi
+#: field:product.rappel.subgroup,group_id:0
+msgid "Group"
+msgstr "Group"
+
+#. module: frigo_edi
 #: field:res.partner,high_competition:0
 msgid "High competition"
 msgstr "Alta competencia"
 
 #. module: frigo_edi
-#: field:item.management.item,license_history_ids:0
-msgid "History"
-msgstr "Histórico"
-
-#. module: frigo_edi
+#: field:agreement.type,id:0
 #: field:item.management.item.move.sync,id:0
+#: field:preferential.agreement,id:0
+#: field:product.rappel.subgroup,id:0
 #: field:product.unilever.family,id:0
 #: field:res.partner.competence,id:0
 #: field:res.partner.sync,id:0
@@ -253,6 +310,11 @@ msgid "Indirect pending to Sync"
 msgstr "Indirectos pendientes de sincronizar"
 
 #. module: frigo_edi
+#: field:preferential.agreement,init_date:0
+msgid "Init date"
+msgstr "Fecha inicio"
+
+#. module: frigo_edi
 #: view:item.management.item.move.sync:frigo_edi.item_move_sync_filter
 #: field:item.management.item.move.sync,item_id:0
 msgid "Item"
@@ -272,7 +334,15 @@ msgid "Item moves syncs"
 msgstr "Sinc. movimientos medios"
 
 #. module: frigo_edi
+#: field:preferential.agreement,joint_percentage:0
+msgid "Joint percentage"
+msgstr "Porcentaje asumido por provedor"
+
+#. module: frigo_edi
+#: field:agreement.type,write_uid:0
 #: field:item.management.item.move.sync,write_uid:0
+#: field:preferential.agreement,write_uid:0
+#: field:product.rappel.subgroup,write_uid:0
 #: field:product.unilever.family,write_uid:0
 #: field:res.partner.competence,write_uid:0
 #: field:res.partner.sync,write_uid:0
@@ -280,7 +350,10 @@ msgid "Last Updated by"
 msgstr "Últ. actualización por"
 
 #. module: frigo_edi
+#: field:agreement.type,write_date:0
 #: field:item.management.item.move.sync,write_date:0
+#: field:preferential.agreement,write_date:0
+#: field:product.rappel.subgroup,write_date:0
 #: field:product.unilever.family,write_date:0
 #: field:res.partner.competence,write_date:0
 #: field:res.partner.sync,write_date:0
@@ -303,6 +376,7 @@ msgid "Morning open time"
 msgstr "Horario apertura mañana"
 
 #. module: frigo_edi
+#: field:agreement.type,name:0
 #: field:product.unilever.family,name:0
 #: field:res.partner.competence,name:0
 msgid "Name"
@@ -318,6 +392,12 @@ msgstr "Nuevo"
 #: help:res.partner,to_competence_id:0
 msgid "New competitor of customer"
 msgstr "Nuevo competencia en cliente"
+
+#. module: frigo_edi
+#: view:preferential.agreement:frigo_edi.preferential_agreement_form
+#: field:preferential.agreement,note:0
+msgid "Notes"
+msgstr "Notes"
 
 #. module: frigo_edi
 #: field:item.management.item.move.sync,operation_type:0
@@ -387,9 +467,39 @@ msgid "Please set a reference to partner %s"
 msgstr "Por favor, asigne una referencia a la empresa %s"
 
 #. module: frigo_edi
+#: model:ir.actions.act_window,name:frigo_edi.action_preferential_agreement
+#: view:preferential.agreement:frigo_edi.preferential_agreement_form
+msgid "Preferential Agreement"
+msgstr "Acuerdo preferente"
+
+#. module: frigo_edi
+#: view:preferential.agreement:frigo_edi.preferential_agreement_tree
+msgid "Preferential Agreements"
+msgstr "Acuerdos preferentes"
+
+#. module: frigo_edi
+#: model:ir.ui.menu,name:frigo_edi.preferential_agreement_menu
+msgid "Preferential agreement"
+msgstr "Acuerdo preferente"
+
+#. module: frigo_edi
 #: model:ir.model,name:frigo_edi.model_product_template
 msgid "Product Template"
 msgstr "Plantilla de producto"
+
+#. module: frigo_edi
+#: view:product.rappel.group:frigo_edi.product_rappel_group_form
+#: view:product.rappel.subgroup:frigo_edi.product_rappel_subgroup_form
+msgid "Product rappel group"
+msgstr "Grupo de rappel"
+
+#. module: frigo_edi
+#: view:product.rappel.group:frigo_edi.product_rappel_group_filter
+#: view:product.rappel.group:frigo_edi.product_rappel_group_tree
+#: view:product.rappel.subgroup:frigo_edi.product_rappel_subgroup_filter
+#: view:product.rappel.subgroup:frigo_edi.product_rappel_subgroup_group_tree
+msgid "Product rappel groups"
+msgstr "Grupos de rappel"
 
 #. module: frigo_edi
 #: model:ir.model,name:frigo_edi.model_edi
@@ -397,9 +507,41 @@ msgid "Provides general functions to impor edi files"
 msgstr "Provee funciones generales para importar ficheros edi"
 
 #. module: frigo_edi
+#: field:preferential.agreement,rappel_group_id:0
+msgid "Rappel group"
+msgstr "Grupo de rappel"
+
+#. module: frigo_edi
+#: model:ir.actions.act_window,name:frigo_edi.action_product_rappel_group
+#: model:ir.actions.act_window,name:frigo_edi.action_product_rappel_subgroup
+msgid "Rappel product group"
+msgstr "Grupo de rappel"
+
+#. module: frigo_edi
+#: model:ir.ui.menu,name:frigo_edi.menu_product_rappel_group
+msgid "Rappel product groups"
+msgstr "Grupos de rappel"
+
+#. module: frigo_edi
+#: model:ir.ui.menu,name:frigo_edi.menu_product_rappel_subgroup
+msgid "Rappel product subgroups"
+msgstr "Subgrupos de rappel"
+
+#. module: frigo_edi
+#: field:preferential.agreement,rappel_subgroup_id:0
+#: field:product.template,rappel_subgroup_id:0
+msgid "Rappel subgroup"
+msgstr "Subgrupo de rappel"
+
+#. module: frigo_edi
 #: selection:item.management.item.move.sync,operation_type:0
 msgid "Recovered"
 msgstr "Recuperado"
+
+#. module: frigo_edi
+#: field:res.partner,ref_history_ids:0
+msgid "Refs history"
+msgstr "Refs history"
 
 #. module: frigo_edi
 #: field:edi,related_partner_id:0
@@ -417,12 +559,24 @@ msgid "Seq. count"
 msgstr "Secuencia"
 
 #. module: frigo_edi
+#: field:edi.doc,service_id:0
+#: field:edi.export.wizard,service_id:0
+msgid "Service"
+msgstr "Servicio"
+
+#. module: frigo_edi
 #: view:item.management.item.move.sync:frigo_edi.item_move_sync_filter
 #: field:item.management.item.move.sync,state:0
 #: view:res.partner.sync:frigo_edi.res_partner_sync_filter
 #: field:res.partner.sync,state:0
 msgid "State"
 msgstr "Estado"
+
+#. module: frigo_edi
+#: view:product.rappel.group:frigo_edi.product_rappel_group_form
+#: field:product.rappel.group,subgroup_ids:0
+msgid "Subgroups"
+msgstr "Subgrupos"
 
 #. module: frigo_edi
 #: field:stock.picking,sync:0
@@ -457,6 +611,11 @@ msgstr "Competencia destino"
 #: view:res.partner.sync:frigo_edi.res_partner_sync_filter
 msgid "To sync"
 msgstr "Pendiente de sincronizar"
+
+#. module: frigo_edi
+#: field:preferential.agreement,type:0
+msgid "Type"
+msgstr "Tipo"
 
 #. module: frigo_edi
 #: field:res.partner,unilever_code:0
@@ -499,4 +658,14 @@ msgstr "Usuario"
 #: constraint:res.partner:0
 msgid "You cannot create recursive Partner hierarchies."
 msgstr "No puede crear jerarquías de empresas recursivas."
+
+#. module: frigo_edi
+#: field:product.rappel.subgroup,name:0
+msgid "name"
+msgstr "Nombre"
+
+#. module: frigo_edi
+#: field:preferential.agreement,state:0
+msgid "state"
+msgstr "Estado"
 
