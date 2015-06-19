@@ -61,22 +61,23 @@ class SaleOrderLine(models.Model):
             unit_price = res['value']['price_unit'] / product.un_ca
         else:
             unit_price = res['value']['price_unit']
-        partner = self.pool.get('res.partner').browse(cr, uid, partner_id,
-                                                      context)
-        tourism_ids = self.pool.get('tourism.line').search(
-            cr, uid, [('product', '=', product.id),
+
+        tourism_ids = self.pool.get('tourism.customer').search(
+            cr, uid, [('customer_id', '=', partner_id),
                       ('tourism_id.date_start', '<=', date.today()),
                       ('tourism_id.date_end', '>=', date.today()),
-                      ('tourism_id.id', 'in', partner.tourism_group_ids._ids),
+                      ('tourism_id.id', 'in', product.tourism_ids._ids),
                       ('tourism_id.state', '=', 'approved')],
             context=context)
-        tourism = self.pool.get('tourism.line').browse(cr, uid, tourism_ids,
-                                                       context)
-        if tourism and unit_price < tourism.min_price:
+        tourism = self.pool.get('tourism.customer').browse(cr, uid,
+                                                           tourism_ids,
+                                                           context)
+        if tourism and unit_price != tourism.agreed_price:
             if uos.like_type == 'boxes':
-                res['value']['price_unit'] = tourism.min_price * product.un_ca
+                res['value']['price_unit'] = tourism.agreed_price * \
+                    product.un_ca
             else:
-                res['value']['price_unit'] = tourism.min_price
+                res['value']['price_unit'] = tourism.agreed_price
             res['value']['discount'] = 0
             res['value']['tourism'] = True
         return res
@@ -84,16 +85,16 @@ class SaleOrderLine(models.Model):
     @api.model
     def create(self, vals):
         res = super(SaleOrderLine, self).create(vals)
-        tourism_ids = self.env['tourism.line'].search(
-            [('product', '=', res.product_id.id),
+        tourism_ids = self.env['tourism.customer'].search(
+            [('customer_id', '=', res.order_id.partner_id.id),
              ('tourism_id.date_start', '<=', date.today()),
              ('tourism_id.date_end', '>=', date.today()),
              ('tourism_id.id', 'in',
-              res.order_id.partner_id.tourism_group_ids._ids),
+              res.product_id.tourism_ids._ids),
              ('tourism_id.state', '=', 'approved')])
         if tourism_ids:
             if res.price_unit * (res.discount and res.discount / 100 or 1) < \
-                    tourism_ids[0].min_price:
+                    tourism_ids[0].agreed_price:
                 raise exceptions.Warning(_('Price error'),
                                          _('can not sell below the \
 minimum price'))
@@ -103,16 +104,16 @@ minimum price'))
     def write(self, vals):
         res = super(SaleOrderLine, self).write(vals)
         for line in self:
-            tourism_ids = self.env['tourism.line'].search(
-                [('product', '=', line.product_id.id),
+            tourism_ids = self.env['tourism.customer'].search(
+                [('customer_id', '=', line.order_id.partner_id.id),
                  ('tourism_id.date_start', '<=', date.today()),
                  ('tourism_id.date_end', '>=', date.today()),
                  ('tourism_id.id', 'in',
-                  line.order_id.partner_id.tourism_group_ids._ids),
+                  line.product_id.tourism_ids._ids),
                  ('tourism_id.state', '=', 'approved')])
             if tourism_ids:
                 if line.price_unit * (line.discount and line.discount /
-                                      100 or 1) < tourism_ids[0].min_price:
+                                      100 or 1) != tourism_ids[0].agreed_price:
                     raise exceptions.Warning(_('Price error'),
                                              _('can not sell below the \
 minimum price'))

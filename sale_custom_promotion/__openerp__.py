@@ -26,7 +26,7 @@
     'description': """""",
     'author': 'Comunitea',
     'website': '',
-    "depends": ['base', 'sale', 'account', 'sale_promotions'],
+    "depends": ['base', 'sale', 'account', 'sale_promotions', 'frigo_edi'],
     "data": ['sale_promotion_view.xml',
              'tourism_view.xml',
              'rules_view.xml',

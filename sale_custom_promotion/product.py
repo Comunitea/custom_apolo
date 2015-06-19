@@ -25,4 +25,8 @@ class ProductTemplate(models.Model):
 
     _inherit = 'product.template'
 
-    supplier_id = fields.Many2one('res.partner', 'Supplier', related='seller_ids.name')
+    supplier_id = fields.Many2one('res.partner', 'Supplier',
+                                  related='seller_ids.name')
+    tourism_ids = fields.Many2many('tourism.group', 'tourism_product_rel',
+                                   'product_id', 'tourism_id',
+                                   'Tourism groups')

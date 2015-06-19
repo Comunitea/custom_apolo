@@ -8,8 +8,12 @@
             <field name="type">tree</field>
             <field name="arch" type="xml">
                 <tree string="Tourism">
+                    <field name="name"/>
+                    <field name="description"/>
                     <field name="date_start"/>
                     <field name="date_end"/>
+                    <field name="min_price"/>
+                    <field name="guar_price"/>
                     <field name="state"/>
                 </tree>
             </field>
@@ -25,25 +29,40 @@
                         <button name="validate" states="new" string="Validate" type="object"/>
                         <button name="approve" states="validated" string="Approve" type="object"/>
                         <button name="cancel" states="new,validated" string="Cancel" type="object"/>
+                        <field name="all_exported" invisible="1"/>
+                        <button name="export_customers" string="Export customers"
+                                type="object" attrs="{'invisible': [('all_exported', '=', True)]}"
+                                class="oe_highlight"/>
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>
                         <group>
-                            <field name="date_start"/>
-                            <field name="date_end"/>
+                            <group>
+                                <field name="name"/>
+                                <field name="description"/>
+                                <field name="min_price"/>
+                                <field name="guar_price"/>
+                            </group>
+                            <group>
+                                <field name="date_start"/>
+                                <field name="date_end"/>
+                                <field name="qty_estimated"/>
+                            </group>
                         </group>
                         <notebook>
                             <page string="Products">
-                                <field name="line_ids" nolabel="1" colspan="4">
-                                    <tree editable="top">
-                                        <field name="product" domain="[('sale_ok', '=', True)]"/>
-                                        <field name="min_price"/>
-                                        <field name="guar_price"/>
-                                    </tree>
-                                </field>
+                                <field name="product_ids" nolabel="1" colspan="4"/>
                             </page>
                             <page string="Customers">
-                                <field name="customer_ids" nolabel="1" colspan="4" domain="[('customer', '=', True)]"/>
+                                <field name="customer_ids" nolabel="1" colspan="4">
+                                    <tree editable="top">
+                                        <field name="customer_id" domain="[('customer', '=', True)]"/>
+                                        <field name="agreed_price" />
+                                        <field name="agreement_date" />
+                                        <field name="product_group" />
+                                        <field name="qty_estimated" />
+                                    </tree>
+                                </field>
                             </page>
                             <page string="Created invoices">
                                 <field name="invoice_ids" nolabel="1" colspan="4"/>
