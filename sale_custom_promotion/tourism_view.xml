@@ -10,6 +10,7 @@
                 <tree string="Tourism">
                     <field name="name"/>
                     <field name="description"/>
+                    <field name="supplier_id"/>
                     <field name="date_start"/>
                     <field name="date_end"/>
                     <field name="min_price"/>
@@ -47,6 +48,7 @@
                                 <field name="date_start"/>
                                 <field name="date_end"/>
                                 <field name="qty_estimated"/>
+                                <field name="supplier_id" domain="[('supplier', '=', True)]"/>
                             </group>
                         </group>
                         <notebook>
@@ -61,6 +63,15 @@
                                         <field name="agreement_date" />
                                         <field name="product_group" />
                                         <field name="qty_estimated" />
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Consumptions">
+                                <field name="consumption_ids" nolabel="1" colspan="4" readonly="1">
+                                    <tree editable="top">
+                                        <field name="customer_id"/>
+                                        <field name="qty"/>
+                                        <field name="period_end" string="Date"/>
                                     </tree>
                                 </field>
                             </page>

@@ -408,8 +408,12 @@ class ExportEdiFile(models.TransientModel):
                        lookup=mylookup, default_filters=['decode.utf8'])
 
         objs = [o for o in objs]
-        doc = tmp.render_unicode(o=objs, datetime=datetime,
-                                 user=self.env.user).encode('utf-8', 'replace')
+        if active_model == 'tourism.customer':
+            doc = tmp.render_unicode(o=objs, o2=[], datetime=datetime,
+                                     user=self.env.user).encode('utf-8', 'replace')
+        else:
+            doc = tmp.render_unicode(o=[], o2=objs, datetime=datetime,
+                                     user=self.env.user).encode('utf-8', 'replace')
         file_name = self[0].service_id.output_path + os.sep + filename
         f = file(file_name, 'w')
         f.write(doc)

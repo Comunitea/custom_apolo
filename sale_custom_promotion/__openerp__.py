@@ -33,6 +33,7 @@
              'sale_view.xml',
              'wizard/invoice_joint_promotion_view.xml',
              'wizard/invoice_tourism_view.xml',
-             'security/ir.model.access.csv'],
+             'security/ir.model.access.csv',
+             'data/ir_cron.xml'],
     "installable": True
 }

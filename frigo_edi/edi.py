@@ -326,6 +326,11 @@ class Edi(models.Model):
             min_price = float(line[58:68])
             group = self.env['tourism.group'].search([('name', '=',
                                                        group_code)])
+            supplierinfo = self.env['product.supplierinfo'].search(
+                [('product_code', '=', product_code)])
+            if not supplierinfo:
+                log.error("Product with code %s not found." % product_code)
+                continue
             if not group:
                 group = self.env['tourism.group'].create(
                     {'name': group_code,
@@ -334,6 +339,7 @@ class Edi(models.Model):
                      'date_end': '%s-12-31' % year,
                      'min_price': min_price,
                      'guar_price': sec_price,
+                     'supplier_id': supplierinfo.name.id
                      })
             else:
                 if group.name != group_code:
@@ -348,10 +354,8 @@ class Edi(models.Model):
                     group.min_price = min_price
                 if group.guar_price != sec_price:
                     group.sec_price = sec_price
-            supplierinfo = self.env['product.supplierinfo'].search([('product_code', '=', product_code)])
-            if not supplierinfo:
-                log.error("Product with code %s not found." % product_code)
-                continue
+                if group.supplier_id != supplierinfo.name:
+                    group.supplier_id = supplierinfo.name
             product = supplierinfo.product_tmpl_id
             group.write({'product_ids': [(4, product.id)]})
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})

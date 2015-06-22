@@ -19,6 +19,8 @@
 #
 ##############################################################################
 from openerp import models, fields, api, exceptions, _
+from datetime import date
+from dateutil.relativedelta import relativedelta
 
 
 class TourismGroup(models.Model):
@@ -29,6 +31,8 @@ class TourismGroup(models.Model):
                                    'Customers')
     product_ids = fields.Many2many('product.template', 'tourism_product_rel',
                                    'tourism_id', 'product_id', 'Products')
+    consumption_ids = fields.One2many('tourism.consumption', 'tourism_id',
+                                      'Consumptions')
     date_start = fields.Date('Date start', required=True)
     date_end = fields.Date('Date end', required=True)
     invoice_ids = fields.One2many('account.invoice', 'tourism_id', 'Invoices',
@@ -43,6 +47,7 @@ class TourismGroup(models.Model):
                                   compute='_get_exported_customer')
     guar_price = fields.Float('Guaranteed price', required=True)
     qty_estimated = fields.Float('Estimated consumption')
+    supplier_id = fields.Many2one('res.partner', 'Supplier', required=True)
 
     @api.one
     def _get_exported_customer(self):
@@ -56,67 +61,72 @@ class TourismGroup(models.Model):
     def create_invoice(self, date_start, date_end):
         start = date_start > self.date_start and date_start or self.date_start
         end = date_end < self.date_end and date_end or self.date_end
-        # total_guaranteed = {'supplier_id': {'product_id': qty, ...}, ...}
-        total_guaranteed = {}
-        for customer_line in self.customer_ids:
-            for product in self.product_ids:
-                supplier_id = product.supplier_id.id
-                product_id = product.id
-                lines = self.env['account.invoice.line'].search(
-                    [('invoice_id.partner_id', '=',
-                      customer_line.customer_id.id),
-                     ('product_id.product_tmpl_id', '=', product_id),
-                     ('invoice_id.state', 'in', ('open', 'paid')),
-                     ('invoice_id.date_invoice', '>=', start),
-                     ('invoice_id.date_invoice', '<=', end)])
-                if supplier_id not in total_guaranteed.keys():
-                    total_guaranteed[supplier_id] = {product_id: 0.0}
-                elif product_id not in total_guaranteed[supplier_id].keys():
-                    total_guaranteed[supplier_id][product_id] = 0.0
-                for line in lines:
-                    if line.uos_id.like_type == 'boxes':
-                        unit_price = line.price_unit / line.product_id.un_ca
-                    else:
-                        unit_price = line.price_unit
-                    total_guaranteed[supplier_id][product_id] += unit_price < \
-                        customer_line.agreed_price and \
-                        customer_line.agreed_price - unit_price or 0.0
-        if total_guaranteed:
-            user = self.env.user
-            journal = self.env['account.journal'].search([('type', '=',
-                                                           'sale'),
-                                                          ('company_id', '=',
-                                                           user.company_id.id)
-                                                          ],
-                                                         limit=1)
-            for supplier_id in total_guaranteed.keys():
-                supplier = self.env['res.partner'].browse(supplier_id)
-                account_id = supplier.property_account_receivable.id
-                invoice = self.env['account.invoice'].create({
-                    'partner_id': supplier_id,
-                    'type': 'out_invoice',
-                    'journal_id': journal and journal.id or False,
-                    'account_id': account_id,
-                    'state': 'draft',
-                    'number': False,
-                    'fiscal_position': supplier.property_account_position.id,
-                    'tourism_id': self.id,
-                })
+        consumptions = self.env['tourism.consumption'].search(
+            [('tourism_id', '=', self.id), ('invoiced', '=', False),
+             ('period_end', '>', start), ('period_end', '<', end)])
+        tot_invoice = sum([(self.guar_price - x.agreed_price) * x.qty
+                           for x in consumptions])
+        if not tot_invoice:
+            return True
+        user = self.env.user
+        journal = self.env['account.journal'].search([('type', '=',
+                                                       'sale'),
+                                                      ('company_id', '=',
+                                                       user.company_id.id)
+                                                      ],
+                                                     limit=1)
 
-                for product_id in total_guaranteed[supplier_id].keys():
-                    product = self.env['product.template'].browse(product_id)
-                    self.env['account.invoice.line'].create({
-                        'product_id': product_id,
-                        'name': _('Tourism'),
-                        'invoice_id': invoice.id,
-                        'account_id': account_id,
-                        'price_unit':
-                        total_guaranteed[supplier_id][product_id],
-                        'invoice_line_tax_id': [(4, x.id) for x in
-                                                product.taxes_id],
-                        'quantity': 1,
-                    })
+        account_id = self.supplier_id.property_account_receivable.id
+        invoice = self.env['account.invoice'].create({
+            'partner_id': self.supplier_id.id,
+            'type': 'out_invoice',
+            'journal_id': journal and journal.id or False,
+            'account_id': account_id,
+            'state': 'draft',
+            'number': False,
+            'fiscal_position': self.supplier_id.property_account_position.id,
+            'tourism_id': self.id,
+        })
+
+        product = self.product_ids and self.product_ids[0] or False
+        if not product:
+            raise exceptions.Warning(_('Product error'),
+                                     _('The tourismo not have products'))
+        self.env['account.invoice.line'].create({
+            'name': _('Tourism'),
+            'invoice_id': invoice.id,
+            'account_id': account_id,
+            'price_unit': tot_invoice,
+            'invoice_line_tax_id': [(4, x.id) for x in
+                                    product.taxes_id],
+            'quantity': 1,
+        })
+        consumptions.write({'invoiced': True})
         return True
+
+    @api.one
+    def calculate_consumptions(self, date_start, date_end):
+        for customer_line in self.customer_ids:
+            lines = self.env['account.invoice.line'].search(
+                [('invoice_id.partner_id', '=',
+                  customer_line.customer_id.id),
+                 ('product_id.product_tmpl_id', 'in', self.product_ids._ids),
+                 ('invoice_id.state', 'in', ('open', 'paid')),
+                 ('invoice_id.date_invoice', '>=', date_start),
+                 ('invoice_id.date_invoice', '<=', date_end)])
+            total_qty = 0.0
+            for line in lines:
+                if line.uos_id.like_type == 'boxes':
+                    qty = line.quantity * line.product_id.un_ca
+                else:
+                    qty = line.quantity
+                total_qty += qty
+            if total_qty > 0:
+                self.env['tourism.consumption'].create(
+                    {'customer_id': customer_line.customer_id.id,
+                     'qty': total_qty, 'tourism_id': self.id,
+                     'period_start': date_start, 'period_end': date_end,
+                     'agreed_price': customer_line.agreed_price})
 
     @api.multi
     def export_customers(self):
@@ -135,6 +145,33 @@ class TourismGroup(models.Model):
                     wzd.export_file_pol('tourism.customer', to_export)
                     break
         to_export.write({'exported': True})
+
+    @api.multi
+    def export_tourism_liquidation(self, date_start, date_end):
+        self.calculate_consumptions(date_start, date_end)
+        for tourism in self:
+            to_export = self.env['tourism.consumption'].search(
+                [('exported', '=', False), ('tourism_id', '=', tourism.id)])
+            edi_obj = self.env["edi"]
+            edis = edi_obj.search([])
+            for service in edis:
+                wzd = False
+                for dtype in service.doc_type_ids:
+                    if dtype.code == "pol":
+                        wzd = self.env['edi.export.wizard'].create(
+                            {'service_id': service.id})
+                        wzd.export_file_pol('tourism.consumption', to_export)
+                        break
+            to_export.write({'exported': True})
+
+    @api.model
+    def export_monthly(self):
+        date_start = date.today() + relativedelta(months=-1)
+        date_end = date.today() + relativedelta(days=-1)
+        tourism = self.env['tourism.group'].search(
+            [('date_start', '<', date_end), ('date_end', '>', date_start),
+             ('state', '=', 'approved')])
+        tourism.export_tourism_liquidation(date_start, date_end)
 
     @api.multi
     def validate(self):
@@ -164,7 +201,23 @@ class TourismCustomer(models.Model):
     @api.multi
     @api.onchange('agreed_price')
     def onchange_agreed_price(self):
-        if self.agreed_price and self.agreed_price < self.tourism_id.min_price:
+        if self.agreed_price and self.agreed_price < \
+                self.tourism_id.min_price and self.agreed_price > \
+                self.tourism_id.guar_price:
             return {'warning': {'tittle': _('Price error'),
                                 'message': _('The agreed price must be higher \
 than the minimum price')}}
+
+
+class TourismConsumption(models.Model):
+
+    _name = 'tourism.consumption'
+
+    customer_id = fields.Many2one('res.partner', 'Customer')
+    qty = fields.Float('Quantity')
+    tourism_id = fields.Many2one('tourism.group', 'Group')
+    period_start = fields.Date('Period start')
+    period_end = fields.Date('Period end')
+    agreed_price = fields.Float('Agreed price')
+    exported = fields.Boolean('Exported')
+    invoiced = fields.Boolean('Invoiced')
