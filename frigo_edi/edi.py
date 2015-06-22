@@ -363,6 +363,44 @@ class Edi(models.Model):
         os.remove(file_path)
 
     @api.model
+    def parse_exclusive(self, file_path, doc):
+        f = codecs.open(file_path, "r", "ISO-8859-1", 'ignore')
+        supplier_products = self.env['product.supplierinfo'].search(
+            [('name', 'child_of', [self[0].related_partner_id.id])])
+        supplier_product_ids = [x.product_tmpl_id.id for x in
+                                supplier_products]
+        unlink_products = self.env['product.template'].search(
+            [('id', 'in', supplier_product_ids), ('exclusive_ids', '!=',
+                                                  False)])
+        delete_links = [(3, x.id) for x in unlink_products]
+        self.env['res.partner'].search(
+            [('customer', '=', True),
+             ('exclusive_ids', '!=', False)]).write({'exclusive_ids':
+                                                     delete_links})
+        for line in f:
+            if '0' * 36 in line:
+                continue
+            customer_code = line[:10].lstrip('0')
+            customer = self.env['res.partner'].search([('unilever_code', '=',
+                                                        customer_code)])
+            if not customer:
+                log.error('Customer with unilever code %s not found' %
+                          customer_code)
+                continue
+            product_code = line[10:20].lstrip('0')
+            product_info = self.env['product.supplierinfo'].search(
+                [('product_code', '=', product_code)])
+            if not product_info:
+                log.error('product with supplier code %s not found' %
+                          product_code)
+                continue
+            product = product_info.product_tmpl_id
+            customer.write({'exclusive_ids': [(4, product.id)]})
+        doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
+        self.make_backup(file_path, doc.file_name)
+        os.remove(file_path)
+
+    @api.model
     def process_files(self, path):
         """
         Search all edi docs in error or draft state and process it depending
@@ -390,6 +428,9 @@ class Edi(models.Model):
                     service.parse_purchase_picking_file(file_path, doc)
                 elif doc.doc_type.code == 'tur':
                     service.parse_tourism(file_path, doc)
+                    process = True
+                elif doc.doc_type.code == 'lpr':
+                    service.parse_exclusive(file_path, doc)
                     process = True
                 # No es necesario hacer este desarrollo para el fichero TOR,
                 # ya que no lo estan usando. Se hara en otra fase
