@@ -2,7 +2,7 @@
 ${ user.company_id.frigo_code.rjust(5, "0") }C${ datetime.strftime(datetime.now(), "%Y%m%d") }Ver2009${ pick.sale_id and pick.sale_id.name[:10].rjust(10, "0") or "".rjust(10, "0") }${ datetime.strftime(datetime.strptime(pick.date, "%Y-%m-%d %H:%M:%S"),"%Y%m%d") }${ pick.partner_id.unilever_code and pick.partner_id.unilever_code[:10].rjust(10, "0") or "".rjust(10, "0") }${ pick.picking_type_code == "outgoing" and "06" or "09" }${ (pick.sale_id and pick.sale_id.client_order_ref) and pick.sale_id.client_order_ref[:15].ljust(15, " ") or "".ljust(15, " ") }${ user.company_id.frigo_code.rjust(10, "0") }${ "".rjust(4, "0") }
 %for m in pick.move_lines:
 %if m.state == "done":
-${ user.company_id.frigo_code.rjust(5, "0") }L${ pick.sale_id and pick.sale_id.name[:10].rjust(10, "0") or "".rjust(10, "0") }${ m.product_id.product_tmpl_id.seller_ids[0].product_code[:10].rjust(10, "0") }${ m.procurement_id.sale_line_id.price_unit == 0.0 and "0.00".rjust(5, "0") or str(m.product_uom_qty)[:5].rjust(5, "0") }${ m.procurement_id.sale_line_id.price_unit == 0.0 and str(m.product_uom_qty)[:5].rjust(5, "0") or "0.00".rjust(5, "0") }${ "".rjust(39, "0") }
+${ user.company_id.frigo_code.rjust(5, "0") }L${ pick.sale_id and pick.sale_id.name[:10].rjust(10, "0") or "".rjust(10, "0") }${ m.product_id.product_tmpl_id.seller_ids[0].product_code[:6].rjust(10, "0") }${ m.procurement_id.sale_line_id.price_unit == 0.0 and "0.00".rjust(5, "0") or str(m.product_uom_qty)[:5].rjust(5, "0") }${ m.procurement_id.sale_line_id.price_unit == 0.0 and str(m.product_uom_qty)[:5].rjust(5, "0") or "0.00".rjust(5, "0") }${ "".rjust(39, "0") }
 %endif
 %endfor
 %endfor

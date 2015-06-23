@@ -25,3 +25,4 @@ from . import product
 from . import account_invoice
 from . import rules
 from . import wizard
+from . import edi

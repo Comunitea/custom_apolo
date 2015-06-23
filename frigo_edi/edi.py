@@ -311,58 +311,6 @@ class Edi(models.Model):
             pass
 
     @api.model
-    def parse_tourism(self, file_path, doc):
-        f = codecs.open(file_path, "r", "ISO-8859-1", 'ignore')
-        for line in f:
-            """En los ficheros de ejemplo se marca el final del archivo con una
-               linea de 0"""
-            if line == '0' * 69:
-                break
-            product_code = line[:10].strip()
-            group_code = line[10:16].strip()
-            description = line[16:46].strip()
-            year = line[46:50].strip()
-            sec_price = float(line[50:58])
-            min_price = float(line[58:68])
-            group = self.env['tourism.group'].search([('name', '=',
-                                                       group_code)])
-            supplierinfo = self.env['product.supplierinfo'].search(
-                [('product_code', '=', product_code)])
-            if not supplierinfo:
-                log.error("Product with code %s not found." % product_code)
-                continue
-            if not group:
-                group = self.env['tourism.group'].create(
-                    {'name': group_code,
-                     'description': description,
-                     'date_start': '%s-01-01' % year,
-                     'date_end': '%s-12-31' % year,
-                     'min_price': min_price,
-                     'guar_price': sec_price,
-                     'supplier_id': supplierinfo.name.id
-                     })
-            else:
-                if group.name != group_code:
-                    group.name = group_code
-                if group.description != description:
-                    group.description = description
-                if group.date_start != '%s-01-01' % year:
-                    group.date_start = '%s-01-01' % year
-                if group.date_end != '%s-12-31' % year:
-                    group.date_end = '%s-12-31' % year
-                if group.min_price != min_price:
-                    group.min_price = min_price
-                if group.guar_price != sec_price:
-                    group.sec_price = sec_price
-                if group.supplier_id != supplierinfo.name:
-                    group.supplier_id = supplierinfo.name
-            product = supplierinfo.product_tmpl_id
-            group.write({'product_ids': [(4, product.id)]})
-        doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
-        self.make_backup(file_path, doc.file_name)
-        os.remove(file_path)
-
-    @api.model
     def parse_exclusive(self, file_path, doc):
         f = codecs.open(file_path, "r", "ISO-8859-1", 'ignore')
         supplier_products = self.env['product.supplierinfo'].search(
@@ -401,11 +349,64 @@ class Edi(models.Model):
         os.remove(file_path)
 
     @api.model
+    def parse_payment_invoice(self, file_path, doc):
+        f = codecs.open(file_path, "r", "ISO-8859-1", 'ignore')
+        for line in f:
+            invoice = self.env['account.invoice'].search([('name', '=',
+                                                           line[7:17])])
+            partner_id = self.related_partner_id
+            account_id = partner_id.property_account_receivable.id
+            if not invoice:
+                user = self.env.user
+                journal = self.env['account.journal'].search(
+                    [('type', '=', 'sale'), ('company_id', '=',
+                                             user.company_id.id)], limit=1)
+
+                invoice = self.env['account.invoice'].create({
+                    'partner_id': partner_id.id,
+                    'type': 'out_invoice',
+                    'journal_id': journal and journal.id or False,
+                    'account_id': account_id,
+                    'name': line[7:17],
+                    'origin': line[87:97],
+                    'state': 'draft',
+                    'number': False,
+                    'fiscal_position': partner_id.property_account_position.id,
+                })
+            product_code = line[20:27]  # Si el producto viene en 10 posiciones
+                                        # las 2 de la izquierda siempre son 0
+            product_info = self.env['product.supplierinfo'].search(
+                [('product_code', '=', product_code)])
+            if not product_info:
+                log.error('product with supplier code %s not found' %
+                          product_code)
+                continue
+            product = product_info.product_tmpl_id
+            qty = float(line[28:33])
+            # Los importes aparecen en el documento multiplicados por 100
+            total = float(line[68:77]) / 100
+            distribution_expenses = float(line[78:87]) / 100
+            unit_price = (total + distribution_expenses) / qty
+            self.env['account.invoice.line'].create({
+                'product_id': product.id,
+                'invoice_id': invoice.id,
+                'account_id': account_id,
+                'price_unit': unit_price,
+                'invoice_line_tax_id': [(4, x.id) for x in
+                                        product.taxes_id],
+                'quantity': qty,
+            })
+        doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
+        self.make_backup(file_path, doc.file_name)
+        os.remove(file_path)
+
+    @api.model
     def process_files(self, path):
         """
         Search all edi docs in error or draft state and process it depending
         on the document type (picking, invoice)
         """
+        super(Edi, self).process_files(path)
         for service in self:
             domain = [('state', 'in', ['draft', 'error']),
                       ('service_id', '=', service.id)]
@@ -426,11 +427,11 @@ class Edi(models.Model):
                     process = True
                 elif doc.doc_type.code == 'alc':
                     service.parse_purchase_picking_file(file_path, doc)
-                elif doc.doc_type.code == 'tur':
-                    service.parse_tourism(file_path, doc)
-                    process = True
                 elif doc.doc_type.code == 'lpr':
                     service.parse_exclusive(file_path, doc)
+                    process = True
+                elif doc.doc_type.code == 'abo':
+                    service.parse_payment_invoice(file_path, doc)
                     process = True
                 # No es necesario hacer este desarrollo para el fichero TOR,
                 # ya que no lo estan usando. Se hara en otra fase
