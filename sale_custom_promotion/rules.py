@@ -41,13 +41,34 @@ class PromotionsRules(models.Model):
         return res
 
 
+class PromotionsRulesActions(models.Model):
+
+    _inherit = 'promos.rules.actions'
+
+    action_type = fields.Selection(selection_add=[('prod_disc_perc_sub',
+                                                   'Discount % on Product of \
+subgroup')])
+
+    @api.model
+    def action_prod_disc_perc_sub(self, action, order):
+        order_line_obj = self.env['sale.order.line']
+        for order_line in order.order_line:
+            if order_line.product_id.rappel_subgroup_id.code == \
+                    eval(action.product_code):
+                return order_line.write({'discount': eval(action.arguments)})
+
+
 class PromotionsRulesConditionsExprs(models.Model):
 
     _inherit = 'promos.rules.conditions.exps'
 
+    attribute = fields.Selection(selection_add=[('subgroup',
+                                                 'Rappel subgroup')])
+
     @api.model
     def evaluate(self, expression, order):
         products = []   # List of product Codes
+        product_ids = []   # List of product ids
         prod_qty = {}   # Dict of product_code:quantity
         prod_unit_price = {}
         prod_sub_total = {}
@@ -55,10 +76,15 @@ class PromotionsRulesConditionsExprs(models.Model):
         prod_weight = {}
         prod_net_price = {}
         prod_lines = {}
+        if expression.attribute == 'subgroup':
+            subgroup_products = self.env['product.product'].search(
+                [('rappel_subgroup_id.code', '=',
+                 eval(expression.value))])._ids
         for line in order.order_line:
             if line.product_id and not line.tourism:
                 product_code = line.product_id.code
                 products.append(product_code)
+                product_ids.append(line.product_id.id)
                 prod_lines[product_code] = line.product_id
                 prod_qty[product_code] = prod_qty.get(product_code, 0.00) + \
                     line.product_uom_qty
@@ -77,3 +103,9 @@ class PromotionsRulesConditionsExprs(models.Model):
                                                             0.00) + \
                     line.th_weight
         return eval(expression.serialised_expr)
+
+    def serialise(self, attribute, comparator, value):
+        if attribute == 'subgroup':
+            return 'len([x for x in product_ids if x in subgroup_products])'
+        return super(PromotionsRulesConditionsExprs, self).serialise(
+            attribute, comparator, value)
