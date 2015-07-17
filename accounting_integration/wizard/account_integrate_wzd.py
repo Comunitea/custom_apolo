@@ -81,7 +81,7 @@ class AccountIntegrateWzd(models.TransientModel):
             for row in reader:
                 try:
                     if row.get('Sit', False) == 'T':
-                        error = True
+                        error = False
                         break
 
                     if not row.get('Referencia', False):
