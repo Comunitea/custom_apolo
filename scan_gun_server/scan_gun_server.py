@@ -1,10 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+"""
+    Para probar la codificación
+"""
 from twisted.internet.protocol import Factory
 from twisted.protocols.basic import LineReceiver
 from twisted.internet import reactor
 from OdooCon import OdooDao
 import sys
+import string
+
 
 params = {}  # se guardará la configuración del archivo aquí
 
@@ -20,10 +25,11 @@ def read_file():
             if key == 'allowed_ips':
                 value = value.split(',')
             params[key] = value
+
 read_file()
 
 
-# Devuelve datos de conexión del archivo de configuración guardado en para,s
+# Devuelve datos de conexión del archivo de configuración guardado en params
 def get_connection_params(return_params=[]):
     return [params[k] for k in return_params if k in params]
 
@@ -43,8 +49,7 @@ class ScanGunProtocol(LineReceiver):
         """
         Método del framework. Mensaje al establecer la conexión
         """
-        self._snd(u"Introduzca su codigo de operador:")
-
+        self._snd(u"**************************\nIntroduzca su código de " + chr(27)+"[7;31m" + "operador:" + chr(27)+"[0m")
     def connectionLost(self, reason):
         """
         Método del framework. Mensaje al perder la conexión
@@ -77,16 +82,60 @@ class ScanGunProtocol(LineReceiver):
             else:
                 self._snd(u"Introduciste %s, pero paso olimpicamente:" % line)
         except Exception, e:
-            str_error = u"Ocurrió un error.\n"
+            str_error = u"Ocurrió un " + chr(27)+"[7;31m" + "error.\n" + chr(27)+"[0m"
             str_error += e.message
             self._snd(str_error)
 
-    def _snd(self, line):
+    def _snd(self, line, custom_format=True):
         """
         Formatea la salida, al enviar mensaje al cliente
         """
         clean = u'\n' * 20
-        self.sendLine((clean + line).encode("ISO-8859-15"))
+
+        if custom_format:
+            cutstr = self.cut_in_lines(line)
+            self.sendLine((clean + cutstr).encode("UTF-8"))
+        else:
+            self.sendLine((clean + line).encode("UTF-8"))
+
+    def cut_in_lines(self,line):
+        """
+        Corta la cadena de caracteres quitándole los símbolos \n, que son los
+        que indican el ambio de línea.
+        """
+        limit_screen = 26 #caracteres que tiene de ancho la pantalla
+        length = 0 #para comparar líneas
+        res = ''
+
+        for linea in line.split('\n'):
+            if length + len(linea) <= limit_screen:
+                new_linea = linea
+                length += len(new_linea)
+            else:
+                if len(linea) > limit_screen:
+                    linea = self.cut_in_words(linea)
+                new_linea = '\n' + linea
+                length = len(new_linea) - 2 #-2 para no tener en cuenta el \n
+            res += new_linea
+        return res
+
+    def cut_in_words(self,linea):
+        """
+        Corta la línea de caracteres separándola por palabras y, si no cabe hace
+        un salto de carro.
+        """
+        length = 0
+        res = ''
+        limit_screen = 26
+        for word in linea.split(' '):
+            if length + len(word) <= limit_screen:
+                new_word = word + ' '
+                length += len(new_word)
+            else:
+                new_word = '\n' + word + ' '
+                length = len(new_word) - 2 #-2 para no tener en cuenta el \n
+            res += new_word
+        return res
 
     def handle_register(self, code):
         """
@@ -94,7 +143,7 @@ class ScanGunProtocol(LineReceiver):
         nos damos por logeados. Solo se usa la conexión central en el factory.
         """
         if code in self.factory.users_codes:
-            self._snd(u"Ya hay un usuario con ese codigo registrado\nIntroduzca codigo operador")
+            self._snd(u"Ya hay un usuario con ese código registrado\n**************************\nIntroduzca código operador")
             return
 
         if self.get_odoo_connexion(code):
@@ -102,7 +151,7 @@ class ScanGunProtocol(LineReceiver):
             self._snd(str_menu)
             self.state = "menu1"
         else:
-            self._snd(u"No se pudo establecer la conexion.\nIntroduzca codigo de nuevo")
+            self._snd(u"No se pudo establecer la conexión.\nIntroduzca código de nuevo")
 
     def get_odoo_connexion(self, code):
         """
@@ -124,18 +173,21 @@ class ScanGunProtocol(LineReceiver):
         """
         Método que devuelve el menú principal
         """
-        delimiter = "\n********************\n"
-        menu_str = u"1 -> Tarea de ubicacion\n2 -> Tarea de reposicion\n3 -> Tarea de picking\n4 -> Transferencia manual\n"
-        return delimiter + menu_str + delimiter
+        delimiter = u"\n**************************"
+        menu_str1 = u"\n1->Tarea de ubicación"
+        menu_str2 = u"\n2->Tarea de reposición"
+        menu_str3 = u"\n3->Tarea de picking"
+        menu_str4 = u"\n4->Transferencia manual"
+        return delimiter + menu_str1 + menu_str2 + menu_str3 + menu_str4 + delimiter
 
-    def handle_menu1(self, line):
+    def handle_menu1(self, line, custom_format=True):
         """
-        Manejador del estado menu1. Para tareas muestra un mení con las
+        Manejador del estado menu1. Para tareas muestra un menú con las
         cámaras a seleccionar, y cambia al siguiente estado si la ubicación es
         correcta.
         """
         if line not in ["1", "2", "3", "4", "5"]:
-            str_error = u"La opcion %s no es valida.\nReintentar:\n" % line
+            str_error = u"La opción %s no es válida.\nReintentar:\n" % line
             self._snd(str_error + self.get_str_menu1())
         elif line == "1":
             self.state = "ubication"
@@ -160,17 +212,17 @@ class ScanGunProtocol(LineReceiver):
         """
         Devuelve el menú con las cámaras disponibles
         """
-        delimiter = "\n********************\n"
+        delimiter = "\n**************************"
         str_menu = ""
         for key in self.factory.menu_cameras:
-            str_menu += str(key) + " -> " + self.factory.menu_cameras[key][1] + "\n"
+            str_menu += "\n" + str(key) + "->" + self.factory.menu_cameras[key][1]
         return delimiter + str_menu + delimiter
 
     def handle_camera_selected(self, line):
         """
         Manejador de los estados location, reposition y picking, pide elegir
         cámara, en caso afirmativo trata de obtener una tarea ya existente
-        o crearse una. Quizás halla que meter estado intermedio para que
+        o crearse una. Quizás haya que meter estado intermedio para que
         seleccione el modo manual de ubicar o el que te da las tareas.
         """
         next_state = {
@@ -180,7 +232,7 @@ class ScanGunProtocol(LineReceiver):
         }
         str_keys = [str(x) for x in self.factory.menu_cameras.keys()]
         if line not in str_keys:
-            str_error = u"La opcion %s no es valida.\nReintentar\n" % line
+            str_error = u"La opcion %s no es válida.\nReintentar\n" % line
             self._snd(str_error + self.get_cameras_menu())
         else:
             try:
@@ -193,7 +245,7 @@ class ScanGunProtocol(LineReceiver):
                 self._snd(op_str)
             except Exception, e:
                 expt_str = e.message
-                str_error = expt_str + u"\nIntroduzca camara de nuevo\n"
+                str_error = expt_str + u"\nIntroduzca cámara de nuevo\n"
                 self._snd(str_error + self.get_cameras_menu())
 
     def get_operation_data(self):
@@ -224,9 +276,9 @@ class ScanGunProtocol(LineReceiver):
             op_str += k + u":  " + self.op_data[k] + "\n"
         op_str += u"\n(Escriba '#C' para cancelar la operación)\n"
         if mode == 'scan_op':
-            op_str += u"************************\nScan Producto/Paquete:"
+            op_str += u"\n**************************\nScan Producto/Paquete:"
         if mode == 'scan_location':
-            op_str += u"************************\nScan Destino:"
+            op_str += u"\n**************************\nScan Destino:"
         return op_str
 
     def cancel_operation(self):
@@ -255,7 +307,7 @@ class ScanGunProtocol(LineReceiver):
                     self.state = "scan_op_pick"
             self._snd(message)
         except Exception, e:
-            str_error = u"Error al cancelar la operacion o finalizar la tarea %s\n"
+            str_error = u"Error al cancelar la operación o finalizar la tarea %s\n"
             self._snd(str_error + e.message)
 
     def handle_scan_op(self, line):
@@ -276,11 +328,11 @@ class ScanGunProtocol(LineReceiver):
                 message = u"Scan correcto. Scanee la ubicación\n"
                 message += self.get_operation_str(mode='scan_location')
             else:
-                message = u"Scan incorrecto, Escanee de nuevo el paquete\n"
+                message = u"Scan " + chr(27)+"[7;31m" + "incorrecto" + chr(27)+"[0m" + ", Escanee de nuevo el paquete\n"
                 message += self.get_operation_str(mode='scan_op')
             self._snd(message)
         except Exception, e:
-            str_error = u"No se pudo identificar la etiqueta %s\n" % line
+            str_error = u"\nNo se pudo identificar la etiqueta %s\n" % line
             self._snd(str_error + e.message)
 
     def handle_scan_location(self, line):
@@ -313,7 +365,7 @@ class ScanGunProtocol(LineReceiver):
                         message += self.get_operation_str(mode='scan_op')
                         self.state = "scan_op"
                 except Exception, e:
-                    str_error = u"Error al marcar la operacion o al finalizar tarea\n"
+                    str_error = u"Error al marcar la operación o al finalizar tarea\n"
                     str_error += e.message + "\n"
                     message += str_error + self.get_operation_str(mode='scan_location')
             else:  # Ubicación mal escaneada, reintentar
@@ -371,5 +423,5 @@ class ScanGunFactory(Factory):
         return ScanGunProtocol(self)
 
 # Para hacer el bucle de escucha del servidor
-reactor.listenTCP(5555, ScanGunFactory())
+reactor.listenTCP(5000, ScanGunFactory())
 reactor.run()
