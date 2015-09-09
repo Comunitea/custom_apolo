@@ -57,11 +57,12 @@ class SaleOrderLine(models.Model):
                 cr, uid, uos, context)
         product = self.pool.get('product.product').browse(cr, uid, product,
                                                           context)
-        if uos.like_type == 'boxes':
-            unit_price = res['value']['price_unit'] / product.un_ca
-        else:
-            unit_price = res['value']['price_unit']
-
+        # like type ya no existe
+        # if uos.like_type == 'boxes':
+        #     unit_price = res['value']['price_unit'] / product.un_ca
+        # else:
+        #     unit_price = res['value']['price_unit']
+        unit_price = res['value']['price_unit']
         tourism_ids = self.pool.get('tourism.customer').search(
             cr, uid, [('customer_id', '=', partner_id),
                       ('tourism_id.date_start', '<=', date.today()),
@@ -73,11 +74,13 @@ class SaleOrderLine(models.Model):
                                                            tourism_ids,
                                                            context)
         if tourism and unit_price != tourism.agreed_price:
-            if uos.like_type == 'boxes':
-                res['value']['price_unit'] = tourism.agreed_price * \
-                    product.un_ca
-            else:
-                res['value']['price_unit'] = tourism.agreed_price
+            # # like type ya no existe
+            # if uos.like_type == 'boxes':
+            #     res['value']['price_unit'] = tourism.agreed_price * \
+            #         product.un_ca
+            # else:
+            #     res['value']['price_unit'] = tourism.agreed_price
+            res['value']['price_unit'] = tourism.agreed_price
             res['value']['discount'] = 0
             res['value']['tourism'] = True
         return res

@@ -116,10 +116,12 @@ class TourismGroup(models.Model):
                  ('invoice_id.date_invoice', '<=', date_end)])
             total_qty = 0.0
             for line in lines:
-                if line.uos_id.like_type == 'boxes':
-                    qty = line.quantity * line.product_id.un_ca
-                else:
-                    qty = line.quantity
+                # Like type ya no xiste
+                # if line.uos_id.like_type == 'boxes':
+                #     qty = line.quantity * line.product_id.un_ca
+                # else:
+                #     qty = line.quantity
+                qty = line.quantity
                 total_qty += qty
             if total_qty > 0:
                 self.env['tourism.consumption'].create(
