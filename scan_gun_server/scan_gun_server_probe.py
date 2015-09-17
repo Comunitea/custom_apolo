@@ -43,6 +43,7 @@ class ConnectionManager:
              'odoo_password'])
         self.odoo_con = OdooDao(server, port, db, user, password)
         self.user_id = False
+        self.user_name = 'username'
 
     def new_connection(self, handler, user_code):
         """
@@ -51,7 +52,8 @@ class ConnectionManager:
         """
         if self.connections.get(user_code, False):
             self.destroy_connection(user_code)
-        user_id = self.odoo_con.get_user_by_code(user_code)
+        user_id, user_name = self.odoo_con.get_user_by_code(user_code)
+        self.user_name = user_name
         self.user_id = user_id
         self.connections[user_code] = Connection(handler, user_id[0])
 

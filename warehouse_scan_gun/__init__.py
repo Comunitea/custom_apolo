@@ -21,3 +21,4 @@
 import res_users
 import stock_task
 import stock
+import stock_quant_package
