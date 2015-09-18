@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Copyright (C) 2015 Comunitea All Rights Reserved
-#    $Javier Colmenero Fernández <javier@comunitea.com>$
+#    Copyright (C) 2004-2014 Pexego Sistemas Informáticos All Rights Reserved
+#    $Javier Colmenero Fernández$ <javier@pexego.es>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published
@@ -18,16 +18,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{
-    'name': 'Warehouse Scan Gun',
-    'version': '1.0',
-    'category': 'Account',
-    'description': """Module to manage the warehouse with a scan gun""",
-    'author': 'Comunitea',
-    'website': '',
-    "depends": ['base',
-                'midban_depot_stock'],
-    "data": ["res_users_view.xml",
-             "product_view.xml"],
-    "installable": True
-}
+from openerp import models, fields
+
+
+class ProductTemplate(models.Model):
+    _inherit = 'product.template'
+
+    gun_name = fields.Char('Gun Name', size=8)
