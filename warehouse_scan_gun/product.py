@@ -24,4 +24,5 @@ from openerp import models, fields
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
-    gun_name = fields.Char('Gun Name', size=8)
+    short_name = fields.Char('Short Name', size=8,
+                             help="Short name displayed in the gun")
