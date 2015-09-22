@@ -9,7 +9,6 @@
             <field name="arch" type="xml">
                 <field name="ref" position="after">
                     <field name="unilever_code"/>
-                    <field name="favorite"/>
                 </field>
                 <field name="category_id" position="after">
                     <group>

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Copyright (C) 2015 Comunitea All Rights Reserved
-#    $Javier Colmenero Fernández <javier@comunitea.com>$
+#    Copyright (C) 2015 Comunitea Servicios Tecnológicos All Rights Reserved
+#    $Omar Castiñeira Saavedra$ <omar@comunitea.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published
@@ -18,18 +18,26 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+
 {
-    'name': 'Warehouse Scan Gun',
-    'version': '1.0',
-    'category': 'Account',
-    'description': """Module to manage the warehouse with a scan gun""",
-    'author': 'Comunitea',
-    'website': '',
-    "depends": ['base',
-                'midban_depot_stock'],
+    "name": "Sale display stock",
+    "version": "1.0",
+    "author": "Comunitea",
+    'website': 'www.comunitea.com',
+    "category": "Sales",
+    "description": """
+Sales display stock
+========================================
+
+    * Displays the real stock of product at each sale order line.
+""",
+    "depends": ["base", "sale", "stock", "midban_depot_stock",
+                "process_sale_order"],
     "data": [
-        "res_users_view.xml",
-        "wave_report.xml"
-        ],
-    "installable": True
+        "sale_view.xml",
+    ],
+    "demo": [],
+    'auto_install': False,
+    "installable": True,
+    'images': [],
 }

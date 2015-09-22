@@ -74,21 +74,22 @@ class StockTask(models.Model):
             if task.paused:
                 ind += 1
                 vals[format(ind)] = values
-            else:
 
+            else:
                 vals[format(0)] = values
                 task_id = task.id
         return task_id, vals
-
     @api.multi
     def get_task_of_type(self, my_args):
         """
         Get a task for a user and type defined in my args.
         """
+        #import ipdb; ipdb.set_trace()
         user_id = my_args.get('user_id', False)
         camera_id = my_args.get('camera_id', False)
         task_type = my_args.get('task_type', False)
         machine_id = my_args.get('machine_id', False)
+        date_planned= my_args.get('date_planned', False)
         domain = [
             ('user_id', '=', user_id),
             ('state', '=', 'assigned'),
@@ -102,9 +103,10 @@ class StockTask(models.Model):
         vals = {
             'operator_id': user_id,
             'machine_id': machine_id,
-            'location_ids': [(4, camera_id, 0)],
+            'location_ids': [],
             'mandatory_camera': True,
             'print_report': False,
+            'date_planned':date_planned,
             # 'max_loc_ops':
             # 'min_loc_replenish':
             # 'warehouse_id':
@@ -113,10 +115,13 @@ class StockTask(models.Model):
         }
         t_wzd = self.env['assign.task.wzd']
         # CHANGUING USER ID t_wzd.sudo(user_id) no funciona
-        wzd_obj = t_wzd.create(vals)
-        env2 = wzd_obj.env(self._cr, user_id, self._context)
-        wzd_obj_uid = wzd_obj.with_env(env2)
-        #import ipdb; ipdb.set_trace()
+
+        env2 = t_wzd.env(self._cr, user_id, self._context)
+        wzd_obj= t_wzd.with_env(env2)
+        wzd_obj_uid= wzd_obj.create(vals)
+        for camera in camera_id:
+            wzd_obj_uid.location_ids =[(4, camera, 0)]
+
         if task_type == 'ubication':
             wzd_obj_uid.get_location_task()
         elif task_type == 'reposition':

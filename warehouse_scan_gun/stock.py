@@ -43,7 +43,7 @@ class stock_picking_wave(models.Model):
                     'ID': op.id,
                     'PRODUCTO': op.product_id and op.product_id.name or "",
                     'EAN' :op.ean13,
-                    'CANTIDAD': str(op.product_qty),
+                    'CANTIDAD': op.product_qty,
                     'LOTE': op.lot_id and op.lot_id.name or "",
                     'PAQUETE': op.pack_id.id and op.pack_id.name or "",
                     'ORIGEN': op.location_id.name_get()[0][1],
@@ -61,7 +61,9 @@ class stock_picking_wave(models.Model):
                     'uos' :op.uos_id.name or False,
                     'uos_id': op.uos_id.id or False,
                     'origen' : op.location_id.get_short_name(),
-                    'destino' : 'D'#op.location_dest_id.get_short_name()
+                    'destino' : 'D',#op.location_dest_id.get_short_name(),
+                    'product_id': op.product_id.id or False,
+                    'short_name':op.product_id.short_name or ''
                     }
 
                 ind += 1
@@ -73,10 +75,11 @@ class wave_report(models.Model):
 
     _inherit = 'wave.report'
 
+
+
     @api.multi
     def get_waves_from_task (self, my_args):
         #import ipdb; ipdb.set_trace()
-        ASA=my_args.fgkhkshjsfgs
         task_id= my_args.get ('task_id', 0)
         domain = [
             ('id', '=', task_id)
@@ -107,7 +110,7 @@ class wave_report(models.Model):
             values = {
                 'ID': op.id,
                 'PRODUCTO': op.product_id and op.product_id.name or "",
-                'CANTIDAD': str(op.product_qty),
+                'CANTIDAD': op.product_qty,
                 'LOTE': op.lot_id and op.lot_id.name or "",
                 'PAQUETE': op.pack_id.id and op.pack_id.name or "",
                 'ORIGEN': op.location_id.name_get()[0][1],
@@ -121,13 +124,15 @@ class wave_report(models.Model):
                 'paquete_dest_id' : False,
                 'uom' :op.uos_id and op.uos_id.name or "",
                 'origen' : op.location_id.get_short_name(),
-                'destino' : 'D'#op.location_dest_id.get_short_name()
+                'destino' : 'D',#op.location_dest_id.get_short_name()
+                'product_id': op.product_id.id or False
                 }
 
             ind += 1
             vals[str(ind)] = values
 
         return vals
+
 
 class stock_pack_operation(models.Model):
     _inherit = 'stock.pack.operation'
@@ -137,6 +142,44 @@ class stock_pack_operation(models.Model):
     wave_ok = fields.Boolean('Wave Ok', default = True)
     #state =fields.Many2one('stock.task', 'State', readonly=True,
     #                       related="task_id.state")
+
+
+    @api.multi
+    def get_user_packet_busy(self, my_args):
+
+        packet_id = my_args.get('packet_id', 0)
+        domain = [('package_id', '=', packet_id)]
+        ops_ids = self.search(domain)
+        res = {}
+        #miramos si está en tareas de ubi o repo
+        if ops_ids:
+            for op in ops_ids:
+                task = op.task_id
+                if task.state == 'assigned':
+                    res = {'ref': task.type[0:4] + '/' + str(task.id),
+                           'user': task.user.id.name}
+
+        #si está enun poicking. Revisar con un pick
+        if not res:
+
+            tasks_pool = self.env['stock.task']
+            picks_pool = self.env['stock.picking']
+            domain = [('state', '=','assigned'), ('picking_id', '!=', False)]
+            tasks = tasks_pool.search(domain)
+            if tasks:
+                for task in tasks:
+                    domain = [('id','=',task.picking_id)]
+                    pick = picks_pool.search(domain)
+                    if pick:
+                        if packet_id in pick.pack_operation_ids:
+                             res = {'ref': pick.name,
+                                    'user': task.user.id.name}
+
+        return res
+
+
+
+
 
     @api.multi
     def set_wave_ops_values(self, my_args):
@@ -159,7 +202,7 @@ class stock_pack_operation(models.Model):
 
     @api.multi
     def get_ops_from_wave (self, my_args):
-        import ipdb; ipdb.set_trace()
+        #import ipdb; ipdb.set_trace()
         wave_id = my_args.get ('wave_id', 0)
         type = my_args.get('type', 'ubication')
 
@@ -175,7 +218,7 @@ class stock_pack_operation(models.Model):
                 values = {
                 'ID': op.id,
                 'PRODUCTO': op.product_id and op.product_id.name or "",
-                'CANTIDAD': str(op.product_qty),
+                'CANTIDAD': op.product_qty,
                 'LOTE': op.packed_lot_id and op.packed_lot_id.name or "",
                 'PAQUETE': op.package_id.id and op.package_id.name or "",
                 'ORIGEN': op.location_id.name_get()[0][1],
@@ -187,9 +230,11 @@ class stock_pack_operation(models.Model):
                 'paquete_id': op.package_id.id or 0,
                 'qty': op.product_qty or 0,
                 'paquete_dest_id' : False,
-                'uom' :op.product_uom_id and op.product_uom_id.name or "",
+                'uom' :op.product_uom_id and op.product_uom_id.name or '',
                 'origen' : op.location_id.get_short_name(),
-                'destino' : op.location_dest_id.get_short_name()
+                'destino' : op.location_dest_id.get_short_name(),
+                'product_id': op.product_id.id or False,
+                'short_name' : op.product_id.short_name or ''
 
                 }
                 ind += 1
@@ -217,7 +262,7 @@ class stock_pack_operation(models.Model):
                 values = {
                 'ID': op.id,
                 'PRODUCTO': op.product_id and op.product_id.name or "",
-                'CANTIDAD': str(op.product_qty),
+                'CANTIDAD': op.product_qty,
                 'LOTE': op.packed_lot_id and op.packed_lot_id.name or "",
                 'PAQUETE': op.package_id.id and op.package_id.name or "",
                 'ORIGEN': op.location_id.name_get()[0][1],
@@ -231,7 +276,8 @@ class stock_pack_operation(models.Model):
                 'paquete_dest_id' : False,
                 'uom' :op.product_uom_id and op.product_uom_id.name or "",
                 'origen' : op.location_id.get_short_name(),
-                'destino' : op.location_dest_id.get_short_name()
+                'destino' : op.location_dest_id.get_short_name(),
+                'product_id': op.product_id.id or False
                 }
                 ind += 1
                 vals[str(ind)] = values

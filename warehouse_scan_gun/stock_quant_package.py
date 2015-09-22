@@ -22,17 +22,42 @@ from openerp import models, fields, api
 from openerp.exceptions import except_orm
 from openerp.tools.translate import _
 
+class stock_quant(models.Model):
+        _inherit = 'stock.quant'
+
+        @api.multi
+        def get_quant_pack_gun_info(self, my_args):
+
+            package_id = my_args.get("package_id", False)
+            domain = [('package_id', '=', package_id)]
+            quants = self.search(domain)
+            res={}
+            vals = {}
+            for quant in quants:
+                if quant:
+                    vals = {
+                        'exist' : True,
+                        'quant' : quant.name,
+                        'quant_id' :quant.id,
+                        'location_id' : quant.location_id.id,
+                        'location': quant.location_id.name_get()[0][1],
+                        'product_id': quant.product_id.id,
+                        'product' : quant.product_id.name,
+                        'quantity' : quant.qty,
+                        'uom': quant.product_id.uom_id.name
+                    }
+                res[str(quant.id)]=vals
+            return res
+
+
 
 class stock_quant_package(models.Model):
+
     _inherit = 'stock.quant.package'
-
-
-
     @api.multi
     def get_quant_pack_gun_info(self, my_args):
         package_id = my_args.get("package_id", False)
-        name = my_args.get('name', False)
-        domain = ['|', ('name', '=', name), ('id', '=', package_id)]
+        domain = [('id', '=', package_id)]
         package = self.search(domain)
         vals = {'exist':False}
         if package:
@@ -42,12 +67,45 @@ class stock_quant_package(models.Model):
                 'package_id' :package.id,
                 'src_location_id' : package.location_id.id,
                 'src_location': package.location_id.name_get()[0][1],
-
+                'dest_location_id' : False,
+                'dest_location': '',
+                'packet_lot_id': package.packed_lot_id.id,
             }
         return vals
 
 class product_product (models.Model):
     _inherit = 'product.product'
+
+    short_name=fields.Char("Short Name", size = 25)
+
+    @api.multi
+    def get_product_gun_complete_info(self, my_args):
+
+        id = my_args.get("product_id", False)
+        domain = [('id', '=', id)]
+        product = self.search(domain)
+        vals = {'exist':False}
+        if product:
+            var_coeff_un_id =False
+            var_coeff_ca_id =False
+            if product.var_coeff_un:
+                var_coeff_un_id = product.log_base_id.id or False
+            if product.var_coeff_ca:
+                var_coeff_ca_id = product.log_unit_id.id or False
+            vals = {
+                'exist' : True,
+                'product_id' : product.id,
+                'product' : product.name,
+                'short_name':product.default_code,
+                'uom_id': product.uom_id.id,
+                'var_coeff_un_id': var_coeff_un_id,
+                'var_coeff_ca_id':var_coeff_ca_id,
+                'un_ca': product.un_ca,
+                'kg_un':product.kg_un,
+                'ca_ma':product.ca_ma
+            }
+        return vals
+
 
     @api.multi
     def get_product_gun_info(self, my_args):
@@ -70,8 +128,8 @@ class product_product (models.Model):
         uom_destino = my_args.get("uom_destino", False)
         uom_origen = my_args.get("uom_origen", False)
         supplier_id = my_args.get("supplier_id", False)
-        product_ean = my_args.get("product_ean", False)
-        domain = [('ean13', '=', product_ean)]
+        product_id = my_args.get("product_id", False)
+        domain = [('id', '=', product_id)]
         product = self.search(domain)
         res = False
         if product:
@@ -79,7 +137,6 @@ class product_product (models.Model):
                   product._get_unit_ratios(uom_origen, supplier_id)
 
         return res
-
 
 class stock_location(models.Model):
 
@@ -111,8 +168,67 @@ class stock_location(models.Model):
             }
         return vals
 
+class wave_reports(models.Model):
 
+    _name = 'wave.reports'
+    _order = 'wave_id'
 
+    wave_id = fields.Many2one('wave.report', 'Id wave_report')
+    to_revised = fields.Boolean ('To Revised', default = False)
+    uos_qty = fields.Float("Uos Qty", default = 0.00)
+    uom_qty = fields.Float("Uom Qty", default = 0.00)
+
+    @api.multi
+    def set_wave_reports_values(self, my_args):
+        """
+        Setea una campo con el valor para todas las ops
+        de un wave.report
+        """
+        wave_id = my_args.get('wave_id', False)
+        user_id = my_args.get('user_id', False)
+        field = my_args.get ('field', False)
+        #value =my_args('value', False)
+
+        env2 = self.env(self._cr, user_id, self._context)
+        wave_pool = self.with_env(env2)
+        wave = wave_pool.browse(wave_id)
+        if wave:
+            for op in wave.operation.ids:
+                res = op.write(field)
+        else:
+            for op in wave.operation.ids:
+                res = op.create({field})
+        return res
+
+class wave_report(models.Model):
+
+    _inherit = 'wave.report'
+
+    @api.multi
+    def set_wave_op_values(self, my_args):
+        """
+        Setea una campo con el valor para todas las ops
+        de un wave.report
+        """
+        wave_id = my_args.get('wave_id', False)
+        user_id = my_args.get('user_id', False)
+        field = my_args.get ('field', False)
+        value =my_args('value', False)
+
+        env2 = self.env(self._cr, user_id, self._context)
+        wave_pool = self.with_env(env2)
+        wave = wave_pool.browse(wave_id)
+        if wave:
+            for op in wave.operation.ids:
+                if field == 'to_process':
+                    res = op.write({field : value, 'visited' : True})
+                else:
+                    res = op.write({field : value})
+
+        else:
+            res = False
+
+        return res
 
 class stock_production_lot(models.Model):
 
@@ -129,10 +245,9 @@ class stock_production_lot(models.Model):
                 'exist' : True,
                 'lot_id' : lot.id,
                 'lot' : lot.name,
+                'product_id': lot.product_id.id or False
             }
         return vals
-
-
 
 class manual_transfer_wzd(models.TransientModel):
 
