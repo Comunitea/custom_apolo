@@ -30,7 +30,7 @@
 
     "data": [
         "res_users_view.xml",
-        "wave_report.xml"
+        "wave_report.xml",
         "product_view.xml"],
     "installable": True
 }
