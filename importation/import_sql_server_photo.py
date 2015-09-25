@@ -5,28 +5,7 @@ import xmlrpclib
 import socket
 import pyodbc
 import traceback
-
-UOM_MAP = {"K": "kg",
-           "U": "Unit(s)",
-           "C": "Box(es)",
-           "L": "Liter(s)"}
-
-TYPE_MAP = {"S": "service",
-            "L": "product",
-            "N": "consu"}
-
-IVA_MAP = {
-    "1": ["S_IVA10B", "P_IVA10_BC"],
-    "2": ["S_IVA4B", "P_IVA4_BC"],
-    "3": ["S_IVA21B", "P_IVA21_BC"],
-    "4": ["S_IVA0", "P_IVA0_BC"]
-}
-
-TEMP_TYPE_MAP = {
-    "D": "Seco",
-    "N": "Refrigerado",
-    "A": "Congelado"
-}
+import base64
 
 def ustr(text):
     """convierte las cadenas de sql server en iso-8859-1 a utf-8 que es la cofificaciï¿œn de postgresql"""
@@ -183,120 +162,20 @@ class DatabaseImport:
         except xmlrpclib.Fault, err:
             raise Exception('Error %s en execute: %s' % (err.faultCode, err.faultString))
 
-    def _getProdCategory_byCode(self, code):
-        categ_ids = self.search("product.category", [("code", "=", str(code))])
-        return categ_ids and categ_ids[0] or False
-
-    def _getTaxes(self, tax_name):
-        tax_ids = self.search("account.tax", [('description', '=', tax_name)])
-        return tax_ids
-
-    def _getTempType_byName(self, temp_name):
-        temp_ids = self.search("temp.type", [("name", "=", temp_name)])
-        return temp_ids and temp_ids[0] or False
-
-    def import_product_category(self, cr):
-        parent_categ_map = {}
-        cr.execute("select count(*) as count from dbo.adsd_gru")
+    def import_product_image(self, cr):
+        cr.execute("select count(*) as count from (select articulo_id as product_id from dbo.articulos_foto where foto is not null "
+                   "union select articulo_id as product_id from dbo.articulos_foto_unilever where articulo_id != 0) t")
         row = cr.fetchone()
-        print "Numero de categorias padre: ", (row.count)
+        print "Numero de fotos: ", (row.count)
         num_rows = row.count
         cont = 0
-        cr.execute("select gru_codi as code, gru_desc as name from dbo.adsd_gru")
+        cr.execute("SET TEXTSIZE 2147483647 select articulo_id as product_id, foto as img from dbo.articulos_foto where foto is not null "
+                   "union select articulo_id as product_id, foto as img from dbo.articulos_foto_unilever where articulo_id != 0")
+
         for row in cr:
-            categ_vals = {
-                "name": ustr(row.name),
-                "parent_id": 2,  # Se puede vender,
-                "code": str(row.code)
-            }
-            res = self.search("product.category", [('parent_id', '=', categ_vals['parent_id']),
-                                                   ('name', '=', categ_vals['name'])])
-            if not res:
-                categ_id = self.create("product.category", categ_vals)
-                parent_categ_map[row.code] = categ_id
-            else:
-                parent_categ_map[row.code] = res[0]
-
-            cont += 1
-            print "%s de %s" % (str(cont), str(num_rows))
-
-        cont = 0
-        cr.execute("select count(*) as count from dbo.adsd_fam")
-        row = cr.fetchone()
-        print "Numero de categorias: ", (row.count)
-        num_rows = row.count
-        cr.execute("select fam_codi as code, fam_nomb as name, fam_grup as parent_id_map from dbo.adsd_fam")
-        for row in cr:
-            categ_vals = {
-                "name": ustr(row.name),
-                "parent_id": parent_categ_map[row.parent_id_map],
-                "code": str(row.code)
-            }
-            res = self.search("product.category", [('parent_id', '=', categ_vals['parent_id']),
-                                                   ('name', '=', categ_vals['name'])])
-            if not res:
-                self.create("product.category", categ_vals)
-
-            cont += 1
-            print "%s de %s" % (str(cont), str(num_rows))
-
-    def import_products(self, cr):
-        cr.execute("select count(*) as count from dbo.articulos")
-        row = cr.fetchone()
-        print "Numero de productos: ", (row.count)
-        num_rows = row.count
-        cont = 0
-        cr.execute("select v.articulo as default_code, v.descripcion as name, v.familia as categ_id_map, m.pr1_cenv as temp_type_map, "
-                   "v.medida_base as uom_id_map, v.medida_composicion as uomb_map, v.cantidad_composicion as kg_un, m.pr1_tcom as var_coeff_un, "
-                   "v.cajas_por_rellano as ca_ma, v.cajas_por_pale / nullif(v.cajas_por_rellano, 0) as ma_pa, v.control_stock as type_map, "
-                   "v.codigo_iva as tax_map, v.ean_base as ean14, v.precio_ultima_compra as standard_price, v.bloqueado as active, "
-                   "m.medida_peso as weight, m.observaciones_articulo as description, v.tipo_composicion as base_use_sale, v.id as internal_code "
-                   "from dbo.articulos v inner join dbo.adsd_art m on m.pr1_codi = v.articulo")
-        data = cr.fetchall()
-        for row in data:
-            uom_id = self.search("product.uom", [('name', '=', UOM_MAP[row.uom_id_map.strip()])])[0]
-            uob_id = self.search("product.uom", [('name', '=', UOM_MAP[row.uomb_map.strip()])])[0]
-            product_vals = {
-                "default_code": str(int(row.default_code)),
-                "name": ustr(row.name),
-                "categ_id": self._getProdCategory_byCode(row.categ_id_map) or 2,
-                "uom_id": uom_id,
-                "uom_po_id": uom_id,
-                "log_unit_id": uom_id,
-                "kg_un": row.kg_un,
-                "ca_ma": row.ca_ma or 0,
-                "ma_pa": row.ma_pa or 0,
-                "standard_price": row.standard_price,
-                "weight": row.weight,
-                "description": (row.description and ustr(row.description) or "") + (row.base_use_sale != "F" and "\nBLOQUEADO" or ""),
-                "unit_use_sale": True,
-                "type": TYPE_MAP[row.type_map],
-                "purchase_ok": True,
-                "sale_ok": True,
-                "log_box_id": False,
-                "log_base_id": False,
-                "cost_method": "average",
-                "taxes_id": [(6, 0, self._getTaxes(IVA_MAP[str(int(row.tax_map))][0]))],
-                "supplier_taxes_id": [(6, 0, self._getTaxes(IVA_MAP[str(int(row.tax_map))][1]))],
-                "ean14": row.ean14 and ustr(str(int(row.ean14))) or "",
-                "temp_type": self._getTempType_byName(row.temp_type_map and TEMP_TYPE_MAP[row.temp_type_map] or TEMP_TYPE_MAP["D"]),
-                "var_coeff_un": row.var_coeff_un == "V" and True or False,
-                "internal_code": str(int(row.internal_code))
-            }
-            if uom_id != uob_id:
-                product_vals["log_base_id"] = uob_id
-                product_vals["base_use_sale"] = row.base_use_sale == "S" and True or False
-
-            res = self.search("product.product", [('default_code', '=', product_vals['default_code']),'|',('active', '=', False),('active', '=', True)])
-            if not res:
-                prod_id = self.create("product.product", product_vals)
-            else:
-                prod_id = res[0]
-
-            cr.execute("select top 1 tari_prec as lst_price from dbo.adsd_tari where tari_arti = ? order by tari_desd desc", (row.default_code,))
-            row2 = cr.fetchone()
-            if row2 and row2.lst_price:
-                self.write("product.product", [prod_id], {"lst_price": row2.lst_price})
+            product_id = self.search("product.product", [('internal_code', '=', str(int(row.product_id))),'|',('active', '=', False),('active', '=', True)])
+            if product_id and row.img:
+                prod_id = self.write("product.product", product_id, {'image_medium': base64.encodestring(row.img)})
 
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
@@ -310,11 +189,10 @@ class DatabaseImport:
             #
             # Nos conectamos a la bbdd de sql server
             #
-            conn = pyodbc.connect("DRIVER={FreeTDS};SERVER=" + self.sql_server_host + ";UID=midban;PWD=midban2015;DATABASE=gest2015;Port=1433;TDS_Version=10.0")
+            conn = pyodbc.connect("DRIVER={FreeTDS};SERVER=" + self.sql_server_host + ";UID=midban;PWD=midban2015;DATABASE=gest_fotos;Port=1433;TDS_Version=10.0")
             cr = conn.cursor()
 
-            self.import_product_category(cr)
-            self.import_products(cr)
+            self.import_product_image(cr)
 
         except Exception, ex:
             print u"Error al conectarse a las bbdd: ", repr(ex)
