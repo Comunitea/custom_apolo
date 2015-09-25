@@ -2,7 +2,7 @@
 <openerp>
     <data>
 
-        <record id="view_list_wave_report" model="ir.ui.view">
+        <!-- <record id="view_list_wave_report" model="ir.ui.view">
             <field name="name">view_list_wave_repot</field>
             <field name="model">wave.report</field>
             <field name="type">form</field>
@@ -26,7 +26,7 @@
             <field name="res_model">wave.report</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
-        </record>
+        </record> -->
 
 
     </data>
