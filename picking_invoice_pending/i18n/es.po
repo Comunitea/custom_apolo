@@ -1,13 +1,13 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#       * picking_invoice_pending
+#	* picking_invoice_pending
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-05-12 15:13+0000\n"
-"PO-Revision-Date: 2015-05-12 15:13+0000\n"
+"POT-Creation-Date: 2015-09-25 10:24+0000\n"
+"PO-Revision-Date: 2015-09-25 10:24+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -63,7 +63,7 @@ msgstr "Esta cuenta se usa para contabilizar las facturas pendientes de recibir.
 #. module: picking_invoice_pending
 #: help:res.company,property_pending_stock_journal:0
 msgid "This journal is used for accounting in pending supplier invoices."
-msgstr "Este diario se usa para contabilizar las facturas pendientes de recibir"
+msgstr "Este diario se usa para contabilizar las facturas pendientes de recibir."
 
 #. module: picking_invoice_pending
 #: code:addons/picking_invoice_pending/stock_picking.py:130

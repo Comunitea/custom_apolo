@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-18 12:33+0000\n"
-"PO-Revision-Date: 2015-09-18 12:33+0000\n"
+"POT-Creation-Date: 2015-09-25 09:41+0000\n"
+"PO-Revision-Date: 2015-09-25 09:41+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,26 +16,79 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: warehouse_scan_gun
-#: code:addons/warehouse_scan_gun/stock.py:47
-#: code:addons/warehouse_scan_gun/stock_task.py:77
-#: code:addons/warehouse_scan_gun/stock_task.py:120
+#: field:wave.reports,create_uid:0
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: warehouse_scan_gun
+#: field:wave.reports,create_date:0
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: warehouse_scan_gun
+#: code:addons/warehouse_scan_gun/stock.py:295
+#: code:addons/warehouse_scan_gun/stock.py:315
+#: code:addons/warehouse_scan_gun/stock.py:356
+#: code:addons/warehouse_scan_gun/stock.py:390
+#: code:addons/warehouse_scan_gun/stock.py:440
+#: code:addons/warehouse_scan_gun/stock_task.py:141
+#: code:addons/warehouse_scan_gun/stock_task.py:202
 #, python-format
 msgid "Error"
 msgstr "Error"
 
 #. module: warehouse_scan_gun
-#: field:product.template,gun_name:0
-msgid "Gun Name"
-msgstr "Nombre pistola"
+#: model:ir.model,name:warehouse_scan_gun.model_wave_report
+msgid "Group picks of waves"
+msgstr "Agrupar albaranes de oleada"
 
 #. module: warehouse_scan_gun
-#: code:addons/warehouse_scan_gun/stock.py:48
+#: field:wave.reports,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: warehouse_scan_gun
+#: field:wave.reports,wave_id:0
+msgid "Id wave_report"
+msgstr "Id wave_report"
+
+#. module: warehouse_scan_gun
+#: model:ir.model,name:warehouse_scan_gun.model_stock_location
+msgid "Inventory Locations"
+msgstr "Ubicaciones de inventario"
+
+#. module: warehouse_scan_gun
+#: field:wave.reports,write_uid:0
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: warehouse_scan_gun
+#: field:wave.reports,write_date:0
+msgid "Last Updated on"
+msgstr "Última actualización el"
+
+#. module: warehouse_scan_gun
+#: model:ir.model,name:warehouse_scan_gun.model_stock_production_lot
+msgid "Lot/Serial"
+msgstr "Lote/Nº de serie"
+
+#. module: warehouse_scan_gun
+#: code:addons/warehouse_scan_gun/stock.py:357
+#, python-format
+msgid "No operation founded to set as to process"
+msgstr "Ninguna operación encontrada para establecer como el proceso"
+
+#. module: warehouse_scan_gun
+#: code:addons/warehouse_scan_gun/stock.py:296
+#: code:addons/warehouse_scan_gun/stock.py:316
+#: code:addons/warehouse_scan_gun/stock.py:391
+#: code:addons/warehouse_scan_gun/stock.py:441
 #, python-format
 msgid "No operation founded to set as visited"
 msgstr "Operación no encontrada para marcar como visitada"
 
 #. module: warehouse_scan_gun
-#: code:addons/warehouse_scan_gun/stock_task.py:121
+#: code:addons/warehouse_scan_gun/stock_task.py:203
 #, python-format
 msgid "Operation not founded in the task"
 msgstr "Operación no encontrada en la tarea"
@@ -46,12 +99,53 @@ msgid "Packing Operation"
 msgstr "Operación de empaquetado"
 
 #. module: warehouse_scan_gun
+#: model:ir.model,name:warehouse_scan_gun.model_stock_quant_package
+msgid "Physical Packages"
+msgstr "Paquetes físicos"
+
+#. module: warehouse_scan_gun
+#: model:ir.model,name:warehouse_scan_gun.model_stock_picking_wave
+msgid "Picking Wave"
+msgstr "Agrupación de albaranes"
+
+#. module: warehouse_scan_gun
+#: model:ir.model,name:warehouse_scan_gun.model_product_product
+msgid "Product"
+msgstr "Producto"
+
+#. module: warehouse_scan_gun
 #: model:ir.model,name:warehouse_scan_gun.model_product_template
 msgid "Product Template"
 msgstr "Plantilla de producto"
 
 #. module: warehouse_scan_gun
-#: code:addons/warehouse_scan_gun/stock_task.py:77
+#: model:ir.model,name:warehouse_scan_gun.model_stock_quant
+msgid "Quants"
+msgstr "Quants"
+
+#. module: warehouse_scan_gun
+#: field:product.product,short_name:0
+#: field:product.template,short_name:0
+msgid "Short Name"
+msgstr "Nombre corto"
+
+#. module: warehouse_scan_gun
+#: help:product.template,short_name:0
+msgid "Short name displayed in the gun"
+msgstr "Nombre corto visualizado en la pistola"
+
+#. module: warehouse_scan_gun
+#: field:stock.pack.operation,state:0
+msgid "State"
+msgstr "Estado"
+
+#. module: warehouse_scan_gun
+#: field:stock.task,gun_begin:0
+msgid "Tarea Comenzada desde Pistola"
+msgstr "Tarea Comenzada desde Pistola"
+
+#. module: warehouse_scan_gun
+#: code:addons/warehouse_scan_gun/stock_task.py:141
 #, python-format
 msgid "Task not founded after create it"
 msgstr "Tarea no encontrada después de crearla"
@@ -60,6 +154,21 @@ msgstr "Tarea no encontrada después de crearla"
 #: field:res.users,x_telnet_code:0
 msgid "Telnet code"
 msgstr "Código telnet"
+
+#. module: warehouse_scan_gun
+#: field:wave.reports,to_revised:0
+msgid "To Revised"
+msgstr "Para ser revisado"
+
+#. module: warehouse_scan_gun
+#: field:wave.reports,uom_qty:0
+msgid "Uom Qty"
+msgstr "Uom Qty"
+
+#. module: warehouse_scan_gun
+#: field:wave.reports,uos_qty:0
+msgid "Uos Qty"
+msgstr "Uos Qty"
 
 #. module: warehouse_scan_gun
 #: model:ir.model,name:warehouse_scan_gun.model_res_users
@@ -75,3 +184,19 @@ msgstr "Visitado"
 #: model:ir.model,name:warehouse_scan_gun.model_stock_task
 msgid "Warehouse task to organice products and locations"
 msgstr "Tareas de almacén para organizar productos y ubicaciones"
+
+#. module: warehouse_scan_gun
+#: field:stock.pack.operation,wave_ok:0
+msgid "Wave Ok"
+msgstr "Ola OK"
+
+#. module: warehouse_scan_gun
+#: model:ir.actions.act_window,name:warehouse_scan_gun.action_list_wave_report
+msgid "Wave Report"
+msgstr "Informe de olas"
+
+#. module: warehouse_scan_gun
+#: view:wave.report:warehouse_scan_gun.view_list_wave_report
+msgid "Wave Reports"
+msgstr "Informes de olas"
+
