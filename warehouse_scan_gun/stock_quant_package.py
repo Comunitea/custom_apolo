@@ -77,6 +77,7 @@ class product_product (models.Model):
     _inherit = 'product.product'
 
     short_name=fields.Char("Short Name", size = 25)
+    internal_code = fields.Char("Importation code")
 
     @api.multi
     def get_product_gun_complete_info(self, my_args):
