@@ -1,19 +1,99 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#       * item_management
+#	* item_management
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-05-21 10:02+0000\n"
-"PO-Revision-Date: 2015-05-21 10:02+0000\n"
+"POT-Creation-Date: 2015-09-25 10:31+0000\n"
+"PO-Revision-Date: 2015-09-25 10:31+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid ", (en lo sucesivo denominado el “Cliente”)."
+msgstr ", (en lo sucesivo denominado el “Cliente”)."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid ", CIF"
+msgstr ", CIF"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid ", Concesionario de Unilever  España S.A., para la zona de"
+msgstr ", Concesionario de Unilever España S.A., para la zona de"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid ", con DNI nº"
+msgstr ", con DNI nº"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid ", con domicilio en"
+msgstr ", con domicilio en"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid ", con domicilio en la calle Tecnología, 19 de 08840-Viladecans, titular del NIF número A-28660520, y en su nombre y representación D."
+msgstr ", con domicilio en la calle Tecnología, 19 de 08840-Viladecans, titular del NIF número A-28660520, y en su nombre y representación D."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid ", en adelante denominado, el “Concesionario”."
+msgstr ", en adelante denominado, el “Concesionario”."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid ", en nombre y representación de"
+msgstr ", en nombre y representación de"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "..........."
+msgstr "..........."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "......................"
+msgstr "......................"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "..................................."
+msgstr "..................................."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid ".................................................................."
+msgstr ".................................................................."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "1. Que Unilever es propietaria en pleno dominio del medio de frío, cuyo número de matrícula se identifica en el encabezamiento de este Contrato, con un valor de"
+msgstr "1. Que Unilever es propietaria en pleno dominio del medio de frío, cuyo número de matrícula se identifica en el encabezamiento de este Contrato, con un valor de"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "2. Que el indicado medio de frío se encuentra puesto a disposición del Concesionario por parte de Unilever, en los términos regulados en el Contrato de Concesión suscrito entre ambas partes, para su posterior distribución a los puntos de venta de los helados con marca  registradas por Unilever, Frigo, Ben&Jerry´s, Café Zero, Calippo® Slush o My Cornetto."
+msgstr "2. Que el indicado medio de frío se encuentra puesto a disposición del Concesionario por parte de Unilever, en los términos regulados en el Contrato de Concesión suscrito entre ambas partes, para su posterior distribución a los puntos de venta de los helados con marca  registradas por Unilever, Frigo, Ben&Jerry´s, Café Zero, Calippo® Slush o My Cornetto."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "3. Que estando interesado el Cliente en realizar la venta al público de los helados que Unilever comercializa, en sus establecimientos, y resultándole necesario los medios de frío para su correcto almacenamiento, UNILEVER hace entrega al Cliente, a través de su Concesionario, de dichos medios de frío para su ubicación permanente en el establecimiento"
+msgstr "3. Que estando interesado el Cliente en realizar la venta al público de los helados que Unilever comercializa, en sus establecimientos, y resultándole necesario los medios de frío para su correcto almacenamiento, UNILEVER hace entrega al Cliente, a través de su Concesionario, de dichos medios de frío para su ubicación permanente en el establecimiento"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "ACUERDO DE CESIÓN DE MEDIOS DE FRÍO EN DEPÓSITO AL PUNTO DE VENTA"
+msgstr "ACUERDO DE CESIÓN DE MEDIOS DE FRÍO EN DEPÓSITO AL PUNTO DE VENTA"
 
 #. module: item_management
 #: selection:item.management.contract,state:0
@@ -26,33 +106,14 @@ msgid "Are you sure? Remember locate these items in warehouse later"
 msgstr "¿Está seguro? Recuerde ubicar estos medios en el almacén más tarde."
 
 #. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "Asimismo, el Cliente se obliga a utilizar el medio de frío con la diligencia de un buen comerciante, atendiendo los gastos de su reparación y conservación, cuando sufra averías motivadas por negligencia, mal uso o abandono."
+msgstr "Asimismo, el Cliente se obliga a utilizar el medio de frío con la diligencia de un buen comerciante, atendiendo los gastos de su reparación y conservación, cuando sufra averías motivadas por negligencia, mal uso o abandono."
+
+#. module: item_management
 #: field:item.management.item,asset_id:0
 msgid "Asset"
 msgstr "Activo asociado"
-
-#. module: item_management
-#: code:addons/item_management/item.py:65
-#, python-format
-msgid "Cannot delete this item because has already been recounted"
-msgstr "No puede borrar este medio porque ya ha sido recontado"
-
-#. module: item_management
-#: code:addons/item_management/item.py:62
-#, python-format
-msgid "Cannot delete this item because is related to a contract"
-msgstr "No puede borrar este medio porque está relacionado a un contrato"
-
-#. module: item_management
-#: code:addons/item_management/item_count.py:55
-#, python-format
-msgid "Cannot delete this recount because has counts associated"
-msgstr "No puede borrar este recuento porque tiene contabilizaciones asociadas"
-
-#. module: item_management
-#: code:addons/item_management/item_contract.py:100
-#, python-format
-msgid "Only can delete contracts in draft or cancel state"
-msgstr "Sólo puede borrar contratos en estado borrador o cancelado"
 
 #. module: item_management
 #: view:item.management.item.assign.contract:item_management.item_management_item_assign_contract_form
@@ -65,6 +126,16 @@ msgstr "Asignar medio"
 #: view:item.management.item.assign.contract:item_management.item_management_item_assign_contract_form
 msgid "Assign item to contract"
 msgstr "Asignar medio al contrato"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "CONDICIONES"
+msgstr "CONDICIONES"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "CUARTA. Precio de  la Cesión."
+msgstr "CUARTA. Precio de  la Cesión."
 
 #. module: item_management
 #: view:item.management.contract:item_management.item_management_contract_form
@@ -86,9 +157,32 @@ msgid "Cannot cancel a contract with related items."
 msgstr "No puede cancelar un contrato con medios asociados."
 
 #. module: item_management
+#: code:addons/item_management/item.py:69
+#, python-format
+msgid "Cannot delete this item because has already been recounted"
+msgstr "No puede borrar este medio porque ya ha sido recontado"
+
+#. module: item_management
+#: code:addons/item_management/item.py:66
+#, python-format
+msgid "Cannot delete this item because is related to a contract"
+msgstr "No puede borrar este medio porque está relacionado a un contrato"
+
+#. module: item_management
+#: code:addons/item_management/item_count.py:55
+#, python-format
+msgid "Cannot delete this recount because has counts associated"
+msgstr "No puede borrar este recuento porque tiene contabilizaciones asociadas"
+
+#. module: item_management
 #: field:item.management.item,capacity:0
 msgid "Capacity (l)"
 msgstr "Capacidad (l)"
+
+#. module: item_management
+#: field:item.management.item.license.plate.history,date:0
+msgid "Change date"
+msgstr "Fecha cambio"
 
 #. module: item_management
 #: field:item.management.contract,name:0
@@ -139,6 +233,7 @@ msgstr "Contratos"
 #: field:item.management.item.count,create_uid:0
 #: field:item.management.item.deactivate,create_uid:0
 #: field:item.management.item.internal.move,create_uid:0
+#: field:item.management.item.license.plate.history,create_uid:0
 #: field:item.management.item.type,create_uid:0
 #: field:item.management.recount,create_uid:0
 #: field:item.management.recount.phase,create_uid:0
@@ -152,11 +247,12 @@ msgstr "Creado por"
 #: field:item.management.item.count,create_date:0
 #: field:item.management.item.deactivate,create_date:0
 #: field:item.management.item.internal.move,create_date:0
+#: field:item.management.item.license.plate.history,create_date:0
 #: field:item.management.item.type,create_date:0
 #: field:item.management.recount,create_date:0
 #: field:item.management.recount.phase,create_date:0
 msgid "Created on"
-msgstr "Creado en"
+msgstr "Creado el"
 
 #. module: item_management
 #: view:item.management.contract:item_management.item_management_contract_filter
@@ -190,11 +286,31 @@ msgid "Customer local street"
 msgstr "Dirección local cliente"
 
 #. module: item_management
+#: view:website:item_management.report_item_contract_remove
+msgid "DOCUMENTO DE RETIRADA DE MEDIOS DE FRÍO EN DEPÓSITO DEL PUNTO DE VENTA"
+msgstr "DOCUMENTO DE RETIRADA DE MEDIOS DE FRÍO EN DEPÓSITO DEL PUNTO DE VENTA"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "DUODÉCIMA.- Fuero:"
+msgstr "DUODÉCIMA.- Fuero:"
+
+#. module: item_management
 #: help:item.management.contract,message_last_post:0
 #: help:item.management.item,message_last_post:0
 #: help:item.management.recount,message_last_post:0
 msgid "Date of the last message posted on the record."
 msgstr "Fecha del último mensaje añadido al registro."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "De otra,"
+msgstr "De otra,"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "De una parte,"
+msgstr "De una parte,"
 
 #. module: item_management
 #: view:item.management.item.deactivate:item_management.item_management_item_deactivate_form
@@ -220,6 +336,16 @@ msgid "Dest. location"
 msgstr "Ubicaión dest."
 
 #. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "Dicha cesión queda sujeta a las condiciones descritas a continuación en el presente Acuerdo."
+msgstr "Dicha cesión queda sujeta a las condiciones descritas a continuación en el presente Acuerdo."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_remove
+msgid "Dirección del cliente:"
+msgstr "Dirección del cliente:"
+
+#. module: item_management
 #: view:item.management.recount:item_management.item_management_recount_form
 #: selection:item.management.recount,state:0
 msgid "Done"
@@ -231,6 +357,61 @@ msgid "Draft"
 msgstr "Borrador"
 
 #. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "DÉCIMA.- Subrogación:"
+msgstr "DÉCIMA.- Subrogación:"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_remove
+msgid "EL CLIENTE"
+msgstr "EL CLIENTE"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_remove
+msgid "EL CONCESIONARIO"
+msgstr "EL CONCESIONARIO"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_remove
+msgid "EL PROPIETARIO"
+msgstr "EL PROPIETARIO"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "EXPONEN"
+msgstr "EXPONEN"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "El Cliente pagará al propietario del medio de frio los daños y perjuicios que sufran, y  será responsable por los daños y perjuicios o lesiones que pudiera causar, como consecuencia de no seguir las instrucciones sobre la correcta instalación, mantenimiento y/o utilización del medio de frío. Salvo caso fortuito o de fuerza mayor, el Cliente responderá de la pérdida  del medio de frío y de los desperfectos que puedan sufrir los productos por cualquier causa dentro del medio de frío."
+msgstr "El Cliente pagará al propietario del medio de frio los daños y perjuicios que sufran, y  será responsable por los daños y perjuicios o lesiones que pudiera causar, como consecuencia de no seguir las instrucciones sobre la correcta instalación, mantenimiento y/o utilización del medio de frío. Salvo caso fortuito o de fuerza mayor, el Cliente responderá de la pérdida  del medio de frío y de los desperfectos que puedan sufrir los productos por cualquier causa dentro del medio de frío."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "El Cliente se responsabiliza de la correcta instalación y mantenimiento del medio de frío. En todos los casos, el Cliente debe cumplir estrictamente con las siguientes normas de seguridad:"
+msgstr "El Cliente se responsabiliza de la correcta instalación y mantenimiento del medio de frío. En todos los casos, el Cliente debe cumplir estrictamente con las siguientes normas de seguridad:"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "El Cliente, en cualquier momento, permitirá al personal del Concesionario o, en su caso, de Unilever, la inspección del medio o medios de frío  tanto por lo que respecta a su estado de conservación como a su contenido. Asimismo, el Cliente se obliga a informar inmediatamente al Concesionario o, en su caso, a  Unilever sobre cualquier cambio de ubicación del medio o medios propiedad de Unilever."
+msgstr "El Cliente, en cualquier momento, permitirá al personal del Concesionario o, en su caso, de Unilever, la inspección del medio o medios de frío  tanto por lo que respecta a su estado de conservación como a su contenido. Asimismo, el Cliente se obliga a informar inmediatamente al Concesionario o, en su caso, a  Unilever sobre cualquier cambio de ubicación del medio o medios propiedad de Unilever."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "El cambio de Concesionario Frigo en la zona del Cliente supondrá la subrogación automática del nuevo concesionario a la posición del concesionario saliente, por lo que no se producirá la resolución de este Contrato en este supuesto y el Cliente deberá seguir únicamente las indicaciones de Unilever."
+msgstr "El cambio de Concesionario Frigo en la zona del Cliente supondrá la subrogación automática del nuevo concesionario a la posición del concesionario saliente, por lo que no se producirá la resolución de este Contrato en este supuesto y el Cliente deberá seguir únicamente las indicaciones de Unilever."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "El medio de frío se cede al Cliente a título oneroso, entendiéndose incluida la contraprestación por su uso en el precio de los productos marca Frigo, Ben&Jerry´s, Café Zero, Calippo® Slush o My Cornetto que se venderán al Cliente para su reventa a los consumidores."
+msgstr "El medio de frío se cede al Cliente a título oneroso, entendiéndose incluida la contraprestación por su uso en el precio de los productos marca Frigo, Ben&Jerry´s, Café Zero, Calippo® Slush o My Cornetto que se venderán al Cliente para su reventa a los consumidores."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "El uso del medio de frío será exclusivamente el almacenamiento, para su venta, de los productos marca Frigo, Ben&Jerry´s, Café Zero, Calippo® Slush o My Cornetto que le suministrará al Cliente. Cualquier otro uso o cesión a terceros, así como cualquier cambio de ubicación del medio sin la previa autorización expresa del Concesionario o, en su caso, Unilever, queda totalmente prohibido, por lo que el Cliente será el único responsable de cualquier daño que dicho cambio de ubicación no autorizado cause sobre bienes y personas. Asimismo, Unilever queda autorizada, adicionalmente a cualquier otra acción, a exigir al Cliente una indemnización por el valor de reposición del medio."
+msgstr "El uso del medio de frío será exclusivamente el almacenamiento, para su venta, de los productos marca Frigo, Ben&Jerry´s, Café Zero, Calippo® Slush o My Cornetto que le suministrará al Cliente. Cualquier otro uso o cesión a terceros, así como cualquier cambio de ubicación del medio sin la previa autorización expresa del Concesionario o, en su caso, Unilever, queda totalmente prohibido, por lo que el Cliente será el único responsable de cualquier daño que dicho cambio de ubicación no autorizado cause sobre bienes y personas. Asimismo, Unilever queda autorizada, adicionalmente a cualquier otra acción, a exigir al Cliente una indemnización por el valor de reposición del medio."
+
+#. module: item_management
 #: model:ir.model,name:item_management.model_item_management_contract
 #: model:ir.model,name:item_management.model_item_management_item
 #: model:ir.model,name:item_management.model_item_management_recount
@@ -238,10 +419,40 @@ msgid "Email Thread"
 msgstr "Hilo de mensajes"
 
 #. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "En caso de avería no causada por negligencia, mal uso o abandono, el Cliente deberá notificarlo a Unilever o a quién ésta designe en cada momento, el cual tomará las acciones oportunas para llevar a cabo la reparación del mismo."
+msgstr "En caso de avería no causada por negligencia, mal uso o abandono, el Cliente deberá notificarlo a Unilever o a quién ésta designe en cada momento, el cual tomará las acciones oportunas para llevar a cabo la reparación del mismo."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "En caso de cualquier actuación judicial o embargo que pueda afectar a los bienes del Cliente, este vendrá obligado a avisar inmediatamente a Unilever de tales eventos y pondrá en conocimiento de los adquirentes, demandantes, acreedores y personal judicial, que el medio de frío es propiedad de Unilever."
+msgstr "En caso de cualquier actuación judicial o embargo que pueda afectar a los bienes del Cliente, este vendrá obligado a avisar inmediatamente a Unilever de tales eventos y pondrá en conocimiento de los adquirentes, demandantes, acreedores y personal judicial, que el medio de frío es propiedad de Unilever."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "En caso de tener arrendado el Cliente el establecimiento donde se sitúe el medio de frío, en calidad de arrendatario, se obliga a comunicar a su arrendador que el mismo es propiedad de Unilever. En caso de cierre, traspaso o venta del local o de cualquier otra incidencia, el cliente se obliga a notificarlo por escrito con una antelación mínima de (7) días laborales."
+msgstr "En caso de tener arrendado el Cliente el establecimiento donde se sitúe el medio de frío, en calidad de arrendatario, se obliga a comunicar a su arrendador que el mismo es propiedad de Unilever. En caso de cierre, traspaso o venta del local o de cualquier otra incidencia, el cliente se obliga a notificarlo por escrito con una antelación mínima de (7) días laborales."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "En el caso de cualquier siniestro en que el medio de frío se vea involucrado,"
+msgstr "En el caso de cualquier siniestro en que el medio de frío se vea involucrado,"
+
+#. module: item_management
 #: field:item.management.contract,end_date:0
 #: field:item.management.recount,end_date:0
 msgid "End date"
 msgstr "Fecha fin"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "Este Contrato tendrá una duración de un mes, si bien se entenderá renovado tácitamente por periodos iguales,  siempre que no sea denunciado por ninguna de las partes con una antelación de quince (15) días. No obstante, la vigencia del presente contrato está plenamente condicionada a la vigencia del acuerdo comercial con el Cliente, por lo que la resolución de dicho acuerdo supondrá, en los mismos términos, la resolución automática de este Contrato."
+msgstr "Este Contrato tendrá una duración de un mes, si bien se entenderá renovado tácitamente por periodos iguales,  siempre que no sea denunciado por ninguna de las partes con una antelación de quince (15) días. No obstante, la vigencia del presente contrato está plenamente condicionada a la vigencia del acuerdo comercial con el Cliente, por lo que la resolución de dicho acuerdo supondrá, en los mismos términos, la resolución automática de este Contrato."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "Euros, en adelante referido como “medios de frio”. Para cada nuevo medio de frio cedido o para cualquier modificación o cambio se firmará el correspondiente documento de cesión entre Unilever, el Concesionario y el Cliente."
+msgstr "Euros, en adelante referido como “medios de frio”. Para cada nuevo medio de frio cedido o para cualquier modificación o cambio se firmará el correspondiente documento de cesión entre Unilever, el Concesionario y el Cliente."
 
 #. module: item_management
 #: view:item.management.contract:item_management.item_management_contract_form
@@ -255,6 +466,39 @@ msgstr "Finalizado"
 #: field:item.management.recount,message_follower_ids:0
 msgid "Followers"
 msgstr "Seguidores"
+
+#. module: item_management
+#: field:item.management.item,license_history_ids:0
+msgid "History"
+msgstr "Historia"
+
+#. module: item_management
+#: help:item.management.contract,message_summary:0
+#: help:item.management.item,message_summary:0
+#: help:item.management.recount,message_summary:0
+msgid "Holds the Chatter summary (number of messages, ...). This summary is directly in html format in order to be inserted in kanban views."
+msgstr "Sostiene el resumen Chatter (número de mensajes, ...). Este resumen es directamente en formato html para ser insertada en vistas kanban."
+
+#. module: item_management
+#: field:item.management.contract,id:0
+#: field:item.management.item,id:0
+#: field:item.management.item.assign.contract,id:0
+#: field:item.management.item.count,id:0
+#: field:item.management.item.deactivate,id:0
+#: field:item.management.item.internal.move,id:0
+#: field:item.management.item.license.plate.history,id:0
+#: field:item.management.item.type,id:0
+#: field:item.management.recount,id:0
+#: field:item.management.recount.phase,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: item_management
+#: help:item.management.contract,message_unread:0
+#: help:item.management.item,message_unread:0
+#: help:item.management.recount,message_unread:0
+msgid "If checked new messages require your attention."
+msgstr "Si se marca nuevos mensajes requieren su atención."
 
 #. module: item_management
 #: selection:item.management.item,situation:0
@@ -289,6 +533,7 @@ msgstr "Es un seguidor"
 #: view:item.management.item:item_management.item_management_item_from
 #: field:item.management.item.assign.contract,item_id:0
 #: field:item.management.item.count,item_id:0
+#: field:item.management.item.license.plate.history,item_id:0
 msgid "Item"
 msgstr "Medio"
 
@@ -361,6 +606,21 @@ msgid "Items management"
 msgstr "Gestión de medios"
 
 #. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "La cesión del medio de frío se realiza como operación accesoria a las operaciones de suministro de los productos marca Frigo, Ben&Jerry´s, Café Zero, Calippo® Slush o My Cornetto, según proceda,  que el Concesionario efectuará al Cliente para que pueda desarrollar su actividad de venta al público de los mismos, manteniéndolos en condiciones óptimas para su consumo, para lo cual resulta esencial la compra por parte del Cliente de los productos directamente al Concesionario o, en su caso, a Unilever."
+msgstr "La cesión del medio de frío se realiza como operación accesoria a las operaciones de suministro de los productos marca Frigo, Ben&Jerry´s, Café Zero, Calippo® Slush o My Cornetto, según proceda,  que el Concesionario efectuará al Cliente para que pueda desarrollar su actividad de venta al público de los mismos, manteniéndolos en condiciones óptimas para su consumo, para lo cual resulta esencial la compra por parte del Cliente de los productos directamente al Concesionario o, en su caso, a Unilever."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "Las partes, con renuncia expresa al fuero que pudiera corresponderles, se someten, para cualesquiera controversias que pudieran surgir en la interpretación y ejecución de ese documento, a los Juzgados y Tribunales de Barcelona."
+msgstr "Las partes, con renuncia expresa al fuero que pudiera corresponderles, se someten, para cualesquiera controversias que pudieran surgir en la interpretación y ejecución de ese documento, a los Juzgados y Tribunales de Barcelona."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "Las partes, conformes, firman el presente  Acuerdo en tres versiones originales, en el lugar y fecha indicados en el encabezamiento."
+msgstr "Las partes, conformes, firman el presente  Acuerdo en tres versiones originales, en el lugar y fecha indicados en el encabezamiento."
+
+#. module: item_management
 #: field:item.management.contract,message_last_post:0
 #: field:item.management.item,message_last_post:0
 #: field:item.management.recount,message_last_post:0
@@ -374,6 +634,7 @@ msgstr "Fecha último mensaje"
 #: field:item.management.item.count,write_uid:0
 #: field:item.management.item.deactivate,write_uid:0
 #: field:item.management.item.internal.move,write_uid:0
+#: field:item.management.item.license.plate.history,write_uid:0
 #: field:item.management.item.type,write_uid:0
 #: field:item.management.recount,write_uid:0
 #: field:item.management.recount.phase,write_uid:0
@@ -387,11 +648,12 @@ msgstr "Última actualización por"
 #: field:item.management.item.count,write_date:0
 #: field:item.management.item.deactivate,write_date:0
 #: field:item.management.item.internal.move,write_date:0
+#: field:item.management.item.license.plate.history,write_date:0
 #: field:item.management.item.type,write_date:0
 #: field:item.management.recount,write_date:0
 #: field:item.management.recount.phase,write_date:0
 msgid "Last Updated on"
-msgstr "Última actualización en"
+msgstr "Última actualización el"
 
 #. module: item_management
 #: model:ir.actions.report.xml,name:item_management.action_report_lend_contract
@@ -400,6 +662,7 @@ msgstr "Contrato cesión"
 
 #. module: item_management
 #: field:item.management.item,license_plate:0
+#: field:item.management.item.license.plate.history,old_license_plate:0
 msgid "License plate"
 msgstr "Matrícula"
 
@@ -417,6 +680,11 @@ msgstr "Ubicación"
 #: field:item.management.item.assign.contract,location_date:0
 msgid "Location date"
 msgstr "Fecha ubicación"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "Los medios de frío de Unilever llevan impresa la marca Frigo, Ben&Jerry´s, Café Zero, Calippo® Slush o My Cornetto que junto con la matrícula no podrán ser alterados de ningún modo por parte del Cliente."
+msgstr "Los medios de frío de Unilever llevan impresa la marca Frigo, Ben&Jerry´s, Café Zero, Calippo® Slush o My Cornetto que junto con la matrícula no podrán ser alterados de ningún modo por parte del Cliente."
 
 #. module: item_management
 #: code:addons/item_management/wizard/item_deactivate.py:25
@@ -452,6 +720,11 @@ msgid "Move item"
 msgstr "Mover medio"
 
 #. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "NOVENA.- Consecuencias de la resolución:"
+msgstr "NOVENA.- Consecuencias de la resolución:"
+
+#. module: item_management
 #: field:item.management.item.type,name:0
 #: field:item.management.recount,name:0
 #: field:item.management.recount.phase,name:0
@@ -459,9 +732,55 @@ msgid "Name"
 msgstr "Nombre"
 
 #. module: item_management
+#: view:website:item_management.report_item_contract_remove
+msgid "Nombre del cliente:"
+msgstr "Nombre del cliente:"
+
+#. module: item_management
 #: field:item.management.item.count,notes:0
 msgid "Notes"
 msgstr "Notas"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "Nº Matrícula"
+msgstr "Nº Matrícula"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_remove
+msgid "Nº Matrícula: ............................."
+msgstr "Nº Matrícula: ............................."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "Nº cliente"
+msgstr "Nº cliente"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_remove
+msgid "Nº cliente:"
+msgstr "Nº cliente:"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "Nº contrato"
+msgstr "Nº contrato"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "OCTAVA. Responsabilidades."
+msgstr "OCTAVA. Responsabilidades."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_remove
+msgid "Observaciones:"
+msgstr "Observaciones:"
+
+#. module: item_management
+#: code:addons/item_management/item_contract.py:100
+#, python-format
+msgid "Only can delete contracts in draft or cancel state"
+msgstr "Sólo puede borrar contratos en estado borrador o cancelado"
 
 #. module: item_management
 #: view:item.management.contract:item_management.item_management_contract_form
@@ -486,19 +805,14 @@ msgid "Owner agent 2"
 msgstr "Representante propietario 2"
 
 #. module: item_management
-#: field:item.management.recount.phase,total_items:0
-msgid "Items #"
-msgstr "Nº medios"
+#: view:website:item_management.report_item_contract_lend
+msgid "PRIMERA. Operación accesoria."
+msgstr "PRIMERA. Operación accesoria."
 
 #. module: item_management
 #: field:item.management.recount.phase,percent_goal:0
 msgid "Percent goal"
 msgstr "% objetivo"
-
-#. module: item_management
-#: field:item.management.recount.phase,percent_count:0
-msgid "Percent count"
-msgstr "% recontado"
 
 #. module: item_management
 #: field:item.management.recount,phase_ids:0
@@ -511,9 +825,39 @@ msgid "Placement date"
 msgstr "Fecha ubicación"
 
 #. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "Por Unilever España, S.A."
+msgstr "Por Unilever España, S.A."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "Por el cliente"
+msgstr "Por el cliente"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "Por el concesionario"
+msgstr "Por el concesionario"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_remove
+msgid "Por medio del presente documento se hace constar que con esta fecha se retira el medio de frío tipo ...................................., cuya matrícula se halla arriba referenciada. Con la firma del presente documento queda extinguido el Acuerdo nº"
+msgstr "Por medio del presente documento se hace constar que con esta fecha se retira el medio de frío tipo ...................................., cuya matrícula se halla arriba referenciada. Con la firma del presente documento queda extinguido el Acuerdo nº"
+
+#. module: item_management
 #: field:item.management.item,purchase_date:0
 msgid "Purchase date"
 msgstr "Fecha compra"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "QUINTA. Identificación y mantenimiento."
+msgstr "QUINTA. Identificación y mantenimiento."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "REUNIDOS"
+msgstr "REUNIDOS"
 
 #. module: item_management
 #: field:item.management.item.count,recount_id:0
@@ -547,6 +891,11 @@ msgid "Reopen"
 msgstr "Reabrir"
 
 #. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "Resuelto este Acuerdo será exigible la devolución del medio o medios de frío en un plazo máximo de siete (7) días naturales, siendo el Cliente responsable tanto de su devolución como de los daños o averías debidas a negligencia o incorrecto uso, por lo que Unilever queda facultada para utilizar todas las acciones necesarias para hacer efectiva esta restitución de los medios, así como exigir los daños y perjuicios irrogados o que se irroguen desde ese momento. En este sentido, el Cliente permitirá que el personal de Unilever, lo desmonte y lo transporte. Unilever se reserva el derecho de reclamar al Cliente las cantidades que procedan si, desmontado el medio de frío, se aprecian en él daños ajenos a su uso. En caso contrario las partes acuerdan expresamente que será de aplicación una penalización equivalente a diez euros (€ 10) por cada día de retraso que transcurra desde la finalización, por la causa que fuere, del Contrato hasta la efectiva entrega del medio/s a Unilever o a quien ésta designe."
+msgstr "Resuelto este Acuerdo será exigible la devolución del medio o medios de frío en un plazo máximo de siete (7) días naturales, siendo el Cliente responsable tanto de su devolución como de los daños o averías debidas a negligencia o incorrecto uso, por lo que Unilever queda facultada para utilizar todas las acciones necesarias para hacer efectiva esta restitución de los medios, así como exigir los daños y perjuicios irrogados o que se irroguen desde ese momento. En este sentido, el Cliente permitirá que el personal de Unilever, lo desmonte y lo transporte. Unilever se reserva el derecho de reclamar al Cliente las cantidades que procedan si, desmontado el medio de frío, se aprecian en él daños ajenos a su uso. En caso contrario las partes acuerdan expresamente que será de aplicación una penalización equivalente a diez euros (€ 10) por cada día de retraso que transcurra desde la finalización, por la causa que fuere, del Contrato hasta la efectiva entrega del medio/s a Unilever o a quien ésta designe."
+
+#. module: item_management
 #: view:item.management.contract:item_management.item_management_contract_form
 msgid "Return to draft"
 msgstr "Volver a borrador"
@@ -555,6 +904,16 @@ msgstr "Volver a borrador"
 #: field:item.management.item.count,recount_date:0
 msgid "Review date"
 msgstr "Fecha revisión"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "SEGUNDA. Uso y destino."
+msgstr "SEGUNDA. Uso y destino."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "SEXTA.- Comunicación de la propiedad del medio:"
+msgstr "SEXTA.- Comunicación de la propiedad del medio:"
 
 #. module: item_management
 #: code:addons/item_management/wizard/item_deactivate.py:23
@@ -592,6 +951,16 @@ msgid "Summary"
 msgstr "Resumen"
 
 #. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "SÉPTIMA. Verificaciones."
+msgstr "SÉPTIMA. Verificaciones."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "TERCERA. Vigencia."
+msgstr "TERCERA. Vigencia."
+
+#. module: item_management
 #: code:addons/item_management/wizard/item_deactivate.py:24
 #: selection:item.management.item,inactive_motive:0
 #: selection:item.management.item.deactivate,inactive_motive:0
@@ -610,6 +979,16 @@ msgstr "Traspaso"
 #: field:item.management.item,type_id:0
 msgid "Type"
 msgstr "Tipo"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "UNDÉCIMA.- Seguro:"
+msgstr "UNDÉCIMA.- Seguro:"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "UNILEVER ESPAÑA, S.A."
+msgstr "UNILEVER ESPAÑA, S.A."
 
 #. module: item_management
 #: field:item.management.contract,message_unread:0
@@ -634,8 +1013,79 @@ msgid "Without location"
 msgstr "Sin ubicar"
 
 #. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "Y de la otra, D."
+msgstr "Y de la otra, D."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "a) Todos los medios de frío deben conectarse siempre con un enchufe con toma de tierra"
+msgstr "a) Todos los medios de frío deben conectarse siempre con un enchufe con toma de tierra"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "b) Enchufar el medio de frío a una toma de alimentación eléctrica reservada sólo para éste y sin adaptadores intermedios. La instalación donde se enchufe el medio de frío debe estar debidamente protegida de acuerdo con el actual Reglamento de Baja Tensión (magneto-térmico, diferencial de alta, etc.)."
+msgstr "b) Enchufar el medio de frío a una toma de alimentación eléctrica reservada sólo para éste y sin adaptadores intermedios. La instalación donde se enchufe el medio de frío debe estar debidamente protegida de acuerdo con el actual Reglamento de Baja Tensión (magneto-térmico, diferencial de alta, etc.)."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "c) No obstaculizar las rejillas de ventilación del medio, debiendo dejar siempre un espacio libre de cómo mínimo 15 centímetros para que el equipo ventile bien. Las rejillas deberán mantenerse asimismo limpias y libres de obstrucciones debidas a polvo acumulado."
+msgstr "c) No obstaculizar las rejillas de ventilación del medio, debiendo dejar siempre un espacio libre de cómo mínimo 15 centímetros para que el equipo ventile bien. Las rejillas deberán mantenerse asimismo limpias y libres de obstrucciones debidas a polvo acumulado."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "con domicilio en"
+msgstr "con domicilio en"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "d) No enchufar el medio de frío a tomas de corrientes cercanas a fuentes de calor y/o elementos fácilmente inflamables."
+msgstr "d) No enchufar el medio de frío a tomas de corrientes cercanas a fuentes de calor y/o elementos fácilmente inflamables."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_remove
+msgid "de cesión de medios de frío en depósito al punto de venta de fecha"
+msgstr "de cesión de medios de frío en depósito al punto de venta de fecha"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "el Cliente deberá comunicarlo de inmediato a Unilever (900 81 25 10)"
+msgstr "el Cliente deberá comunicarlo de inmediato a Unilever (900 81 25 10)"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "los medios de frio están asegurados por Unilever como titular del bien. En caso de siniestro el Cliente está obligado a comunicar el siniestro dentro de las 48 horas siguientes al siniestro. En caso contrario, Unilever no será responsable de los daños que hubiere podido causar dicho medio en el Cliente o en cualquier tercero."
+msgstr "los medios de frío están asegurados por Unilever como titular del bien. En caso de siniestro el Cliente está obligado a comunicar el siniestro dentro de las 48 horas siguientes al siniestro. En caso contrario, Unilever no será responsable de los daños que hubiere podido causar dicho medio en el Cliente o en cualquier tercero."
+
+#. module: item_management
 #: view:item.management.item.assign.contract:item_management.item_management_item_assign_contract_form
 #: view:item.management.item.deactivate:item_management.item_management_item_deactivate_form
 #: view:item.management.item.internal.move:item_management.item_management_item_internal_move_form
 msgid "or"
 msgstr "o"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "para que esta pueda tomar las medidas adecuadas. En caso de que Unilever no sea notificada inmediatamente desde que hubiese ocurrido el evento antes citado y ello causara que no pueda intervenir activamente en el estudio de sus causas y su solución, Unilever quedará completamente exonerada de cualquier responsabilidad, renunciando el Cliente a cualquier cantidad o indemnización o compensación que le pudiera corresponder reclamar."
+msgstr "para que esta pueda tomar las medidas adecuadas. En caso de que Unilever no sea notificada inmediatamente desde que hubiese ocurrido el evento antes citado y ello causara que no pueda intervenir activamente en el estudio de sus causas y su solución, Unilever quedará completamente exonerada de cualquier responsabilidad, renunciando el Cliente a cualquier cantidad o indemnización o compensación que le pudiera corresponder reclamar."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "sito en"
+msgstr "sito en"
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "y D."
+msgstr "y D."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_lend
+msgid "y en su nombre y representación D."
+msgstr "y en su nombre y representación D."
+
+#. module: item_management
+#: view:website:item_management.report_item_contract_remove
+msgid "únicamente en cuanto al medio de frío relacionado en este documento."
+msgstr "únicamente en cuanto al medio de frío relacionado en este documento."
+

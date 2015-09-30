@@ -1,13 +1,13 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#   * rappel
+#	* rappel
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-06-16 09:40+0000\n"
-"PO-Revision-Date: 2015-06-16 09:40+0000\n"
+"POT-Creation-Date: 2015-09-25 10:09+0000\n"
+"PO-Revision-Date: 2015-09-25 10:09+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: rappel
-#: code:addons/rappel/rappel.py:89
+#: code:addons/rappel/rappel.py:92
 #, python-format
 msgid " Product and category are empty"
 msgstr " El producto y la categoría están vacíos"
@@ -38,7 +38,7 @@ msgid "<p class=\"oe_view_nocontent_create\">\n"
 "              </p>\n"
 "            "
 msgstr "<p class=\"oe_view_nocontent_create\">\n"
-"                Click to create a new rappel type.\n"
+"                Clic para crear un nuevo tipo de rappel.\n"
 "              </p>\n"
 "            "
 
@@ -50,7 +50,7 @@ msgid "<p class=\"oe_view_nocontent_create\">\n"
 "              </p>\n"
 "            "
 msgstr "<p class=\"oe_view_nocontent_create\">\n"
-"                Click to create a new rappel.\n"
+"                Clic para crear un nuevo rappel.\n"
 "              </p>\n"
 "            "
 
@@ -78,7 +78,7 @@ msgstr "Por tramos"
 #. module: rappel
 #: view:rappel:rappel.rappel_form
 msgid "Calc Configuration"
-msgstr "Configuración Cálculo"
+msgstr "Configuración cálculo"
 
 #. module: rappel
 #: view:rappel.calculate.wizard:rappel.calculate_rappel_wizard_form
@@ -108,7 +108,6 @@ msgid "Category"
 msgstr "Categoría"
 
 #. module: rappel
-#: field:product.rappel.group,code:0
 #: field:rappel.type,code:0
 msgid "Code"
 msgstr "Código"
@@ -146,7 +145,6 @@ msgid "Create the invoice for the group of sub-partners"
 msgstr "Crear la factura para el grupo de sub-partners"
 
 #. module: rappel
-#: field:product.rappel.group,create_uid:0
 #: field:rappel,create_uid:0
 #: field:rappel.calculate.wizard,create_uid:0
 #: field:rappel.calculated,create_uid:0
@@ -154,10 +152,9 @@ msgstr "Crear la factura para el grupo de sub-partners"
 #: field:rappel.section,create_uid:0
 #: field:rappel.type,create_uid:0
 msgid "Created by"
-msgstr "Created by"
+msgstr "Creado por"
 
 #. module: rappel
-#: field:product.rappel.group,create_date:0
 #: field:rappel,create_date:0
 #: field:rappel.calculate.wizard,create_date:0
 #: field:rappel.calculated,create_date:0
@@ -165,7 +162,7 @@ msgstr "Created by"
 #: field:rappel.section,create_date:0
 #: field:rappel.type,create_date:0
 msgid "Created on"
-msgstr "Created on"
+msgstr "Creado el"
 
 #. module: rappel
 #: view:rappel.calculated:rappel.rappel_calculated_filter
@@ -206,13 +203,8 @@ msgid "Dates"
 msgstr "Fechas"
 
 #. module: rappel
-#: model:ir.model,name:rappel.model_rappel_deal
-msgid "Deal of rappels for customers"
-msgstr "Reparto de rappels a clientes"
-
-#. module: rappel
-#: code:addons/rappel/rappel.py:73
-#: code:addons/rappel/rappel.py:88
+#: code:addons/rappel/rappel.py:75
+#: code:addons/rappel/rappel.py:91
 #, python-format
 msgid "Error"
 msgstr "Error"
@@ -221,7 +213,7 @@ msgstr "Error"
 #: code:addons/rappel/wizard/calculate_rappel_wizard.py:50
 #, python-format
 msgid "Error!"
-msgstr "Error!"
+msgstr "¡Error!"
 
 #. module: rappel
 #: view:rappel:rappel.rappel_form
@@ -238,7 +230,7 @@ msgstr "Fijo"
 #: view:rappel:rappel.rappel_form
 #: field:rappel,calc_mode:0
 msgid "Fixed/Variable"
-msgstr "Fijo/Variable"
+msgstr "Fijo/variable"
 
 #. module: rappel
 #: field:rappel.section,rappel_from:0
@@ -248,7 +240,7 @@ msgstr "Desde"
 #. module: rappel
 #: view:rappel.type:rappel.rappel_type_form
 msgid "General Information"
-msgstr "Información General"
+msgstr "Información general"
 
 #. module: rappel
 #: field:rappel,global_application:0
@@ -271,12 +263,6 @@ msgid "Grouped by sub customer"
 msgstr "Agrupar cálculo de subclientes"
 
 #. module: rappel
-#: model:ir.model,name:rappel.model_rappel_calculated
-msgid "History Rappels"
-msgstr "History Rappels"
-
-#. module: rappel
-#: field:product.rappel.group,id:0
 #: field:rappel,id:0
 #: field:rappel.calculate.wizard,id:0
 #: field:rappel.calculated,id:0
@@ -315,7 +301,6 @@ msgid "Invoices"
 msgstr "Facturas"
 
 #. module: rappel
-#: field:product.rappel.group,write_uid:0
 #: field:rappel,write_uid:0
 #: field:rappel.calculate.wizard,write_uid:0
 #: field:rappel.calculated,write_uid:0
@@ -323,10 +308,9 @@ msgstr "Facturas"
 #: field:rappel.section,write_uid:0
 #: field:rappel.type,write_uid:0
 msgid "Last Updated by"
-msgstr "Last Updated by"
+msgstr "Última actualización por"
 
 #. module: rappel
-#: field:product.rappel.group,write_date:0
 #: field:rappel,write_date:0
 #: field:rappel.calculate.wizard,write_date:0
 #: field:rappel.calculated,write_date:0
@@ -334,7 +318,7 @@ msgstr "Last Updated by"
 #: field:rappel.section,write_date:0
 #: field:rappel.type,write_date:0
 msgid "Last Updated on"
-msgstr "Last Updated on"
+msgstr "Última actualización el"
 
 #. module: rappel
 #: field:rappel,last_execution:0
@@ -357,7 +341,6 @@ msgid "Monthly"
 msgstr "Mensual"
 
 #. module: rappel
-#: field:product.rappel.group,name:0
 #: field:rappel.type,name:0
 msgid "Name"
 msgstr "Nombre"
@@ -392,17 +375,17 @@ msgstr "Porcentaje/Cantidad"
 #: view:rappel.calculated:rappel.rappel_calculated_filter
 #: field:rappel.calculated,period:0
 msgid "Period"
-msgstr "Periodo"
+msgstr "Período"
 
 #. module: rappel
 #: field:rappel.calculated,period_end:0
 msgid "Period end"
-msgstr "Period end"
+msgstr "Fin período"
 
 #. module: rappel
 #: field:rappel.calculated,period_start:0
 msgid "Period start"
-msgstr "Period start"
+msgstr "Inicio período"
 
 #. module: rappel
 #: field:rappel,periodicity:0
@@ -416,12 +399,7 @@ msgid "Product"
 msgstr "Producto"
 
 #. module: rappel
-#: model:ir.model,name:rappel.model_product_template
-msgid "Product Template"
-msgstr "Plantilla de producto"
-
-#. module: rappel
-#: code:addons/rappel/rappel.py:74
+#: code:addons/rappel/rappel.py:76
 #, python-format
 msgid "Product and category are empty"
 msgstr "El producto y la categoría están vacías"
@@ -465,7 +443,7 @@ msgstr "Tipo de rappel"
 #. module: rappel
 #: model:ir.model,name:rappel.model_rappel_type
 msgid "Rappel Type Model"
-msgstr "Tipo de Rappel"
+msgstr "Tipo de rappel"
 
 #. module: rappel
 #: model:ir.actions.act_window,name:rappel.action_rappel_type
@@ -483,7 +461,6 @@ msgid "Rappel calculated"
 msgstr "Rappel calculados"
 
 #. module: rappel
-#: field:product.template,rappel_group_id:0
 #: field:rappel,rappel_group_id:0
 msgid "Rappel group"
 msgstr "Grupo de rappel"
@@ -491,7 +468,12 @@ msgstr "Grupo de rappel"
 #. module: rappel
 #: model:ir.model,name:rappel.model_rappel_section
 msgid "Rappel section model"
-msgstr "Tramos Rappel"
+msgstr "Tramos rappel"
+
+#. module: rappel
+#: field:rappel,rappel_subgroup_id:0
+msgid "Rappel subgroup"
+msgstr "Rappel subgroup"
 
 #. module: rappel
 #: view:rappel:rappel.rappel_form
@@ -509,7 +491,7 @@ msgstr "Rappels"
 #. module: rappel
 #: view:rappel:rappel.view_rappel_filter
 msgid "Search Rappel"
-msgstr "Buscar Rappel"
+msgstr "Buscar rappel"
 
 #. module: rappel
 #: view:rappel.type:rappel.view_rappel_type_filter
@@ -557,7 +539,7 @@ msgstr "A facturar"
 #. module: rappel
 #: field:rappel.calculated,total_consumed:0
 msgid "Total consumed"
-msgstr "Total consumed"
+msgstr "Total consumido"
 
 #. module: rappel
 #: field:rappel,type_id:0
@@ -590,11 +572,6 @@ msgid "invoice"
 msgstr "Facturar"
 
 #. module: rappel
-#: model:ir.model,name:rappel.model_rappel_consumption
-msgid "keeps the consumption for calculate the rappel"
-msgstr "mantiene el consumo para calcular el rappe"
-
-#. module: rappel
 #: selection:rappel,calc_type:0
 msgid "value"
 msgstr "Valor"
@@ -602,7 +579,7 @@ msgstr "Valor"
 #. module: rappel
 #: field:rappel,calc_type:0
 msgid "value/quantity"
-msgstr "Valor/Cantidad"
+msgstr "Valor/cantidad"
 
 #. module: rappel
 #: view:rappel:rappel.rappel_form

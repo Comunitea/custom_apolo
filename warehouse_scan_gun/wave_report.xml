@@ -13,7 +13,6 @@
                  <field name="sequence" position="attributes">
                      <attribute name="invisible">True</attribute>
                  </field>
-
                  <field name="customer_id" position="attributes">
                     <attribute name="invisible">True</attribute>
                  </field>
@@ -32,12 +31,11 @@
                   </group>
                   <group>
                       <field name="to_revised"/>
-                      <field name="wave_report_revised_id"/> <!--attrs="{'invisible': [('to_revised', '=', False)]}"/>-->
+                      <field name="wave_report_revised_id"/>
                   </group>
               </field>
          </field>
     </record>
-
 
 </data>
 </openerp>

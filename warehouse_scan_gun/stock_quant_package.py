@@ -75,7 +75,6 @@ class stock_quant(models.Model):
                 vals[ind]=values
             return vals
 
-
 class stock_quant_package(models.Model):
 
     _inherit = 'stock.quant.package'
@@ -107,7 +106,6 @@ class stock_quant_package(models.Model):
                 'uom_id': package.uom_id.id or False,
                 'is_multiproduct':package.is_multiproduct,
                 'qty':qty
-
             }
         return vals
 

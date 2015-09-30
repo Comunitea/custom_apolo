@@ -1,13 +1,13 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#   * frigo_edi
+#	* frigo_edi
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-06-19 12:27+0000\n"
-"PO-Revision-Date: 2015-06-19 12:27+0000\n"
+"POT-Creation-Date: 2015-09-25 11:07+0000\n"
+"PO-Revision-Date: 2015-09-25 11:07+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: frigo_edi
-#: code:addons/frigo_edi/edi.py:373
+#: code:addons/frigo_edi/edi.py:416
 #, python-format
 msgid "%s: File not found in folder. File: %s"
 msgstr "%s: Fichero no encontrado en la carpeta. Fichero: %s"
@@ -98,6 +98,7 @@ msgstr "Días cierre"
 
 #. module: frigo_edi
 #: field:agreement.type,code:0
+#: field:product.rappel.group,code:0
 #: field:product.rappel.subgroup,code:0
 #: field:product.unilever.family,code:0
 #: field:res.partner.competence,code:0
@@ -146,6 +147,7 @@ msgstr "Contrato"
 #: field:agreement.type,create_uid:0
 #: field:item.management.item.move.sync,create_uid:0
 #: field:preferential.agreement,create_uid:0
+#: field:product.rappel.group,create_uid:0
 #: field:product.rappel.subgroup,create_uid:0
 #: field:product.unilever.family,create_uid:0
 #: field:res.partner.competence,create_uid:0
@@ -157,6 +159,7 @@ msgstr "Creado por"
 #: field:agreement.type,create_date:0
 #: field:item.management.item.move.sync,create_date:0
 #: field:preferential.agreement,create_date:0
+#: field:product.rappel.group,create_date:0
 #: field:product.rappel.subgroup,create_date:0
 #: field:product.unilever.family,create_date:0
 #: field:res.partner.competence,create_date:0
@@ -261,7 +264,7 @@ msgstr "Competencia previa"
 #. module: frigo_edi
 #: field:product.rappel.subgroup,group_id:0
 msgid "Group"
-msgstr "Group"
+msgstr "Grupo"
 
 #. module: frigo_edi
 #: field:res.partner,high_competition:0
@@ -272,6 +275,7 @@ msgstr "Alta competencia"
 #: field:agreement.type,id:0
 #: field:item.management.item.move.sync,id:0
 #: field:preferential.agreement,id:0
+#: field:product.rappel.group,id:0
 #: field:product.rappel.subgroup,id:0
 #: field:product.unilever.family,id:0
 #: field:res.partner.competence,id:0
@@ -342,6 +346,7 @@ msgstr "Porcentaje asumido por provedor"
 #: field:agreement.type,write_uid:0
 #: field:item.management.item.move.sync,write_uid:0
 #: field:preferential.agreement,write_uid:0
+#: field:product.rappel.group,write_uid:0
 #: field:product.rappel.subgroup,write_uid:0
 #: field:product.unilever.family,write_uid:0
 #: field:res.partner.competence,write_uid:0
@@ -353,6 +358,7 @@ msgstr "Últ. actualización por"
 #: field:agreement.type,write_date:0
 #: field:item.management.item.move.sync,write_date:0
 #: field:preferential.agreement,write_date:0
+#: field:product.rappel.group,write_date:0
 #: field:product.rappel.subgroup,write_date:0
 #: field:product.unilever.family,write_date:0
 #: field:res.partner.competence,write_date:0
@@ -377,6 +383,7 @@ msgstr "Horario apertura mañana"
 
 #. module: frigo_edi
 #: field:agreement.type,name:0
+#: field:product.rappel.group,name:0
 #: field:product.unilever.family,name:0
 #: field:res.partner.competence,name:0
 msgid "Name"
@@ -508,6 +515,7 @@ msgstr "Provee funciones generales para importar ficheros edi"
 
 #. module: frigo_edi
 #: field:preferential.agreement,rappel_group_id:0
+#: field:product.template,rappel_group_id:0
 msgid "Rappel group"
 msgstr "Grupo de rappel"
 
@@ -539,11 +547,6 @@ msgid "Recovered"
 msgstr "Recuperado"
 
 #. module: frigo_edi
-#: field:res.partner,ref_history_ids:0
-msgid "Refs history"
-msgstr "Refs history"
-
-#. module: frigo_edi
 #: field:edi,related_partner_id:0
 msgid "Related partner"
 msgstr "Empresa relacionada"
@@ -557,12 +560,6 @@ msgstr "Desguace"
 #: field:edi.doc,count:0
 msgid "Seq. count"
 msgstr "Secuencia"
-
-#. module: frigo_edi
-#: field:edi.doc,service_id:0
-#: field:edi.export.wizard,service_id:0
-msgid "Service"
-msgstr "Servicio"
 
 #. module: frigo_edi
 #: view:item.management.item.move.sync:frigo_edi.item_move_sync_filter

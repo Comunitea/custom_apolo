@@ -1,13 +1,13 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#       * accounting_integration
+#	* accounting_integration
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-06-01 11:58+0000\n"
-"PO-Revision-Date: 2015-06-01 11:58+0000\n"
+"POT-Creation-Date: 2015-09-25 11:19+0000\n"
+"PO-Revision-Date: 2015-09-25 11:19+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,19 +16,19 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: accounting_integration
-#: code:addons/accounting_integration/wizard/account_integrate_wzd.py:242
+#: code:addons/accounting_integration/wizard/account_integrate_wzd.py:243
 #, python-format
 msgid "%s: Any analytic account with code %s"
 msgstr "%s: Ninguna cuenta analítica con el código %s"
 
 #. module: accounting_integration
-#: code:addons/accounting_integration/wizard/account_integrate_wzd.py:197
+#: code:addons/accounting_integration/wizard/account_integrate_wzd.py:199
 #, python-format
 msgid "%s: Cannot create account with code %s."
 msgstr "%s: No puede crear una cuneta con el código %s."
 
 #. module: accounting_integration
-#: code:addons/accounting_integration/wizard/account_integrate_wzd.py:254
+#: code:addons/accounting_integration/wizard/account_integrate_wzd.py:250
 #, python-format
 msgid "%s: Exception %s in row %s"
 msgstr "%s: Excepción %s en la fila %s"
@@ -46,7 +46,7 @@ msgid "%s: Processing."
 msgstr "%s: Procesando."
 
 #. module: accounting_integration
-#: code:addons/accounting_integration/wizard/account_integrate_wzd.py:177
+#: code:addons/accounting_integration/wizard/account_integrate_wzd.py:179
 #, python-format
 msgid "%s: There isn't any account created with code %s"
 msgstr "%s: No hay ninguna cuenta creada con el código %s"

@@ -1,13 +1,13 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#   * sale_custom_promotion
+#	* sale_custom_promotion
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-06-19 12:18+0000\n"
-"PO-Revision-Date: 2015-06-19 12:18+0000\n"
+"POT-Creation-Date: 2015-09-25 09:52+0000\n"
+"PO-Revision-Date: 2015-09-25 09:52+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,6 +16,13 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: sale_custom_promotion
+#: code:addons/sale_custom_promotion/edi.py:94
+#, python-format
+msgid "%s: File not found in folder. File: %s"
+msgstr "%s: Archivo no encontrado en la carpeta. Archivo: %s"
+
+#. module: sale_custom_promotion
+#: field:tourism.consumption,agreed_price:0
 #: field:tourism.customer,agreed_price:0
 msgid "Agreed price"
 msgstr "Precio acordado"
@@ -54,14 +61,21 @@ msgid "Code"
 msgstr "Código"
 
 #. module: sale_custom_promotion
+#: view:tourism.group:sale_custom_promotion.tourism_form
+#: field:tourism.group,consumption_ids:0
+msgid "Consumptions"
+msgstr "Consumos"
+
+#. module: sale_custom_promotion
 #: field:invoice.joint.promotion,create_uid:0
 #: field:invoice.tourism,create_uid:0
 #: field:sale.joint.promotion,create_uid:0
 #: field:sale.joint.promotion.history,create_uid:0
+#: field:tourism.consumption,create_uid:0
 #: field:tourism.customer,create_uid:0
 #: field:tourism.group,create_uid:0
 msgid "Created by"
-msgstr "Created by"
+msgstr "Creado por"
 
 #. module: sale_custom_promotion
 #: view:tourism.group:sale_custom_promotion.tourism_form
@@ -73,12 +87,14 @@ msgstr "Facturas creadas"
 #: field:invoice.tourism,create_date:0
 #: field:sale.joint.promotion,create_date:0
 #: field:sale.joint.promotion.history,create_date:0
+#: field:tourism.consumption,create_date:0
 #: field:tourism.customer,create_date:0
 #: field:tourism.group,create_date:0
 msgid "Created on"
-msgstr "Created on"
+msgstr "Creado el"
 
 #. module: sale_custom_promotion
+#: field:tourism.consumption,customer_id:0
 #: field:tourism.customer,customer_id:0
 msgid "Customer"
 msgstr "Cliente"
@@ -95,6 +111,11 @@ msgstr "Cliente exportado"
 #: field:tourism.group,customer_ids:0
 msgid "Customers"
 msgstr "Clientes"
+
+#. module: sale_custom_promotion
+#: view:tourism.group:sale_custom_promotion.tourism_form
+msgid "Date"
+msgstr "Fecha"
 
 #. module: sale_custom_promotion
 #: field:tourism.group,date_end:0
@@ -150,14 +171,20 @@ msgid "Export customers"
 msgstr "Exportar clientes"
 
 #. module: sale_custom_promotion
+#: field:tourism.consumption,exported:0
+msgid "Exported"
+msgstr "Exportado"
+
+#. module: sale_custom_promotion
 #: model:ir.model,name:sale_custom_promotion.model_promos_rules_conditions_exps
 msgid "Expressions for conditions"
 msgstr "Expresiones para las condiciones"
 
 #. module: sale_custom_promotion
+#: field:tourism.consumption,tourism_id:0
 #: field:tourism.customer,tourism_id:0
 msgid "Group"
-msgstr "Group"
+msgstr "Grupo"
 
 #. module: sale_custom_promotion
 #: field:tourism.group,guar_price:0
@@ -174,6 +201,7 @@ msgstr "Historial"
 #: field:invoice.tourism,id:0
 #: field:sale.joint.promotion,id:0
 #: field:sale.joint.promotion.history,id:0
+#: field:tourism.consumption,id:0
 #: field:tourism.customer,id:0
 #: field:tourism.group,id:0
 msgid "ID"
@@ -217,6 +245,11 @@ msgid "Invoice type"
 msgstr "Tipo de factura"
 
 #. module: sale_custom_promotion
+#: field:tourism.consumption,invoiced:0
+msgid "Invoiced"
+msgstr "Facturado"
+
+#. module: sale_custom_promotion
 #: field:sale.joint.promotion,invoiced_amounts:0
 msgid "Invoiced amounts"
 msgstr "Cantidades facturadas"
@@ -245,25 +278,27 @@ msgstr "Promociones conjuntas"
 #: field:invoice.tourism,write_uid:0
 #: field:sale.joint.promotion,write_uid:0
 #: field:sale.joint.promotion.history,write_uid:0
+#: field:tourism.consumption,write_uid:0
 #: field:tourism.customer,write_uid:0
 #: field:tourism.group,write_uid:0
 msgid "Last Updated by"
-msgstr "Last Updated by"
+msgstr "Última actualización por"
 
 #. module: sale_custom_promotion
 #: field:invoice.joint.promotion,write_date:0
 #: field:invoice.tourism,write_date:0
 #: field:sale.joint.promotion,write_date:0
 #: field:sale.joint.promotion.history,write_date:0
+#: field:tourism.consumption,write_date:0
 #: field:tourism.customer,write_date:0
 #: field:tourism.group,write_date:0
 msgid "Last Updated on"
-msgstr "Last Updated on"
+msgstr "Última actualización el"
 
 #. module: sale_custom_promotion
 #: field:tourism.group,min_price:0
 msgid "Minimum price"
-msgstr "Minimum price"
+msgstr "Precio mínimo"
 
 #. module: sale_custom_promotion
 #: selection:tourism.group,state:0
@@ -278,7 +313,17 @@ msgstr "Empresa"
 #. module: sale_custom_promotion
 #: view:promos.rules:sale_custom_promotion.rules_promotion_add_customers
 msgid "Partner Categories"
-msgstr "Categorias de clientes"
+msgstr "Categorías de clientes"
+
+#. module: sale_custom_promotion
+#: field:tourism.consumption,period_end:0
+msgid "Period end"
+msgstr "Fin período"
+
+#. module: sale_custom_promotion
+#: field:tourism.consumption,period_start:0
+msgid "Period start"
+msgstr "Inicio período"
 
 #. module: sale_custom_promotion
 #: field:sale.joint.promotion,promotion_id:0
@@ -286,9 +331,9 @@ msgid "Pomotion"
 msgstr "Promoción"
 
 #. module: sale_custom_promotion
-#: code:addons/sale_custom_promotion/sale.py:98
-#: code:addons/sale_custom_promotion/sale.py:117
-#: code:addons/sale_custom_promotion/tourism.py:168
+#: code:addons/sale_custom_promotion/sale.py:101
+#: code:addons/sale_custom_promotion/sale.py:120
+#: code:addons/sale_custom_promotion/tourism.py:209
 #, python-format
 msgid "Price error"
 msgstr "Error en precio"
@@ -297,6 +342,12 @@ msgstr "Error en precio"
 #: model:ir.model,name:sale_custom_promotion.model_product_template
 msgid "Product Template"
 msgstr "Plantilla de producto"
+
+#. module: sale_custom_promotion
+#: code:addons/sale_custom_promotion/tourism.py:93
+#, python-format
+msgid "Product error"
+msgstr "Error producto"
 
 #. module: sale_custom_promotion
 #: field:tourism.customer,product_group:0
@@ -317,18 +368,28 @@ msgstr "Reglas de promoción"
 #. module: sale_custom_promotion
 #: field:account.invoice.line,promotion_line:0
 msgid "Promotion line"
-msgstr "Promotion line"
+msgstr "Línea promoción"
+
+#. module: sale_custom_promotion
+#: model:ir.model,name:sale_custom_promotion.model_promos_rules_actions
+msgid "Promotions actions"
+msgstr "Acciones de la promoción"
+
+#. module: sale_custom_promotion
+#: model:ir.model,name:sale_custom_promotion.model_edi
+msgid "Provides general functions to impor edi files"
+msgstr "Provee funciones generales para importar ficheros edi"
+
+#. module: sale_custom_promotion
+#: field:tourism.consumption,qty:0
+msgid "Quantity"
+msgstr "Cantidad"
 
 #. module: sale_custom_promotion
 #: field:sale.joint.promotion,rappel_id:0
 #: selection:sale.joint.promotion,type:0
 msgid "Rappel"
 msgstr "Rappel"
-
-#. module: sale_custom_promotion
-#: model:ir.model,name:sale_custom_promotion.model_sale_order
-msgid "Sales Order"
-msgstr "Pedido de venta"
 
 #. module: sale_custom_promotion
 #: model:ir.model,name:sale_custom_promotion.model_sale_order_line
@@ -350,23 +411,30 @@ msgstr "Fecha inicio"
 #. module: sale_custom_promotion
 #: field:tourism.group,state:0
 msgid "State"
-msgstr "State"
+msgstr "Estado"
 
 #. module: sale_custom_promotion
 #: field:sale.joint.promotion,supplier_id:0
+#: field:tourism.group,supplier_id:0
 msgid "Supplier"
 msgstr "Proveedor"
 
 #. module: sale_custom_promotion
-#: code:addons/sale_custom_promotion/tourism.py:169
+#: code:addons/sale_custom_promotion/tourism.py:210
 #, python-format
 msgid "The agreed price must be higher than the minimum price"
 msgstr "El precio acordado debe de eser mayor al precio mínimo"
 
 #. module: sale_custom_promotion
+#: code:addons/sale_custom_promotion/tourism.py:94
+#, python-format
+msgid "The tourismo not have products"
+msgstr "El turismo no tiene productos"
+
+#. module: sale_custom_promotion
 #: field:account.invoice,tourism_id:0
 #: field:account.invoice.line,tourism:0
-#: code:addons/sale_custom_promotion/tourism.py:110
+#: code:addons/sale_custom_promotion/tourism.py:96
 #: model:ir.actions.act_window,name:sale_custom_promotion.action_tourism
 #: model:ir.ui.menu,name:sale_custom_promotion.tourism_menu
 #: field:sale.order.line,tourism:0
@@ -397,8 +465,8 @@ msgid "Validated"
 msgstr "Validado"
 
 #. module: sale_custom_promotion
-#: code:addons/sale_custom_promotion/sale.py:99
-#: code:addons/sale_custom_promotion/sale.py:118
+#: code:addons/sale_custom_promotion/sale.py:102
+#: code:addons/sale_custom_promotion/sale.py:121
 #, python-format
 msgid "can not sell below the minimum price"
 msgstr "No se puede cambiar el precio acordado en turismo"
@@ -406,5 +474,5 @@ msgstr "No se puede cambiar el precio acordado en turismo"
 #. module: sale_custom_promotion
 #: selection:invoice.joint.promotion,invoice_type:0
 msgid "pro-forma"
-msgstr "pro-forma"
+msgstr "Pro-forma"
 

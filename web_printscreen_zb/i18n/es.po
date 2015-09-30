@@ -1,0 +1,38 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* web_printscreen_zb
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-09-25 09:48+0000\n"
+"PO-Revision-Date: 2015-09-25 09:48+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: web_printscreen_zb
+#. openerp-web
+#: code:addons/web_printscreen_zb/static/src/xml/web_printscreen_export.xml:13
+#, python-format
+msgid "Excel"
+msgstr "Excel"
+
+#. module: web_printscreen_zb
+#. openerp-web
+#: code:addons/web_printscreen_zb/static/src/xml/web_printscreen_export.xml:8
+#, python-format
+msgid "PDF"
+msgstr "PDF"
+
+#. module: web_printscreen_zb
+#. openerp-web
+#: code:addons/web_printscreen_zb/static/src/xml/web_printscreen_export.xml:9
+#, python-format
+msgid "or"
+msgstr "o"
+
