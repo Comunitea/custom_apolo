@@ -42,25 +42,54 @@ class stock_quant(models.Model):
                         'location_id' : quant.location_id.id,
                         'location': quant.location_id.name_get()[0][1],
                         'product_id': quant.product_id.id,
-                        'product' : quant.product_id.name,
+                        'product' : quant.product_id.short_name and quant.product_id.name,
                         'quantity' : quant.qty,
                         'uom': quant.product_id.uom_id.name
                     }
                 res[str(quant.id)]=vals
             return res
 
+        @api.multi
+        def get_quant_pack_gun_info_resumen(self, my_args):
+
+            package_id = my_args.get("package_id", False)
+            domain = [('package_id', '=', package_id)]
+            quants = self.search(domain)
+
+            vals = {}
+            indice = 0
+            for quant in quants:
+                indice+=1
+                ind = str(quant.product_id.id)
+
+                if ind in vals.keys() and 'qty' in vals[ind].keys():
+                    qty =vals[ind]['qty'] + quant.qty
+                else:
+                    qty = quant.qty
+
+                values={
+                    'id':  quant.product_id.id or False,
+                    'product': quant.product_id.short_name and quant.product_id.name,
+                    'uom': quant.product_id.uom_id.name,
+                    'qty':qty}
+                vals[ind]=values
+            return vals
 
 
 class stock_quant_package(models.Model):
 
     _inherit = 'stock.quant.package'
     @api.multi
-    def get_quant_pack_gun_info(self, my_args):
+    def get_pack_gun_info(self, my_args):
         package_id = my_args.get("package_id", False)
         domain = [('id', '=', package_id)]
         package = self.search(domain)
         vals = {'exist':False}
         if package:
+            qtys= [t.qty for t in package.quant_ids if t.product_id == package.packed_lot_id.product_id.id]
+            qty = 0
+            for qty_ in qtys:
+                qty+= qty_
             vals = {
                 'exist' : True,
                 'package' : package.name,
@@ -68,75 +97,19 @@ class stock_quant_package(models.Model):
                 'src_location_id' : package.location_id.id,
                 'src_location': package.location_id.name_get()[0][1],
                 'dest_location_id' : False,
-                'dest_location': '',
+                'dest_location': False,
                 'packet_lot_id': package.packed_lot_id.id,
+                'product_id' : package.packed_lot_id.product_id.id,
+                'product_short_name' : package.packed_lot_id.product_id.short_name and
+                                       package.packed_lot_id.product_id.name,
+                'packed_qty': package.packed_qty or 0,
+                'uom' : package.uom_id.name or '',
+                'uom_id': package.uom_id.id or False,
+                'is_multiproduct':package.is_multiproduct,
+                'qty':qty
+
             }
         return vals
-
-class product_product (models.Model):
-    _inherit = 'product.product'
-
-    short_name=fields.Char("Short Name", size = 25)
-
-    @api.multi
-    def get_product_gun_complete_info(self, my_args):
-
-        id = my_args.get("product_id", False)
-        domain = [('id', '=', id)]
-        product = self.search(domain)
-        vals = {'exist':False}
-        if product:
-            var_coeff_un_id =False
-            var_coeff_ca_id =False
-            if product.var_coeff_un:
-                var_coeff_un_id = product.log_base_id.id or False
-            if product.var_coeff_ca:
-                var_coeff_ca_id = product.log_unit_id.id or False
-            vals = {
-                'exist' : True,
-                'product_id' : product.id,
-                'product' : product.name,
-                'short_name':product.default_code,
-                'uom_id': product.uom_id.id,
-                'var_coeff_un_id': var_coeff_un_id,
-                'var_coeff_ca_id':var_coeff_ca_id,
-                'un_ca': product.un_ca,
-                'kg_un':product.kg_un,
-                'ca_ma':product.ca_ma
-            }
-        return vals
-
-
-    @api.multi
-    def get_product_gun_info(self, my_args):
-        import ipdb; ipdb.set_trace()
-        product_ean = my_args.get("product_ean", False)
-        domain = [('ean13', '=', product_ean)]
-        product = self.search(domain)
-        vals = {'exist':False}
-        if product:
-            vals = {
-                'exist' : True,
-                'product_id' : product.id,
-                'product' : product.name,
-            }
-        return vals
-
-    @api.multi
-    def conv_units_from_gun(self, my_args):
-
-        uom_destino = my_args.get("uom_destino", False)
-        uom_origen = my_args.get("uom_origen", False)
-        supplier_id = my_args.get("supplier_id", False)
-        product_id = my_args.get("product_id", False)
-        domain = [('id', '=', product_id)]
-        product = self.search(domain)
-        res = False
-        if product:
-            res = product._get_unit_ratios(uom_destino, supplier_id) / \
-                  product._get_unit_ratios(uom_origen, supplier_id)
-
-        return res
 
 class stock_location(models.Model):
 
@@ -165,70 +138,9 @@ class stock_location(models.Model):
                 'exist' : True,
                 type + 'location_id' : location.id,
                 type + 'location' : location.name_get()[0][1],
+                'usage':location.usage
             }
         return vals
-
-class wave_reports(models.Model):
-
-    _name = 'wave.reports'
-    _order = 'wave_id'
-
-    wave_id = fields.Many2one('wave.report', 'Id wave_report')
-    to_revised = fields.Boolean ('To Revised', default = False)
-    uos_qty = fields.Float("Uos Qty", default = 0.00)
-    uom_qty = fields.Float("Uom Qty", default = 0.00)
-
-    @api.multi
-    def set_wave_reports_values(self, my_args):
-        """
-        Setea una campo con el valor para todas las ops
-        de un wave.report
-        """
-        wave_id = my_args.get('wave_id', False)
-        user_id = my_args.get('user_id', False)
-        field = my_args.get ('field', False)
-        #value =my_args('value', False)
-
-        env2 = self.env(self._cr, user_id, self._context)
-        wave_pool = self.with_env(env2)
-        wave = wave_pool.browse(wave_id)
-        if wave:
-            for op in wave.operation.ids:
-                res = op.write(field)
-        else:
-            for op in wave.operation.ids:
-                res = op.create({field})
-        return res
-
-class wave_report(models.Model):
-
-    _inherit = 'wave.report'
-
-    @api.multi
-    def set_wave_op_values(self, my_args):
-        """
-        Setea una campo con el valor para todas las ops
-        de un wave.report
-        """
-        wave_id = my_args.get('wave_id', False)
-        user_id = my_args.get('user_id', False)
-        field = my_args.get ('field', False)
-        value =my_args('value', False)
-
-        env2 = self.env(self._cr, user_id, self._context)
-        wave_pool = self.with_env(env2)
-        wave = wave_pool.browse(wave_id)
-        if wave:
-            for op in wave.operation.ids:
-                if field == 'to_process':
-                    res = op.write({field : value, 'visited' : True})
-                else:
-                    res = op.write({field : value})
-
-        else:
-            res = False
-
-        return res
 
 class stock_production_lot(models.Model):
 
@@ -245,7 +157,9 @@ class stock_production_lot(models.Model):
                 'exist' : True,
                 'lot_id' : lot.id,
                 'lot' : lot.name,
-                'product_id': lot.product_id.id or False
+                'product_id': lot.product_id.id or False,
+                'product': lot.product_id.short_name and  lot.product_id.name ,
+
             }
         return vals
 
@@ -253,14 +167,11 @@ class manual_transfer_wzd(models.TransientModel):
 
     _inherit = 'manual.transfer.wzd'
 
-
     @api.multi
     def do_manual_trasfer_from_gun(self, my_args):
         """
         Get a task for a user and type defined in my args.
         """
-        #import ipdb ; ipdb.set_trace()
-
         user_id = my_args.get('user_id', False)
         package_id= my_args.get('package_id', False)
         product_id= my_args.get('product_id', False)
@@ -285,7 +196,7 @@ class manual_transfer_wzd(models.TransientModel):
             'dest_location_id': dest_location_id,
             'do_pack': do_pack,
         }
-        #import ipdb; ipdb.set_trace()
+
         t_wzd = self.env['manual.transfer.wzd']
         env2 = t_wzd.env(self._cr, user_id, self._context)
         wzd_obj_uid = t_wzd.with_env(env2)
@@ -300,8 +211,6 @@ class manual_transfer_wzd(models.TransientModel):
         else:
             vals = vals_pack_line_ids
             val_ids = 'pack_line_ids'
-        #import ipdb; ipdb.set_trace()
-
         res = wzd_obj.write({val_ids: [(0,0, vals)]})
 
         wzd_obj.do_manual_transfer()

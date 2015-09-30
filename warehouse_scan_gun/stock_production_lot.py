@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Copyright (C) 2015 Comunitea All Rights Reserved
-#    $Javier Colmenero Fernández <javier@comunitea.com>$
+#    Copyright (C) 2015-2014 Comunitea Servicios Tecnológicos All Rights Reserved
+#    $Kiko Sánchez$ <kiko@comunitea.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published
@@ -18,20 +18,19 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{
-    'name': 'Warehouse Scan Gun',
-    'version': '1.0',
-    'category': 'Account',
-    'description': """Module to manage the warehouse with a scan gun""",
-    'author': 'Comunitea',
-    'website': '',
-    "depends": ['base',
-                'midban_depot_stock'],
 
-    "data": [
-        "res_users_view.xml",
-        "wave_report_revised.xml",
-        "wave_report.xml",
-        "product_view.xml"],
-    "installable": True
-}
+from openerp import models, fields, api
+from openerp.exceptions import except_orm
+from openerp.tools.translate import _
+
+class Stock_Production_Lot(models.Model):
+
+    _inherit ='stock.production.lot'
+
+    def get_lot_qty(self):
+        qty=0
+        for quant in self.quant_ids:
+            if quant.location_id.usage=='internal' and quant.package_id:
+                qty+=quant.qty
+        return qty
+

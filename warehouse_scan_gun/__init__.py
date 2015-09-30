@@ -21,6 +21,8 @@
 import res_users
 import stock_task
 import stock
-import stock_quant_package
+import stock_quant_package, stock_pack_operation, stock_production_lot
+import wave_report_revised
+
 import product
 

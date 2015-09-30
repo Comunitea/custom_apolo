@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="view_wave_report_revised_tree" model="ir.ui.view">
+             <field name="name">wave.report.revised.tree</field>
+             <field name="model">wave.report.revised</field>
+             <field name="arch" type="xml">
+                 <tree string="Picking List To Revised">
+                     <field name="product_id"/>
+                     <field name="pack_id"/>
+                     <field name="to_revised"/>
+                     <field name="wave_report_id"/>
+                 </tree>
+             </field>
+        </record>
+
+        <record id="view_wave_report_revised_form" model="ir.ui.view">
+             <field name="name">wave.report.revised.form</field>
+             <field name="model">wave.report.revised</field>
+             <field name="arch" type="xml">
+                 <form string="Picking List To Revised">
+                     <group colspan="4" col="4">
+                         <field name="to_revised"/>
+                         <field name="wave_report_id"/>
+                         <field name="product_id"/>
+                         <field name="pack_id"/>
+                         <field name="new_uom_qty"/>
+                         <field name="new_uos_qty"/>
+                         <separator string="Operations" colspan="4"/>
+                             <field name="operation_ids" colspan="4" nolabel="1">
+                                <tree editable="top">
+                                    <field name="do_onchange" invisible="1"/>
+                                    <field name="product_id" on_change="product_id_change(product_id, product_uom_id, product_qty)"/>
+                                    <field name="product_qty" attrs="{'required': [('product_id', '!=', False)]}"/>
+                                    <field name="product_uom_id" groups="product.group_uom" string="Stock unit" readonly="1"/>
+                                    <field name="package_id" groups="stock.group_tracking_lot"/>
+                                    <field name="lot_id" domain="[('product_id','=?', product_id)]" context="{'product_id': product_id}" groups="stock.group_production_lot" on_change="onchange_lot_id(lot_id)"/>
+                                    <field name="packed_qty"/>
+                                    <field name="product_uom_id" readonly="1"/>
+                                    <field name="uos_qty"/>
+                                    <field name="uos_id" readonly="1"/>
+                                    <field name="location_id"/>
+                                    <field name="location_dest_id" />
+                                    <field name="picking_id" />
+                                    <!-- <field name="owner_id" groups="stock.group_tracking_owner"/> -->
+                                    <!-- <field name="result_package_id" groups="stock.group_tracking_lot" context="{'location_id': location_dest_id}"/> -->
+                                </tree>
+                             </field>
+
+                     </group>
+                 </form>
+             </field>
+        </record>
+        <record id="action_list_wave_report_revised" model="ir.actions.act_window">
+            <field name="name">Wave Report</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">wave.report.revised</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                Click to add a Machine.
+                </p><p>
+                A machine has a unique code.
+                </p>
+            </field>
+        </record>
+        <menuitem id="list_wave_report_menu" action="action_list_wave_report_revised" name="Waves To Revise" parent="midban_depot_stock.menu_stock_task_mgmt" sequence="500"/>
+
+    </data>
+</openerp>

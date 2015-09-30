@@ -199,7 +199,7 @@ class OdooDao:
         return res
 
     def get_machines_menu(self, type):
-        #import ipdb; ipdb.set_trace()
+
         res = {}
         domain =[]
         if type =="ubication":
@@ -277,7 +277,6 @@ class OdooDao:
         return done
 
     def get_op_data(self, user_id, task_id):
-        #import ipdb; ipdb.set_trace()
         my_args = {'user_id': user_id, 'task_id': task_id}
         op_data = self.connection.execute('stock.task', 'get_op_data', [], my_args)
         return op_data
@@ -346,12 +345,17 @@ class OdooDao:
 
     def get_pack_gun_info(self, user_id, package_id):
         my_args = {'user_id': user_id, 'package_id': package_id}
-        op_data = self.connection.execute('stock.quant.package', 'get_quant_pack_gun_info', [], my_args)
+        op_data = self.connection.execute('stock.quant.package', 'get_pack_gun_info', [], my_args)
         return op_data
 
     def get_quant_pack_gun_info(self, user_id, package_id):
         my_args = {'user_id': user_id, 'package_id': package_id}
         op_data = self.connection.execute('stock.quant', 'get_quant_pack_gun_info', [], my_args)
+        return op_data
+
+    def get_quant_pack_gun_info_resumen(self, user_id, package_id):
+        my_args = {'user_id': user_id, 'package_id': package_id}
+        op_data = self.connection.execute('stock.quant', 'get_quant_pack_gun_info_resumen', [], my_args)
         return op_data
 
     def get_product_gun_info(self, user_id, product_ean):
@@ -378,12 +382,27 @@ class OdooDao:
         op_data = self.connection.execute('product.product', 'conv_units_from_gun', [], my_args)
         return op_data
 
-    def get_product_gun_complete_info(self, product_id):
-        my_args = {'product_id':product_id}
+    def get_product_gun_complete_info(self, user_id, product_id = False, ean = False):
+        my_args = {'user_id': user_id, 'ean': ean, 'product_id': product_id}
         product_data = self.connection.execute('product.product', 'get_product_gun_complete_info',[], my_args)
         return product_data
+
+    def get_packets_for_ean(self, user_id, product_id = False, ean = False):
+        my_args = {'user_id': user_id, 'ean' : ean, 'product_id':product_id}
+        packets = self.connection.execute('product.product', 'get_packets_for_ean',[], my_args)
+        return packets
 
     def get_user_packet_busy(self, user_id, packet_id):
         my_args = {'user_id': user_id, 'packet_id': packet_id}
         res = self.connection.execute('stock.pack.operation', 'get_user_packet_busy', [], my_args)
+        return res
+
+    def new_wave_to_revised(self, user_id, new_uom_qty, new_uos_qty, id):
+        my_args = {'user_id': user_id, 'new_uom_qty' : new_uom_qty, 'new_uos_qty' : new_uos_qty, 'id' : id}
+        res = self.connection.execute('wave.report.revised', 'new_wave_to_revised', [], my_args)
+        return res
+
+    def set_waves_op_processed(self, user_id, id):
+        my_args = {'user_id': user_id, 'id' : id}
+        res = self.connection.execute('wave.report', 'set_waves_op_processed', [], my_args)
         return res

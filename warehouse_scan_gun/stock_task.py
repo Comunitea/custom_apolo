@@ -84,7 +84,6 @@ class StockTask(models.Model):
         """
         Get a task for a user and type defined in my args.
         """
-        #import ipdb; ipdb.set_trace()
         user_id = my_args.get('user_id', False)
         camera_id = my_args.get('camera_id', False)
         task_type = my_args.get('task_type', False)
@@ -217,7 +216,6 @@ class StockTask(models.Model):
 
     @api.multi
     def gun_begin_task(self, my_args):
-        #import ipdb; ipdb.set_trace()
         task_id = my_args.get('task_id', False)
         user_id = my_args.get('user_id', False)
         run = my_args.get('run', False)
@@ -236,7 +234,6 @@ class StockTask(models.Model):
     @api.multi
     def gun_finish_task(self, my_args):
 
-
         task_id = my_args.get('task_id', False)
         user_id = my_args.get('user_id', False)
 
@@ -247,4 +244,16 @@ class StockTask(models.Model):
         task_obj_uid.finish_partial_task()
         return True
 
+    @api.multi
+    def gun_finish_picking_task(self, my_args):
+
+        task_id = my_args.get('task_id', False)
+        user_id = my_args.get('user_id', False)
+
+        task_obj = self.browse(task_id)
+        env2 = task_obj.env(self._cr, user_id, self._context)
+        task_obj_uid = task_obj.with_env(env2)
+
+        task_obj_uid.finish_partial_task()
+        return True
 
