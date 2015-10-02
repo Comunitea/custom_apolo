@@ -54,8 +54,7 @@ class product_product (models.Model):
             vals = {
                 'exist' : True,
                 'product_id' : product.id,
-                'product' : product.name,
-                'short_name':product.short_name,
+                'product' : product.short_name or product.name,
                 'uom_id': product.uom_id.id,
                 'uom':product.uom_id.name,
                 'var_coeff_un_id': var_coeff_un_id,
@@ -90,7 +89,9 @@ class product_product (models.Model):
                            x.package_id.uom_id.name,
                            x.package_id.uom_id.id,
                            x.lot_id.id,
-                           x.lot_id.name)
+                           x.lot_id.name,
+                           x.package_id.uos_qty,
+                           x.package_id.uos_id.name)
                        for x in stock_quants
                        if x.location_id.usage=='internal']
             packets =list(set(packets))
@@ -110,7 +111,9 @@ class product_product (models.Model):
                 'uom':pack[6],
                 'uom_id':pack[7],
                 'lot_id':pack[8],
-                'lot':pack[9]
+                'lot':pack[9],
+                'uos_qty':pack[10],
+                'uos':pack[11],
             }
             res[str(inc)]=vals
 

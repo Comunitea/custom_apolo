@@ -406,3 +406,10 @@ class OdooDao:
         my_args = {'user_id': user_id, 'id' : id}
         res = self.connection.execute('wave.report', 'set_waves_op_processed', [], my_args)
         return res
+
+    def create_reposition_from_gun(self, user_id, selected_loc_ids, limit):
+        my_args = {'user_id': user_id, 'selected_loc_ids' : selected_loc_ids, 'limit' : limit}
+        res = self.connection.execute('reposition.wizard', 'create_reposition_from_gun', [], my_args)
+        # my_args = {'user_id': user_id, 'picks': res}
+        # res = self.connection.execute('stock.pack.operation', 'add_task_to_created_rep', [], my_args)
+        return res
