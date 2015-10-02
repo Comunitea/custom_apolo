@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Omar Castiñeira Saavedra Copyright Comunitea SL 2015
+#    Carlos Lombardía Rodríguez Copyright Comunitea SL 2015
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from openerp import models, fields, api
 
-from . import sale
-from . import stock
-from . import respartner
+
+class partner_supplier_rel(models.Model):
+
+    _inherit = 'res.partner'
+
+    supplier_ids = fields.Many2many('res.partner', 'partner_supplier_rel',
+                                    'partner_id','supplier_id',
+                                    string='Suppliers',
+                                    domain=[('supplier', '=', True)])
