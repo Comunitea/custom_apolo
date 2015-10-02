@@ -42,7 +42,7 @@ class stock_quant(models.Model):
                         'location_id' : quant.location_id.id,
                         'location': quant.location_id.name_get()[0][1],
                         'product_id': quant.product_id.id,
-                        'product' : quant.product_id.short_name and quant.product_id.name,
+                        'product' : quant.product_id.short_name or quant.product_id.name,
                         'quantity' : quant.qty,
                         'uom': quant.product_id.uom_id.name
                     }
@@ -68,12 +68,13 @@ class stock_quant(models.Model):
                     qty = quant.qty
 
                 values={
-                    'id':  quant.product_id.id or False,
-                    'product': quant.product_id.short_name and quant.product_id.name,
+                    'id':package_id,
+                    'product_id':  quant.product_id.id or False,
+                    'product': quant.product_id.short_name or quant.product_id.name,
                     'uom': quant.product_id.uom_id.name,
                     'qty':qty}
                 vals[ind]=values
-            return vals
+            return values
 
 class stock_quant_package(models.Model):
 
@@ -84,28 +85,36 @@ class stock_quant_package(models.Model):
         domain = [('id', '=', package_id)]
         package = self.search(domain)
         vals = {'exist':False}
+
         if package:
             qtys= [t.qty for t in package.quant_ids if t.product_id == package.packed_lot_id.product_id.id]
             qty = 0
             for qty_ in qtys:
                 qty+= qty_
+
             vals = {
                 'exist' : True,
                 'package' : package.name,
                 'package_id' :package.id,
                 'src_location_id' : package.location_id.id,
-                'src_location': package.location_id.name_get()[0][1],
+                'src_location': package.location_id.name_get()[0][1] or package.quant_ids[0].location_id.name_get()[0][1],
                 'dest_location_id' : False,
                 'dest_location': False,
-                'packet_lot_id': package.packed_lot_id.id,
+                'lot_id': package.packed_lot_id.id or False,
+                'lot': package.packed_lot_id.name or "",
                 'product_id' : package.packed_lot_id.product_id.id,
-                'product_short_name' : package.packed_lot_id.product_id.short_name and
+                'product' : package.packed_lot_id.product_id.short_name
+                                        or
                                        package.packed_lot_id.product_id.name,
                 'packed_qty': package.packed_qty or 0,
                 'uom' : package.uom_id.name or '',
                 'uom_id': package.uom_id.id or False,
                 'is_multiproduct':package.is_multiproduct,
-                'qty':qty
+                'qty':qty,
+                'uos_id':package.uos_id.id or package.uom_id.id,
+                'uos':package.uos_id.name or package.uom_id.name,
+                'uos_qty': package.uos_qty or package.packed_qty,
+                'change': False
             }
         return vals
 
@@ -136,7 +145,8 @@ class stock_location(models.Model):
                 'exist' : True,
                 type + 'location_id' : location.id,
                 type + 'location' : location.name_get()[0][1],
-                'usage':location.usage
+                'usage':location.usage,
+                'zone':location.zone
             }
         return vals
 

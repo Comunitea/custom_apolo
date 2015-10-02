@@ -22,7 +22,7 @@
 from openerp import models, fields, api
 from openerp.exceptions import except_orm
 from openerp.tools.translate import _
-
+import time
 
 class stock_pack_operation(models.Model):
     _inherit = 'stock.pack.operation'
@@ -142,7 +142,7 @@ class stock_pack_operation(models.Model):
             for op in op_obj:
                 values = {
                 'ID': op.id,
-                'PRODUCTO': op.product_id.name and op.product_id.short_name or False,
+                'PRODUCTO': op.product_id.short_name or op.packed_lot_id.product_id.short_name or op.packed_lot_id.product_id.name,
                 'CANTIDAD': op.product_qty,
                 'LOTE': op.packed_lot_id and op.packed_lot_id.name or "",
                 'PAQUETE': op.package_id.id and op.package_id.name or "",
@@ -154,15 +154,21 @@ class stock_pack_operation(models.Model):
                 'destino_id': op.location_dest_id.id or 0,
                 'paquete_id': op.package_id.id or 0,
                 'qty': op.product_qty or 0,
-                'paquete_dest_id' : False,
+                'result_package_id' : op.result_package_id or False,
                 'uom' :op.product_uom_id and op.product_uom_id.name or "",
-                'origen' : op.location_id.get_short_name(),
-                'destino' : op.location_dest_id.get_short_name(),
-                'product_id': op.product_id.id or False,
+                'origen' : op.location_id.name_get()[0][1],
+                'destino' : op.location_dest_id.name_get()[0][1],
+                'product_id': op.product_id.id or op.packed_lot_id.product_id.id or False,
                 'lot_id': op.packed_lot_id.id,
                 'packed_qty': op.packed_qty or 0,
-                'uos_id' :op.uos_id and op.uos_id.name or '',
-                'uos_qty': op.uos_qty or 0
+                'uos_id' :op.uos_id.id or False,
+                'uos': op.uos_id.name or '',
+                'uos_qty': op.uos_qty or 0,
+                'changed': False,
+                'paquete': op.package_id.id and op.package_id.name or "",
+                'lot': op.packed_lot_id and op.packed_lot_id.name or "",
+                'producto': op.product_id.short_name or op.packed_lot_id.product_id.short_name or op.packed_lot_id.product_id.name,
+
 
                 }
 
@@ -171,9 +177,9 @@ class stock_pack_operation(models.Model):
                     domain_package = [('id', '=', op.package_id.id)]
                     package_pool= self.env['stock.quant.package'].search(domain_package)[0]
                     if len(package_pool)==1:
-                        values['LOTE']=package_pool.packed_lot_id.name
+                        values['lot']=package_pool.packed_lot_id.name
                         values['lot_id'] = package_pool.packed_lot_id.id
-                        values['PRODUCTO'] = package_pool.packed_lot_id.product_id.short_name or ''
+                        values['product'] = package_pool.packed_lot_id.product_id.short_name or ''
                         values['product_id'] = package_pool.packed_lot_id.product_id.id or False
                         values['uom']=package_pool.packed_lot_id.product_id.uom_id.name
                 ind += 1
@@ -342,3 +348,5 @@ class stock_pack_operation(models.Model):
             return True
         except Exception:
             return False
+
+

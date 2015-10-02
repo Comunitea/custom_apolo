@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-25 11:05+0000\n"
-"PO-Revision-Date: 2015-09-25 11:05+0000\n"
+"POT-Creation-Date: 2015-10-02 13:04+0000\n"
+"PO-Revision-Date: 2015-10-02 13:04+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -32,6 +32,11 @@ msgid "Indirect sales"
 msgstr "Ventas indirectas"
 
 #. module: indirect_sale
+#: model:ir.model,name:indirect_sale.model_res_partner
+msgid "Partner"
+msgstr "Empresa"
+
+#. module: indirect_sale
 #: model:ir.model,name:indirect_sale.model_stock_picking
 msgid "Picking List"
 msgstr "Albarán"
@@ -46,4 +51,9 @@ msgstr "Pedido de venta"
 #: field:stock.picking,supplier_id:0
 msgid "Supplier"
 msgstr "Proveedor"
+
+#. module: indirect_sale
+#: field:res.partner,supplier_ids:0
+msgid "Suppliers"
+msgstr "Proveedores"
 
