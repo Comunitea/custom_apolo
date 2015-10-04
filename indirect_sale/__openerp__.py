@@ -27,6 +27,7 @@
     "description": """Allow to create indirect sales without invoice""",
     "depends": ["sale_stock"],
     "data": ["sale_view.xml",
+             "respartner_view.xml",
              "stock_view.xml"],
     "installable": True,
     "application": True,

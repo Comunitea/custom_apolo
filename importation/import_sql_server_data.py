@@ -301,6 +301,126 @@ class DatabaseImport:
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
+    def _create_or_update_partner(self, row, unregister_id,parent_id=False):
+        partner_ids = self.search("res.partner", [('ref', '=', str(row[0])),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
+        partner_vals = {'comercial': row[1] and ustr(row[1]) or "",
+                        'name': ustr(row[2]),
+                        'street': row[3] and ustr(row[3]) or "",
+                        'zip': row[4] and ustr(row[4]) or "",
+                        'city': row[5] and ustr(row[5]) or "",
+                        'phone': row[6] and ustr(row[6]) or "",
+                        'fax': row[8] and ustr(row[8]) or "",
+                        "customer": True,
+                        "comment": row[11] and ustr(row[11]) or "",
+                        "email": row[10] and ustr(row[10]) or "",
+                        "parent_id": parent_id,
+                        "is_company": not parent_id and True or False
+                        }
+        if row[9]:
+            partner_vals['state2'] = "unregistered"
+            partner_vals['unregister_reason_id'] = unregister_id[0]
+            partner_vals['comment'] += "\nFecha de baja: " + str(row[9])
+            partner_vals['active'] = False
+        insert_vat = False
+        if not partner_ids:
+            partner_vals['ref'] = str(row[0])
+            partner_id = self.create("res.partner", partner_vals)
+
+            if row[7] and len(ustr(row[7].replace(" ", "").replace("-",""))) == 9:
+                insert_vat = True
+        else:
+            self.write("res.partner", [partner_ids[0]], partner_vals)
+            partner_id = partner_ids[0]
+            if row[7] and len(ustr(row[7].replace(" ", "").replace("-",""))) == 9:
+                partner_data = self.read("res.partner", partner_id, ["vat"])
+                if not partner_data["vat"]:
+                    insert_vat = True
+        if insert_vat:
+            vat = u"ES" + ustr(row[7].replace(" ", "").replace("-",""))
+            try:
+                self.write("res.partner", [partner_id], {'vat': vat})
+            except:
+                print u"CIF no váĺido en España", row[7]
+
+        return partner_id
+
+    def import_customers(self, cr):
+        unregister_reason = u"Baja en importación"
+        unregister_id = self.search("unregister.partner.reason", [("name", '=', unregister_reason)])
+        cr.execute("select count(*) as count from dbo.LG_clientes")
+        row = cr.fetchone()
+        print "Numero de clientes: ", (row.count)
+        num_rows = row.count
+        cont = 0
+        cr.execute("select vc.cliente as ref, vc.nombre_comercial as comercial, vc.nombre_fiscal as name, vc.direccion as street,vc.codigo_postal as zip,"
+                   "vc.poblacion as city, vc.telefono as phone, nullif(nullif(vc.nif, '0T'), '0') as vat_woc, c.cli_nfax as fax, c.fecha_baja as inactive_date,"
+                   "c.email_comercial as email, c.observaciones as comment from dbo.LG_clientes vc inner join dbo.adsd_clie c on c.cli_codi = vc.cliente where c.cli_asoc = 0")
+        parent_partner_data = cr.fetchall()
+        for row in parent_partner_data:
+            parent_id = self._create_or_update_partner(row, unregister_id)
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+        cr.execute("select vc.cliente as ref, vc.nombre_comercial as comercial, vc.nombre_fiscal as name, vc.direccion as street,vc.codigo_postal as zip,"
+                   "vc.poblacion as city, vc.telefono as phone, nullif(nullif(vc.nif, '0T'), '0') as vat_woc, c.cli_nfax as fax, c.fecha_baja as inactive_date,"
+                   "c.email_comercial as email, c.observaciones as comment, c.cli_asoc as parent_id_map from dbo.LG_clientes vc "
+                   "inner join dbo.adsd_clie c on c.cli_codi = vc.cliente where c.cli_asoc != 0")
+        child_partner_data = cr.fetchall()
+        while child_partner_data:
+            for row in child_partner_data:
+                partner_parent_ids = self.search("res.partner", [('ref', '=', str(row[12])),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
+                if partner_parent_ids:
+                    parent_id = self._create_or_update_partner(row, unregister_id, parent_id=partner_parent_ids[0])
+                    child_partner_data.remove(row)
+                    cont += 1
+                    print "%s de %s" % (str(cont), str(num_rows))
+                else:
+                    print "row: ", row
+
+    def import_suppliers(self, cr):
+        cr.execute("select count(*) as count from dbo.adsd_prv")
+        row = cr.fetchone()
+        print "Numero de proveedores: ", (row.count)
+        num_rows = row.count
+        cont = 0
+        cr.execute("select prv_codi as ref, prv_nomb as name, prv_dire as street, prv_cpos as zip, prv_pobl as city, prv_ncif as vat_woc, "
+                   "prv_tlfo as phone, prv_nfax as fax, cliente as customer from dbo.adsd_prv")
+        supplier_data = cr.fetchall()
+        for row in supplier_data:
+            partner_ids = self.search("res.partner", [('ref', '=', str(row[0])),'|',('active', '=', True),('active', '=', False)])
+            partner_vals = {'name': ustr(row[1]),
+                            'street': row[2] and ustr(row[2]) or "",
+                            'zip': row[3] and ustr(row[3]) or "",
+                            'city': row[4] and ustr(row[4]) or "",
+                            'phone': row[6] and ustr(row[6]) or "",
+                            'fax': row[7] and ustr(row[7]) or "",
+                            "supplier": True,
+                            "is_company": True,
+                            }
+            if partner_ids:
+                partner_id = partner_ids[0]
+            if row[8] and row[8] != 800000: #unilever
+                customer_ids = self.search("res.partner", [('ref', '=', str(row[8])),('supplier', '=', True),'|',('active', '=', True),('active', '=', False)])
+                if customer_ids:
+                    partner_id = customer_ids[0]
+            if not partner_id:
+                partner_vals["ref"] = str(row[0])
+                partner_id = self.create("res.partner", partner_vals)
+            else:
+                self.write("res.partner", [partner_id], partner_vals)
+
+            if row[7] and len(ustr(row[5].replace(" ", "").replace("-",""))) == 9:
+                vat = u"ES" + ustr(row[5].replace(" ", "").replace("-",""))
+                try:
+                    self.write("res.partner", [partner_id], {'vat': vat})
+                except:
+                    print u"CIF no váĺido en España", row[7]
+
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+
+
     def process_data(self):
         """
         Importa la bbdd
@@ -313,8 +433,10 @@ class DatabaseImport:
             conn = pyodbc.connect("DRIVER={FreeTDS};SERVER=" + self.sql_server_host + ";UID=midban;PWD=midban2015;DATABASE=gest2015;Port=1433;TDS_Version=10.0")
             cr = conn.cursor()
 
-            self.import_product_category(cr)
-            self.import_products(cr)
+            #self.import_product_category(cr)
+            #self.import_products(cr)
+            self.import_customers(cr)
+            self.import_suppliers(cr)
 
         except Exception, ex:
             print u"Error al conectarse a las bbdd: ", repr(ex)

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<openerp>
+    <data>
+         <record id="custom_indirect_sale_suppliers_form" model="ir.ui.view">
+            <field name="name">custom.indirect.sale.suppliers.form</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="midban_partner.midban_view_partner_form"/>
+            <field name="arch" type="xml">
+
+                <field name="invoice_method" position="before">
+                  <field name="supplier_ids" widget="many2many_tags"/>
+              </field>
+            </field>
+          </record>
+
+  </data>
+</openerp>
