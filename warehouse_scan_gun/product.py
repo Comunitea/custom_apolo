@@ -43,7 +43,7 @@ class product_product (models.Model):
         if id:
             domain = [('id', '=', id)]
         product = self.search(domain)
-        vals = {'exist':False}
+        vals = False
         if domain and product:
             var_coeff_un_id =False
             var_coeff_ca_id =False
@@ -62,7 +62,10 @@ class product_product (models.Model):
                 'un_ca': product.un_ca,
                 'kg_un':product.kg_un,
                 'ca_ma':product.ca_ma,
-                'virtual_available': product.virtual_available
+                'virtual_available': product.virtual_available,
+                'picking_location_id':product.picking_location_id.id,
+                'picking_location':product.picking_location_id.name_get()[0][1],
+                'temp_type_id': product.temp_type.id
             }
         return vals
 
@@ -134,3 +137,19 @@ class product_product (models.Model):
                   product._get_unit_ratios(uom_origen, supplier_id)
 
         return res
+
+    @api.multi
+    def check_picking_zone(self, my_args):
+        #import ipdb; ipdb.set_trace()
+
+        picking_location_id = my_args.get("picking_location_id", False)
+        product_id = my_args.get("product_id", True)
+        write = my_args.get("write", False)
+
+        domain = [('id', '=', product_id)]
+        product = self.search(domain)
+        res = False
+        if product:
+            res = product.write ({'picking_location_id': picking_location_id})
+        return res
+

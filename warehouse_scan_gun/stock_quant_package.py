@@ -85,12 +85,20 @@ class stock_quant_package(models.Model):
         domain = [('id', '=', package_id)]
         package = self.search(domain)
         vals = {'exist':False}
-
-        if package:
+        #import ipdb; ipdb.set_trace()
+        if package and package.quant_ids:
             qtys= [t.qty for t in package.quant_ids if t.product_id == package.packed_lot_id.product_id.id]
             qty = 0
             for qty_ in qtys:
                 qty+= qty_
+            picking_zone_id = False
+            picking_zone = ''
+
+            if not package.is_multiproduct:
+                picking_zone_id = package.product_id.picking_location_id.id \
+                               or package.packed_lot_id.product_id.picking_location_id.id
+                picking_zone = package.product_id.picking_location_id.name_get()[0][1] \
+                               or package.packed_lot_id.product_id.picking_location_id.name_get()[0][1]
 
             vals = {
                 'exist' : True,
@@ -108,13 +116,15 @@ class stock_quant_package(models.Model):
                                        package.packed_lot_id.product_id.name,
                 'packed_qty': package.packed_qty or 0,
                 'uom' : package.uom_id.name or '',
-                'uom_id': package.uom_id.id or False,
+                'uom_id': package.uom_id.id or package.packed_lot_id.product_id.uom_id or False,
                 'is_multiproduct':package.is_multiproduct,
                 'qty':qty,
-                'uos_id':package.uos_id.id or package.uom_id.id,
+                'uos_id':package.uos_id.id or False,
                 'uos':package.uos_id.name or package.uom_id.name,
                 'uos_qty': package.uos_qty or package.packed_qty,
-                'change': False
+                'change': False,
+                'picking_location_id':picking_zone_id,
+                'picking_location':picking_zone,
             }
         return vals
 
@@ -146,7 +156,8 @@ class stock_location(models.Model):
                 type + 'location_id' : location.id,
                 type + 'location' : location.name_get()[0][1],
                 'usage':location.usage,
-                'zone':location.zone
+                'zone':location.zone,
+                'temp_type_id':location.temp_type_id.id or False,
             }
         return vals
 
