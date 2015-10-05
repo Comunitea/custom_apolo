@@ -1609,7 +1609,7 @@ class ScanGunProtocol(LineReceiver):
         #         Modificamos cantidades en OP y finalizamos
         # caso 3: No coincide: varias operaciones >
         #         No finalizamos>> Seteamos to_revised
-        import ipdb; ipdb.set_trace()
+        #import ipdb; ipdb.set_trace()
         wave_ = self.waves[str(self.active_wave)]
         op_id = wave_['op']
         self.wave_id = wave_['ID']
