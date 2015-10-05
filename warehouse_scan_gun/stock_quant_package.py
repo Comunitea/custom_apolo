@@ -85,9 +85,8 @@ class stock_quant_package(models.Model):
         domain = [('id', '=', package_id)]
         package = self.search(domain)
         vals = {'exist':False}
-        #import ipdb; ipdb.set_trace()
         if package and package.quant_ids:
-            qtys= [t.qty for t in package.quant_ids if t.product_id == package.packed_lot_id.product_id.id]
+            qtys= [t.qty for t in package.quant_ids if t.product_id.id == package.packed_lot_id.product_id.id]
             qty = 0
             for qty_ in qtys:
                 qty+= qty_
@@ -127,6 +126,16 @@ class stock_quant_package(models.Model):
                 'picking_location':picking_zone,
             }
         return vals
+
+    @api.multi
+    def create_package_from_gun(self, my_args):
+        user_id= my_args.get("user_id", False)
+        values = my_args.get('values', {})
+        pack_wzd = self.env['stock.quant.package']
+        env2 = pack_wzd.env(self._cr, user_id, self._context)
+        wzd_obj_uid = pack_wzd.with_env(env2)
+        wzd_obj = wzd_obj_uid.create(values)
+        return wzd_obj
 
 class stock_location(models.Model):
 

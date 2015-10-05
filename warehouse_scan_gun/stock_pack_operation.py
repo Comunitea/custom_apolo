@@ -63,18 +63,20 @@ class stock_pack_operation(models.Model):
 
     @api.multi
     def set_wave_ops_values(self, my_args):
+        import ipdb; ipdb.set_trace()
         wave_id = my_args.get ('wave_id', 0)
+        op_id = my_args.get('op_id',0)
         user_id = my_args.get('user_id', 0)
         field = my_args.get('field', '')
         value = my_args.get ('value', False)
-        domain = [
-            ('id', '=', wave_id)
-        ]
+        domain = [('id', '=', wave_id)]
+
         vals= {field : value}
         wave_reports= self.env['wave.report'].search(domain)
         env2 = wave_reports.env(self._cr, user_id, self._context)
         wave_reports_uid = wave_reports.with_env(env2)
         ops = wave_reports_uid.operation_ids
+
         ops.write (vals)
         return True
 
