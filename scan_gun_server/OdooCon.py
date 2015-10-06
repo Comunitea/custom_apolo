@@ -424,7 +424,7 @@ class OdooDao:
 
 
 
-    def check_picking_zone(self, user_id, product_id, picking_location_id):
-        my_args = {'user_id': user_id, 'picking_location_id' : picking_location_id, 'product_id' : product_id}
+    def check_picking_zone(self, user_id, product_id, picking_location_id, write = True):
+        my_args = {'user_id': user_id, 'picking_location_id' : picking_location_id, 'product_id' : product_id, 'write': write}
         res = self.connection.execute('product.product', 'check_picking_zone', [], my_args)
         return res

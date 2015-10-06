@@ -108,7 +108,7 @@ class stock_pack_operation(models.Model):
                 'destino_id': op.location_dest_id.id or 0,
                 'paquete_id': op.package_id.id or 0,
                 'qty': op.product_qty or 0,
-                'paquete_dest_id' : False,
+                'paquete_dest_id' : op.result_package_id.id or False,
                 'uom' :op.product_uom_id and op.product_uom_id.name or '',
                 'origen' : op.location_id.get_short_name(),
                 'destino' : op.location_dest_id.get_short_name(),
@@ -141,6 +141,7 @@ class stock_pack_operation(models.Model):
             for op in op_obj:
                 values = {
                 'ID': op.id,
+                'id': op.id,
                 'PRODUCTO': op.product_id.short_name or op.packed_lot_id.product_id.short_name or op.packed_lot_id.product_id.name,
                 'CANTIDAD': op.product_qty,
                 'LOTE': op.packed_lot_id and op.packed_lot_id.name or "",
@@ -153,7 +154,7 @@ class stock_pack_operation(models.Model):
                 'destino_id': op.location_dest_id.id or 0,
                 'paquete_id': op.package_id.id or 0,
                 'qty': op.product_qty or 0,
-                'result_package_id' : op.result_package_id or False,
+                'result_package_id' : op.result_package_id.id or False,
                 'uom' :op.product_uom_id and op.product_uom_id.name or "",
                 'origen' : op.location_id.name_get()[0][1],
                 'destino' : op.location_dest_id.name_get()[0][1],

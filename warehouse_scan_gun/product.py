@@ -150,6 +150,12 @@ class product_product (models.Model):
         product = self.search(domain)
         res = False
         if product:
-            res = product.write ({'picking_location_id': picking_location_id})
+            domain_picking = [('id','=', picking_location_id), ('zone','=','picking'), ('temp_type_id', '=', product.temp_type)]
+            picking_location = self.env['stock.picking.location'].search(domain_picking)
+
+            if picking_location and not write:
+                res = True
+            if picking_location and write:
+                res = product.write ({'picking_location_id': picking_location_id})
         return res
 
