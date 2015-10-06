@@ -10,6 +10,9 @@
                 <field name="ref" position="after">
                     <field name="unilever_code"/>
                 </field>
+                <field name="invoice_method" position="before">
+                    <field name="indirect_customer"/>
+                </field>
                 <field name="category_id" position="after">
                     <group>
                         <field name="from_competence_id"/>
