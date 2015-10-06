@@ -35,20 +35,18 @@ class stock_pack_operation(models.Model):
     def get_user_packet_busy(self, my_args):
 
         packet_id = my_args.get('packet_id', 0)
-        domain = [('package_id', '=', packet_id)]
+        domain = [('package_id', '=', packet_id),('task_id.state', '=', 'assigned')]
         ops_ids = self.search(domain)
-        res = {}
-
+        res = False
         if ops_ids:
             for op in ops_ids:
                 task = op.task_id
-                if task.state == 'assigned':
-                    res = {'ref': task.type[0:4] + '/' + str(task.id),
-                           'user': task.user.id.name}
+                res = {'ref': task.type[0:4] + '/' + str(task.id),
+                           'user': task.user_id.name}
 
         #si está enun poicking. Revisar con un pick
         if not res:
-
+            #import ipdb; ipdb.set_trace()
             tasks_pool = self.env['stock.task']
             picks_pool = self.env['stock.picking']
             domain = [('state', '=','assigned'), ('picking_id', '!=', False)]
@@ -60,24 +58,25 @@ class stock_pack_operation(models.Model):
                     if pick:
                         if packet_id in pick.pack_operation_ids:
                              res = {'ref': pick.name,
-                                    'user': task.user.id.name}
-
+                                    'user': task.user_id.name}
         return res
 
     @api.multi
     def set_wave_ops_values(self, my_args):
+        # import ipdb; ipdb.set_trace()
         wave_id = my_args.get ('wave_id', 0)
+        op_id = my_args.get('op_id',0)
         user_id = my_args.get('user_id', 0)
         field = my_args.get('field', '')
         value = my_args.get ('value', False)
-        domain = [
-            ('id', '=', wave_id)
-        ]
+        domain = [('id', '=', wave_id)]
+
         vals= {field : value}
         wave_reports= self.env['wave.report'].search(domain)
         env2 = wave_reports.env(self._cr, user_id, self._context)
         wave_reports_uid = wave_reports.with_env(env2)
         ops = wave_reports_uid.operation_ids
+
         ops.write (vals)
         return True
 
@@ -109,7 +108,7 @@ class stock_pack_operation(models.Model):
                 'destino_id': op.location_dest_id.id or 0,
                 'paquete_id': op.package_id.id or 0,
                 'qty': op.product_qty or 0,
-                'paquete_dest_id' : False,
+                'paquete_dest_id' : op.result_package_id.id or False,
                 'uom' :op.product_uom_id and op.product_uom_id.name or '',
                 'origen' : op.location_id.get_short_name(),
                 'destino' : op.location_dest_id.get_short_name(),
@@ -142,6 +141,7 @@ class stock_pack_operation(models.Model):
             for op in op_obj:
                 values = {
                 'ID': op.id,
+                'id': op.id,
                 'PRODUCTO': op.product_id.short_name or op.packed_lot_id.product_id.short_name or op.packed_lot_id.product_id.name,
                 'CANTIDAD': op.product_qty,
                 'LOTE': op.packed_lot_id and op.packed_lot_id.name or "",
@@ -154,13 +154,14 @@ class stock_pack_operation(models.Model):
                 'destino_id': op.location_dest_id.id or 0,
                 'paquete_id': op.package_id.id or 0,
                 'qty': op.product_qty or 0,
-                'result_package_id' : op.result_package_id or False,
+                'result_package_id' : op.result_package_id.id or False,
                 'uom' :op.product_uom_id and op.product_uom_id.name or "",
                 'origen' : op.location_id.name_get()[0][1],
                 'destino' : op.location_dest_id.name_get()[0][1],
                 'product_id': op.product_id.id or op.packed_lot_id.product_id.id or False,
                 'lot_id': op.packed_lot_id.id,
                 'packed_qty': op.packed_qty or 0,
+                'uom_id':op.product_uom_id.id or op.packed_lot_id.product_id.uom_id.id or False,
                 'uos_id' :op.uos_id.id or False,
                 'uos': op.uos_id.name or '',
                 'uos_qty': op.uos_qty or 0,
@@ -168,8 +169,7 @@ class stock_pack_operation(models.Model):
                 'paquete': op.package_id.id and op.package_id.name or "",
                 'lot': op.packed_lot_id and op.packed_lot_id.name or "",
                 'producto': op.product_id.short_name or op.packed_lot_id.product_id.short_name or op.packed_lot_id.product_id.name,
-
-
+                'to_process': op.to_process
                 }
 
                 #revisar para palet_multiproducto
@@ -323,6 +323,31 @@ class stock_pack_operation(models.Model):
         else:
             return False
 
+    @api.multi
+    def change_op_values(self, my_args):
+        """
+        Mark operation defined in my_args as visited an the check if remaining
+        operations in task are visited to return true in order to finish task
+        or False because we need to show the next operation.
+        """
+        user_id = my_args.get('user_id', False)
+        op_id = my_args.get('op_id', False)
+
+        field_values = my_args.get ('field_values', False)
+        domain = ['|', ('id', '=', op_id), ('old_id', '=', op_id)]
+        op_obj = self.search(domain, limit=1)
+        if not op_obj:
+            raise except_orm(_('Error'),
+                            _('No operation founded to set as visited'))
+
+        # Browse with correct uid, an mark as visited
+        try:
+            env2 = op_obj.env(self._cr, user_id, self._context)
+            op_obj_uid = op_obj.with_env(env2)
+            op_obj_uid.write(field_values)
+            return True
+        except Exception:
+            return False
     @api.multi
     def change_op_value(self, my_args):
         """

@@ -177,20 +177,26 @@ class import_normalize_customer_addressses(object):
             try:
                 partner_vals = {
                     "comercial": record[1],
+                    "name": record[15],
                     "state_id": record[2] and self._get_stateId_byName(record[2]) or False,
                     "city": record[3],
                     "zip": record[4],
                     "street": record[5],
                     "phone": record[6],
-                    "category_id": self._getPartnerCategories(record[12], record[13], record[14])
+                    "category_id": self._getPartnerCategories(record[10])
                 }
-                customer_refs = record[11].replace("C.","").split(",")
+                customer_refs = record[8].replace("C.","").split(",")
+                customer_refs.sort()
+                old_partner_id = False
                 for ref in customer_refs:
                     partner_ids = self.search("res.partner", [("ref", "=", ref),("customer",'=',True),'|',('active','=',False),('active','=',True)])
                     if partner_ids:
                         partner_data = self.read("res.partner", partner_ids[0], ["comment", "street"])
                         partner_vals["comment"] = partner_data["comment"] and (partner_data["comment"] + u"\nDirección Antigua: " + partner_data["street"]) or (u"Dirección Antigua: " + partner_data["street"])
+                        if old_partner_id:
+                            partner_vals["local_share_partner_id"] = old_partner_id
                         self.write("res.partner", partner_ids[0], partner_vals)
+                        old_partner_id = partner_ids[0]
 
                 print "%s de %s" % (cont, all_lines)
                 cont += 1

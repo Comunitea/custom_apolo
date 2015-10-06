@@ -69,8 +69,6 @@ class wave_report(models.Model):
                         'visited': True}
                 op.write(vals)
 
-
-
 class wave_report_revised(models.Model):
 
     _name = 'wave.report.revised'
@@ -99,56 +97,6 @@ class wave_report_revised(models.Model):
         if wave_repor:
             res = wave_repor.operation_ids
         return res
-
-
-    #
-
-    # operation_ids = fields.One2many (function = '_get_operation_ids')
-    # pack_id = fields.Integer(related='wave_report_id.pack_id', readonly= True)
-    # product_id = fields.Integer(related='wave_report_id.product_id', readonly= True)
-    # reference = fields.Char(related='wave_report_id.reference', readonly = True)
-    # ean13 = fields.Char(related='wave_report_id.ean13', readonly= True)
-    # location_id= fields.Integer(related='wave_report_id.location_id', readonly=True)
-    # product_qty= fields.Float(related='wave_report_id.product_qty', readonly=True)
-    # lot_id= fields.Integer(related='wave_report_id.lot_id', readonly=True)
-    # sequence= fields.Integer(related='wave_report_id.sequence', readonly=True)
-    #     #
-        #
-        #
-        # 'product_qty': fields.float('Quantity', readonly=True),
-        # 'lot_id': fields.many2one('stock.production.lot', 'Lot',
-        #                           readonly=True),
-        # 'sequence': fields.integer('Sequence', readonly=True),
-        # 'wave_id': fields.many2one('stock.picking.wave', 'Wave',
-        #                            readonly=True),
-        # 'camera_id': fields.function(_get_camera_from_loc, type='many2one',
-        #                              relation='stock.location',
-        #                              string='Camera', readonly=True),
-        # 'operation_ids': fields.function(_get_operation_ids, type="one2many",
-        #                                  string="Operations",
-        #                                  relation="stock.pack.operation",
-        #                                  fnct_inv=_set_operation_ids, multi='multi_'),
-        # 'uom_id': fields.related('product_id', 'uom_id', type='many2one',
-        #                          relation='product.uom', string='Stock unit',
-        #                          readonly=True),
-        # 'uos_qty': fields.float('UoS quantity', readonly=True),
-        # 'uos_id': fields.many2one('product.uom', 'Secondary unit',
-        #                           readonly=True),
-        # 'customer_id': fields.many2one('res.partner', 'Customer',
-        #                                readonly=True),
-        # 'pack_id': fields.many2one('stock.quant.package', 'Pack',
-        #                            readonly=True),
-        # 'to_process': fields.function(_get_operation_ids, type="boolean",
-        #                                  string="Operations",
-        #                                  relation="stock.pack.operation",
-        #                                  multi='multi_'),
-        # 'visited': fields.function(_get_operation_ids, type="boolean",
-        #                                  string="Operations",
-        #                                  relation="stock.pack.operation",
-        #                                  multi='multi_'),
-        # 'to_revised': fields.function (_get_to_revised, type="boolean",
-        #                                string='To revised', relation='wave.reports'),
-
 
     @api.multi
     def new_wave_to_revised(self, my_args):
