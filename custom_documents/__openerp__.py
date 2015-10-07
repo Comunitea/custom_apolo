@@ -31,7 +31,10 @@
     "images": [],
     "depends": [
                 ],
-    "data": ['res_partner_view.xml'],
+    "data": ['res_partner_view.xml',
+             'custom_reports.xml',
+             'qweb_report/report_custom_picking.xml',
+             'qweb_report/report_custom_invoice.xml'],
     "demo": [],
     "test": [],
     "installable": True,
