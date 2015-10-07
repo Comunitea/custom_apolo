@@ -18,5 +18,5 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-import res_partner
-import report
+import custom_picking_parser
+import custom_invoice_parser

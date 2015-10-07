@@ -18,5 +18,32 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-import res_partner
-import report
+from openerp import models, api
+from openerp.exceptions import except_orm
+from openerp.tools.translate import _
+import time
+
+
+class custom_picking_parser(models.AbstractModel):
+    """
+    """
+
+    _name = 'report.custom_documents.report_custom_picking'
+
+    @api.multi
+    def render_html(self, data=None):
+        # import ipdb; ipdb.set_trace()
+
+        report_obj = self.env['report']
+        report_name = 'custom_documents.report_custom_picking'
+        report = report_obj._get_report_from_name(report_name)
+        docs = []
+        for pick in self.env[report.model].browse(self._ids):
+            docs.append(pick)
+
+        docargs = {
+            'doc_ids': self._ids,
+            'doc_model': report.model,
+            'docs': docs,
+        }
+        return report_obj.render(report_name, docargs)

@@ -7,6 +7,7 @@
                     <t t-call="report.external_layout">
                         <div class="page">
                              <h1>Custom Picking Report</h1>
+                             <h3><span t-field="o.name"/></h3>
                         </div>
                     </t>
                  </t>

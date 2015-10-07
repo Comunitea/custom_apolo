@@ -7,6 +7,7 @@
                     <t t-call="report.external_layout">
                         <div class="page">
                              <h1>Custom Invoice Report</h1>
+                             <h3><span t-field="o.partner_id.name"/></h3>
                         </div>
                     </t>
                  </t>
