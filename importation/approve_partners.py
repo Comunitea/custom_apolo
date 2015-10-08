@@ -161,7 +161,7 @@ class approve_partners(object):
                 print "%s de %s" % (cont, len(partner_ids))
                 cont += 1
             except Exception, e:
-                print "EXCEPTION: Part: %" % (partner_data['name']), e
+                print "EXCEPTION: Part:", partner_data['name'], repr(e)
 
         return True
 

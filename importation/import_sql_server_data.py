@@ -268,7 +268,7 @@ class DatabaseImport:
                 "ma_pa": row.ma_pa or 0,
                 "standard_price": row.standard_price,
                 "weight": row.weight,
-                "description": (row.description and ustr(row.description) or "") + (row.base_use_sale != "F" and "\nBLOQUEADO" or ""),
+                "description": (row.description and ustr(row.description) or "") + (row.active != "N" and "\nBLOQUEADO" or ""),
                 "unit_use_sale": True,
                 "type": TYPE_MAP[row.type_map],
                 "purchase_ok": True,
@@ -387,7 +387,7 @@ class DatabaseImport:
                    "prv_tlfo as phone, prv_nfax as fax, cliente as customer from dbo.adsd_prv")
         supplier_data = cr.fetchall()
         for row in supplier_data:
-            partner_ids = self.search("res.partner", [('ref', '=', str(row[0])),'|',('active', '=', True),('active', '=', False)])
+            partner_ids = self.search("res.partner", [('ref', '=', str(row[0])),('supplier', '=', True),'|',('active', '=', True),('active', '=', False)])
             partner_vals = {'name': ustr(row[1]),
                             'street': row[2] and ustr(row[2]) or "",
                             'zip': row[3] and ustr(row[3]) or "",
@@ -400,7 +400,7 @@ class DatabaseImport:
             if partner_ids:
                 partner_id = partner_ids[0]
             if row[8] and row[8] != 800000: #unilever
-                customer_ids = self.search("res.partner", [('ref', '=', str(row[8])),('supplier', '=', True),'|',('active', '=', True),('active', '=', False)])
+                customer_ids = self.search("res.partner", [('ref', '=', str(row[8])),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
                 if customer_ids:
                     partner_id = customer_ids[0]
             if not partner_id:
@@ -419,7 +419,86 @@ class DatabaseImport:
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
+    def import_indirect_customer(self, cr):
+        cr.execute("select count(*) as count from dbo.adsd_clpr")
+        row = cr.fetchone()
+        print "Numero de clientes indirectos: ", (row.count)
+        num_rows = row.count
+        cont = 0
+        cr.execute("select clpr_clie as customer_map, clpr_prov as supplier_map, clpr_copr as unilever_code from dbo.adsd_clpr")
+        customer_data = cr.fetchall()
+        for row in customer_data:
+            customer_ids = self.search("res.partner", [('ref', '=', str(row[0])),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
+            supplier_ids = self.search("res.partner", [('ref', '=', str(row[1])),('supplier', '=', True),'|',('active', '=', True),('active', '=', False)])
+            if customer_ids and supplier_ids:
+                vals = {'supplier_ids': [(4,supplier_ids[0])],
+                        'indirect_customer': True}
+                if row[1] == 2: #unilever
+                    vals['unilever_code'] = row[2] and str(int(row[2])) or ""
+                self.write("res.partner", [customer_ids[0]], vals)
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
 
+
+    def import_rel_product_supplier(self, cr):
+        cr.execute("select count(*) as count from dbo.articulos where proveedor != 100")
+        row = cr.fetchone()
+        print "Numero de proveedores/productos: ", (row.count)
+        num_rows = row.count
+        cont = 0
+        cr.execute("select v.articulo as default_code, v.proveedor as supplier_map, v.articulo_proveedor as supplier_code, v.medida_base as uom_id_map, v.medida_composicion as uomb_map,"
+                   " v.tipo_composicion as base_use_purchase, v.cantidad_composicion as supp_kg_un, m.pr1_tcom as var_coeff_un, v.cajas_por_rellano as supp_ca_ma, "
+                   " v.cajas_por_pale / nullif(v.cajas_por_rellano, 0) as supp_ma_pa from dbo.articulos v inner join dbo.adsd_art m on m.pr1_codi = v.articulo where v.proveedor != 100")
+        product_data = cr.fetchall()
+        for row in product_data:
+            uom_id = self.search("product.uom", [('name', '=', UOM_MAP[row.uom_id_map.strip()])])[0]
+            uob_id = self.search("product.uom", [('name', '=', UOM_MAP[row.uomb_map.strip()])])[0]
+            supplier_ids = self.search("res.partner", [('ref', '=', str(row.supplier_map)),('supplier', '=', True),'|',('active', '=', True),('active', '=', False)])
+            product_ids = self.search("product.product", [('default_code', '=',str(row.default_code)),'|',('active', '=', False),('active', '=', True)])
+            if supplier_ids and product_ids:
+                product_data = self.read("product.product", product_ids[0], ["product_tmpl_id"])
+                supp_info_ids = self.search("product.supplierinfo", [('product_tmpl_id', '=', product_data['product_tmpl_id'][0]),('name', '=', supplier_ids[0])])
+                if not supp_info_ids:
+                    vals = {"product_tmpl_id": product_data['product_tmpl_id'][0],
+                            "name": supplier_ids[0],
+                            "product_code": str(row.supplier_code),
+                            "log_unit_id": uom_id,
+                            "unit_use_purchase": True,
+                            "log_box_id": False,
+                            "log_base_id": False,
+                            "supp_kg_un": row.supp_kg_un,
+                            "supp_ca_ma": row.supp_ca_ma or 0,
+                            "supp_ma_pa": row.supp_ma_pa or 0,
+                            "var_coeff_un": row.var_coeff_un == "V" and True or False}
+
+                    if uom_id != uob_id:
+                        vals["log_base_id"] = uob_id
+                        vals["base_use_purchase"] = row.base_use_purchase == "S" and True or False
+                    self.create("product.supplierinfo", vals)
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+    def fix_products(self, cr):
+        products_ids = self.search("product.product", [('description', 'like', '%BLOQUEADO%')])
+        print "to_fix_products: ", len(products_ids)
+        products_data = self.read('product.product', products_ids, ['description'])
+        for product in products_data:
+            self.write("product.product", [product["id"]], {'description': product["description"].replace("BLOQUEADO", "")})
+
+        cr.execute("select count(*) as count from dbo.articulos where bloqueado  != 'N'")
+        row = cr.fetchone()
+        print "Numero de productos bloqueados: ", (row.count)
+        num_rows = row.count
+        cont = 0
+        cr.execute("select articulo as default_code, bloqueado as active from dbo.articulos where bloqueado  != 'N'")
+        data = cr.fetchall()
+        for row in data:
+            product_ids = self.search("product.product", [('default_code', '=', str(int(row.default_code))),'|',('active', '=', False),('active', '=', True)])
+            if product_ids:
+                product_data = self.read('product.product', product_ids[0], ['description'])
+                self.write("product.product", [product_ids[0]], {'description': product_data["description"] and product_data["description"] + u"\nBLOQUEADO" or "BLOQUEADO"})
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
 
     def process_data(self):
         """
@@ -433,10 +512,13 @@ class DatabaseImport:
             conn = pyodbc.connect("DRIVER={FreeTDS};SERVER=" + self.sql_server_host + ";UID=midban;PWD=midban2015;DATABASE=gest2015;Port=1433;TDS_Version=10.0")
             cr = conn.cursor()
 
-            #self.import_product_category(cr)
-            #self.import_products(cr)
+            self.import_product_category(cr)
+            self.import_products(cr)
             self.import_customers(cr)
             self.import_suppliers(cr)
+            self.import_indirect_customer(cr)
+            self.import_rel_product_supplier(cr)
+            #self.fix_products(cr)
 
         except Exception, ex:
             print u"Error al conectarse a las bbdd: ", repr(ex)
