@@ -20,8 +20,9 @@
 ##############################################################################
 import res_users
 import stock_task
-import stock
+import stock, stock_location
 import stock_quant_package, stock_pack_operation, stock_production_lot, reposition_wizard
+
 import wave_report_revised
 
 import product

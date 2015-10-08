@@ -436,19 +436,19 @@ class ScanGunProtocol(LineReceiver):
             self.code = False
             self.handle_register('0')
         elif line == "1":
-            self.state = "machines"
+            self.state = "ubication"
             self.type = 'ubication'
-            menu_str = self.get_machines_menu(self.type)
+            menu_str = self.get_cameras_menu()
             self._snd(menu_str)
         elif line == "2":
-            self.state = "machines"
+            self.state = "reposition"
             self.type = "reposition"
-            menu_str = self.get_machines_menu(self.type)
+            menu_str = self.get_cameras_menu()
             self._snd(menu_str)
         elif line == "3":
-            self.state = 'machines'
+            self.state = 'picking'
             self.type = 'picking'
-            menu_str = self.get_machines_menu(self.type)
+            menu_str = self.get_cameras_menu()
             self._snd(menu_str)
         elif line == "4":
             self.state = 'manual_transfer_packet'
@@ -1257,10 +1257,12 @@ class ScanGunProtocol(LineReceiver):
             return
 
 
+
+
+
         if self.step ==10 and order_line == PRE_LOC:
-            #no pongo el de la operación si no el del producto del paquete
-            #REVISAR
-            #import ipdb; ipdb.set_trace()
+            location_id = line_int
+
             if line == str(self.product['picking_location_id']):
                 if self.confirm_last_step==False or confirm == True:
                     #aquí confirmamos operación
@@ -1281,7 +1283,25 @@ class ScanGunProtocol(LineReceiver):
                         message =u"\nTodas las OPs OK"
                         self._snd(self.get_str_list_repo_ops() + message)
                         return
-            else:
+            elif (self.product['picking_location_id']== False or self.product['picking_location_id']<>line_int):
+
+                #debemos de actualizar la zona de picking del producto
+                #recargar producto
+                if line == KEY_CONFIRM:
+                    if self.factory.odoo_con.check_picking_zone(self.user_id,
+                                                            self.product['product_id'],
+                                                            line_int, write = True):
+                        self.product['picking_location_id'] = line_int
+                        message += u'\nAsignada'%KEY_CONFIRM
+                        self._snd(self.get_str_form_ops() + message)
+                        return
+                elif confirm == False:
+                    #la primera vez.
+
+                    message += u'\n%s Asignar Pick Zone\n'%KEY_CONFIRM
+                    self._snd(self.get_str_form_repo_ops() + message)
+                    return
+
                 message =u"Ubicacion no valida"
                 self._snd(self.get_str_form_repo_ops() + message)
                 return
@@ -1711,7 +1731,7 @@ class ScanGunProtocol(LineReceiver):
             one_unit = True
         else:
             one_unit = False
-
+        op_id = wave_['op_id']
         if order_line == PRE_PACK and self.step in [0,1,2]:
            #Es un paquete
             for op_ in self.waves:
@@ -2056,16 +2076,26 @@ class ScanGunProtocol(LineReceiver):
         message =''
 
         if self.step <= 2:
-            cantidad += u"%s %s\n"%(wave_['CANTIDAD'],wave_['uom'])
+            cantidad += u"%s %s\n"%(wave_['uom_qty'],wave_['uom'])
             cantidad_uos += u"%s %s\n"%(wave_['uos_qty'],wave_['uos'])
 
         if self.step ==2:
              message = u"%s Ok %s Cantidades\n"%(KEY_CONFIRM, KEY_QTY)
              message = self.inverse(message)
+        cantidad_uom_full= '(%s) %s %s\n'%(wave_['CANTIDAD'], self.new_uom_qty, wave_['uom'])
+        cantidad_2uos_full = '(%s) %s %s\n'%(str(wave_['uos_qty']),self.new_uos_qty,  wave_['uos'])
+
+        cantidad_2uos = (len(str(wave_['qty'])) * " ") + '%s %s\n'%(str(wave_['uos_qty']),self.new_uos_qty,  wave_['uos'])
+        cantidad_uom = (len(str(wave_['uos_qty'])) * " ") + '%s %s\n'%(wave_['uom_qty'], self.new_uom_qty, wave_['uom'])
 
         if self.step == 3:
-            cantidad += '(%s) %s %s\n'%(wave_['CANTIDAD'], self.new_uom_qty, wave_['uom'])
-            cantidad_uos += '(%s) %s %s\n'%(str(wave_['uos_qty']),self.new_uos_qty,  wave_['uos'])
+            #AQUI INTRODUCIMOS EN UOM
+            #cantidad += '(%s) %s %s\n'%(wave_['CANTIDAD'], self.new_uom_qty, wave_['uom'])
+            #cantidad_uos += '(len(str(wave_['qty'])) * " ") + %s %s\n'%(str(wave_['uos_qty']),self.new_uos_qty,  wave_['uos'])
+            #cantidad += (len(str(wave_['uos_qty'])) * " ") + '%s %s\n'%(wave_['uom_qty'], self.new_uom_qty, wave_['uom'])
+            #cantidad_uos += '(%s) %s %s\n'%(str(wave_['uos_qty']),self.new_uos_qty,  wave_['uos'])
+            cantidad += cantidad_uom_full
+            cantidad_uos += cantidad_2uos
             cantidad = self.inverse(cantidad)
             if wave_['uom'] == wave_['uos']:
                 message = u"%s OK uom o intro %s\n"%(KEY_CONFIRM, wave_['uom'])
@@ -2073,28 +2103,29 @@ class ScanGunProtocol(LineReceiver):
                 message = KEY_QTY + " Ok uom\n"
 
         if self.step == 4:
-            cantidad += '(%s) %s %s\n'%(wave_['CANTIDAD'], self.new_uom_qty, wave_['uom'])
-            cantidad_uos += '(%s) %s %s\n'%(str(wave_['uos_qty']),self.new_uos_qty,  wave_['uos'])
+
+            cantidad += cantidad_uom_full
+            cantidad_uos += cantidad_2uos
             cantidad_uos = self.inverse(cantidad_uos)
             message = KEY_QTY + " Ok uos\n"
 
         if self.step == 5:
-            cantidad += '(%s) %s %s\n'%(wave_['CANTIDAD'], self.new_uom_qty, wave_['uom'])
-            cantidad_uos += '(%s) %s %s\n'%(wave_['uos_qty'], self.new_uos_qty, wave_['uos'])
+            cantidad += cantidad_uom
+            cantidad_uos += cantidad_2uos_full
             cantidad_uos = self.inverse(cantidad_uos)
             message = "%s Ok Uos, o intro nuevo\n"%(KEY_CONFIRM)
 
         if self.step == 6:
-            cantidad += '(%s) %s %s\n'%(wave_['CANTIDAD'], self.new_uom_qty, wave_['uom'])
-            cantidad_uos += '(%s) %s %s\n'%(wave_['uos_qty'],self.new_uos_qty,  wave_['uos'])
+            cantidad += cantidad_uom
+            cantidad_uos += cantidad_2uos_full
             cantidad = self.inverse(cantidad)
             message = "%s Ok Uom, o intro nuevo\n"%(KEY_CONFIRM)
 
 
         if self.step == 8:
             #Aqui es peso fijo, introducimos cantidad para uom
-            cantidad += '(%s) %s %s\n'%(wave_['CANTIDAD'], self.new_uom_qty, wave_['uom'])
-            cantidad_uos += '(%s) %s %s\n'%(wave_['uos_qty'],self.new_uos_qty,  wave_['uos'])
+            cantidad += cantidad_uom_full
+            cantidad_uos += cantidad_2uos
             if wave_['uom'] == wave_['uos']:
                 message = u"%s OK uom o intro %s\n"%(KEY_CONFIRM, wave_['uom'])
             else:
@@ -2102,13 +2133,13 @@ class ScanGunProtocol(LineReceiver):
             cantidad = self.inverse(cantidad)
 
         if self.step == 9:
-            cantidad += '(%s) %s %s\n'%(wave_['CANTIDAD'], self.new_uom_qty, wave_['uom'])
-            cantidad_uos += '(%s) %s %s\n'%(wave_['uos_qty'],self.new_uos_qty,  wave_['uos'])
+            cantidad += cantidad_uom
+            cantidad_uos += cantidad_2uos_full
             message = KEY_QTY + u"cambiar a %s o intro %s\n"%(wave_['uom'], wave_['uos'])
             cantidad_uos = self.inverse(cantidad_uos)
 
         if self.step == 10:
-            cantidad += '(%s) %s %s\n'%(wave_['CANTIDAD'], self.new_uom_qty, wave_['uom'])
+            cantidad += '(%s) %s %s\n'%(wave_['uom_qty'], self.new_uom_qty, wave_['uom'])
             cantidad_uos += '(%s) %s %s\n'%(wave_['uos_qty'],self.new_uos_qty,  wave_['uos'])
             message =u"%s Confirmar Operación\n"%KEY_CONFIRM
             message = self.inverse(message)
@@ -2124,7 +2155,7 @@ class ScanGunProtocol(LineReceiver):
             menu_str+= self.inverse(str_)
         else:
             menu_str += str_
-        str_ = 'A %s\n'%wave_['DESTINO']
+        # com oe s picking no hay destino str_ = 'A %s\n'%wave_['DESTINO']
         menu_str += str_
         keys =''
         if wave_['PROCESADO']:

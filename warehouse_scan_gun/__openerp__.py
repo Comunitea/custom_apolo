@@ -32,6 +32,7 @@
         "res_users_view.xml",
         "wave_report_revised.xml",
         "wave_report.xml",
-        "product_view.xml"],
+        "product_view.xml",
+        "stock_location.xml"],
     "installable": True
 }
