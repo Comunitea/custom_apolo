@@ -30,7 +30,7 @@ class reposition_wizard(models.Model):
     @api.multi
     def create_reposition_from_gun(self, my_args):
 
-        import ipdb; ipdb.set_trace()
+        #import ipdb; ipdb.set_trace()
 
         selected_loc_ids = my_args.get("selected_loc_ids", [])
         limit = my_args.get("limit", 100)

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Copyright (C) 2015 Comunitea All Rights Reserved
-#    $Javier Colmenero Fernández <javier@comunitea.com>$
+#    Copyright (C) 2015 Comunitea Servicios Informáticos All Rights Reserved
+#    $Carlos Lombardía Rodríguez$ <carlos@comunitea.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published
@@ -18,21 +18,5 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{
-    'name': 'Warehouse Scan Gun',
-    'version': '1.0',
-    'category': 'Account',
-    'description': """Module to manage the warehouse with a scan gun""",
-    'author': 'Comunitea',
-    'website': '',
-    "depends": ['base',
-                'midban_depot_stock'],
-
-    "data": [
-        "res_users_view.xml",
-        "wave_report_revised.xml",
-        "wave_report.xml",
-        "product_view.xml",
-        "stock_location.xml"],
-    "installable": True
-}
+import res_partner
+import report

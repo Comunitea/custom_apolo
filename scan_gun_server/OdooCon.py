@@ -153,7 +153,6 @@ class OdooConnector:
         except xmlrpclib.Fault, err:
             raise Exception('Error %s en execute: %s' % (err.faultCode, err.faultString))
 
-
 class OdooDao:
 
     def __init__(self, server, port, db, user, password):
@@ -271,8 +270,8 @@ class OdooDao:
         done = self.connection.execute('stock.pack.operation', 'set_processed_val', [], my_args)
         return done
 
-    def set_wave_ops_values(self, wave_id, user_id, field, value):
-        my_args= {'wave_id' : wave_id, 'user_id' :user_id, 'field': field, 'value' :value}
+    def set_wave_ops_values(self, user_id, wave_id, op_id, field, value):
+        my_args= {'wave_id' : wave_id, 'op_id' : op_id, 'user_id' :user_id, 'field': field, 'value' :value}
         done = self.connection.execute('stock.pack.operation', 'set_wave_ops_values', [], my_args)
         return done
 
@@ -342,11 +341,20 @@ class OdooDao:
         my_args = {'user_id': user_id, 'op_id': op_id, 'field': field, 'value': value}
         res = self.connection.execute('stock.pack.operation', 'change_op_value', [], my_args)
         return res
+    def change_op_values(self, user_id, op_id, field_values):
+        my_args = {'user_id': user_id, 'op_id': op_id, 'field_values': field_values}
+        res = self.connection.execute('stock.pack.operation', 'change_op_values', [], my_args)
+        return res
 
     def get_pack_gun_info(self, user_id, package_id):
         my_args = {'user_id': user_id, 'package_id': package_id}
         op_data = self.connection.execute('stock.quant.package', 'get_pack_gun_info', [], my_args)
         return op_data
+
+    def create_package_from_gun(self, user_id, values):
+        my_args = {'user_id': user_id, 'values': values}
+        package_data = self.connection.execute('stock.quant.package', 'create_package_from_gun', [], my_args)
+        return package_data
 
     def get_quant_pack_gun_info(self, user_id, package_id):
         my_args = {'user_id': user_id, 'package_id': package_id}
@@ -412,4 +420,11 @@ class OdooDao:
         res = self.connection.execute('reposition.wizard', 'create_reposition_from_gun', [], my_args)
         # my_args = {'user_id': user_id, 'picks': res}
         # res = self.connection.execute('stock.pack.operation', 'add_task_to_created_rep', [], my_args)
+        return res
+
+
+
+    def check_picking_zone(self, user_id, product_id, picking_location_id, write = True):
+        my_args = {'user_id': user_id, 'picking_location_id' : picking_location_id, 'product_id' : product_id, 'write': write}
+        res = self.connection.execute('product.product', 'check_picking_zone', [], my_args)
         return res

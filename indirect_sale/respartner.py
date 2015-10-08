@@ -28,3 +28,7 @@ class partner_supplier_rel(models.Model):
                                     'partner_id','supplier_id',
                                     string='Suppliers',
                                     domain=[('supplier', '=', True)])
+    customer_ids = fields.Many2many('res.partner', 'partner_supplier_rel',
+                                    'supplier_id','partner_id',
+                                    string='Customers',
+                                    domain=[('customer', '=', True)])

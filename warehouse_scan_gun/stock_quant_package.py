@@ -85,12 +85,19 @@ class stock_quant_package(models.Model):
         domain = [('id', '=', package_id)]
         package = self.search(domain)
         vals = {'exist':False}
-
-        if package:
-            qtys= [t.qty for t in package.quant_ids if t.product_id == package.packed_lot_id.product_id.id]
+        if package and package.quant_ids:
+            qtys= [t.qty for t in package.quant_ids if t.product_id.id == package.packed_lot_id.product_id.id]
             qty = 0
             for qty_ in qtys:
                 qty+= qty_
+            picking_zone_id = False
+            picking_zone = ''
+
+            if not package.is_multiproduct:
+                picking_zone_id = package.product_id.picking_location_id.id \
+                               or package.packed_lot_id.product_id.picking_location_id.id
+                picking_zone = package.product_id.picking_location_id.name_get()[0][1] \
+                               or package.packed_lot_id.product_id.picking_location_id.name_get()[0][1]
 
             vals = {
                 'exist' : True,
@@ -108,47 +115,27 @@ class stock_quant_package(models.Model):
                                        package.packed_lot_id.product_id.name,
                 'packed_qty': package.packed_qty or 0,
                 'uom' : package.uom_id.name or '',
-                'uom_id': package.uom_id.id or False,
+                'uom_id': package.uom_id.id or package.packed_lot_id.product_id.uom_id or False,
                 'is_multiproduct':package.is_multiproduct,
                 'qty':qty,
-                'uos_id':package.uos_id.id or package.uom_id.id,
+                'uos_id':package.uos_id.id or False,
                 'uos':package.uos_id.name or package.uom_id.name,
                 'uos_qty': package.uos_qty or package.packed_qty,
-                'change': False
+                'change': False,
+                'picking_location_id':picking_zone_id,
+                'picking_location':picking_zone,
             }
         return vals
 
-class stock_location(models.Model):
-
-    _inherit = "stock.location"
-
     @api.multi
-    def get_short_name(self):
-        short_name = self.name
-        zone ="V"
-        if self.zone == 'storage':
-            zone = "A"
-        if self.zone == 'picking':
-            zone = "P"
-        short_name = zone + '/' + self.name
-        return short_name
-
-    @api.multi
-    def get_location_gun_info(self, my_args):
-        location_id = my_args.get("location_id", False)
-        domain = [('id', '=', location_id)]
-        type = my_args.get("type", "")
-        location = self.search(domain)
-        vals = {'exist':False}
-        if location:
-            vals = {
-                'exist' : True,
-                type + 'location_id' : location.id,
-                type + 'location' : location.name_get()[0][1],
-                'usage':location.usage,
-                'zone':location.zone
-            }
-        return vals
+    def create_package_from_gun(self, my_args):
+        user_id= my_args.get("user_id", False)
+        values = my_args.get('values', {})
+        pack_wzd = self.env['stock.quant.package']
+        env2 = pack_wzd.env(self._cr, user_id, self._context)
+        wzd_obj_uid = pack_wzd.with_env(env2)
+        wzd_obj = wzd_obj_uid.create(values)
+        return wzd_obj
 
 class stock_production_lot(models.Model):
 

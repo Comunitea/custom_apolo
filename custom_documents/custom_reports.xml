@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <report
+            string="Custom Picking Report"
+            id="action_report_custom_picking"
+            model="stock.picking"
+            report_type="qweb-pdf"
+            name="custom_documents.report_custom_picking"
+            file="custom_documents.report_custom_picking"
+        />
+        <report
+            string="Custom Invoice Report"
+            id="action_report_custom_invoice"
+            model="account.invoice"
+            report_type="qweb-pdf"
+            name="custom_documents.report_custom_invoice"
+            file="custom_documents.report_custom_invoice"
+        />
+    </data>
+</openerp>
