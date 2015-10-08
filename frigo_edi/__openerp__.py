@@ -29,6 +29,7 @@
                 "midban_partner",
                 "item_management",
                 "stock",
+                "base",
                 "indirect_sale"],
     "data": ["res_partner_view.xml",
              "edi_menu.xml",
