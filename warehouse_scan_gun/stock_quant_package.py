@@ -137,39 +137,6 @@ class stock_quant_package(models.Model):
         wzd_obj = wzd_obj_uid.create(values)
         return wzd_obj
 
-class stock_location(models.Model):
-
-    _inherit = "stock.location"
-
-    @api.multi
-    def get_short_name(self):
-        short_name = self.name
-        zone ="V"
-        if self.zone == 'storage':
-            zone = "A"
-        if self.zone == 'picking':
-            zone = "P"
-        short_name = zone + '/' + self.name
-        return short_name
-
-    @api.multi
-    def get_location_gun_info(self, my_args):
-        location_id = my_args.get("location_id", False)
-        domain = [('id', '=', location_id)]
-        type = my_args.get("type", "")
-        location = self.search(domain)
-        vals = {'exist':False}
-        if location:
-            vals = {
-                'exist' : True,
-                type + 'location_id' : location.id,
-                type + 'location' : location.name_get()[0][1],
-                'usage':location.usage,
-                'zone':location.zone,
-                'temp_type_id':location.temp_type_id.id or False,
-            }
-        return vals
-
 class stock_production_lot(models.Model):
 
     _inherit = "stock.production.lot"
