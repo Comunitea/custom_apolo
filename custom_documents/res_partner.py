@@ -3,6 +3,7 @@
 #
 #    Copyright (C) 2015 Comunitea Servicios Informáticos All Rights Reserved
 #    $Carlos Lombardía Rodríguez$ <carlos@comunitea.com>
+#    $Javier Colmenero Fernández$ <javier@comunitea.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published
@@ -20,5 +21,18 @@
 ##############################################################################
 from openerp import models, fields, api, exceptions, _
 
-class CustomDocuments(models.Model):
+
+class ResPartner(models.Model):
     _inherit = 'res.partner'
+
+    INV_PRINT_OPTIONS = [
+        ('op1', 'OP1'),
+        ('op2', 'OP2'),
+    ]
+    PICK_PRINT_OPTIONS = [
+        ('op1', 'OP1'),
+        ('op2', 'OP2'),
+    ]
+
+    inv_print_op = fields.Selection(INV_PRINT_OPTIONS, 'Invoice Printing')
+    pick_print_op = fields.Selection(PICK_PRINT_OPTIONS, 'Pick Printing')
