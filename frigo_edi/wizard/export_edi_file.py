@@ -167,7 +167,6 @@ class ExportEdiFile(models.TransientModel):
                            lookup=mylookup, default_filters=['decode.utf8'])
 
             products = list(chunks(products, 9))
-            import ipdb; ipdb.set_trace()
             doc = tmp.render_unicode(products=products, datetime=datetime,
                                      user=self.env.user).encode('utf-8',
                                                                 'replace')
@@ -460,6 +459,7 @@ class ExportEdiFile(models.TransientModel):
                 if dtype.code in ["cli", "med", "sto", "mef", "alb", "ven"]:
                     wzd = self.create({'service_id': service.id})
                     wzd.export_file_cli("res.partner.sync")
+                    self.env['sale.export.edi'].generate_week()
                     wzd.export_file_ven('sale.export.edi')
                     wzd.export_file_med("item.management.item.move.sync")
                     wzd.export_file_sto()

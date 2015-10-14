@@ -19,12 +19,12 @@
 #
 ##############################################################################
 from openerp import models, fields, api, exceptions, _
+from datetime import date, timedelta
 
 
 class SaleExportEdi(models.Model):
 
     _name = 'sale.export.edi'
-
 
     user_id = fields.Many2one("res.users", "User", readonly=True,
                               required=True,
@@ -34,3 +34,19 @@ class SaleExportEdi(models.Model):
                              'State', default='pending')
     period_start = fields.Date('Period start', required=True)
     period_end = fields.Date('Period end', required=True)
+
+    @api.model
+    def _get_this_week(self):
+        today = date.today()
+        weekday = today.weekday()
+        monday = today + timedelta(days=-weekday)
+        sunday = monday + timedelta(days=6)
+        return monday, sunday
+
+    @api.model
+    def generate_week(self):
+        monday, sunday = self._get_this_week()
+        self.create({
+            'period_start': monday,
+            'period_end': sunday,
+        })
