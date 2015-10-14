@@ -149,7 +149,8 @@ class ExportEdiFile(models.TransientModel):
         sinfo_obj = self.env["product.supplierinfo"]
         sinfo_ids = sinfo_obj.search([('name', 'child_of', [self[0].service_id.
                                                             related_partner_id.
-                                                            id])])
+                                                            id]),
+                                       ('product_tmpl_id.active', '=', True)])
 
         if sinfo_ids:
             products = list(sinfo_ids)
@@ -166,48 +167,7 @@ class ExportEdiFile(models.TransientModel):
                            lookup=mylookup, default_filters=['decode.utf8'])
 
             products = list(chunks(products, 9))
-            doc = tmp.render_unicode(products=products, datetime=datetime,
-                                     user=self.env.user).encode('utf-8',
-                                                                'replace')
-            file_name = self[0].service_id.output_path + os.sep + filename
-            f = file(file_name, 'w')
-            f.write(doc)
-            f.close()
-            file_obj = self.create_doc(filename, file_name, doc_type)
-            file_obj.count = count
-
-
-    @api.model
-    def export_file_sto(self):
-        doc_type_obj = self.env["edi.doc.type"]
-        doc_obj = self.env["edi.doc"]
-        doc_type = doc_type_obj.search([("code", '=', "sto")])[0]
-        last_sto_file = doc_obj.search([("doc_type", '=', doc_type.id)],
-                                       order="date desc", limit=1)
-        if last_sto_file:
-            count = last_sto_file.count + 1
-        else:
-            count = 1
-        sinfo_obj = self.env["product.supplierinfo"]
-        sinfo_ids = sinfo_obj.search([('name', 'child_of', [self[0].service_id.
-                                                            related_partner_id.
-                                                            id])])
-
-        if sinfo_ids:
-            products = list(sinfo_ids)
-            tmp_name = "export_sto.txt"
-            rows = (len(products) / 9) + 2
-            filename = "%sSTO%s.%s" % (self.env.user.company_id.frigo_code,
-                                       str(rows).zfill(4), str(count).zfill(4))
-            templates_path = self.addons_path('frigo_edi') + os.sep + \
-                'wizard' + os.sep + 'templates' + os.sep
-            mylookup = TemplateLookup(input_encoding='utf-8',
-                                      output_encoding='utf-8',
-                                      encoding_errors='replace')
-            tmp = Template(filename=templates_path + tmp_name,
-                           lookup=mylookup, default_filters=['decode.utf8'])
-
-            products = list(chunks(products, 9))
+            import ipdb; ipdb.set_trace()
             doc = tmp.render_unicode(products=products, datetime=datetime,
                                      user=self.env.user).encode('utf-8',
                                                                 'replace')
@@ -503,7 +463,6 @@ class ExportEdiFile(models.TransientModel):
                     wzd.export_file_ven('sale.export.edi')
                     wzd.export_file_med("item.management.item.move.sync")
                     wzd.export_file_sto()
-                    wzd.export_file_ven()
                     wzd.export_file_mef()
                     wzd.export_file_alb("stock.picking")
                     break
