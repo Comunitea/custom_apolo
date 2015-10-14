@@ -27,6 +27,37 @@
             width: 100%;
             font-size: 10px;
           }
+        .table2 .col-ref{
+          width: 10%;
+         }
+        .table2 .col-des{
+          width: 20%;
+        }
+        .table2 .col-iva{
+          width: 10%;
+         }
+        .table2 .col-qty{
+          width: 10%;
+        }
+        .table2 .col-unit{
+          width: 20%;
+         }
+        .table2 .col-pp{
+          width: 10%;
+        }
+        .table2 .col-ap{
+          width: 10%;
+         }
+        .table2 .col-net{
+          width: 10%;
+        }
+
+          .table2 td{
+            padding-right:4px;
+           }
+           .table2 th{
+             padding-right:4px;
+            }
          .table2 thead{
               border-top: solid 2px #000000;
               border-bottom: solid 2px #000000;
@@ -46,32 +77,67 @@
           min-height:10mm;
         }
 
+
+
+        .table3{
+          width: 100%;
+        }
+        .table3 th strong{
+             font-size: 10px;
+        }
+        .table3 .col-fbase{
+          width:14%;
+        }
+        .table3 .col-fiva{
+          width:6%;
+        }
+        .table3 .col-fivaimp{
+          width:14%;
+        }
+        .table3 .col-freq{
+          width:6%;
+        }
+        .table3 .col-freqimp{
+          width:15%;
+        }
+        .table3 .col-ftd{
+          width:15%;
+        }
+        .table3 .col-fap"{
+          width:15%;
+        }
+        .table3 .col-ftotal{
+          width:15%;
+        }
+        .table3 td{
+          font-size: 9px;
+        }
+
          </style>
             <t t-call="report.html_container">
                 <t t-foreach="docs" t-as="o">
-                      <!-- CUSTOM VALUED REPORT -->
-                      <div class="page" t-if="o.partner_id.pick_print_op == 'valued' and o.picking_type_id.code == 'outgoing'">
-                            <div class="row top_part">
-                              <div class="col-xs-7 top-border">
-                                  <div class="col-xs-3 no-padd-left">
+                    <!-- CUSTOM VALUED REPORT -->
+                    <div class="page">
+                        <div class="row top_part">
+                            <div class="col-xs-7 top-border">
+                                <div class="col-xs-3 no-padd-left">
                                       <strong>PICKING:</strong>
-                                  </div>
-                                  <div class="col-xs-4">
-                                      <strong><span t-field="o.name"/></strong>
-                                  </div>
-                                  <div class="col-xs-5">
-                                    <strong>DATE: <span t-esc="o.min_date.split(' ')[0].replace('-', '/')"/></strong>
-                                  </div>
-
-                                  <div t-if="o.partner_id">
-                                      <br/>
-                                      <p><strong>SOLICITANT</strong></p>
-                                      <p><span t-field="o.partner_id.ref"/> <span t-field="o.partner_id.name"/></p>
-                                      <p><span t-field="o.partner_id.street"/></p>
-                                      <p><span t-field="o.partner_id.zip"/> - <span t-field="o.partner_id.city"/></p>
-                                      <p>Tlfo. <span t-field="o.partner_id.phone"/></p>
-                                  </div>
-                                  <div>
+                                </div>
+                                <div class="col-xs-4">
+                                    <strong><span t-field="o.name"/></strong>
+                                </div>
+                                <div class="col-xs-5">
+                                  <strong>DATE: <span t-esc="o.min_date.split(' ')[0].replace('-', '/')"/></strong>
+                                </div>
+                                <div t-if="o.partner_id">
+                                    <br/>
+                                    <p><strong>SOLICITANT</strong></p>
+                                    <p><span t-field="o.partner_id.ref"/> <span t-field="o.partner_id.name"/></p>
+                                    <p><span t-field="o.partner_id.street"/></p>
+                                    <p><span t-field="o.partner_id.zip"/> - <span t-field="o.partner_id.city"/></p>
+                                    <p>Tlfo. <span t-field="o.partner_id.phone"/></p>
+                                </div>
+                                <div>
                                     <table class="table1">
                                     <thead>
                                         <tr>
@@ -100,7 +166,8 @@
                                   <div t-if="o.partner_id.commercial_partner_id">
                                       <br/>
                                       <br/>
-                                      <p><strong>INVOICE TO</strong></p>
+                                      <!-- Page: <span class="page"/> de <span class="topage"/> -->
+                                      <p><strong>INVOICE TO</strong>       </p>
                                       <p><span t-field="o.partner_id.commercial_partner_id.ref"/> <span t-field="o.partner_id.commercial_partner_id.name"/></p>
                                       <p><span t-field="o.partner_id.commercial_partner_id.street"/></p>
                                       <p><span t-field="o.partner_id.commercial_partner_id.zip"/> - <span t-field="o.partner_id.commercial_partner_id.city"/></p>
@@ -109,23 +176,26 @@
                                   </div>
                               </div>
                           </div>
+
+
+
                           <div class="middle_part">
                           <table class="table2">
                             <thead>
                               <tr>
-                                  <th><strong>Ref.</strong></th>
-                                  <th><strong>Description</strong></th>
-                                  <th class="text-right"><strong>% IVA</strong></th>
-                                  <th class="text-right"><strong>Qty.</strong></th>
-                                  <th><strong>Unit</strong></th>
-                                  <th class="text-right"><strong>Pricelist Price</strong></th>
-                                  <th class="text-right"><strong>Applied Price</strong></th>
-                                  <th class="text-right"><strong>Net import</strong></th>
+                                  <th class="col-ref"><strong>Ref.</strong></th>
+                                  <th class="col-des"><strong>Description</strong></th>
+                                  <th class="col-iva text-right"><strong>% IVA</strong></th>
+                                  <th class="col-qty text-right"><strong>Qty.</strong></th>
+                                  <th class="col-unit"><strong>Unit</strong></th>
+                                  <th class="col-pp text-right"><strong t-if="o.partner_id.pick_print_op == 'valued' and o.picking_type_id.code == 'outgoing'">Pricelist Price</strong></th>
+                                  <th class="col-ap text-right"><strong t-if="o.partner_id.pick_print_op == 'valued' and o.picking_type_id.code == 'outgoing'">Applied Price</strong></th>
+                                  <th class="col-net text-right"><strong t-if="o.partner_id.pick_print_op == 'valued' and o.picking_type_id.code == 'outgoing'">Net import</strong></th>
                               </tr>
 
                             </thead>
                             <tbody>
-                              <tr t-foreach="lines" t-as="l">
+                              <tr t-foreach="lines[o.id]" t-as="l">
                                   <td>
                                       <span t-esc="l['ref']"/>
                                   </td>
@@ -142,13 +212,19 @@
                                       <span t-esc="l['unit']"/>
                                   </td>
                                   <td class="text-right">
+                                    <div  t-if="o.partner_id.pick_print_op == 'valued' and o.picking_type_id.code == 'outgoing'">
                                       <span t-esc="l['pric_price']"/>
+                                    </div>
                                   </td>
                                   <td class="text-right">
+                                    <div  t-if="o.partner_id.pick_print_op == 'valued' and o.picking_type_id.code == 'outgoing'">
                                       <span t-esc="l['app_price']"/>
+                                    </div>
                                   </td>
                                   <td class="text-right">
+                                    <div  t-if="o.partner_id.pick_print_op == 'valued' and o.picking_type_id.code == 'outgoing'">
                                       <span t-esc="l['net']"/>
+                                    </div>
                                   </td>
                               </tr>
                             </tbody>
@@ -161,7 +237,7 @@
                                 TOTALS:
                               </td>
                               <td class="text-right">
-                                <span t-esc="tfoot['sum_qty']"/>
+                                <span t-esc="tfoot[o.id]['sum_qty']"/>
                               </td>
                               <td>
 
@@ -173,166 +249,67 @@
 
                               </td>
                               <td class="text-right">
-                                <span t-esc="tfoot['sum_net']"/>
+                                <div  t-if="o.partner_id.pick_print_op == 'valued' and o.picking_type_id.code == 'outgoing'">
+                                  <span t-esc="tfoot[o.id]['sum_net']"/>
+                                </div>
                               </td>
                             </tfoot>
                           </table>
+
                           </div>
-                          <div class="my_footer">
-                            <table class="table1">
+
+
+
+
+                        <div class="my_footer">
+                            <table class="table3" t-if="o.partner_id.pick_print_op == 'valued' and o.picking_type_id.code == 'outgoing'">
                             <thead>
                                 <tr>
-                                    <th><strong>IMPONIBLE BASE</strong></th>
-                                    <th><strong>IVA</strong></th>
-                                    <th><strong>IMPORT IVA</strong></th>
-                                    <th><strong>% REQ</strong></th>
-                                    <th><strong>IMPORT REQ</strong></th>
-                                    <th><strong>TOTAL DOCUMENT</strong></th>
-                                    <th><strong>ACCOUNT PAID</strong></th>
-                                    <th><strong>TOTAL TO PAY</strong></th>
+                                    <th class="col-fbase text-right"><strong>IMPONIBLE BASE</strong></th>
+                                    <th class="col-fiva text-right"><strong>IVA</strong></th>
+                                    <th class="col-fivaimp text-right"><strong>IMPORT IVA</strong></th>
+                                    <th class="col-freq text-right"><strong>% REQ</strong></th>
+                                    <th class="col-freqimp text-right"><strong>IMPORT REQ</strong></th>
+                                    <th class="col-ftd text-center"><strong>TOTAL DOCUMENT</strong></th>
+                                    <th class="col-fap text-right"><strong>ACCOUNT PAID</strong></th>
+                                    <th class="col-ftotal text-right"><strong>TOTAL TO PAY</strong></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                  <td>
-                                      <span t-esc="totals['base']"/>
+                                  <td class="text-right">
+                                      <span t-esc="totals[o.id]['base']"/>
                                   </td>
-                                  <td>
-                                      <span t-esc="totals['iva']"/>
+                                  <td class="text-right">
+                                      <span t-esc="totals[o.id]['iva']"/>
                                   </td>
-                                  <td>
-                                      <span t-esc="totals['iva_import']"/>
+                                  <td class="text-right">
+                                      <span t-esc="totals[o.id]['iva_import']"/>
                                   </td>
-                                  <td>
-                                      <span t-esc="totals['rec']"/>
+                                  <td class="text-right">
+                                      <span t-esc="totals[o.id]['rec']"/>
                                   </td>
-                                  <td>
-                                      <span t-esc="totals['imp_rec']"/>
+                                  <td class="text-right">
+                                      <span t-esc="totals[o.id]['imp_rec']"/>
                                   </td>
-                                  <td>
-                                      <span t-esc="totals['total_doc']"/>
+                                  <td class="text-center">
+                                     <div class="full-border">
+                                      <span t-esc="totals[o.id]['total_doc']"/>
+                                    </div>
                                   </td>
-                                  <td>
-                                      <span t-esc="totals['acc_paid']"/>
+                                  <td class="text-right">
+                                      <span t-esc="totals[o.id]['acc_paid']"/>
                                   </td>
-                                  <td>
-                                      <span t-esc="totals['total_paid']"/>
+                                  <td class="text-right">
+                                      <span t-esc="totals[o.id]['total_paid']"/>
                                   </td>
                                 </tr>
                             </tbody>
                             </table>
-                          </div>
-                      </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                      <div class="page" t-if="o.partner_id.pick_print_op == 'not_valued' or o.picking_type_id.code != 'outgoing'">  <!-- ORIGINAL REPORT -->
-                          <div class="row"><div class="col-xs-4 pull-right">
-                          <!-- <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 600, 100)" style="width:300px;height:50px;"/> -->
-                          </div></div>
-                          <div class="row">
-                              <div class="col-xs-6">
-                                  <div t-if="o.picking_type_id.code=='incoming' and o.partner_id">
-                                      <span><strong>Supplier Address:</strong></span>
-                                  </div>
-                                  <div t-if="o.picking_type_id.code=='internal' and o.partner_id">
-                                      <span><strong>Warehouse Address:</strong></span>
-                                  </div>
-                                  <div t-if="o.picking_type_id.code=='outgoing' and o.partner_id">
-                                      <span><strong>Customer Address:</strong></span>
-                                  </div>
-                                  <div t-if="o.partner_id" name="partner_header">
-                                      <div t-field="o.partner_id"
-                                         t-field-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": true}'/>
-                                      <p t-if="o.partner_id.vat">VAT: <span t-field="o.partner_id.vat"/></p>
-                                  </div>
-                              </div>
-                              <div class="col-xs-5 col-xs-offset-1">
-                                  <div t-if="o.move_lines and o.move_lines[0].partner_id and o.move_lines[0].partner_id.id != o.partner_id.id">
-                                      <span><strong>Delivery Address:</strong></span>
-                                      <div t-field="o.move_lines[0].partner_id"
-                                          t-field-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": true}'/>
-                                  </div>
-                                  <div t-if="o.picking_type_id.code != 'internal' and (not o.move_lines or not o.move_lines[0].partner_id) and o.picking_type_id.warehouse_id.partner_id">
-                                      <span><strong>Warehouse Address:</strong></span>
-                                      <div t-field="o.picking_type_id.warehouse_id.partner_id"
-                                          t-field-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": true}'/>
-                                  </div>
-                              </div>
-                          </div>
-                          <h2>
-                          <span t-field="o.picking_type_id"/>:
-                          <span t-field="o.name"/>
-                          </h2>
-                          <table class="table table-condensed">
-                          <thead>
-                              <tr>
-                                  <th><strong>Order (Origin)</strong></th>
-                                  <th><strong>State</strong></th>
-                                  <th><strong>Commitment Date</strong></th>
-                                  <th name="td_sched_date_h"><strong>Scheduled Date</strong></th>
-                              </tr>
-                          </thead>
-                          <tbody>
-                              <tr>
-                                  <td>
-                                      <span t-field="o.origin"/>
-                                  </td>
-                                  <td>
-                                      <span t-field="o.state"/>
-                                  </td>
-                                  <td>
-                                      <span t-field="o.date"/>
-                                  </td>
-                                  <td name="td_sched_date">
-                                      <span t-field="o.min_date"/>
-                                  </td>
-                              </tr>
-                          </tbody>
-                          </table>
-                          <br/>
-                          <br/>
-                          <table class="table table-condensed">
-                            <thead>
-                              <tr>
-                                  <th><strong>Product</strong></th>
-                                  <th class="text-right"><strong>Quantity</strong></th>
-
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr t-foreach="o.move_lines" t-as="move">
-                                  <td><span t-field="move.product_id"/></td>
-                                  <td class="text-right"><span t-field="move.product_uom_qty"/> <span t-field="move.product_uom" groups="product.group_uom"/></td>
-
-                              </tr>
-                            </tbody>
-                          </table>
-
-                      </div>
-                 </t>
-             </t>
+                        </div>
+                    </div>
+                </t>
+            </t>
         </template>
     </data>
 </openerp>
