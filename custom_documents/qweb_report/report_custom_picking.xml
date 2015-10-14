@@ -7,11 +7,14 @@
                border-top: solid 2px #000000;
            }
            p {
-             line-height: 10px;
+             line-height: 9px;
              font-size: 11px;
           }
           strong {
             font-size: 12px;
+          }
+          th{
+            font-size: 7px;
           }
           .no-padd-left {
               padding-left: 0px !important;
