@@ -29,6 +29,7 @@
                 "midban_partner",
                 "item_management",
                 "stock",
+                "base",
                 "indirect_sale"],
     "data": ["wizard/frigo_edi_wzd.xml",
              "views/res_partner_view.xml",

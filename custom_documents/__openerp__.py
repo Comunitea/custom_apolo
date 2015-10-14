@@ -29,8 +29,7 @@
 
     """,
     "images": [],
-    "depends": [
-                ],
+    "depends": ["stock_valued_picking"],
     "data": ['res_partner_view.xml',
              'custom_reports.xml',
              'qweb_report/report_custom_picking.xml',

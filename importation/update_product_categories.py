@@ -7,8 +7,8 @@ import socket
 import traceback
 import xlrd
 
-class import_normalize_customer_addressses(object):
-    def __init__(self, dbname, user, passwd, addresses_file):
+class UpdateProductCategories(object):
+    def __init__(self, dbname, user, passwd, file_path):
         """método incial"""
 
         try:
@@ -18,7 +18,7 @@ class import_normalize_customer_addressses(object):
             self.dbname = dbname
             self.user_name = user
             self.user_passwd = passwd
-            self.addresses_file = addresses_file
+            self.file_path = file_path
 
             #
             # Conectamos con OpenERP
@@ -27,7 +27,7 @@ class import_normalize_customer_addressses(object):
             self.user_id = login_facade.login(self.dbname, self.user_name, self.user_passwd)
             self.object_facade = xmlrpclib.ServerProxy(self.url_template % (self.server, self.port, 'object'))
 
-            res = self.import_normaize_address()
+            res = self.update_catgeories()
             #con exito
             if res:
                 print ("All created")
@@ -56,7 +56,7 @@ class import_normalize_customer_addressses(object):
             raise Exception(u'Error %s en create: %s' % (err.faultCode, err.faultString))
 
 
-    def search(self, model, query, offset=0, limit=False, order=False, context={}, count=False, obj=1):
+    def search(self, model, query, offset=0, limit=False, order=False, context={}, count=False):
         """
         Wrapper del metodo search.
         """
@@ -147,68 +147,34 @@ class import_normalize_customer_addressses(object):
         except xmlrpclib.Fault, err:
             raise Exception(u'Error %s en exec_workflow: %s' % (err.faultCode, err.faultString))
 
-    def _get_stateId_byName(self, state_name):
-        state_ids = self.search("res.country.state", [('name','ilike',state_name)])
-        return state_ids and state_ids[0] or False
 
-    def _getPartnerCategories(self, *args):
-        by_default_values = ["SIN CATEGORIZAR","ZZ - No informado"]
-        category_ids = []
-        for arg in args:
-            if arg and arg not in by_default_values:
-                categ_ids = self.search("res.partner.category", [("name",'=',arg)])
-                if categ_ids:
-                    category_ids.append(categ_ids[0])
-                else:
-                    categ_id = self.create("res.partner.category", {"name": arg})
-                    category_ids.append(categ_id)
-        return [(6,0,category_ids)]
-
-    def import_normaize_address(self):
-        awb = xlrd.open_workbook(self.addresses_file, encoding_override="utf-8")
-        sh = awb.sheet_by_index(0)
+    def update_catgeories(self):
+        cwb = xlrd.open_workbook(self.file_path, encoding_override="utf-8")
+        sh = cwb.sheet_by_index(0)
 
         cont = 1
         all_lines = sh.nrows - 1
-        print "addresses no: ", all_lines
 
         for rownum in range(1, all_lines):
             record = sh.row_values(rownum)
             try:
-                partner_vals = {
-                    "comercial": record[1],
-                    "name": record[15],
-                    "state_id": record[2] and self._get_stateId_byName(record[2]) or False,
-                    "city": record[3],
-                    "zip": record[4],
-                    "street": record[5],
-                    "phone": record[6],
-                    "category_id": self._getPartnerCategories(record[10])
-                }
-                customer_refs = record[8].replace("C.","").split(",")
-                customer_refs.sort()
-                old_partner_id = False
-                for ref in customer_refs:
-                    partner_ids = self.search("res.partner", [("ref", "=", ref),("customer",'=',True),'|',('active','=',False),('active','=',True)])
-                    if partner_ids:
-                        partner_data = self.read("res.partner", partner_ids[0], ["comment", "street"])
-                        if partner_data["street"]:
-                            partner_vals["comment"] = partner_data["comment"] and (partner_data["comment"] + u"\nDirección Antigua: " + partner_data["street"]) or (u"Dirección Antigua: " + partner_data["street"])
-                        if old_partner_id:
-                            partner_vals["local_share_partner_id"] = old_partner_id
-                        self.write("res.partner", partner_ids[0], partner_vals)
-                        old_partner_id = partner_ids[0]
-
+                product_ids = self.search("product.product", [("default_code", "=", str(int(record[1]))),'|',('active','=',True),('active','=',False)])
+                if product_ids:
+                    if record[0]:
+                        categ_ids = self.search("product.category", [("code", "=", str(int(record[0])))], order="id desc", limit=1)
+                        self.write("product.product", [product_ids[0]], {'categ_id': categ_ids[0]})
+                    else:
+                        self.write("product.product", [product_ids[0]], {'categ_id': 2}) #Se puede vender
                 print "%s de %s" % (cont, all_lines)
                 cont += 1
             except Exception, e:
-                print "EXCEPTION: REC: %" % (record), repr(e)
+                print "EXCEPTION: Prod:", record[1], repr(e)
 
         return True
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
-        print u"Uso: %s <dbname> <user> <password> <addresses.xls>" % sys.argv[0]
+        print u"Uso: %s <dbname> <user> <password> <file_path>" % sys.argv[0]
     else:
-        import_normalize_customer_addressses(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+        UpdateProductCategories(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
