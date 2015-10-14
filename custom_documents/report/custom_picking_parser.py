@@ -38,20 +38,23 @@ class custom_picking_parser(models.AbstractModel):
         report_name = 'custom_documents.report_custom_picking'
         report = report_obj._get_report_from_name(report_name)
         docs = []
-        lines = []
-        tfoot = {'sum_qty': 0.0, 'sum_net': 0.0}
-        totals = {
-            'base': 0.0,
-            'iva': 0.0,
-            'iva_import': 0.0,
-            'rec': 0.0,
-            'imp_rec': 0.0,
-            'total_doc': 0.0,
-            'acc_paid': 0.0,
-            'total_paid': 0.0,
-        }
+        lines = {}
+        tfoot = {}
+        totals = {}
         for pick in self.env[report.model].browse(self._ids):
             docs.append(pick)
+            lines[pick.id] = []
+            tfoot[pick.id] = {'sum_qty': 0.0, 'sum_net': 0.0}
+            totals[pick.id] = {
+                'base': pick.amount_untaxed,
+                'iva': 0.0,
+                'iva_import': pick.amount_tax,
+                'rec': 0.0,
+                'imp_rec': 0.0,
+                'total_doc': pick.amount_total,
+                'acc_paid': 0.0,
+                'total_paid': pick.amount_total - 0.0,
+            }
             for move in pick.move_lines:
                 iva = ""
                 sale_line = False
@@ -72,9 +75,9 @@ class custom_picking_parser(models.AbstractModel):
                     'app_price': move.order_price_unit,
                     'net': move.price_subtotal,
                 }
-                lines.append(dic)
-                tfoot['sum_qty'] += dic['qty']
-                tfoot['sum_net'] += dic['net']
+                lines[pick.id].append(dic)
+                tfoot[pick.id]['sum_qty'] += dic['qty']
+                tfoot[pick.id]['sum_net'] += dic['net']
         docargs = {
             'doc_ids': self._ids,
             'doc_model': report.model,
