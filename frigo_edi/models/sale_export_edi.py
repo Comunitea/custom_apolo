@@ -18,12 +18,19 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import sale_promotion
-from . import tourism
-from . import stock
-from . import sale
-from . import product
-from . import account_invoice
-from . import rules
-from . import wizard
-from . import edi
+from openerp import models, fields, api, exceptions, _
+
+
+class SaleExportEdi(models.Model):
+
+    _name = 'sale.export.edi'
+
+
+    user_id = fields.Many2one("res.users", "User", readonly=True,
+                              required=True,
+                              default=lambda self: self.env.user)
+    date = fields.Date("Date", default=fields.Date.today(), required=True)
+    state = fields.Selection((('pending', 'Pending'), ('send', 'Send')),
+                             'State', default='pending')
+    period_start = fields.Date('Period start', required=True)
+    period_end = fields.Date('Period end', required=True)

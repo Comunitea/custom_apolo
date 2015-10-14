@@ -80,11 +80,21 @@
             <field name="context">{'doc_type': 'alb'}</field>
         </record>
 
-        <record id="ir_export_alb_file" model="ir.values">
-            <field name="name">Export Frigo ALB</field>
+        <record id="act_export_frigo_ven_file" model="ir.actions.act_window">
+            <field name="name">Export Frigo VEN</field>
+            <field name="res_model">edi.export.wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="depot_edi.export_edi_file_form"/>
+            <field name="target">new</field>
+            <field name="context">{'doc_type': 'ven'}</field>
+        </record>
+
+        <record id="ir_export_rco_file" model="ir.values">
+            <field name="name">Export Frigo VEN</field>
             <field name="key2">client_action_multi</field>
-            <field name="model">stock.picking</field>
-            <field name="value" eval="'ir.actions.act_window,%d'%act_export_frigo_alb_file" />
+            <field name="model">sale.export.edi</field>
+            <field name="value" eval="'ir.actions.act_window,%d'%act_export_frigo_ven_file" />
         </record>
 
     </data>
