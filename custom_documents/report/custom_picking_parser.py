@@ -46,14 +46,14 @@ class custom_picking_parser(models.AbstractModel):
             lines[pick.id] = []
             tfoot[pick.id] = {'sum_qty': 0.0, 'sum_net': 0.0}
             totals[pick.id] = {
-                'base': 0.0,
+                'base': pick.amount_untaxed,
                 'iva': 0.0,
-                'iva_import': 0.0,
+                'iva_import': pick.amount_tax,
                 'rec': 0.0,
                 'imp_rec': 0.0,
-                'total_doc': 0.0,
+                'total_doc': pick.amount_total,
                 'acc_paid': 0.0,
-                'total_paid': 0.0,
+                'total_paid': pick.amount_total - 0.0,
             }
             for move in pick.move_lines:
                 iva = ""

@@ -74,7 +74,7 @@
         .my_footer{
           border-top: solid 2px #000000;
           border-bottom: solid 2px #000000;
-          min-height:10mm;
+          min-height:13mm;
         }
 
 
@@ -86,13 +86,13 @@
              font-size: 10px;
         }
         .table3 .col-fbase{
-          width:14%;
+          width:20%;
         }
         .table3 .col-fiva{
           width:6%;
         }
         .table3 .col-fivaimp{
-          width:14%;
+          width:20%;
         }
         .table3 .col-freq{
           width:6%;
@@ -101,16 +101,16 @@
           width:15%;
         }
         .table3 .col-ftd{
-          width:15%;
+          width:20%;
         }
         .table3 .col-fap"{
-          width:15%;
+          width:20%;
         }
         .table3 .col-ftotal{
-          width:15%;
+          width:20%;
         }
         .table3 td{
-          font-size: 9px;
+          font-size: 11px;
         }
 
          </style>
@@ -266,10 +266,10 @@
                             <thead>
                                 <tr>
                                     <th class="col-fbase text-right"><strong>IMPONIBLE BASE</strong></th>
-                                    <th class="col-fiva text-right"><strong>IVA</strong></th>
+                                    <!-- <th class="col-fiva text-right"><strong>IVA</strong></th> -->
                                     <th class="col-fivaimp text-right"><strong>IMPORT IVA</strong></th>
-                                    <th class="col-freq text-right"><strong>% REQ</strong></th>
-                                    <th class="col-freqimp text-right"><strong>IMPORT REQ</strong></th>
+                                    <!-- <th class="col-freq text-right"><strong>% REQ</strong></th> -->
+                                    <!-- <th class="col-freqimp text-right"><strong>IMPORT REQ</strong></th> -->
                                     <th class="col-ftd text-center"><strong>TOTAL DOCUMENT</strong></th>
                                     <th class="col-fap text-right"><strong>ACCOUNT PAID</strong></th>
                                     <th class="col-ftotal text-right"><strong>TOTAL TO PAY</strong></th>
@@ -280,18 +280,18 @@
                                   <td class="text-right">
                                       <span t-esc="totals[o.id]['base']"/>
                                   </td>
-                                  <td class="text-right">
+                                  <!-- <td class="text-right">
                                       <span t-esc="totals[o.id]['iva']"/>
-                                  </td>
+                                  </td> -->
                                   <td class="text-right">
                                       <span t-esc="totals[o.id]['iva_import']"/>
                                   </td>
-                                  <td class="text-right">
+                                  <!-- <td class="text-right">
                                       <span t-esc="totals[o.id]['rec']"/>
                                   </td>
                                   <td class="text-right">
                                       <span t-esc="totals[o.id]['imp_rec']"/>
-                                  </td>
+                                  </td> -->
                                   <td class="text-center">
                                      <div class="full-border">
                                       <span t-esc="totals[o.id]['total_doc']"/>
