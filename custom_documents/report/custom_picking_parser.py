@@ -78,8 +78,6 @@ class custom_picking_parser(models.AbstractModel):
                 lines[pick.id].append(dic)
                 tfoot[pick.id]['sum_qty'] += dic['qty']
                 tfoot[pick.id]['sum_net'] += dic['net']
-        import ipdb; ipdb.set_trace()
-
         docargs = {
             'doc_ids': self._ids,
             'doc_model': report.model,
