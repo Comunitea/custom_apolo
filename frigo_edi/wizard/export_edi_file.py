@@ -176,6 +176,48 @@ class ExportEdiFile(models.TransientModel):
             file_obj = self.create_doc(filename, file_name, doc_type)
             file_obj.count = count
 
+
+    @api.model
+    def export_file_sto(self):
+        doc_type_obj = self.env["edi.doc.type"]
+        doc_obj = self.env["edi.doc"]
+        doc_type = doc_type_obj.search([("code", '=', "sto")])[0]
+        last_sto_file = doc_obj.search([("doc_type", '=', doc_type.id)],
+                                       order="date desc", limit=1)
+        if last_sto_file:
+            count = last_sto_file.count + 1
+        else:
+            count = 1
+        sinfo_obj = self.env["product.supplierinfo"]
+        sinfo_ids = sinfo_obj.search([('name', 'child_of', [self[0].service_id.
+                                                            related_partner_id.
+                                                            id])])
+
+        if sinfo_ids:
+            products = list(sinfo_ids)
+            tmp_name = "export_sto.txt"
+            rows = (len(products) / 9) + 2
+            filename = "%sSTO%s.%s" % (self.env.user.company_id.frigo_code,
+                                       str(rows).zfill(4), str(count).zfill(4))
+            templates_path = self.addons_path('frigo_edi') + os.sep + \
+                'wizard' + os.sep + 'templates' + os.sep
+            mylookup = TemplateLookup(input_encoding='utf-8',
+                                      output_encoding='utf-8',
+                                      encoding_errors='replace')
+            tmp = Template(filename=templates_path + tmp_name,
+                           lookup=mylookup, default_filters=['decode.utf8'])
+
+            products = list(chunks(products, 9))
+            doc = tmp.render_unicode(products=products, datetime=datetime,
+                                     user=self.env.user).encode('utf-8',
+                                                                'replace')
+            file_name = self[0].service_id.output_path + os.sep + filename
+            f = file(file_name, 'w')
+            f.write(doc)
+            f.close()
+            file_obj = self.create_doc(filename, file_name, doc_type)
+            file_obj.count = count
+
     @api.model
     def export_file_mef(self):
         doc_type_obj = self.env["edi.doc.type"]
@@ -351,8 +393,73 @@ class ExportEdiFile(models.TransientModel):
             for obj in objs:
                 obj.sync = True
 
+    @api.model
+    def product_price_get(self, product, qty, partner):
+        pricelist = partner.property_product_pricelist
+        price = pricelist.price_get(product.id, qty or 1.0,
+                                    partner.id)[pricelist.id]
+        return price
+
     @api.multi
-    def export_file_col(self, active_model, objs=False, type='A'):
+    def export_file_ven_create(self, date_start, date_end):
+        supplier_id = self[0].service_id.related_partner_id.id
+        objs = self.env['account.invoice'].search([('date_invoice', '>=',
+                                                    date_start),
+                                                   ('date_invoice', '<=',
+                                                    date_end),
+                                                   ('state', 'in', ('open', 'paid')),
+                                                   ('type', '=', 'out_invoice')])
+        file_len = 0
+        for obj in objs:
+            for line in obj.invoice_line:
+                for supp in line.product_id.seller_ids:
+                    if supp.name.id == supplier_id:
+                        file_len += 1
+        doc_type_obj = self.env["edi.doc.type"]
+        doc_obj = self.env["edi.doc"]
+        doc_type = doc_type_obj.search([("code", '=', "ven")])[0]
+        last_ven_file = doc_obj.search([("doc_type", '=', doc_type.id)],
+                                       order="date desc", limit=1)
+        if last_ven_file:
+            count = last_ven_file.count + 1
+        else:
+            count = 1
+
+        tmp_name = "export_ven.txt"
+        filename = "%sVEN%s.%s" % (self.env.user.company_id.frigo_code,
+                                   str(file_len).zfill(4),
+                                   str(count).zfill(4))
+        templates_path = self.addons_path('frigo_edi') + os.sep + 'wizard' + \
+            os.sep + 'templates' + os.sep
+        mylookup = TemplateLookup(input_encoding='utf-8',
+                                  output_encoding='utf-8',
+                                  encoding_errors='replace')
+        tmp = Template(filename=templates_path + tmp_name,
+                       lookup=mylookup, default_filters=['decode.utf8'])
+        objs = [o for o in objs]
+        doc = tmp.render_unicode(o=objs, datetime=datetime, user=self.env.user,
+                                 supplier_id=supplier_id,
+                                 price_get=self.product_price_get).encode('utf-8', 'replace')
+        file_name = self[0].service_id.output_path + os.sep + filename
+        f = file(file_name, 'w')
+        f.write(doc)
+        f.close()
+        file_obj = self.create_doc(filename, file_name, doc_type)
+        file_obj.count = count
+
+
+    @api.multi
+    def export_file_ven(self, active_model, objs=False):
+        if not objs:
+            objs = self.env[active_model].search([('state', '=', 'pending')])
+        if not objs:
+            return
+        for obj in objs:
+            self.export_file_ven_create(obj.period_start, obj.period_end)
+        objs.state = 'send'
+
+    @api.model
+    def export_file_col(self, active_model, objs, type):
         doc_type_obj = self.env["edi.doc.type"]
         doc_obj = self.env["edi.doc"]
         doc_type = doc_type_obj.search([("code", '=', "col")])[0]
@@ -373,7 +480,6 @@ class ExportEdiFile(models.TransientModel):
                                   encoding_errors='replace')
         tmp = Template(filename=templates_path + tmp_name,
                        lookup=mylookup, default_filters=['decode.utf8'])
-
         objs = [o for o in objs]
         doc = tmp.render_unicode(o=objs, datetime=datetime, user=self.env.user,
                                  type_=type).encode('utf-8', 'replace')
@@ -391,11 +497,13 @@ class ExportEdiFile(models.TransientModel):
         for service in edis:
             wzd = False
             for dtype in service.doc_type_ids:
-                if dtype.code in ["cli", "med", "sto", "mef", "alb"]:
+                if dtype.code in ["cli", "med", "sto", "mef", "alb", "ven"]:
                     wzd = self.create({'service_id': service.id})
                     wzd.export_file_cli("res.partner.sync")
+                    wzd.export_file_ven('sale.export.edi')
                     wzd.export_file_med("item.management.item.move.sync")
                     wzd.export_file_sto()
+                    wzd.export_file_ven()
                     wzd.export_file_mef()
                     wzd.export_file_alb("stock.picking")
                     break
