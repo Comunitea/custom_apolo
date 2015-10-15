@@ -73,7 +73,7 @@ MAX_NUM_ONE = 6
 # Para leer el archivo de configuración y guardarlo en params
 
 def read_file():
-    if sys.argv:
+    if len(sys.argv)>1:
         telnet_cfg = sys.argv[1]
     else:
         telnet_cfg = 'telnet.cfg'
