@@ -328,12 +328,16 @@ class ScanGunProtocol(LineReceiver):
                 u'\n' * 25
 
         self.last = '-'
+        if not self.show_id:
+            clean =''
 
         if self.user_id:
             cabecera = self.user_name
         else:
             cabecera=''
-        delimiter = u"\n" + u'*'*26 + u'\n'
+
+        delimiter = u"\n" + u'*'*25 + u'\n'
+
         if message !='':
             message = '\n' + message
         if not line:
@@ -2676,14 +2680,20 @@ class ScanGunProtocol(LineReceiver):
         if self.step ==1:
              menu_str += self.inverse(u'\nOpcion o Scan Packet\n')
 
+
+        if self.step >=5 and self.new_uom_qty>0:
+            menu_str += u'\nMover: % s %s'%(self.new_uom_qty, self.vals['uom'])
+
         if self.step == 5:
             #ya tenemos pakete
             menu_str += self.inverse(u'\nScan Destino\n')
+
         if self.step>5:
              menu_str += u'\nA : %s'%self.loc['dest_bcd_name']
+
         if self.step==8:
             #Ya tenemos destino
-            menu_str+= u'\n\n1> Empaquetar\n2> Sin Paquete\n'
+            menu_str+= u'\n1> Sin Nuevo Paquete\n2> Empaquetar\n'
             menu_str += self.inverse(u'\nOpción o %s Mover\n'%KEY_CONFIRM)
 
         if self.step==10:
@@ -2699,7 +2709,7 @@ class ScanGunProtocol(LineReceiver):
 
     def handle_manual_transfer_packet(self, line, confirm=False):
         #menu eventos en manual
-
+        #import ipdb; ipdb.set_trace()
         order_line = line[0:2]
         if order_line in (PRE_LOC, PRE_LOT, PRE_PACK, PRE_PROD):
             line = line [2:]
@@ -2708,17 +2718,18 @@ class ScanGunProtocol(LineReceiver):
         message =''
 
         if order_line==PRE_LOC and self.step==0:
+
             #buscamos una ubicación de picking
             self.state="manual_picking_reposition"
             self.step=0
             self.handle_manual_picking_reposition(PRE_LOC + line)
             return
 
-        if len(line)==13:
-            #es un ean, pasamos a manehjar productos
-            self.state = "manual_transfer_product"
-            self.handle_manual_transfer_product(line=line)
-            return
+        # if len(line)==13 and False:
+        #     #es un ean, pasamos a manehjar productos
+        #     self.state = "manual_transfer_product"
+        #     self.handle_manual_transfer_product(line=line)
+        #     return
         if line==KEY_YES and self.step==0:
                 self.step = 5
                 self._snd(self.get_manual_transfer_packet())
@@ -2761,7 +2772,7 @@ class ScanGunProtocol(LineReceiver):
             self.vals={}
             self.vals = self.factory.odoo_con.get_pack_gun_info(self.user_id, package_id)
             busy = self.factory.odoo_con.get_user_packet_busy(self.user_id, package_id)
-
+            self.new_uom_qty = 0
             if self.vals['exist'] == False:
                 message = "\nNo encuentro el paquete"
                 self.step=0
@@ -2782,6 +2793,12 @@ class ScanGunProtocol(LineReceiver):
                     self.loc={}
                     self._snd(self.get_manual_transfer_packet(), message)
                     return
+
+        if self.step==5 and self.float_(line) and not order_line:
+            #introdujo un acantidad
+            self.new_uom_qty = self.float_(line)
+            self._snd(self.get_manual_transfer_packet(), message)
+            return
 
         if self.step==5  and order_line == PRE_LOC:
             self.loc={}
@@ -2806,27 +2823,28 @@ class ScanGunProtocol(LineReceiver):
             do=False
             do_key=False
             if not order_line and line in ['0','1','2']:
-                pack_ = 'do_pack'
-                if line == '1':
+                pack_ = 'no_pack'
+                if line == '2':
                     pack_ = 'do_pack'
 
                 self.step=10
                 do=True
             if line ==KEY_CONFIRM:
-                pack_ = 'do_pack'
+                pack_ = 'no_pack'
                 do_key=True
             if do or do_key:
                 self.move = {}
                 k=str(self.active_task)
                 self.step=10
+
                 self.move = {
-                    'product_id': False,
+                    'product_id': self.vals['product_id'],
                     'package_id': self.vals['package_id'],
-                    #'quantity': False,
+                    'quantity': self.new_uom_qty,
                     'src_location_id': self.vals['src_location_id'],
                     'dest_location_id': self.loc['dest_location_id'],
                     'do_pack':pack_,
-                    #'lot_id': False,
+                    'lot_id': self.vals['lot_id'],
                     'user_id': self.user_id
                 }
                 if do_key:
@@ -4183,8 +4201,8 @@ class ScanGunProtocol(LineReceiver):
         if line == KEY_VOLVER:
             self.vals={}
             self.step=0
-            self.state= 'menu_tools'
-            self._snd(self.get_menu_tool())
+            self.state= 'tools'
+            self._snd(self.get_menu_tools())
             return
 
         if self.step == 0:

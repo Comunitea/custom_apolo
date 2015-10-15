@@ -103,6 +103,7 @@ class stock_location(models.Model):
             domain= [('bcd_code', '=', bcd_code)]
 
         type = my_args.get("type", '')
+
         if type == 'picking':
             #se busca para hacer un picking, con lo que vale de id o delocation:_id
             domain.append(('location_id','=',location_id))
@@ -118,15 +119,17 @@ class stock_location(models.Model):
                 childs.append({'bcd_name': loc.bcd_name,
                                'id': loc.id})
         vals = {'exist':False}
+        if not type:
+            type = ''
         if location:
             vals = {
                 'exist' : True,
-                type or '' + 'location_id' : location.id,
-                type or '' + 'location' : location.name_get()[0][1],
+                type + 'location_id' : location.id,
+                type + 'location' : location.name_get()[0][1],
                 'usage':location.usage,
                 'zone':location.zone,
                 'temp_type_id':location.temp_type_id.id or False,
-                'bcd_name': location.bcd_name,
+                type + 'bcd_name': location.bcd_name,
                 'parent_id': location.location_id.id or False,
                 'childs': childs,
             }
