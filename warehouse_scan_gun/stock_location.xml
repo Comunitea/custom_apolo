@@ -33,5 +33,16 @@
                 </field>-->
             </field>
         </record>
+
+         <record id="view_location_search_add_bcd_name" model="ir.ui.view">
+            <field name="name">view_location_search_add_bcd_name</field>
+            <field name="model">stock.location</field>
+            <field name="inherit_id" ref="stock.view_location_search"/>
+            <field name="arch" type="xml">
+                <field name="name" position="before">
+                    <field name="bcd_name" string="BCD Name" filter_domain="['|',('bcd_name','ilike',self),('bcd_code','ilike',self)]"/>
+                </field>
+            </field>
+        </record>
     </data>
 </openerp>
