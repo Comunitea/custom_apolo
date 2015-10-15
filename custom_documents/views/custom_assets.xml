@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+      <!-- Parece que no los carga, puee ser un problema de la revisión de odoo -->
+      <!-- No los estamos usando -->
+      <template id="assets_backend" name="custom assets" inherit_id="web.assets_backend">
+          <xpath expr="." position="inside">
+            <link rel="stylesheet" href="/custom_documents/static/src/css/report_picking.css"/>
+            <!-- <script type="text/javascript" src="/stock/static/src/js/widgets.js"></script> -->
+          </xpath>
+    </template>
+    </data>
+</openerp>

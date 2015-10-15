@@ -29,13 +29,13 @@
 
     """,
     "images": [],
-    "depends": ["stock_valued_picking"],
-    "data": ['res_partner_view.xml',
-             'custom_reports.xml',
+    "depends": ["stock_valued_picking", "web", "report"],
+    "data": ['views/res_partner_view.xml',
+            #  'views/custom_assets.xml', NO ME FUNCIONA en esta revision
+             'views/custom_reports.xml',
              'qweb_report/report_custom_picking.xml',
              'qweb_report/report_custom_invoice.xml'],
     "demo": [],
     "test": [],
     "installable": True,
-    "application": True,
 }
