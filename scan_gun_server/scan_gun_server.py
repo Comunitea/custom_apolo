@@ -71,8 +71,13 @@ PRE_LOT = 'LT'
 MAX_NUM = 4
 MAX_NUM_ONE = 6
 # Para leer el archivo de configuración y guardarlo en params
+
 def read_file():
-    with open('telnet.cfg', 'r') as configfile:
+    if sys.argv:
+        telnet_cfg = sys.argv[1]
+    else:
+        telnet_cfg = 'telnet.cfg'
+    with open(telnet_cfg, 'r') as configfile:
         for line in configfile:
             key = line[:line.index('=')]
             value = line[line.index('=') + 1:].replace('\n', '')
