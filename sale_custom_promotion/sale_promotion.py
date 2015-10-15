@@ -43,6 +43,57 @@ class sale_joint_promotion(models.Model):
     invoiced_amounts = fields.One2many('sale.joint.promotion.history',
                                        'joint_id', 'Invoiced amounts')
 
+    @api.model
+    def create(self, vals):
+        res = super(sale_joint_promotion, self).create(vals)
+        edis = self.env["edi"].search([('related_partner_id', '=',
+                                        res.supplier_id.id)])
+        for service in edis:
+            wzd = False
+            for dtype in service.doc_type_ids:
+                if dtype.code == "dto":
+                    wzd = self.env['edi.export.wizard'].create({'service_id': service.id})
+                    wzd.export_file_dto('sale.joint.promotion', res, 'A')
+                    break
+        return res
+
+    @api.multi
+    def write(self, vals):
+        res = super(sale_joint_promotion, self).write(vals)
+        promos_by_partner = {}
+        for promotion in self:
+            if promotion.supplier_id not in promos_by_partner.keys():
+                promos_by_partner[promotion.supplier_id.id] = self.env['sale.joint.promotion']
+            promos_by_partner[promotion.supplier_id.id] += promotion
+        for supplier in promos_by_partner.keys():
+            edis = self.env["edi"].search([('related_partner_id', '=', supplier)])
+            for service in edis:
+                wzd = False
+                for dtype in service.doc_type_ids:
+                    if dtype.code == "dto":
+                        wzd = self.env['edi.export.wizard'].create({'service_id': service.id})
+                        wzd.export_file_dto('sale.joint.promotion', promos_by_partner[supplier], 'M')
+                        break
+        return res
+
+    @api.multi
+    def unlink(self):
+        promos_by_partner = {}
+        for promotion in self:
+            if promotion.supplier_id.id not in promos_by_partner.keys():
+                promos_by_partner[promotion.supplier_id.id] = self.env['sale.joint.promotion']
+            promos_by_partner[promotion.supplier_id.id] += promotion
+        for supplier in promos_by_partner.keys():
+            edis = self.env["edi"].search([('related_partner_id', '=', supplier)])
+            for service in edis:
+                wzd = False
+                for dtype in service.doc_type_ids:
+                    if dtype.code == "dto":
+                        wzd = self.env['edi.export.wizard'].create({'service_id': service.id})
+                        wzd.export_file_dto('sale.joint.promotion', promos_by_partner[supplier], 'B')
+                        break
+        return super(sale_joint_promotion, self).unlink()
+
     @api.multi
     def _get_invoice(self, amount):
         user = self.env.user
@@ -145,3 +196,31 @@ class sale_joint_promotion(models.Model):
                 'joint_id': self.id})
             invoices += invoice
         return invoices
+
+    @api.multi
+    def get_customers(self):
+        self.ensure_one()
+        customers = self.env['res.partner']
+        if self.type == 'rappel':
+            customer_setted =  self.rappel_id.customer_ids
+        elif self.type == 'discount':
+            customer_setted =  self.promotion_id.customer_ids
+        for customer in customer_setted:
+            customers += self.env['res.partner'].search(
+                [('id', 'child_of', customer.id), ('is_company', '=', True)])
+        return customers
+
+    @api.multi
+    def get_affected_subgroups(self):
+        self.ensure_one()
+        if self.type == 'rappel':
+            return self.rappel_id.get_rappel_subgroups()
+        elif self.type == 'discount':
+            return self.promotion_id.get_discount_subgroups()
+
+    @api.multi
+    def get_discount(self):
+        self.ensure_one()
+        for action in self.promotion_id.actions:
+            if action.action_type == 'prod_disc_perc_sub':
+                return float(action.arguments)

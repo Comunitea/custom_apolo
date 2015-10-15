@@ -47,7 +47,8 @@ class rappel(models.Model):
     product_id = fields.Many2one('product.product', 'Product')
     product_categ_id = fields.Many2one('product.category', 'Category')
     rappel_group_id = fields.Many2one('product.rappel.group', 'Rappel group')
-    rappel_subgroup_id = fields.Many2one('product.rappel.subgroup', 'Rappel subgroup')
+    rappel_subgroup_id = fields.Many2one('product.rappel.subgroup',
+                                         'Rappel subgroup')
     calc_amount = fields.Selection(CALC_AMOUNT, 'Percent/Quantity')
     calc_type = fields.Selection(CALC_TYPE, 'value/quantity')
     uom_id = fields.Many2one('product.uom', 'UoM')
@@ -94,6 +95,17 @@ empty'))
         return res
 
     @api.multi
+    def get_rappel_subgroups(self):
+        self.ensure_one()
+        if self.rappel_subgroup_id:
+            return self.rappel_subgroup_id
+        elif self.rappel_group_id:
+            return self.env['product.rappel.subgroup'].search(
+                [('group_id', '=', self.rappel_group_id.id)])
+        else:
+            return self.env['product.rappel.subgroup'].search([])
+
+    @api.multi
     def get_products(self):
 
         product_obj = self.env['product.template']
@@ -126,10 +138,22 @@ empty'))
                 partners += child
         return partners
 
+    @api.multi
+    def get_section_string(self):
+        self.ensure_one()
+        string_sections = ''
+        for section in self.sections:
+            string_sections += str(section.rappel_from) + '-' + \
+                str(section.rappel_until) + ':' + str(section.percent) + ';'
+        if string_sections[-1] == ';':
+            string_sections = string_sections[:-1]
+        return string_sections
+
 
 class rappel_section(models.Model):
     _name = "rappel.section"
     _description = "Rappel section model"
+    _order = 'rappel_from asc'
 
     rappel_from = fields.Float('From')
     rappel_until = fields.Float('Until')
@@ -158,7 +182,7 @@ class rappel_calculation(models.Model):
     quantity = fields.Float('Quantity', required=True)
     invoiced = fields.Boolean('Invoiced')
     invoice_ids = fields.Many2many('account.invoice',
-                                          'rappel_calculated_invoice_rel',
-                                          'calculated_id', 'invoice_id',
-                                          'Invoices')
+                                   'rappel_calculated_invoice_rel',
+                                   'calculated_id', 'invoice_id',
+                                   'Invoices')
     total_consumed = fields.Float('Total consumed')

@@ -466,3 +466,115 @@ class ExportEdiFile(models.TransientModel):
                     wzd.export_file_mef()
                     wzd.export_file_alb("stock.picking")
                     break
+
+    @api.multi
+    def export_file_pol(self, active_model, objs=[]):
+        """En este fichero se exportan tanto nuevos clientes como liquidaciones."""
+        doc_type_obj = self.env["edi.doc.type"]
+        doc_obj = self.env["edi.doc"]
+        doc_type = doc_type_obj.search([("code", '=', "pol")])[0]
+        last_pol_file = doc_obj.search([("doc_type", '=', doc_type.id)],
+                                       order="date desc", limit=1)
+        if last_pol_file:
+            count = last_pol_file.count + 1
+        else:
+            count = 1
+
+        tmp_name = "export_pol.txt"
+        file_len = len(objs)
+        filename = "%sPOL%s.%s" % (self.env.user.company_id.frigo_code,
+                                   str(file_len).zfill(4),
+                                   str(count).zfill(4))
+        templates_path = self.addons_path('frigo_edi') + os.sep + 'wizard' + \
+            os.sep + 'templates' + os.sep
+        mylookup = TemplateLookup(input_encoding='utf-8',
+                                  output_encoding='utf-8',
+                                  encoding_errors='replace')
+        tmp = Template(filename=templates_path + tmp_name,
+                       lookup=mylookup, default_filters=['decode.utf8'])
+        objs = [o for o in objs]
+        if active_model == 'tourism.customer':
+            o = objs
+            o2 = []
+        else:
+            o = []
+            o2 = objs
+        doc = tmp.render_unicode(o=o, o2=o2, datetime=datetime,
+                                 user=self.env.user).encode('utf-8', 'replace')
+        file_name = self[0].service_id.output_path + os.sep + filename
+        f = file(file_name, 'w')
+        f.write(doc)
+        f.close()
+        file_obj = self.create_doc(filename, file_name, doc_type)
+        file_obj.count = count
+
+
+    @api.multi
+    def export_file_dto(self, active_model, objs=[], type=''):
+        """
+            Se exportan las promociones conjuntas, habra 1 linea por partner y
+            subgrupo de rappel, si por ejemplo 1 rappel el global se creara 1
+            linea para todos los subgrupos que existen, si 1 rappel se aplica
+            a 1 grupo de rappel se creara 1 linea por cada subgrupo de ese
+            grupo.
+        """
+        dto_parser = DtoParser()
+        objs2 = []
+        for obj in objs:
+            objs2 += dto_parser.parseJointPromotion(obj)
+
+        doc_type_obj = self.env["edi.doc.type"]
+        doc_obj = self.env["edi.doc"]
+        doc_type = doc_type_obj.search([("code", '=', "dto")])[0]
+        last_dto_file = doc_obj.search([("doc_type", '=', doc_type.id)],
+                                       order="date desc", limit=1)
+        if last_dto_file:
+            count = last_dto_file.count + 1
+        else:
+            count = 1
+
+        tmp_name = "export_dto.txt"
+        file_len = len(objs2)
+        filename = "%sDTO%s.%s" % (self.env.user.company_id.frigo_code,
+                                   str(file_len).zfill(4),
+                                   str(count).zfill(4))
+        templates_path = self.addons_path('frigo_edi') + os.sep + 'wizard' + \
+            os.sep + 'templates' + os.sep
+        mylookup = TemplateLookup(input_encoding='utf-8',
+                                  output_encoding='utf-8',
+                                  encoding_errors='replace')
+        tmp = Template(filename=templates_path + tmp_name,
+                       lookup=mylookup, default_filters=['decode.utf8'])
+
+        doc = tmp.render_unicode(o=objs2, type_=type, datetime=datetime,
+                                 user=self.env.user).encode('utf-8', 'replace')
+        file_name = self[0].service_id.output_path + os.sep + filename
+        f = file(file_name, 'w')
+        f.write(doc)
+        f.close()
+        file_obj = self.create_doc(filename, file_name, doc_type)
+        file_obj.count = count
+
+
+class DtoParser(object):
+
+    def parseJointPromotion(self, promo):
+        lines = []
+        customers = promo.get_customers()
+        subgroups = promo.get_affected_subgroups()
+        for customer in customers:
+            if not customer.is_parent_chain:
+                for subgroup in subgroups:
+                    lines.append(DtoLine(customer, subgroup, promo))
+        return lines
+
+
+class DtoLine(object):
+
+    def __init__(self, partner, subgroup, promo):
+        for estimation in subgroup.estimation_ids:
+            if estimation.partner_id.id == partner.id:
+                self.estimation = estimation.estimation
+        self.partner = partner
+        self.subgroup = subgroup
+        self.promo = promo

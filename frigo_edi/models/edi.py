@@ -71,6 +71,58 @@ class Edi(models.Model):
             return super(Edi, self)._get_file_name(filename, type)
 
     @api.model
+    def parse_tourism(self, file_path, doc):
+        f = codecs.open(file_path, "r", "ISO-8859-1", 'ignore')
+        for line in f:
+            """En los ficheros de ejemplo se marca el final del archivo con una
+               linea de 0"""
+            if line == '0' * 69:
+                break
+            product_code = line[:10].strip()
+            group_code = line[10:16].strip()
+            description = line[16:46].strip()
+            year = line[46:50].strip()
+            sec_price = float(line[50:58])
+            min_price = float(line[58:68])
+            group = self.env['tourism.group'].search([('name', '=',
+                                                       group_code)])
+            supplierinfo = self.env['product.supplierinfo'].search(
+                [('product_code', '=', product_code)])
+            if not supplierinfo:
+                log.error("Product with code %s not found." % product_code)
+                continue
+            if not group:
+                group = self.env['tourism.group'].create(
+                    {'name': group_code,
+                     'description': description,
+                     'date_start': '%s-01-01' % year,
+                     'date_end': '%s-12-31' % year,
+                     'min_price': min_price,
+                     'guar_price': sec_price,
+                     'supplier_id': supplierinfo.name.id
+                     })
+            else:
+                if group.name != group_code:
+                    group.name = group_code
+                if group.description != description:
+                    group.description = description
+                if group.date_start != '%s-01-01' % year:
+                    group.date_start = '%s-01-01' % year
+                if group.date_end != '%s-12-31' % year:
+                    group.date_end = '%s-12-31' % year
+                if group.min_price != min_price:
+                    group.min_price = min_price
+                if group.guar_price != sec_price:
+                    group.sec_price = sec_price
+                if group.supplier_id != supplierinfo.name:
+                    group.supplier_id = supplierinfo.name
+            product = supplierinfo.product_tmpl_id
+            group.write({'product_ids': [(4, product.id)]})
+        doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
+        self.make_backup(file_path, doc.file_name)
+        os.remove(file_path)
+
+    @api.model
     def parse_products_file(self, file_path, doc):
         f = codecs.open(file_path, "r", "ISO-8859-1", 'ignore')
         supp_obj = self.env["product.supplierinfo"]
@@ -432,6 +484,9 @@ class Edi(models.Model):
                     process = True
                 elif doc.doc_type.code == 'abo':
                     service.parse_payment_invoice(file_path, doc)
+                    process = True
+                elif doc.doc_type.code == 'tur':
+                    service.parse_tourism(file_path, doc)
                     process = True
                 # No es necesario hacer este desarrollo para el fichero TOR,
                 # ya que no lo estan usando. Se hara en otra fase
