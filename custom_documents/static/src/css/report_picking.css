@@ -1,0 +1,106 @@
+.top-border {
+    border-top: solid 2px #000000;
+}
+p {
+  line-height: 9px;
+  font-size: 11px;
+}
+strong {
+ font-size: 12px;
+}
+th{
+ font-size: 7px;
+}
+.no-padd-left {
+   padding-left: 0px !important;
+}
+.table1{
+  width: 100%;
+  font-size: 10px;
+}
+.table2{
+ width: 100%;
+ font-size: 10px;
+}
+.table2 .col-ref{
+width: 10%;
+}
+.table2 .col-des{
+width: 20%;
+}
+.table2 .col-iva{
+width: 10%;
+}
+.table2 .col-qty{
+width: 10%;
+}
+.table2 .col-unit{
+width: 20%;
+}
+.table2 .col-pp{
+width: 10%;
+}
+.table2 .col-ap{
+width: 10%;
+}
+.table2 .col-net{
+width: 10%;
+}
+
+.table2 td{
+ padding-right:4px;
+}
+.table2 th{
+  padding-right:4px;
+ }
+.table2 thead{
+   border-top: solid 2px #000000;
+   border-bottom: solid 2px #000000;
+}
+.table2 tfoot{
+   border-top: solid 2px #000000;
+}
+.top_part{
+min-height:30mm;
+}
+.middle_part{
+min-height:162mm;
+}
+.my_footer{
+border-top: solid 2px #000000;
+border-bottom: solid 2px #000000;
+min-height:13mm;
+}
+.table3{
+width: 100%;
+}
+.table3 th strong{
+  font-size: 10px;
+}
+.table3 .col-fbase{
+width:20%;
+}
+.table3 .col-fiva{
+width:6%;
+}
+.table3 .col-fivaimp{
+width:20%;
+}
+.table3 .col-freq{
+width:6%;
+}
+.table3 .col-freqimp{
+width:15%;
+}
+.table3 .col-ftd{
+width:20%;
+}
+.table3 .col-fap"{
+width:20%;
+}
+.table3 .col-ftotal{
+width:20%;
+}
+.table3 td{
+font-size: 11px;
+}
