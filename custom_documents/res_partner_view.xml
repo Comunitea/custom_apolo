@@ -7,10 +7,13 @@
       <field name="model">res.partner</field>
       <field name="inherit_id" ref="base.view_partner_form"/>
       <field name="arch" type="xml">
-        <notebook>
-          <page string="Reports Preferences" position="after">
-
-          </page>
+        <notebook position="inside">
+            <page string="Reports Preferences">
+                <group strinf="Print Preferences">
+                    <field name="inv_print_op"/>
+                    <field name="pick_print_op"/>
+                </group>
+            </page>
         </notebook>
       </field>
     </record>

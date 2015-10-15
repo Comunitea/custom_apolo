@@ -31,5 +31,5 @@ class AccountInvoice(models.Model):
 class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'
 
-    tourism = fields.Boolean('Tourism')
+    tourism = fields.Many2one('tourism.customer', 'Tourism')
     promotion_line = fields.Boolean('Promotion line')

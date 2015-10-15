@@ -20,6 +20,7 @@
 ##############################################################################
 from . import sale_promotion
 from . import tourism
+from . import stock
 from . import sale
 from . import product
 from . import account_invoice

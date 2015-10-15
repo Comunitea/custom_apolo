@@ -1,16 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
-    <data><record id="view_location_form_depot" model="ir.ui.view">
+    <data>
+        <record id="view_location_tree2" model="ir.ui.view">
+            <field name="name">stock.location.tree2_with_bcd</field>
+            <field name="model">stock.location</field>
+            <field name="inherit_id" ref="stock.view_location_tree2"/>
+            <field name="arch" type="xml">
+                <field name="complete_name" position="after">
+                    <field name="bcd_name"/>
+                </field>
+                <!---->
+            </field>
+        </record>
+        <record id="view_location_form_depot" model="ir.ui.view">
             <field name="name">stock.location.form.depot</field>
             <field name="model">stock.location</field>
             <field name="inherit_id" ref="stock.view_location_form"/>
             <field name="arch" type="xml">
-                <field name="comment" position="before">
-                    <group>
-                        <field name="bcd_name"/>
-                        <button name="get_old_name" string="BCD Names" type="object" />
-                    </group>
-                </field>
+                <!--<field name="scrap_location" position="after">
+                    <field name="default_picking_zone"/>
+                </field>-->
+                <xpath expr="//label[@for='location_id']" position='before'>
+                    <label for="bcd_name" class="oe_edit_only"/>
+                    <h2><field name="bcd_name"/></h2>
+                </xpath>
+
+                <!--<label for="location_id" class="oe_edit_only"/>-->
+                    <!--<h2><field name="location_id"/></h2>-->
+                <!--<field name="name" position="after">
+                    <label for="bcd_name" class="oe_edit_only"/>
+                    <h2><field name="bcd_name"/></h2>
+                </field>-->
             </field>
         </record>
     </data>

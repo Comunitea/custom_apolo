@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
+      <!-- TAG REPORT IN A6 FORMAT -->
+      <record id="my_A4_paperformat" model="report.paperformat">
+          <field name="name">My A4 Tag paperformat</field>
+          <field name="default" eval="True"/>
+          <field name="format">A4</field>
+          <field name="orientation">Portrait</field>
+
+          <!-- To Full customization -->
+          <!-- <field name="name">Tag paperformat</field> -->
+          <!-- <field name="default" eval="True"/> -->
+          <field name="format">custom</field>
+          <!-- <field name="orientation">Portrait</field> -->
+           <!-- <field name="page_height">150</field>
+           <field name="page_width">100</field> -->
+
+           <field name="margin_top">50</field>
+           <field name="margin_bottom">22</field>
+           <field name="margin_left">10</field>
+           <field name="margin_right">2</field>
+           <field name="header_line" eval="False"/>
+           <field name="header_spacing">0</field>
+           <field name="dpi">0</field>
+      </record>
+
         <report
             string="Custom Picking Report"
             id="action_report_custom_picking"
@@ -9,6 +33,10 @@
             name="custom_documents.report_custom_picking"
             file="custom_documents.report_custom_picking"
         />
+
+        <record id="action_report_custom_picking" model="ir.actions.report.xml">
+            <field name="paperformat_id" ref="my_A4_paperformat"/>
+        </record>
         <report
             string="Custom Invoice Report"
             id="action_report_custom_invoice"

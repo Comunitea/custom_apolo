@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-07 14:09+0000\n"
-"PO-Revision-Date: 2015-10-07 14:09+0000\n"
+"POT-Creation-Date: 2015-10-14 12:15+0000\n"
+"PO-Revision-Date: 2015-10-14 12:15+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,12 +16,243 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "% IVA"
+msgstr "% IVA"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "% REQ"
+msgstr "% REQ"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "ACCOUNT PAID"
+msgstr "PAGADO A CUENTA"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Agent"
+msgstr "Agente"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Applied Price"
+msgstr "Precio Aplicado"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Commitment Date"
+msgstr "Fecha compromiso"
+
+#. module: custom_documents
+#: model:ir.actions.report.xml,name:custom_documents.action_report_custom_invoice
+#: view:website:custom_documents.report_custom_invoice
+msgid "Custom Invoice Report"
+msgstr "Factura personalizada"
+
+#. module: custom_documents
+#: model:ir.actions.report.xml,name:custom_documents.action_report_custom_picking
+msgid "Custom Picking Report"
+msgstr "Albaran personalizado"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Customer Address:"
+msgstr "Dirección de cliente:"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "DATE:"
+msgstr "FECHA:"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Delivery Address:"
+msgstr "Dirección de envío:"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Delivery Man"
+msgstr "Repartidor"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Description"
+msgstr "Descripción"
+
+#. module: custom_documents
+#: field:report.custom_documents.report_custom_invoice,id:0
+#: field:report.custom_documents.report_custom_picking,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "IMPONIBLE BASE"
+msgstr "BASE IMPONIBLE"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "IMPORT IVA"
+msgstr "IMPORTE IVA"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "IMPORT REQ"
+msgstr "IMPORTE REQ"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "INVOICE TO"
+msgstr "FACTURAR A"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "IVA"
+msgstr "IVA"
+
+#. module: custom_documents
+#: field:res.partner,inv_print_op:0
+msgid "Invoice Printing"
+msgstr "Impresión de facturas"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "NIF:"
+msgstr "NIF:"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Net import"
+msgstr "Importe Neto"
+
+#. module: custom_documents
+#: selection:res.partner,pick_print_op:0
+msgid "Not Valued Picking"
+msgstr "Albarán sin valorar"
+
+#. module: custom_documents
+#: selection:res.partner,inv_print_op:0
+msgid "OP1"
+msgstr "OP1"
+
+#. module: custom_documents
+#: selection:res.partner,inv_print_op:0
+msgid "OP2"
+msgstr "OP2"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Order (Origin)"
+msgstr "Pedido (Origen)"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "PICKING:"
+msgstr "ALBARÁN:"
+
+#. module: custom_documents
 #: model:ir.model,name:custom_documents.model_res_partner
 msgid "Partner"
 msgstr "Empresa"
+
+#. module: custom_documents
+#: field:res.partner,pick_print_op:0
+msgid "Pick Printing"
+msgstr "Impresión de albaranes"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Pricelist Price"
+msgstr "Precio Tarifa"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Product"
+msgstr "Producto"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Qty."
+msgstr "Cant."
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Quantity"
+msgstr "Cantidad"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Ref."
+msgstr "Ref."
 
 #. module: custom_documents
 #: view:res.partner:custom_documents.custom_documents_view_form
 msgid "Reports Preferences"
 msgstr "Preferencias informes"
 
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "SOLICITANT"
+msgstr "SOLICITANTE"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Scheduled Date"
+msgstr "Fecha prevista"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "State"
+msgstr "Estado"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Supplier Address:"
+msgstr "Dirección del proveedor:"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "TOTAL DOCUMENT"
+msgstr "TOTAL DOCUMENTO"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "TOTAL TO PAY"
+msgstr "TOTAL A PAGAR"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "TOTALS:"
+msgstr "TOTALES:"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Tlfo."
+msgstr "Tlfo."
+
+#. module: custom_documents
+#: selection:res.partner,pick_print_op:0
+msgid "Tracked Picking"
+msgstr "Albarán con trazabilidad"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Unit"
+msgstr "Unidad"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "VAT:"
+msgstr "NIF:"
+
+#. module: custom_documents
+#: selection:res.partner,pick_print_op:0
+msgid "Valued Picking"
+msgstr "Albarán valorado"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_picking
+msgid "Warehouse Address:"
+msgstr "Dirección del almacén"

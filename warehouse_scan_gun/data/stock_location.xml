@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+         <record id="stock.virtual_picking_location" model="stock.location">
+             <field name="name">Virtual Picking Location</field>
+             <field name="usage">view</field>
+             <field name="sequence">0</field>
+             <field name="bcd_name">Virtual Pick Loc</field>
+             <field name="bcd_code">00 000 00 00</field>
+             <field name ="width">100</field>
+             <field name ="length">100</field>
+             <field name ="heigth">100</field>
+        </record>
+    </data>
+</openerp>

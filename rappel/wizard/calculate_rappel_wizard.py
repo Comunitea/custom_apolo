@@ -44,19 +44,9 @@ class calculate_rappel_wizard(models.TransientModel):
 calculate rappels.  If left blank is calculated for all')
 
     @api.model
-    def _compute_qty_obj(self, from_unit, qty, to_unit):
-        if from_unit.category_id.id != to_unit.category_id.id:
-            if self._context.get('raise-exception', True):
-                raise exceptions.Warning(_('Error!'),
-                                         _('Conversion from Product \
-UoM %s to Default UoM %s is not possible as they both belong to different \
-Category!.') % (from_unit.name, to_unit.name,))
-            else:
-                return qty
-        amount = qty / from_unit.factor
-        if to_unit:
-            amount = rounding(amount * to_unit.factor, to_unit.rounding)
-        return amount
+    def _compute_qty_obj(self, from_unit, invoice_line, to_unit):
+        conv = invoice_line.product_id._conv_units(from_unit, to_unit, 0)
+        return invoice_line.quantity * conv
 
     @api.multi
     def _get_periods(self, rappel):
@@ -97,9 +87,7 @@ Category!.') % (from_unit.name, to_unit.name,))
         customers = self.customer_ids
         rappels = self.env['rappel'].search([])
         for rappel in rappels:
-            for customer in rappel.customer_ids:
-                if customers and customer not in customers:
-                    continue
+            for customer in customers and rappel.customer_ids & customers or rappel.customer_ids:
                 if (rappel.date_stop and rappel.date_stop >= self.date_start
                         or not rappel.date_stop) and \
                         rappel.date_start < self.date_stop:
@@ -161,8 +149,8 @@ Category!.') % (from_unit.name, to_unit.name,))
                                     total_consumed = 0.0
                                     for line in inv_lines:
                                         total_consumed += self._compute_qty_obj(
-                                            line.uos_id, line.quantity,
-                                            rappel.uom_id)
+                                            line.uos_id.id, line,
+                                            rappel.uom_id.id)
                                 used_section = self.env['rappel.section']
                                 for section in rappel.sections:
                                     if section.rappel_until >= \
