@@ -25,8 +25,42 @@ from openerp.tools.translate import _
 class StockTask(models.Model):
     _inherit = 'stock.task'
 
-    gun_begin = fields.Boolean('Tarea Comenzada desde Pistola', default = False)
 
+
+    @api.multi
+    def create_task_from_gun(self, my_args):
+        #import ipdb; ipdb.set_trace()
+        user_id = my_args.get('user_id', False)
+        from_gun = True
+        task_obj = self.env['stock.task']
+        env2 = task_obj.env(self._cr, user_id, self._context)
+        new_task = task_obj.with_env(env2)
+        vals = {
+            'user_id': user_id,
+            'from_gun': True
+        }
+        task_id = new_task.create(vals)
+
+        return task_id.id
+
+    @api.multi
+    def add_loc_operation_from_gun(self, my_args):
+        #import ipdb; ipdb.set_trace()
+        user_id = my_args.get('user_id', False)
+        pack_id = my_args.get('pack_id', False)
+        task_id = my_args.get('task_id', False)
+        from_gun = True
+        domain = [('id', '=', task_id)]
+        task_obj = self.env['stock.task'].search(domain)
+        env2 = task_obj.env(self._cr, user_id, self._context)
+        task = task_obj.with_env(env2)
+        message = ''
+        op_id = False
+        try:
+            op_id = task.add_loc_operation (pack_id)
+        except:
+            message = u'paquete no encontrado'
+        return op_id, message
 
     @api.multi
     def reset_to_process(self, my_args):
@@ -79,16 +113,19 @@ class StockTask(models.Model):
                 vals[format(0)] = values
                 task_id = task.id
         return task_id, vals
+
     @api.multi
     def get_task_of_type(self, my_args):
         """
         Get a task for a user and type defined in my args.
         """
+        #import ipdb; ipdb.set_trace()
         user_id = my_args.get('user_id', False)
         camera_id = my_args.get('camera_id', False)
         task_type = my_args.get('task_type', False)
         machine_id = my_args.get('machine_id', False)
         date_planned= my_args.get('date_planned', False)
+        route_id= my_args.get('route_id', False)
         domain = [
             ('user_id', '=', user_id),
             ('state', '=', 'assigned'),
@@ -98,14 +135,20 @@ class StockTask(models.Model):
         if task_obj:
             print "Te doy la que tenias"
             return task_obj.id
-
+        trans_route_id = False
+        if route_id:
+            route_detail= self.env['route.detail'].search([('id', '=', route_id)])
+            date_planned= route_detail.date
+            route_id = route_detail.route_id.id
         vals = {
             'operator_id': user_id,
             'machine_id': machine_id,
             'location_ids': [],
             'mandatory_camera': True,
             'print_report': False,
-            'date_planned':date_planned,
+            #'date_planned':date_planned,
+            'trans_route_id':route_id,
+            'date_planned': date_planned
             # 'max_loc_ops':
             # 'min_loc_replenish':
             # 'warehouse_id':
@@ -167,9 +210,9 @@ class StockTask(models.Model):
                 continue
             op_data = {
                 'ID': op.id,
-                'PRODUCTO': op.product_id and op.product_id.name or "",
+                'product': op.product_id and op.product_id.name or "",
                 'CANTIDAD': str(op.product_qty),
-                'LOTE': op.packed_lot_id and op.packed_lot_id.name or "",
+                'lot': op.packed_lot_id and op.packed_lot_id.name or "",
                 'PAQUETE': op.package_id and op.package_id.name or "",
                 'ORIGEN': op.location_id.name_get()[0][1],
                 'DESTINO': op.location_dest_id.name_get()[0][1],
@@ -177,7 +220,7 @@ class StockTask(models.Model):
                 'VISITED' :op.visited,
                 'origen_id': op.location_id.id,
                 'destino_id': op.location_dest_id.id,
-                'paquete_id': op.package_id.id,
+                'pack_id': op.package_id.id,
                 'origen' : op.location_id.get_short_name(),
                 'destino' : op.location_dest_id.get_short_name()
 
@@ -228,7 +271,7 @@ class StockTask(models.Model):
             if not run:
                 op_.to_process = False
             op_.visited = False
-        task_obj_uid.gun_begin = True
+
         return True
 
     @api.multi
@@ -245,6 +288,20 @@ class StockTask(models.Model):
         return True
 
     @api.multi
+    def gun_cancel_task(self, my_args):
+
+        task_id = my_args.get('task_id', False)
+        user_id = my_args.get('user_id', False)
+
+        task_obj = self.browse(task_id)
+        env2 = task_obj.env(self._cr, user_id, self._context)
+        task_obj_uid = task_obj.with_env(env2)
+
+        task_obj_uid.cancel_task()
+        return True
+
+
+    @api.multi
     def gun_finish_picking_task(self, my_args):
 
         task_id = my_args.get('task_id', False)
@@ -257,3 +314,4 @@ class StockTask(models.Model):
         task_obj_uid.finish_partial_task()
         return True
 
+    from_gun = fields.Boolean("Created from gun", default = "False")

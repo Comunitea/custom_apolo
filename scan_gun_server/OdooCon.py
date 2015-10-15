@@ -34,6 +34,7 @@ class OdooConnector:
         #
         # Conectamos con OpenERP
         #
+
         login_facade = xmlrpclib.ServerProxy(self.url_template % (self.server, self.port, 'common'))
         self.user_id = login_facade.login(self.dbname, self.user_name, self.user_passwd)
         self.object_facade = xmlrpclib.ServerProxy(self.url_template % (self.server, self.port, 'object'))
@@ -190,12 +191,37 @@ class OdooDao:
         camera_ids = self.connection.search('stock.location', domain, order ='name asc')
         if not camera_ids:
             raise Exception("No hay ubicaciones marcadas como cámaras")
-        res_read = self.connection.read('stock.location', camera_ids, ['name'])
+        res_read = self.connection.read('stock.location', camera_ids, ['bcd_name'])
         indx = 1
         for x in res_read:
-            res[indx] = (x['id'], x['name'])
+            res[indx] = (x['id'], x['bcd_name'])
             indx += 1
         return res
+
+    def get_routes_menu2(self, type = False):
+        #import ipdb; ipdb.set_trace()
+
+        res = {}
+        domain =[]
+        domain = [('picking_type_id', '=',5), ('validated', '=', True), ('state', 'not in', ('draft','done','cancel'))]
+        route_ids = self.connection.search('stock.picking', domain, order ='orig_planned_date, min_date, name asc')
+        if not route_ids:
+            res = False
+        res_read = self.connection.read('stock.picking', route_ids, ['route_detail_id'])
+        res_read = list(set(res_read))
+        indx = 1
+        for x in res_read:
+            domain = [('id', '=', x['route_detail_id'])]
+            route = self.connection.search('route.detail', domain)
+            if not route:
+                res[indx] = (x['id'], x['detail_name_str'], x['date'])
+                indx += 1
+        return res
+
+    def get_routes_menu(self, user_id, type=False):
+        my_args = {'user_id': user_id}
+        ops_data = self.connection.execute('stock.picking', 'get_routes_menu', [], my_args)
+        return ops_data
 
     def get_machines_menu(self, type):
 
@@ -249,14 +275,19 @@ class OdooDao:
         ops_data = self.connection.execute('stock.pack.operation', 'get_ops_from_wave', [], my_args)
         return ops_data
 
+    def create_task_from_gun(self, user_id):
+        my_args = {'user_id': user_id}
+        res = self.connection.execute('stock.task', 'create_task_from_gun', [], my_args)
+        return res
+
     def set_task_pause_state(self, user_id, task_id, pause_state):
         my_args = {'user_id': user_id, 'task_id': task_id, 'pause_state': pause_state}
         res = self.connection.execute('stock.task', 'set_task_pause_state', [], my_args)
         return res
 
-    def get_task_of_type(self, user_id, camera_id, task_type, machine_id, date_planned):
+    def get_task_of_type(self, user_id, camera_id, task_type, machine_id, route_id, date_planned):
         my_args = {'user_id': user_id, 'camera_id': camera_id,
-                   'task_type': task_type, 'machine_id': machine_id,'date_planned': date_planned}
+                   'task_type': task_type, 'machine_id': machine_id,'date_planned': date_planned, 'route_id': route_id}
         task_id = self.connection.execute('stock.task', 'get_task_of_type', [], my_args)
         return task_id
 
@@ -319,6 +350,15 @@ class OdooDao:
         my_args = {'user_id': user_id, 'task_id': task_id}
         op_data = self.connection.execute('stock.task', 'gun_finish_task', [], my_args)
         return op_data
+    def gun_cancel_task(self, user_id, task_id):
+        my_args = {'user_id': user_id, 'task_id': task_id}
+        op_data = self.connection.execute('stock.task', 'gun_cancel_task', [], my_args)
+        return op_data
+
+    def add_loc_operation_from_gun(self, user_id, task_id, pack_id):
+        my_args = {'user_id': user_id, 'task_id': task_id, 'pack_id':pack_id}
+        op_data = self.connection.execute('stock.task', 'add_loc_operation_from_gun', [], my_args)
+        return op_data
 
     def check_packet_op(self, user_id, package_id):
         my_args = {'user_id': user_id, 'package_id': package_id}
@@ -334,8 +374,6 @@ class OdooDao:
         my_args = {'user_id': user_id, 'wave_id': wave_id, 'field': field, 'value': value}
         res = self.connection.execute('wave.reports', 'set_wave_reports_values', [], my_args)
         return res
-
-
 
     def change_op_value(self, user_id, op_id, field, value):
         my_args = {'user_id': user_id, 'op_id': op_id, 'field': field, 'value': value}
@@ -371,10 +409,27 @@ class OdooDao:
         op_data = self.connection.execute('product.product', 'get_product_gun_info', [], my_args)
         return op_data
 
-    def get_location_gun_info(self, user_id, location_id, type =''):
-        my_args = {'user_id': user_id, 'location_id': location_id, 'type': type}
+
+    def get_parent_location_id(self, user_id, location_id):
+        my_args = {'user_id': user_id, 'location_id': location_id}
+        op_data = self.connection.execute('stock.location', 'get_parent_location_id', [], my_args)
+        return op_data
+
+    def is_location_free(self, user_id, location_id):
+        my_args = {'user_id': user_id, 'location_id': location_id}
+        op_data = self.connection.execute('stock.location', 'is_location_free', [], my_args)
+        return op_data
+
+    def get_subpicking_zones(self, user_id, location_id= False, bcd_code = False):
+        my_args = {'user_id': user_id, 'location_id': location_id, 'bcd_code' : bcd_code}
+        op_data = self.connection.execute('stock.location', 'get_subpicking_zones', [], my_args)
+        return op_data
+
+    def get_location_gun_info(self, user_id, location_id=False, bcd_code=False, type=False):
+        my_args = {'user_id': user_id, 'location_id': location_id, 'bcd_code' : bcd_code, 'type' : type}
         op_data = self.connection.execute('stock.location', 'get_location_gun_info', [], my_args)
         return op_data
+
 
     def get_lot_gun_info(self, user_id, lot_id):
         my_args = {'user_id': user_id, 'lot_id': lot_id}
@@ -415,6 +470,11 @@ class OdooDao:
         res = self.connection.execute('wave.report', 'set_waves_op_processed', [], my_args)
         return res
 
+    def change_wave_op_values_packed_change(self, user_id, id, values):
+        my_args = {'user_id': user_id, 'id' : id, 'values' : values }
+        res = self.connection.execute('wave.report', 'change_wave_op_values_packed_change', [], my_args)
+        return res
+
     def create_reposition_from_gun(self, user_id, selected_loc_ids, limit):
         my_args = {'user_id': user_id, 'selected_loc_ids' : selected_loc_ids, 'limit' : limit}
         res = self.connection.execute('reposition.wizard', 'create_reposition_from_gun', [], my_args)
@@ -422,9 +482,12 @@ class OdooDao:
         # res = self.connection.execute('stock.pack.operation', 'add_task_to_created_rep', [], my_args)
         return res
 
-
-
     def check_picking_zone(self, user_id, product_id, picking_location_id, write = True):
         my_args = {'user_id': user_id, 'picking_location_id' : picking_location_id, 'product_id' : product_id, 'write': write}
         res = self.connection.execute('product.product', 'check_picking_zone', [], my_args)
+        return res
+
+    def create_picking_sublocation_from_gun(self, user_id, pick_zone_id, sub_cols):
+        my_args = {'user_id': user_id, 'pick_zone_id' : pick_zone_id, 'sub_cols' : sub_cols}
+        res = self.connection.execute('stock.location', 'create_picking_sublocation_from_gun', [], my_args)
         return res

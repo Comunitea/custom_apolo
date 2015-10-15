@@ -33,6 +33,7 @@
         "wave_report_revised.xml",
         "wave_report.xml",
         "product_view.xml",
-        "stock_location.xml"],
+        "stock_location.xml",
+        "data/stock_location.xml"],
     "installable": True
 }

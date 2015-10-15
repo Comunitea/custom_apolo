@@ -20,8 +20,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, fields, api
-
+from openerp import models, fields, api, _, exceptions
+#from openerp.exceptions import except_orm
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
@@ -29,9 +29,21 @@ class ProductTemplate(models.Model):
     short_name = fields.Char('Short Name', size=25,
                              help="Short name displayed in the gun")
 
+    # @api.constrains('picking_location_id')
+    # def _check_picking_location(self):
+    #     #import ipdb; ipdb.set_trace()
+    #     if self.picking_location_id.default_picking_zone == False:
+    #         domain =[('picking_location_id', '=', self.picking_location_id.id),
+    #              ('id', '!=', self.id)]
+    #         count = self.search(domain)
+    #         if count:
+    #             raise exceptions.Warning(_('Error!'), _('Picking ubication must be unique or default picking zone.'))
+
+
 class product_product (models.Model):
 
     _inherit = 'product.product'
+
 
     @api.multi
     def get_product_gun_complete_info(self, my_args):
@@ -59,13 +71,16 @@ class product_product (models.Model):
                 'uom':product.uom_id.name,
                 'var_coeff_un_id': var_coeff_un_id,
                 'var_coeff_ca_id':var_coeff_ca_id,
+                'is_var_coeff': product.is_var_coeff,
                 'un_ca': product.un_ca,
                 'kg_un':product.kg_un,
                 'ca_ma':product.ca_ma,
                 'virtual_available': product.virtual_available,
                 'picking_location_id':product.picking_location_id.id,
                 'picking_location':product.picking_location_id.name_get()[0][1],
-                'temp_type_id': product.temp_type.id
+                'picking_location_cdb':product.picking_location_id.bcd_name,
+                'temp_type_id': product.temp_type.id,
+                'qty_available' :product.qty_available
             }
         return vals
 
@@ -94,7 +109,8 @@ class product_product (models.Model):
                            x.lot_id.id,
                            x.lot_id.name,
                            x.package_id.uos_qty,
-                           x.package_id.uos_id.name)
+                           x.package_id.uos_id.name,
+                           x.location.bcd_name)
                        for x in stock_quants
                        if x.location_id.usage=='internal']
             packets =list(set(packets))
@@ -117,6 +133,7 @@ class product_product (models.Model):
                 'lot':pack[9],
                 'uos_qty':pack[10],
                 'uos':pack[11],
+                'location_bcd':pack[12]
             }
             res[str(inc)]=vals
 
@@ -150,8 +167,8 @@ class product_product (models.Model):
         product = self.search(domain)
         res = False
         if product:
-            domain_picking = [('id','=', picking_location_id), ('zone','=','picking'), ('temp_type_id', '=', product.temp_type)]
-            picking_location = self.env['stock.picking.location'].search(domain_picking)
+            domain_picking = [('id','=', picking_location_id), ('zone','=','picking'), ('temp_type_id', '=', product.temp_type.id)]
+            picking_location = self.env['stock.location'].search(domain_picking)
 
             if picking_location and not write:
                 res = True

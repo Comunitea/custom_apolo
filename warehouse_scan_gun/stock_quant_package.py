@@ -78,7 +78,10 @@ class stock_quant(models.Model):
 
 class stock_quant_package(models.Model):
 
+
     _inherit = 'stock.quant.package'
+
+
     @api.multi
     def get_pack_gun_info(self, my_args):
         package_id = my_args.get("package_id", False)
@@ -124,6 +127,8 @@ class stock_quant_package(models.Model):
                 'change': False,
                 'picking_location_id':picking_zone_id,
                 'picking_location':picking_zone,
+                'src_location_bcd': package.location_id.bcd_name or False,
+                'dest_location_bcd': False,
             }
         return vals
 
