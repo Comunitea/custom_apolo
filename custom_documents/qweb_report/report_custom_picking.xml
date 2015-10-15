@@ -121,6 +121,9 @@
         border-bottom: solid 1px #000000;
         border-right: solid 1px #000000;
         }
+        .fullwidth{
+        width: 100%;
+        }
        </style>
           <t t-call="report.html_container">
                 <t t-foreach="docs" t-as="o">
@@ -280,7 +283,12 @@
                         <br/>
                         <br/>
                         <!-- Page: <span class="page"/> de <span class="topage"/> -->
-                        <p><strong>INVOICE TO</strong>       </p>
+                        <div class="col-xs-7 no-padd-left">
+                          <p><strong>INVOICE TO</strong></p>
+                        </div>
+                        <div class="col-xs-5 no-padd-left text-right">
+                          <p>Pág. 1 de 1</p>
+                        </div>
                         <p><span t-field="o.partner_id.commercial_partner_id.ref"/> <span t-field="o.partner_id.commercial_partner_id.name"/></p>
                         <p><span t-field="o.partner_id.commercial_partner_id.street"/></p>
                         <p><span t-field="o.partner_id.commercial_partner_id.zip"/> - <span t-field="o.partner_id.commercial_partner_id.city"/></p>
