@@ -23,7 +23,7 @@
     'name': 'Sale custom promotions',
     'version': '1.0',
     'category': 'Sale',
-    'description': """""",
+    'description': """ """,
     'author': 'Comunitea',
     'website': '',
     "depends": ['base', 'sale', 'account', 'sale_promotions', 'frigo_edi'],

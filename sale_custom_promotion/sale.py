@@ -26,13 +26,13 @@ class SaleOrderLine(models.Model):
 
     _inherit = 'sale.order.line'
 
-    tourism = fields.Boolean('Tourism')
+    tourism = fields.Many2one('tourism.customer', 'Tourism')
 
     @api.model
     def _prepare_order_line_invoice_line(self, line, account_id=False):
         res = super(SaleOrderLine, self)._prepare_order_line_invoice_line(
             line, account_id)
-        res['tourism'] = line.tourism
+        res['tourism'] = line.tourism.id
         res['promotion_line'] = line.promotion_line
         return res
 
@@ -57,11 +57,6 @@ class SaleOrderLine(models.Model):
                 cr, uid, uos, context)
         product = self.pool.get('product.product').browse(cr, uid, product,
                                                           context)
-        # like type ya no existe
-        # if uos.like_type == 'boxes':
-        #     unit_price = res['value']['price_unit'] / product.un_ca
-        # else:
-        #     unit_price = res['value']['price_unit']
         unit_price = res['value']['price_unit']
         tourism_ids = self.pool.get('tourism.customer').search(
             cr, uid, [('customer_id', '=', partner_id),
@@ -73,31 +68,19 @@ class SaleOrderLine(models.Model):
         tourism = self.pool.get('tourism.customer').browse(cr, uid,
                                                            tourism_ids,
                                                            context)
-        if tourism and unit_price != tourism.agreed_price:
-            # # like type ya no existe
-            # if uos.like_type == 'boxes':
-            #     res['value']['price_unit'] = tourism.agreed_price * \
-            #         product.un_ca
-            # else:
-            #     res['value']['price_unit'] = tourism.agreed_price
-            res['value']['price_unit'] = tourism.agreed_price
+        if tourism and unit_price != tourism.get_box_price(product):
+
+            res['value']['price_unit'] = tourism.get_box_price(product)
             res['value']['discount'] = 0
-            res['value']['tourism'] = True
+            res['value']['tourism'] = tourism
         return res
 
     @api.model
     def create(self, vals):
         res = super(SaleOrderLine, self).create(vals)
-        tourism_ids = self.env['tourism.customer'].search(
-            [('customer_id', '=', res.order_id.partner_id.id),
-             ('tourism_id.date_start', '<=', date.today()),
-             ('tourism_id.date_end', '>=', date.today()),
-             ('tourism_id.id', 'in',
-              res.product_id.tourism_ids._ids),
-             ('tourism_id.state', '=', 'approved')])
-        if tourism_ids:
+        if res.tourism:
             if res.price_unit * (res.discount and res.discount / 100 or 1) < \
-                    tourism_ids[0].agreed_price:
+                    res.tourism.get_box_price(res.product_id):
                 raise exceptions.Warning(_('Price error'),
                                          _('can not sell below the \
 minimum price'))
@@ -107,16 +90,9 @@ minimum price'))
     def write(self, vals):
         res = super(SaleOrderLine, self).write(vals)
         for line in self:
-            tourism_ids = self.env['tourism.customer'].search(
-                [('customer_id', '=', line.order_id.partner_id.id),
-                 ('tourism_id.date_start', '<=', date.today()),
-                 ('tourism_id.date_end', '>=', date.today()),
-                 ('tourism_id.id', 'in',
-                  line.product_id.tourism_ids._ids),
-                 ('tourism_id.state', '=', 'approved')])
-            if tourism_ids:
+            if line.tourism:
                 if line.price_unit * (line.discount and line.discount /
-                                      100 or 1) != tourism_ids[0].agreed_price:
+                                      100 or 1) != line.tourism.get_box_price(line.product_id):
                     raise exceptions.Warning(_('Price error'),
                                              _('can not sell below the \
 minimum price'))

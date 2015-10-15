@@ -30,9 +30,12 @@ class ResPartner(models.Model):
         ('op2', 'OP2'),
     ]
     PICK_PRINT_OPTIONS = [
-        ('op1', 'OP1'),
-        ('op2', 'OP2'),
+        ('not_valued', 'Not Valued Picking'),
+        ('valued', 'Valued Picking'),
+        ('tracked', 'Tracked Picking'),
     ]
 
-    inv_print_op = fields.Selection(INV_PRINT_OPTIONS, 'Invoice Printing')
-    pick_print_op = fields.Selection(PICK_PRINT_OPTIONS, 'Pick Printing')
+    inv_print_op = fields.Selection(INV_PRINT_OPTIONS, 'Invoice Printing',
+                                    default="op1")
+    pick_print_op = fields.Selection(PICK_PRINT_OPTIONS, 'Pick Printing',
+                                     default="not_valued")

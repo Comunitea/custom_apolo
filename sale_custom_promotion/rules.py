@@ -57,6 +57,20 @@ subgroup')])
                     eval(action.product_code):
                 return order_line.write({'discount': eval(action.arguments)})
 
+    @api.model
+    def create_line(self, args):
+        args['price_udv'] = args.get('price_unit')
+        if args.get('product_id', False):
+            lines = self.env['sale.order.line'].search(
+                [('product_id', '=', args.get('product_id')),
+                 ('order_id', '=', args.get('order_id'))])
+            args['product_uos'] = lines[0].product_uos.id
+            qty = lines[0].product_id.uom_qty_to_uos_qty(args.get('product_uom_qty'), lines[0].product_uos.id)
+            args['product_uos_qty'] = qty
+        else:
+            args['product_uos'] = args.get('product_uom')
+            args['product_uos_qty'] = args.get('product_uom_qty')
+        return super(PromotionsRulesActions, self).create_line(args)
 
 class PromotionsRulesConditionsExprs(models.Model):
 

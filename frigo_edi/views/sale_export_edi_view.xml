@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="sale_export_edi_tree" model="ir.ui.view">
+            <field name="name">sale.export.edi.tree</field>
+            <field name="model">sale.export.edi</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Sale exportations">
+                    <field name="period_start"/>
+                    <field name="period_end"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="sale_export_edi_form" model="ir.ui.view">
+            <field name="name">sale.export.edi.form</field>
+            <field name="model">sale.export.edi</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Sale exportation">
+                    <header>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="period_start" attrs="{'readonly': [('state', '=', 'send')]}"/>
+                                <field name="period_end" attrs="{'readonly': [('state', '=', 'send')]}"/>
+                            </group>
+                            <group>
+                                <field name="user_id"  attrs="{'readonly': [('state', '=', 'send')]}"/>
+                                <field name="date"  attrs="{'readonly': [('state', '=', 'send')]}"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="sale_export_edi_filter" model="ir.ui.view">
+            <field name="name">sale.export.edi.search</field>
+            <field name="model">sale.export.edi</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="">
+                   <field name="user_id"/>
+                   <field name="state"/>
+               </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_sale_export_edi">
+            <field name="name">Export edi sales</field>
+            <field name="res_model">sale.export.edi</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="sale_export_edi_tree"/>
+            <field name="search_view_id" ref="sale_export_edi_filter"/>
+        </record>
+
+        <menuitem id="menu_export_edi_sales" parent="menu_edi_frigo"
+                  name="Sales export" action="action_sale_export_edi"/>
+
+    </data>
+</openerp>

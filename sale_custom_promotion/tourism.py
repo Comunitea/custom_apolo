@@ -42,10 +42,10 @@ class TourismGroup(models.Model):
     state = fields.Selection((('new', 'New'), ('validated', 'Validated'),
                              ('approved', 'Approved'), ('cancel', 'Cancel')),
                              'State', default='new')
-    min_price = fields.Float('Minimum price', required=True)
+    min_price = fields.Float('Minimum price', required=True, help="Unit minimum price")
     all_exported = fields.Boolean('All customer exported', readonly=True,
                                   compute='_get_exported_customer')
-    guar_price = fields.Float('Guaranteed price', required=True)
+    guar_price = fields.Float('Guaranteed price', required=True, help="Unit guaranteed price")
     qty_estimated = fields.Float('Estimated consumption')
     supplier_id = fields.Many2one('res.partner', 'Supplier', required=True)
 
@@ -54,6 +54,8 @@ class TourismGroup(models.Model):
         all_exported = True
         for customer in self.customer_ids:
             if not customer.exported:
+                all_exported = False
+            if customer.modified_edi:
                 all_exported = False
         self.all_exported = all_exported
 
@@ -116,13 +118,7 @@ class TourismGroup(models.Model):
                  ('invoice_id.date_invoice', '<=', date_end)])
             total_qty = 0.0
             for line in lines:
-                # Like type ya no xiste
-                # if line.uos_id.like_type == 'boxes':
-                #     qty = line.quantity * line.product_id.un_ca
-                # else:
-                #     qty = line.quantity
-                qty = line.quantity
-                total_qty += qty
+                total_qty += line.product_id.uom_qty_to_uos_qty(line.quantity, line.product_id.log_unit_id.id)
             if total_qty > 0:
                 self.env['tourism.consumption'].create(
                     {'customer_id': customer_line.customer_id.id,
@@ -136,6 +132,8 @@ class TourismGroup(models.Model):
         for customer in self.customer_ids:
             if not customer.exported:
                 to_export += customer
+            elif customer.modified_edi:
+                to_export += customer
         edi_obj = self.env["edi"]
         edis = edi_obj.search([])
         for service in edis:
@@ -146,7 +144,8 @@ class TourismGroup(models.Model):
                         {'service_id': service.id})
                     wzd.export_file_pol('tourism.customer', to_export)
                     break
-        to_export.write({'exported': True})
+        to_export.with_context(pass_comp=True).write({'exported': True,
+                                                      'modified_edi': False})
 
     @api.multi
     def export_tourism_liquidation(self, date_start, date_end):
@@ -176,6 +175,10 @@ class TourismGroup(models.Model):
         tourism.export_tourism_liquidation(date_start, date_end)
 
     @api.multi
+    def button_export_consumptions(self):
+        self.export_monthly()
+
+    @api.multi
     def validate(self):
         self.write({'state': 'validated'})
 
@@ -194,9 +197,10 @@ class TourismCustomer(models.Model):
 
     tourism_id = fields.Many2one('tourism.group', 'Group')
     customer_id = fields.Many2one('res.partner', 'Customer')
-    agreed_price = fields.Float('Agreed price')
+    agreed_price = fields.Float('Agreed price', help="Unit price agreed")
     agreement_date = fields.Date('Agreement date')
     exported = fields.Boolean('Customer exported')
+    modified_edi = fields.Boolean('Modified')
     product_group = fields.Many2one('product.rappel.group', 'Product group')
     qty_estimated = fields.Float('Estimated consumption')
 
@@ -209,6 +213,29 @@ class TourismCustomer(models.Model):
             return {'warning': {'tittle': _('Price error'),
                                 'message': _('The agreed price must be higher \
 than the minimum price')}}
+
+    @api.multi
+    def write(self, vals):
+        for customer in self:
+            if customer.exported and not vals.get('modified_edi', False) \
+                    and not self._context.get('pass_comp', False):
+                vals['modified_edi'] = True
+        return super(TourismCustomer, self).write(vals)
+
+    @api.multi
+    def get_box_price(self, product):
+        """
+            En los turismos se trabaja con unidades, esta función calcula el
+            precio por unidad de medida del producto.
+        """
+        product_uom = product.uom_id
+        if product_uom == product.log_base_id:
+            return self.agreed_price / product.kg_un
+        elif product_uom == product.log_box_id:
+            return self.agreed_price * product.un_ca
+        else:
+            return self.agreed_price
+
 
 
 class TourismConsumption(models.Model):

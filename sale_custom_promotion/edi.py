@@ -18,7 +18,11 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, fields, api, exceptions, _
+from openerp import models, fields, api, tools, exceptions, _
+from mako.template import Template
+from mako.lookup import TemplateLookup
+import os
+from datetime import datetime
 
 
 class Edi(models.Model):
@@ -109,7 +113,8 @@ class ExportEdiFile(models.TransientModel):
     _inherit = "edi.export.wizard"
 
     @api.multi
-    def export_file_pol(self, active_model, objs=False):
+    def export_file_pol(self, active_model, objs=[]):
+        """En este fichero se exportan tanto nuevos clientes como liquidaciones."""
         doc_type_obj = self.env["edi.doc.type"]
         doc_obj = self.env["edi.doc"]
         doc_type = doc_type_obj.search([("code", '=', "pol")])[0]
@@ -119,24 +124,28 @@ class ExportEdiFile(models.TransientModel):
             count = last_pol_file.count + 1
         else:
             count = 1
+
         tmp_name = "export_pol.txt"
+        file_len = len(objs)
         filename = "%sPOL%s.%s" % (self.env.user.company_id.frigo_code,
-                                   str(len(objs)).zfill(4),
+                                   str(file_len).zfill(4),
                                    str(count).zfill(4))
-        templates_path = self.addons_path('sale_custom_promotion') + os.sep + 'templates' + os.sep
+        templates_path = self.addons_path('frigo_edi') + os.sep + 'wizard' + \
+            os.sep + 'templates' + os.sep
         mylookup = TemplateLookup(input_encoding='utf-8',
                                   output_encoding='utf-8',
                                   encoding_errors='replace')
         tmp = Template(filename=templates_path + tmp_name,
                        lookup=mylookup, default_filters=['decode.utf8'])
-
         objs = [o for o in objs]
         if active_model == 'tourism.customer':
-            doc = tmp.render_unicode(o=objs, o2=[], datetime=datetime,
-                                     user=self.env.user).encode('utf-8', 'replace')
+            o = objs
+            o2 = []
         else:
-            doc = tmp.render_unicode(o=[], o2=objs, datetime=datetime,
-                                     user=self.env.user).encode('utf-8', 'replace')
+            o = []
+            o2 = objs
+        doc = tmp.render_unicode(o=o, o2=o2, datetime=datetime,
+                                 user=self.env.user).encode('utf-8', 'replace')
         file_name = self[0].service_id.output_path + os.sep + filename
         f = file(file_name, 'w')
         f.write(doc)

@@ -2,16 +2,314 @@
 <openerp>
     <data>
         <template id="report_custom_picking">
+          <style type="text/css">
+           .top-border {
+               border-top: solid 2px #000000;
+           }
+           p {
+             line-height: 9px;
+             font-size: 11px;
+          }
+          strong {
+            font-size: 12px;
+          }
+          th{
+            font-size: 7px;
+          }
+          .no-padd-left {
+              padding-left: 0px !important;
+          }
+         .table1{
+             width: 100%;
+             font-size: 10px;
+          }
+         .table2{
+            width: 100%;
+            font-size: 10px;
+          }
+        .table2 .col-ref{
+          width: 10%;
+         }
+        .table2 .col-des{
+          width: 20%;
+        }
+        .table2 .col-iva{
+          width: 10%;
+         }
+        .table2 .col-qty{
+          width: 10%;
+        }
+        .table2 .col-unit{
+          width: 20%;
+         }
+        .table2 .col-pp{
+          width: 10%;
+        }
+        .table2 .col-ap{
+          width: 10%;
+         }
+        .table2 .col-net{
+          width: 10%;
+        }
+
+          .table2 td{
+            padding-right:4px;
+           }
+           .table2 th{
+             padding-right:4px;
+            }
+         .table2 thead{
+              border-top: solid 2px #000000;
+              border-bottom: solid 2px #000000;
+          }
+        .table2 tfoot{
+              border-top: solid 2px #000000;
+          }
+        .top_part{
+          min-height:30mm;
+        }
+        .middle_part{
+          min-height:162mm;
+        }
+        .my_footer{
+          border-top: solid 2px #000000;
+          border-bottom: solid 2px #000000;
+          min-height:13mm;
+        }
+
+
+
+        .table3{
+          width: 100%;
+        }
+        .table3 th strong{
+             font-size: 10px;
+        }
+        .table3 .col-fbase{
+          width:20%;
+        }
+        .table3 .col-fiva{
+          width:6%;
+        }
+        .table3 .col-fivaimp{
+          width:20%;
+        }
+        .table3 .col-freq{
+          width:6%;
+        }
+        .table3 .col-freqimp{
+          width:15%;
+        }
+        .table3 .col-ftd{
+          width:20%;
+        }
+        .table3 .col-fap"{
+          width:20%;
+        }
+        .table3 .col-ftotal{
+          width:20%;
+        }
+        .table3 td{
+          font-size: 11px;
+        }
+
+         </style>
             <t t-call="report.html_container">
                 <t t-foreach="docs" t-as="o">
-                    <t t-call="report.external_layout">
-                        <div class="page">
-                             <h1>Custom Picking Report</h1>
-                             <h3><span t-field="o.name"/></h3>
+                    <!-- CUSTOM VALUED REPORT -->
+                    <div class="page">
+                        <div class="row top_part">
+                            <div class="col-xs-7 top-border">
+                                <div class="col-xs-3 no-padd-left">
+                                      <strong>PICKING:</strong>
+                                </div>
+                                <div class="col-xs-4">
+                                    <strong><span t-field="o.name"/></strong>
+                                </div>
+                                <div class="col-xs-5">
+                                  <strong>DATE: <span t-esc="o.min_date.split(' ')[0].replace('-', '/')"/></strong>
+                                </div>
+                                <div t-if="o.partner_id">
+                                    <br/>
+                                    <p><strong>SOLICITANT</strong></p>
+                                    <p><span t-field="o.partner_id.ref"/> <span t-field="o.partner_id.name"/></p>
+                                    <p><span t-field="o.partner_id.street"/></p>
+                                    <p><span t-field="o.partner_id.zip"/> - <span t-field="o.partner_id.city"/></p>
+                                    <p>Tlfo. <span t-field="o.partner_id.phone"/></p>
+                                </div>
+                                <div>
+                                    <table class="table1">
+                                    <thead>
+                                        <tr>
+                                            <th><strong>Agent</strong></th>
+                                            <th><strong>Delivery Man</strong></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <span t-field="o.user_id.name"/>
+                                            </td>
+                                            <td>
+                                              <div t-if="o.route_detail_id">
+                                                <span t-field="o.route_detail_id.comercial_id.name"/>
+                                              </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    </table>
+                                  </div>
+                              </div>
+                              <div class="col-xs-1">
+                              </div>
+                              <div class="col-xs-4">
+                                  <div t-if="o.partner_id.commercial_partner_id">
+                                      <br/>
+                                      <br/>
+                                      <!-- Page: <span class="page"/> de <span class="topage"/> -->
+                                      <p><strong>INVOICE TO</strong>       </p>
+                                      <p><span t-field="o.partner_id.commercial_partner_id.ref"/> <span t-field="o.partner_id.commercial_partner_id.name"/></p>
+                                      <p><span t-field="o.partner_id.commercial_partner_id.street"/></p>
+                                      <p><span t-field="o.partner_id.commercial_partner_id.zip"/> - <span t-field="o.partner_id.commercial_partner_id.city"/></p>
+                                      <br/>
+                                      <p><strong>NIF: </strong><span t-field="o.partner_id.commercial_partner_id.vat"/> </p>
+                                  </div>
+                              </div>
+                          </div>
+
+
+
+                          <div class="middle_part">
+                          <table class="table2">
+                            <thead>
+                              <tr>
+                                  <th class="col-ref"><strong>Ref.</strong></th>
+                                  <th class="col-des"><strong>Description</strong></th>
+                                  <th class="col-iva text-right"><strong>% IVA</strong></th>
+                                  <th class="col-qty text-right"><strong>Qty.</strong></th>
+                                  <th class="col-unit"><strong>Unit</strong></th>
+                                  <th class="col-pp text-right"><strong t-if="o.partner_id.pick_print_op == 'valued' and o.picking_type_id.code == 'outgoing'">Pricelist Price</strong></th>
+                                  <th class="col-ap text-right"><strong t-if="o.partner_id.pick_print_op == 'valued' and o.picking_type_id.code == 'outgoing'">Applied Price</strong></th>
+                                  <th class="col-net text-right"><strong t-if="o.partner_id.pick_print_op == 'valued' and o.picking_type_id.code == 'outgoing'">Net import</strong></th>
+                              </tr>
+
+                            </thead>
+                            <tbody>
+                              <tr t-foreach="lines[o.id]" t-as="l">
+                                  <td>
+                                      <span t-esc="l['ref']"/>
+                                  </td>
+                                  <td>
+                                      <span t-esc="l['des']"/>
+                                  </td>
+                                  <td class="text-right">
+                                      <span t-esc="l['iva']"/>
+                                  </td>
+                                  <td class="text-right">
+                                      <span t-esc="l['qty']"/>
+                                  </td>
+                                  <td>
+                                      <span t-esc="l['unit']"/>
+                                  </td>
+                                  <td class="text-right">
+                                    <div  t-if="o.partner_id.pick_print_op == 'valued' and o.picking_type_id.code == 'outgoing'">
+                                      <span t-esc="l['pric_price']"/>
+                                    </div>
+                                  </td>
+                                  <td class="text-right">
+                                    <div  t-if="o.partner_id.pick_print_op == 'valued' and o.picking_type_id.code == 'outgoing'">
+                                      <span t-esc="l['app_price']"/>
+                                    </div>
+                                  </td>
+                                  <td class="text-right">
+                                    <div  t-if="o.partner_id.pick_print_op == 'valued' and o.picking_type_id.code == 'outgoing'">
+                                      <span t-esc="l['net']"/>
+                                    </div>
+                                  </td>
+                              </tr>
+                            </tbody>
+                            <tfoot>
+                              <td>
+                              </td>
+                              <td>
+                              </td>
+                              <td class="text-right">
+                                TOTALS:
+                              </td>
+                              <td class="text-right">
+                                <span t-esc="tfoot[o.id]['sum_qty']"/>
+                              </td>
+                              <td>
+
+                              </td>
+                              <td class="text-right">
+
+                              </td>
+                              <td class="text-right">
+
+                              </td>
+                              <td class="text-right">
+                                <div  t-if="o.partner_id.pick_print_op == 'valued' and o.picking_type_id.code == 'outgoing'">
+                                  <span t-esc="tfoot[o.id]['sum_net']"/>
+                                </div>
+                              </td>
+                            </tfoot>
+                          </table>
+
+                          </div>
+
+
+
+
+                        <div class="my_footer">
+                            <table class="table3" t-if="o.partner_id.pick_print_op == 'valued' and o.picking_type_id.code == 'outgoing'">
+                            <thead>
+                                <tr>
+                                    <th class="col-fbase text-right"><strong>IMPONIBLE BASE</strong></th>
+                                    <!-- <th class="col-fiva text-right"><strong>IVA</strong></th> -->
+                                    <th class="col-fivaimp text-right"><strong>IMPORT IVA</strong></th>
+                                    <!-- <th class="col-freq text-right"><strong>% REQ</strong></th> -->
+                                    <!-- <th class="col-freqimp text-right"><strong>IMPORT REQ</strong></th> -->
+                                    <th class="col-ftd text-center"><strong>TOTAL DOCUMENT</strong></th>
+                                    <th class="col-fap text-right"><strong>ACCOUNT PAID</strong></th>
+                                    <th class="col-ftotal text-right"><strong>TOTAL TO PAY</strong></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                  <td class="text-right">
+                                      <span t-esc="totals[o.id]['base']"/>
+                                  </td>
+                                  <!-- <td class="text-right">
+                                      <span t-esc="totals[o.id]['iva']"/>
+                                  </td> -->
+                                  <td class="text-right">
+                                      <span t-esc="totals[o.id]['iva_import']"/>
+                                  </td>
+                                  <!-- <td class="text-right">
+                                      <span t-esc="totals[o.id]['rec']"/>
+                                  </td>
+                                  <td class="text-right">
+                                      <span t-esc="totals[o.id]['imp_rec']"/>
+                                  </td> -->
+                                  <td class="text-center">
+                                     <div class="full-border">
+                                      <span t-esc="totals[o.id]['total_doc']"/>
+                                    </div>
+                                  </td>
+                                  <td class="text-right">
+                                      <span t-esc="totals[o.id]['acc_paid']"/>
+                                  </td>
+                                  <td class="text-right">
+                                      <span t-esc="totals[o.id]['total_paid']"/>
+                                  </td>
+                                </tr>
+                            </tbody>
+                            </table>
                         </div>
-                    </t>
-                 </t>
-             </t>
+                    </div>
+                </t>
+            </t>
         </template>
     </data>
 </openerp>

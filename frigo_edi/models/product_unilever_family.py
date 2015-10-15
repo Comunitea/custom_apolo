@@ -18,7 +18,7 @@
 #
 ##############################################################################
 
-from openerp import models, fields
+from openerp import models, fields, api
 
 
 class ProductUnileverFamily(models.Model):
@@ -57,3 +57,22 @@ class ProductTemplate(models.Model):
     rappel_group_id = fields.Many2one('product.rappel.group', 'Rappel group')
     rappel_subgroup_id = fields.Many2one('product.rappel.subgroup',
                                          'Rappel subgroup')
+
+
+class ProductProduct(models.Model):
+
+    _inherit = 'product.product'
+
+    @api.multi
+    def get_supplier_product_code(self, supplier_id):
+        self.ensure_one()
+
+        suppinfo = self.env['product.supplierinfo'].search(
+            [('product_tmpl_id', '=', self.product_tmpl_id.id),
+             ('name', '=', supplier_id)])
+
+        if suppinfo.product_code:
+            res_code = suppinfo.product_code or ''
+        else:
+            res_code = self.default_code or ''
+        return res_code
