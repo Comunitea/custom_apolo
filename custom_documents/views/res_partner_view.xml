@@ -12,6 +12,7 @@
                 <group strinf="Print Preferences">
                     <field name="inv_print_op"/>
                     <field name="pick_print_op"/>
+                    <field name="add_summary"/>
                 </group>
             </page>
         </notebook>

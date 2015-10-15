@@ -37,12 +37,25 @@ class custom_invoice_parser(models.AbstractModel):
         report_name = 'custom_documents.report_custom_invoice'
         report = report_obj._get_report_from_name(report_name)
         docs = []
-        for invoice in self.env[report.model].browse(self._ids):
-            docs.append(invoice)
+        totals = {}
+        for inv in self.env[report.model].browse(self._ids):
+            docs.append(inv)
+            idate = inv.date_invoice.split("-")
+            inv_date = idate[2] + '/' + idate[1] + '/' + idate[0]
+            deliver_man = ''
+            if inv.pick_ids and inv.pick_ids[0].route_detail_id:
+                detail_route = inv.pick_ids[0].route_detail_id
+                if detail_route.commercial_id:
+                    deliver_man = detail_route.commercial_id.name
+            totals[inv.id] = {
+                'inv_date': inv_date,
+                'deliver_man': deliver_man
+            }
 
         docargs = {
             'doc_ids': self._ids,
             'doc_model': report.model,
             'docs': docs,
+            'totals': totals,
         }
         return report_obj.render(report_name, docargs)

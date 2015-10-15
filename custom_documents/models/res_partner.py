@@ -26,8 +26,9 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     INV_PRINT_OPTIONS = [
-        ('op1', 'OP1'),
-        ('op2', 'OP2'),
+        ('give_deliver', 'Give in Delivery'),
+        ('group_pick', 'Group by Pick'),
+        ('group_by_partner', 'Group by Partner'),
     ]
     PICK_PRINT_OPTIONS = [
         ('not_valued', 'Not Valued Picking'),
@@ -36,6 +37,9 @@ class ResPartner(models.Model):
     ]
 
     inv_print_op = fields.Selection(INV_PRINT_OPTIONS, 'Invoice Printing',
-                                    default="op1")
+                                    default="give_deliver")
     pick_print_op = fields.Selection(PICK_PRINT_OPTIONS, 'Pick Printing',
                                      default="not_valued")
+    add_summary = fields.Boolean('Add Summary Articles',
+                                 help="Add a page to the invoice with the"
+                                 " summary of invoiced products")
