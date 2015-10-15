@@ -39,10 +39,10 @@ class stock_picking_wave(models.Model):
             for op in wave.wave_report_ids:
                 values = {
                     'ID': op.id,
-                    'PRODUCTO': op.product_id.name and op.product_id.short_name or "",
+                    'product': op.product_id.name and op.product_id.short_name or "",
                     'EAN' :op.ean13,
                     'CANTIDAD': op.product_qty or 0.00,
-                    'LOTE': op.lot_id and op.lot_id.name or "",
+                    'lot': op.lot_id and op.lot_id.name or "",
                     'PAQUETE': op.pack_id and op.pack_id.name or "",
                     'ORIGEN': op.location_id.name_get()[0][1],
                     'DESTINO': 'Salida', #; op.location_dest_id.name_get()[0][1],
@@ -50,21 +50,26 @@ class stock_picking_wave(models.Model):
                     'VISITED': op.visited or False,
                     'origen_id': op.location_id.id or 0,
                     'destino_id': 0,
-                    'paquete_id': op.pack_id.id or 0,
+                    'pack_id': op.pack_id.id or 0,
                     'paquete_dest_id' : False,
                     'qty': op.product_qty or 0,
                     'uom': op.uom_id.name or False,
                     'uom_id': op.uom_id.id or False,
+                    'uom_qty' : op.product_qty or 0.00,
                     'uos_qty': op.uos_qty or op.product_qty or 0,
                     'uos' :op.uos_id.name or op.uom_id.name,
                     'uos_id': op.uos_id.id or op.uom_id.id or False,
                     'origen' : op.location_id.get_short_name(),
+                    'origen_bcd' : op.location_id.bcd_name or op.location_id.get_short_name(),
                     'destino' : 'D',#op.location_dest_id.get_short_name(),
                     'product_id': op.product_id.id or False,
                     'to_revised':op.to_revised or False,
-                    'variable': op.product_id.is_var_coeff or False,
+                    'is_var_coeff': op.product_id.is_var_coeff or False,
                     'num_ops':len(op.operation_ids) or 1,
-                    'op': op.operation_ids[0].id or False
+                    'op': op.operation_ids[0].id or False,
+                    'customer_id': op.customer_id.comercial or op.customer_id.name,
+                    'ref': op.customer_id.ref or False,
+                    'qty_available': op.product_id.qty_available or 0.00
                     }
 
                 ind += 1

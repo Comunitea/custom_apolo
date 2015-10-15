@@ -30,6 +30,7 @@ class stock_pack_operation(models.Model):
     visited = fields.Boolean('Visited', default=False)
     state= fields.Char()
     wave_ok = fields.Boolean('Wave Ok', default = True)
+    op_package_id = fields.Many2one('stock.quant.package', 'Original Pack',  default = False)
 
     @api.multi
     def get_user_packet_busy(self, my_args):
@@ -96,9 +97,9 @@ class stock_pack_operation(models.Model):
             for op in ops:
                 values = {
                 'ID': op.id,
-                'PRODUCTO': op.product_id and op.product_id.short_name or "",
+                'product': op.product_id and op.product_id.short_name or "",
                 'CANTIDAD': op.product_qty,
-                'LOTE': op.packed_lot_id and op.packed_lot_id.name or "",
+                'lot': op.packed_lot_id and op.packed_lot_id.name or "",
                 'PAQUETE': op.package_id.id and op.package_id.name or "",
                 'ORIGEN': op.location_id.name_get()[0][1],
                 'DESTINO': op.location_dest_id.name_get()[0][1],
@@ -106,22 +107,26 @@ class stock_pack_operation(models.Model):
                 'VISITED': op.visited,
                 'origen_id': op.location_id.id or 0,
                 'destino_id': op.location_dest_id.id or 0,
-                'paquete_id': op.package_id.id or 0,
+                'pack_id': op.package_id.id or 0,
                 'qty': op.product_qty or 0,
                 'paquete_dest_id' : op.result_package_id.id or False,
                 'uom' :op.product_uom_id and op.product_uom_id.name or '',
                 'origen' : op.location_id.get_short_name(),
+                'origen_bcd' : op.location_id.bcd_name or op.location_id.get_short_name(),
                 'destino' : op.location_dest_id.get_short_name(),
+                'destino_bcd' : op.location_dest_id.bcd_name or op.location_dest_id.get_short_name(),
                 'product_id': op.product_id.id or False,
-                'lot_id': op.packed_lot_id.id
+                'lot_id': op.packed_lot_id.id,
+                'qty_available':op.packed_lot_id.product_id.qty_available or 0.00
                  }
                 if not op.product_id:
                     domain_package = [('id', '=', op.package_id.id)]
                     package_pool= self.env['stock.quant.package'].search(domain_package)[0]
-                    values['LOTE']=package_pool.packed_lot_id.name
+                    values['lot']=package_pool.packed_lot_id.name
                     values['lot_id'] = package_pool.packed_lot_id.id
-                    values['PRODUCTO'] = package_pool.packed_lot_id.product_id.short_name or ""
+                    values['product'] = package_pool.packed_lot_id.product_id.short_name or ""
                     values['product_id'] = package_pool.packed_lot_id.product_id.id or False
+                    values['qty_available'] = package_pool.packed_lot_id.product_id.qty_available or 0.00
                 ind += 1
                 vals[str(ind)] = values
             return vals
@@ -142,9 +147,9 @@ class stock_pack_operation(models.Model):
                 values = {
                 'ID': op.id,
                 'id': op.id,
-                'PRODUCTO': op.product_id.short_name or op.packed_lot_id.product_id.short_name or op.packed_lot_id.product_id.name,
+                'product': op.product_id.short_name or op.packed_lot_id.product_id.short_name or op.packed_lot_id.product_id.name,
                 'CANTIDAD': op.product_qty,
-                'LOTE': op.packed_lot_id and op.packed_lot_id.name or "",
+                'lot': op.packed_lot_id and op.packed_lot_id.name or "",
                 'PAQUETE': op.package_id.id and op.package_id.name or "",
                 'ORIGEN': op.location_id.name_get()[0][1],
                 'DESTINO': op.location_dest_id.name_get()[0][1],
@@ -152,12 +157,14 @@ class stock_pack_operation(models.Model):
                 'VISITED': False,
                 'origen_id': op.location_id.id or 0,
                 'destino_id': op.location_dest_id.id or 0,
-                'paquete_id': op.package_id.id or 0,
+                'pack_id': op.package_id.id or 0,
                 'qty': op.product_qty or 0,
                 'result_package_id' : op.result_package_id.id or False,
                 'uom' :op.product_uom_id and op.product_uom_id.name or "",
                 'origen' : op.location_id.name_get()[0][1],
                 'destino' : op.location_dest_id.name_get()[0][1],
+                'origen_bcd' : op.location_id.bcd_name or op.location_id.get_short_name(),
+                'destino_bcd' : op.location_dest_id.bcd_name or op.location_dest_id.get_short_name(),
                 'product_id': op.product_id.id or op.packed_lot_id.product_id.id or False,
                 'lot_id': op.packed_lot_id.id,
                 'packed_qty': op.packed_qty or 0,
@@ -169,7 +176,8 @@ class stock_pack_operation(models.Model):
                 'paquete': op.package_id.id and op.package_id.name or "",
                 'lot': op.packed_lot_id and op.packed_lot_id.name or "",
                 'producto': op.product_id.short_name or op.packed_lot_id.product_id.short_name or op.packed_lot_id.product_id.name,
-                'to_process': op.to_process
+                'to_process': op.to_process,
+                'qty_available':op.packed_lot_id.product_id.qty_available or 0.00
                 }
 
                 #revisar para palet_multiproducto
@@ -182,6 +190,7 @@ class stock_pack_operation(models.Model):
                         values['product'] = package_pool.packed_lot_id.product_id.short_name or ''
                         values['product_id'] = package_pool.packed_lot_id.product_id.id or False
                         values['uom']=package_pool.packed_lot_id.product_id.uom_id.name
+                        values['qty_available'] = package_pool.packed_lot_id.product_id.qty_available or 0.00
                 ind += 1
                 vals[str(ind)] = values
             return vals

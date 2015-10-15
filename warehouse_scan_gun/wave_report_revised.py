@@ -56,18 +56,38 @@ class wave_report(models.Model):
     to_revised = fields.Boolean(string = 'To Revised', compute='_get_wrtrevised')
     wave_report_revised_id = fields.Many2one("wave.report.revised", string = 'Wave Report', compute='_get_revised_id')
 
+
     @api.multi
-    def set_waves_op_processed(self, my_args):
+    def change_wave_op_values_packed_change(self, my_args):
+        id = my_args.get('id', False)
+        user_id = my_args.get('user_id', False)
+        vals = my_args.get('values', False)
+        wave_obj = self.browse(id)
+        env2 = wave_obj.env(self._cr, user_id, self._context)
+        wave = wave_obj.with_env(env2)
+        res = True
+        if wave:
+            for op in wave.operation_ids:
+                #op.write(vals)
+                res = op.write(vals) and res
+        return res
+
+
+    @api.multi
+    def change_wave_op_values(self, my_args):
+
         id = my_args.get('id', 0)
         user_id = my_args.get('user_id', False)
         wave_obj = self.browse(id)
         env2 = wave_obj.env(self._cr, user_id, self._context)
         wave = wave_obj.with_env(env2)
+        res = True
         if wave:
-            for op in self.operation.ids:
+            for op in wave.operation_ids:
                 vals = {'to_process': True,
                         'visited': True}
-                op.write(vals)
+                res = op.write(vals) and res
+        return res
 
 class wave_report_revised(models.Model):
 

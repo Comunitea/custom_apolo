@@ -90,7 +90,7 @@
             <field name="context">{'doc_type': 'ven'}</field>
         </record>
 
-        <record id="ir_export_rco_file" model="ir.values">
+        <record id="ir_export_ven_file" model="ir.values">
             <field name="name">Export Frigo VEN</field>
             <field name="key2">client_action_multi</field>
             <field name="model">sale.export.edi</field>
