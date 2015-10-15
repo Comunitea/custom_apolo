@@ -120,6 +120,8 @@
         border-left: solid 1px #000000;
         border-bottom: solid 1px #000000;
         border-right: solid 1px #000000;
+        margin-left: 6px;
+        margin-right: 6px;
         }
        </style>
           <t t-call="report.html_container">
@@ -317,7 +319,7 @@
                         <span t-esc="totals[o.id]['iva_import']"/>
                     </td>
                     <td class="text-center">
-                       <div class="full-border">
+                       <div class="full-border full-border-no-used">
                         <strong><span t-esc="totals[o.id]['total_doc']"/></strong>
                       </div>
                     </td>
