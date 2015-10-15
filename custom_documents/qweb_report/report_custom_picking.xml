@@ -121,17 +121,14 @@
         border-bottom: solid 1px #000000;
         border-right: solid 1px #000000;
         }
-        .fullwidth{
-        width: 100%;
-        }
        </style>
           <t t-call="report.html_container">
                 <t t-foreach="docs" t-as="o">
                     <!-- CUSTOM VALUED REPORT -->
                     <div class="page">
                         <t t-call="custom_documents.picking_top_part"/>
-                         <div class="middle_part">
-                          <table class="table2">
+                         <div class="row middle_part">
+                          <table class="table2 no-padd-left">
                             <thead>
                               <tr>
                                   <th class="col-ref"><strong>Ref.</strong></th>
@@ -235,7 +232,7 @@
 
         <template id="picking_top_part">
             <div class="row top_part">
-              <div class="col-xs-7 top-border">
+              <div class="col-xs-7 top-border no-padd-left">
                   <div class="col-xs-3 no-padd-left">
                         <strong>PICKING:</strong>
                   </div>
@@ -300,7 +297,7 @@
         </template>
 
         <template id="picking_bottom_part">
-          <div class="my_footer">
+          <div class="row my_footer">
               <table class="table3" t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">
               <thead>
                   <tr>
