@@ -35,8 +35,8 @@
                                 type="object" attrs="{'invisible': [('all_exported', '=', True)]}"
                                 class="oe_highlight"/>
 
-                        <button name="button_export_consumptions" string="Export consumptions"
-                                type="object" class="oe_highlight"/>
+                        <!--button name="button_export_consumptions" string="Export consumptions"
+                                type="object" class="oe_highlight"/-->
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>

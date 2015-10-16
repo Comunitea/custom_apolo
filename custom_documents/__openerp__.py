@@ -29,9 +29,12 @@
 
     """,
     "images": [],
-    "depends": ["stock_valued_picking", "web", "report"],
+    "depends": [
+        "stock_valued_picking",
+        "stock_picking_review"
+    ],
     "data": ['views/res_partner_view.xml',
-            #  'views/custom_assets.xml', NO ME FUNCIONA en esta revision
+             #  'views/custom_assets.xml', NO ME FUNCIONA en esta revision
              'views/custom_reports.xml',
              'qweb_report/report_custom_picking.xml',
              'qweb_report/report_custom_invoice.xml'],

@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Copyright (C) 2015 Comunitea Servicios Informáticos All Rights Reserved
-#    $Carlos Lombardía Rodríguez$ <carlos@comunitea.com>
-#    $Javier Colmenero Fernández$ <javier@comunitea.com>
+#    Copyright (C) 2015 Comunitea All Rights Reserved
+#    $Jesús Ventosinos Mayor <jesus@comunitea.com>$
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published
@@ -23,23 +22,17 @@ from openerp import models, fields, api, exceptions, _
 
 
 class ResPartner(models.Model):
+
     _inherit = 'res.partner'
 
-    INV_PRINT_OPTIONS = [
-        ('give_deliver', 'Give in Delivery'),
-        ('group_pick', 'Group by Pick'),
-        ('group_by_partner', 'Group by Partner'),
-    ]
-    PICK_PRINT_OPTIONS = [
-        ('not_valued', 'Not Valued Picking'),
-        ('valued', 'Valued Picking'),
-        ('tracked', 'Tracked Picking'),
-    ]
+    is_parent_chain = fields.Boolean('Is parent chain',
+                                     compute='_get_is_parent_chain')
 
-    inv_print_op = fields.Selection(INV_PRINT_OPTIONS, 'Invoice Printing',
-                                    default="give_deliver")
-    pick_print_op = fields.Selection(PICK_PRINT_OPTIONS, 'Pick Printing',
-                                     default="not_valued")
-    add_summary = fields.Boolean('Add Summary Articles',
-                                 help="Add a page to the invoice with the"
-                                 " summary of invoiced products")
+    @api.one
+    def _get_is_parent_chain(self):
+        parent_chain = False
+        if self.is_company:
+            for child in self.child_ids:
+                if child.is_company:
+                    parent_chain = True
+        self.is_parent_chain = parent_chain

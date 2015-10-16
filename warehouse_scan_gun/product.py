@@ -157,8 +157,7 @@ class product_product (models.Model):
 
     @api.multi
     def check_picking_zone(self, my_args):
-        #import ipdb; ipdb.set_trace()
-
+       
         picking_location_id = my_args.get("picking_location_id", False)
         product_id = my_args.get("product_id", True)
         write = my_args.get("write", False)

@@ -21,6 +21,7 @@
 from openerp import models, fields, api, exceptions, _
 from datetime import datetime, date, timedelta
 
+
 class AccountInvoiceLine(models.Model):
 
     _inherit = 'account.invoice.line'
@@ -115,4 +116,3 @@ class AccountInvoiceLine(models.Model):
         discounts = self._get_applicable_promotions(sale_line, total_discount)
         self.supplier_disc_qty = sum([x[1] for x in discounts])
         self.rest_disc_qty = sum([x[0] - x[1] for x in discounts])
-

@@ -46,6 +46,17 @@ class ProductRappelSubgroup(models.Model):
     name = fields.Char('name', required=True)
     code = fields.Char('Code', size=2, required=True)
     group_id = fields.Many2one('product.rappel.group', 'Group')
+    estimation_ids = fields.One2many('product.rappel.subgroup.estimation',
+                                     'subgroup_id', 'Estimations')
+
+
+class ProductRappelSubgroupEstimation(models.Model):
+
+    _name = 'product.rappel.subgroup.estimation'
+
+    subgroup_id = fields.Many2one('product.rappel.subgroup', 'Subgroup')
+    partner_id = fields.Many2one('res.partner', 'Customer')
+    estimation = fields.Float('Estimations')
 
 
 class ProductTemplate(models.Model):

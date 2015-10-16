@@ -40,6 +40,16 @@ class PromotionsRules(models.Model):
             return False
         return res
 
+    @api.multi
+    def get_discount_subgroups(self):
+        self.ensure_one()
+        subgroups = self.env['product.rappel.subgroup']
+        for expression in self.expressions:
+            if expression.attribute == 'subgroup':
+                code = expression.value.replace("'", "")
+                subgroups += self.env['product.rappel.subgroup'].search([('code', '=', code)])
+        return subgroups
+
 
 class PromotionsRulesActions(models.Model):
 

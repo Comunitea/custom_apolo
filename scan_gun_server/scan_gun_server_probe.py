@@ -10,7 +10,12 @@ params = {}
 
 
 def read_file():
-    with open('telnet.cfg', 'r') as configfile:
+    import ipdb; ipdb.set_trace()
+    if sys.argv:
+        telnet_cfg = sys.argv
+    else:
+        telnet_cfg = 'telnet.cfg'
+    with open(sys.argv, 'r') as configfile:
         for line in configfile:
             key = line[:line.index('=')]
             value = line[line.index('=') + 1:].replace('\n', '')
@@ -32,6 +37,7 @@ class Connection:
         self.handler = handler
         self.current_mode = False
         self.uid = uid
+
 
 
 class ConnectionManager:

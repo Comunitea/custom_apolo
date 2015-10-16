@@ -53,5 +53,8 @@
             name="custom_documents.report_custom_invoice"
             file="custom_documents.report_custom_invoice"
         />
+        <record id="action_report_custom_invoice" model="ir.actions.report.xml">
+            <field name="paperformat_id" ref="my_A4_paperformat"/>
+        </record>
     </data>
 </openerp>
