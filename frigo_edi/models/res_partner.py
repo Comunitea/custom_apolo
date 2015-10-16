@@ -44,6 +44,7 @@ class ResPartner(models.Model):
     local_share_partner_id = fields.Many2one('res.partner',
                                              'Partner local share')
     indirect_customer = fields.Boolean("Indirect customer")
+    concession_code = fields.Char('Concession chain code', size=3)
 
     _constraints = [(models.Model._check_recursion,
                     'You cannot create recursive Partner hierarchies.',

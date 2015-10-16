@@ -31,7 +31,7 @@ class StockLocation(osv.osv):
 
     def _complete_name (self, cr, uid, ids, name, args, context=None):
         #no funciona
-        #import ipdb; ipdb.set_trace()
+
         res = super(stock_location, self)._complete_name(cr, uid, ids, name, args, context=None)
         for m in self.browse(cr, uid, ids, context=context):
             if len(m.bcd_code)==11:
@@ -66,34 +66,67 @@ class stock_location(models.Model):
     @api.multi
     def is_location_free(self, my_args):
         location_id = my_args.get("location_id", False)
-        domain = [('loc_id','=', location_id)]
+        domain = [('location_id','=', location_id)]
+
         packs=self.env['stock.quant'].search(domain)
-        busy = False
+        busy = True
         if packs:
-            busy = True
+            busy = False
+
         domain = [('location_dest_id', '=', location_id),
                   ('processed', '=', 'false'),
                   ('picking_id.state', 'in', ['assigned'])]
         ops=self.env['stock.pack.operation'].search(domain)
+
         if ops:
-             busy = True
+             busy = False
         return busy
 
     @api.multi
-    def get_parent_location(self, my_args):
+    def get_parent_location_id(self, my_args):
+
         location_id = my_args.get("location_id", False)
-        parent_loc = self.browse[location_id]
+        bcd_code = my_args.get('bcd_code', '')
         res = False
-        if parent_loc:
-            res = parent_loc.parent_id.id
+        if location_id:
+            domain = [('id', '=', location_id)]
+
+            parent_loc = self.search(domain, order = 'id desc', limit =1)
+            res = False
+            if parent_loc:
+                res = parent_loc.location_id.id
+        elif bcd_code:
+            domain = [('bcd_code', '=', bcd_code)]
+            parent_loc= self.search(domain, order = 'id desc', limit =1)
+            if parent_loc:
+                res = parent_loc.location_id.id
 
         return res
 
     @api.multi
-    def get_location_gun_info(self, my_args):
-        #import ipdb; ipdb.set_trace()
+    def get_list_location(self, my_args):
 
-        #import ipdb; ipdb.set_trace()
+        location_ids = my_args.get("location_id", False)
+        res = []
+        if location_ids:
+            location_child_ids = self.search([('location_id', 'in', location_ids)])
+            for loc in location_child_ids:
+                res.append({'id':loc.id, 'cdb_name' : loc.cdb_name})
+        return res
+
+    @api.multi
+    def get_location_id_childs(self, my_args):
+
+        location_id = my_args.get("location_id", False)
+        res = []
+        if location_id:
+            location_child_ids = self.search([('location_id', '=', location_id)])
+            for loc in location_child_ids:
+                res.append(loc.id)
+        return res
+
+    @api.multi
+    def get_location_gun_info(self, my_args):
 
         location_id = my_args.get("location_id", False)
         bcd_code = my_args.get('bcd_code', False)
@@ -103,11 +136,12 @@ class stock_location(models.Model):
             domain= [('bcd_code', '=', bcd_code)]
 
         type = my_args.get("type", '')
+
         if type == 'picking':
             #se busca para hacer un picking, con lo que vale de id o delocation:_id
             domain.append(('location_id','=',location_id))
 
-        location = self.search(domain, order = 'id desc')
+        location = self.search(domain, order = 'id desc', limit =1)
 
         location_child_ids = self.search([('location_id', '=', location.id)])
         child = len(location_child_ids)
@@ -118,15 +152,17 @@ class stock_location(models.Model):
                 childs.append({'bcd_name': loc.bcd_name,
                                'id': loc.id})
         vals = {'exist':False}
+        if not type:
+            type = ''
         if location:
             vals = {
                 'exist' : True,
-                type or '' + 'location_id' : location.id,
-                type or '' + 'location' : location.name_get()[0][1],
+                type + 'location_id' : location.id,
+                type + 'location' : location.name_get()[0][1],
                 'usage':location.usage,
                 'zone':location.zone,
                 'temp_type_id':location.temp_type_id.id or False,
-                'bcd_name': location.bcd_name,
+                type + 'bcd_name': location.bcd_name,
                 'parent_id': location.location_id.id or False,
                 'childs': childs,
             }

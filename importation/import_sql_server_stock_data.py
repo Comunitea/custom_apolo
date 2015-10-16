@@ -149,13 +149,13 @@ class DatabaseImport:
         except xmlrpclib.Fault, err:
             raise Exception('Error %s en default_get: %s' % (err.faultCode, err.faultString))
 
-    def execute(self, model, method, ids, context={}):
+    def execute(self, model, method, args = [], context={}):
         """
         Wrapper del método execute.
         """
         try:
             res = self.object_facade.execute(self.dbname, self.user_id, self.user_passwd,
-                                    model, method, ids, context)
+                                    model, method, *args, **context)
             return res
         except socket.error, err:
             raise Exception('Conexión rechazada: %s!' % err)
@@ -197,6 +197,7 @@ class DatabaseImport:
             print "%s de %s" % (str(cont), str(num_rows))
 
     def import_stock(self, cr):
+        inv_id = self.create("stock.inventory", {"name": "Inventario inicial"})
         cr.execute("select case CAM when '' then null else CAM + EST + RIGHT('0'+convert(varchar,FIL),2) + RIGHT('0'+convert(varchar,PIS),2)end as location_id_map, "
                    "REF_PROD as product_id_map, NUM_LOTE as lot_id_map, NUM_PALET as package_id_map, UNIDADES as box_qty, COMPOS as unit_qty from dbo.TB_ESTOCA")
         data = cr.fetchall()
@@ -206,12 +207,56 @@ class DatabaseImport:
         for row in data:
             product_ids = self.search("product.product", [('default_code', '=', str(int(row.product_id_map))),'|',('active', '=', False),('active', '=', True)])
             if product_ids:
-                product_data = self.read("product.product", product_ids[0], ["uom_id"])
-                package_vals = {'name': row.name,
-                                'uos_id': product_data["uom_id"][0]}
-                self.create("stock.quant.package", package_vals)
+                product_data = self.read("product.product", product_ids[0], ["uom_id", "log_unit_id", "log_base_id", "log_box_id"])
+                loc_qty = row.box_qty
+                if row.unit_qty:
+                    if product_data["log_unit_id"]:
+                        unit = product_data["log_unit_id"][0]
+                    elif product_data["log_base_id"]:
+                        unit = product_data["log_base_id"][0]
+                    else:
+                        unit = product_data["log_box_id"][0]
+                    if unit:
+                        print "initial loc_qty: ", loc_qty
+                        loc_qty += self.execute("product.product", "uos_qty_to_uom_qty", [product_ids[0], row.unit_qty, unit])
+                        print "end loc_qty: ", loc_qty
+
+                if row.lot_id_map and row.lot_id_map.strip() != "":
+                    lots_ids = self.search("stock.production.lot", [('product_id', '=', product_ids[0]),('name', 'ilike', row.lot_id_map)])
+                    if not lots_ids:
+                        raise Exception("No se ha podido encontrar el lote n: %s" % row.lot_id_map)
+                else:
+                    self.write("product.product", [product_ids[0]], {'track_all': False, 'track_incoming': False, 'track_outgoing': False})
+                    lots_ids = []
+                if row.package_id_map:
+                    package_ids = self.search("stock.quant.package", [('name', '=', row.package_id_map)])
+                    if not package_ids:
+                        raise Exception("No se ha podido encontrar el lote n: %s" % row.package_id_map)
+                    elif len(package_ids) > 1:
+                        raise Exception("Hay más de un paquete con número %s" % row.package_id_map)
+                else:
+                    package_ids = []
+                if row.location_id_map:
+                    location_ids = self.search("stock.location", [('bcd_code', '=', row.location_id_map)])
+                    if not location_ids:
+                        raise Exception("No se ha podido encontrar la ubicacion: %s" % row.location_id_map)
+                else:
+                    location_ids = self.search("stock.location", [('special_location', '=', True)])
+                    if not location_ids:
+                        raise Exception("No se ha podido encontrar una ubicación especial")
+
+                inv_line_vals = {'inventory_id': inv_id,
+                                 'product_id': product_ids[0],
+                                 'product_qty': loc_qty,
+                                 'product_uom_id': product_data["uom_id"][0],
+                                 'location_id': location_ids[0],
+                                 'prod_lot_id': lots_ids and lots_ids[0] or False,
+                                 'package_id': package_ids and package_ids[0] or False}
+                self.create("stock.inventory.line", inv_line_vals)
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
+        self.execute("stock.inventory", "prepare_inventory", [[inv_id]])
+        self.execute("stock.inventory", "action_done", [[inv_id]])
 
     def process_data(self):
         """
@@ -227,7 +272,7 @@ class DatabaseImport:
 
             self.import_lots(cr)
             self.import_packages(cr)
-            #self.import_stock(cr)
+            self.import_stock(cr)
 
         except Exception, ex:
             print u"Error al conectarse a las bbdd: ", repr(ex)

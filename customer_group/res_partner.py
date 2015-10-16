@@ -18,11 +18,21 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import sale_promotion
-from . import tourism
-from . import stock
-from . import sale
-from . import product
-from . import account_invoice
-from . import rules
-from . import wizard
+from openerp import models, fields, api, exceptions, _
+
+
+class ResPartner(models.Model):
+
+    _inherit = 'res.partner'
+
+    is_parent_chain = fields.Boolean('Is parent chain',
+                                     compute='_get_is_parent_chain')
+
+    @api.one
+    def _get_is_parent_chain(self):
+        parent_chain = False
+        if self.is_company:
+            for child in self.child_ids:
+                if child.is_company:
+                    parent_chain = True
+        self.is_parent_chain = parent_chain

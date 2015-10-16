@@ -71,6 +71,58 @@ class Edi(models.Model):
             return super(Edi, self)._get_file_name(filename, type)
 
     @api.model
+    def parse_tourism(self, file_path, doc):
+        f = codecs.open(file_path, "r", "ISO-8859-1", 'ignore')
+        for line in f:
+            """En los ficheros de ejemplo se marca el final del archivo con una
+               linea de 0"""
+            if line == '0' * 69:
+                break
+            product_code = line[:10].strip()
+            group_code = line[10:16].strip()
+            description = line[16:46].strip()
+            year = line[46:50].strip()
+            sec_price = float(line[50:58])
+            min_price = float(line[58:68])
+            group = self.env['tourism.group'].search([('name', '=',
+                                                       group_code)])
+            supplierinfo = self.env['product.supplierinfo'].search(
+                [('product_code', '=', product_code)])
+            if not supplierinfo:
+                log.error("Product with code %s not found." % product_code)
+                continue
+            if not group:
+                group = self.env['tourism.group'].create(
+                    {'name': group_code,
+                     'description': description,
+                     'date_start': '%s-01-01' % year,
+                     'date_end': '%s-12-31' % year,
+                     'min_price': min_price,
+                     'guar_price': sec_price,
+                     'supplier_id': supplierinfo.name.id
+                     })
+            else:
+                if group.name != group_code:
+                    group.name = group_code
+                if group.description != description:
+                    group.description = description
+                if group.date_start != '%s-01-01' % year:
+                    group.date_start = '%s-01-01' % year
+                if group.date_end != '%s-12-31' % year:
+                    group.date_end = '%s-12-31' % year
+                if group.min_price != min_price:
+                    group.min_price = min_price
+                if group.guar_price != sec_price:
+                    group.sec_price = sec_price
+                if group.supplier_id != supplierinfo.name:
+                    group.supplier_id = supplierinfo.name
+            product = supplierinfo.product_tmpl_id
+            group.write({'product_ids': [(4, product.id)]})
+        doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
+        self.make_backup(file_path, doc.file_name)
+        os.remove(file_path)
+
+    @api.model
     def parse_products_file(self, file_path, doc):
         f = codecs.open(file_path, "r", "ISO-8859-1", 'ignore')
         supp_obj = self.env["product.supplierinfo"]
@@ -302,13 +354,97 @@ class Edi(models.Model):
     @api.model
     def parse_purchase_picking_file(self, file_path, doc):
         f = codecs.open(file_path, "r", "ISO-8859-1", 'ignore')
-        # Cada linea representa un movimiento del albaran, un fichero puede
-        # contener varios albaranes.
-        picking_code = ''
+        # Cada linea representa 1 movimiento, para no buscar en cada movimiento
+        # el albaran al que pertenece se van guardando en un diccionario con
+        # clave purchase_code valor record de picking
+        picking_store = {}
+        errors = False
         for line in f:
-            if not picking_code:
-                picking_code = line[117:127]
-            pass
+            min_date_str = line[25:33]
+            min_date = datetime.strptime(min_date_str, '%Y%m%d')
+            product_supplier_code = line[43:53]
+            lot_name = line[71:81].lstrip(' ')
+            fab_date = line[81:89]
+            life_date = datetime.strptime(line[89:97], '%Y%m%d')
+            qty = float(line[97:107])
+            purchase_code = line[117:127].rstrip(' ')
+
+            if purchase_code not in picking_store.keys():
+                purchase = self.env['purchase.order'].search([('name', '=',
+                                                               purchase_code)])
+                if not purchase:
+                    log.error('Purchase with code %s not found' %
+                              purchase_code)
+                    errors = True
+                    continue
+                picking = self.env['stock.picking'].search([('purchase_id',
+                                                             '=',
+                                                             purchase.id)])
+                picking_products = [x.product_id.id for x in
+                                    picking.move_lines]
+                if len(picking_products) != len(set(picking_products)):
+                    log.error(
+                        'The picking %s has various moves with the same product. Cannot be procesed' % picking.name)
+                    errors = True
+                    continue
+                picking_store[purchase_code] = PickingFile(picking)
+            picking = picking_store[purchase_code]
+
+            if picking.picking.min_date != min_date:
+                picking.picking.min_date = min_date
+            product_supp = self.env['product.supplierinfo'].search(
+                [('product_code', '=', product_supplier_code.lstrip('0')),
+                 ('name', '=', self.related_partner_id.id)])
+            if not product_supp:
+                log.error('Product with code %s not found' %
+                          product_supplier_code.lstrip('0'))
+                errors = True
+                continue
+            product = product_supp.product_tmpl_id.product_variant_ids[0]
+            lot_id = self.env['stock.production.lot'].search(
+                [('name', '=', lot_name), ('product_id', '=', product.id)])
+            if not lot_id:
+                lot_id = self.env['stock.production.lot'].create(
+                    {'name': lot_name, 'product_id': product.id})
+            if lot_id.life_date != life_date:
+                lot_id.life_date = life_date
+            picking.add_line(product, lot_id, qty)
+
+        for purchase_code in picking_store.keys():
+            picking = picking_store[purchase_code].picking
+            operations = self.env['stock.pack.operation'].search(
+                [('picking_id', '=', picking.id)])
+            operations.unlink()
+            picking_file = picking_store[purchase_code]
+            for move in picking.move_lines:
+                total = picking_file.get_qty_by_product(move.product_id)
+                if move.product_uom_qty != total:
+                    move.product_uom_qty = total
+                    move.product_uos_qty = move.product_id.uom_qty_to_uoc_qty(
+                        total, move.product_uos.id, self.related_partner_id.id)
+                for line in picking_file.get_line_by_product(move.product_id):
+                    vals = {
+                        'location_id': move.location_id.id,
+                        'product_id': move.product_id.id,
+                        'product_uom_id': move.product_uom.id,
+                        'uos_id': move.product_uos.id,
+                        'location_dest_id': move.location_dest_id.id,
+                        'picking_id': move.picking_id.id,
+                        'lot_id': lot_id.id,
+                        'product_qty': line.qty,
+                        'uos_qty': move.product_id.uom_qty_to_uoc_qty(
+                            line.qty, move.product_uos.id,
+                            self.related_partner_id.id)
+                    }
+                    self.env['stock.pack.operation'].create(vals)
+
+        if errors:
+            doc.write({'state': 'error'})
+        else:
+            doc.write({'state': 'imported',
+                       'date_process': fields.Datetime.now()})
+            self.make_backup(file_path, doc.file_name)
+            os.remove(file_path)
 
     @api.model
     def parse_exclusive(self, file_path, doc):
@@ -433,9 +569,48 @@ class Edi(models.Model):
                 elif doc.doc_type.code == 'abo':
                     service.parse_payment_invoice(file_path, doc)
                     process = True
+                elif doc.doc_type.code == 'tur':
+                    service.parse_tourism(file_path, doc)
+                    process = True
                 # No es necesario hacer este desarrollo para el fichero TOR,
                 # ya que no lo estan usando. Se hara en otra fase
                 # cuando se haya implantado el ERP.
                 # elif doc.doc_type.code == 'tor':
                 if process:
                     doc.write({'errors': log.get_errors()})
+
+
+class MoveFile(object):
+
+    def __init__(self, product, lot, qty):
+        self.product = product
+        self.lot = lot
+        self.qty = qty
+
+
+class PickingFile(object):
+
+    def __init__(self, picking):
+        self.picking = picking
+        self.lines = {}
+
+    def add_line(self, product, lot, qty):
+        key = (product, lot)
+        if key not in self.lines.keys():
+            self.lines[key] = qty
+        else:
+            self.lines[key] += qty
+
+    def get_qty_by_product(self, product):
+        total = 0.0
+        for key in self.lines.iterkeys():
+            if key[0] == product:
+                total += self.lines[key]
+        return total
+
+    def get_line_by_product(self, product):
+        lines = []
+        for key in self.lines.iterkeys():
+            if key[0] == product:
+                lines.append(MoveFile(product, key[1], self.lines[key]))
+        return lines

@@ -327,13 +327,18 @@ class ScanGunProtocol(LineReceiver):
                 u'\nFiltrar : %s'%self.show_op_processed+\
                 u'\n' * 25
 
+        clean =''
         self.last = '-'
+        if not self.show_id:
+            clean =''
 
         if self.user_id:
             cabecera = self.user_name
         else:
             cabecera=''
-        delimiter = u"\n" + u'*'*26 + u'\n'
+
+        delimiter = u"\n" + u'*'*25 + u'\n'
+
         if message !='':
             message = '\n' + message
         if not line:
@@ -714,8 +719,13 @@ class ScanGunProtocol(LineReceiver):
             return
 
         if line == KEY_CONFIRM and confirm == True:
-            ok = self.factory.odoo_con.finish_task(self.user_id, self.task_id)
-            self.handle_new_task()
+
+            res = self.factory.odoo_con.finish_task(self.user_id, self.task_id)
+            if not res:
+                message = u'\nError:\nRevisa Ubicaciones y/o Cantidades\n%s para volver'%KEY_VOLVER
+                self._snd(message)
+            else:
+                self.handle_new_task()
             return
 
         if line == KEY_YES and self.step==10:
@@ -1049,8 +1059,8 @@ class ScanGunProtocol(LineReceiver):
                 return
             if self.step == 10:
                 self.step = 2
-            elif self.step ==12:
-                self.step=10
+            elif self.step >10:
+                self.step = 10
             elif self.step ==4:
                 self.step=3
             elif self.step ==6:
@@ -1289,95 +1299,119 @@ class ScanGunProtocol(LineReceiver):
             self.handle_form_repo_ops(default_line)
             return
 
-        #import ipdb; ipdb.set_trace()
-
-        if self.step ==12:
-            if not (line_int >0 and line_int < len(self.subzones)):
-                self.step=11
-                self.last_read = line_int
-                self._snd(self.get_str_select_picking_subzone(self.last_read))
-                return
-
-
-            if line == KEY_CONFIRM:
-                    if self.factory.odoo_con.check_picking_zone(self.user_id,
-                                                            self.product['product_id'],
-                                                            self.last_read, write = True):
-                        self.product['picking_location_id'] = self.last_read
-                        message += u'\nAsignada'%KEY_CONFIRM
-                        self._snd(self.get_str_form_ops() + message)
-
-                        return
-            location_id = self.subzones[line_int]['id']
-            self.last_read = location_id
-            location = self.factory.odoo_con.get_location_gun_info(self, location_id=location_id)
-
-            if location_id == self.product['picking_location_id']:
-                #1º caso, conincide con el que nos pide
-                if self.confirm_last_step==False or confirm == True:
-                    res = self.finish_repo_op()
-                    return
-
-            else:
-                #si está libre, pregunta si se asigna
-                if not self.factory.odoo_con.is_location_free(location_id):
-                    message += u'\n%s Asignar Pick Zone\n'%KEY_CONFIRM
-                    self._snd(self.get_str_form_ops(), message)
-                    return
-
-
-
-
-
         if self.step ==10 and order_line == PRE_LOC:
             location_id = line_int
-            location = self.factory.odoo_con.get_location_gun_info(self, location_id=line_int)
+            location = self.factory.odoo_con.get_location_gun_info(self.user_id, location_id=line_int)
 
+            #Concide con la ubicación de picking del producto
+            #Entonces ok
             if line == str(self.product['picking_location_id']):
-                if self.confirm_last_step==False or confirm == True:
-                    res = self.finish_repo_op()
-                    return
-
-            elif location['parent_id'] == line_int:
-                #hemos escaneado una ubicación padre, muestra el menu hijas
-                self.step=12
-                self.last_read = line_int
-                self._snd(self.get_str_select_picking_subzone(line_int))
+                self.ops[str(self.active_op)]['destino_id'] = line
+                res = self.finish_repo_op()
                 return
 
+            #coincide con la ubicación padre del producto
+            elif location['parent_id'] == line_int:
+                #hemos escaneado una ubicación padre, muestra el menu hijas
+                self.step=11
+                self.last_read = line_int
+                self.subzones = False
+                self._snd(self.get_str_select_picking_subzone(line_int))
+                return
+            #producto sin zona de picking asignada y escaneamos una cantidad
 
-            elif (self.product['picking_location_id']== False or self.product['picking_location_id']<>line_int):
-
-                #debemos de actualizar la zona de picking del producto
-                #recargar producto
-                if line == KEY_CONFIRM:
-                    if self.factory.odoo_con.check_picking_zone(self.user_id,
+            elif self.factory.odoo_con.check_picking_zone(self.user_id,
                                                             self.product['product_id'],
-                                                            line_int, write = True):
-                        self.product['picking_location_id'] = line_int
-                        message += u'\nAsignada'%KEY_CONFIRM
-                        self._snd(self.get_str_form_ops() + message)
-                        return
-                elif confirm == False:
-                    #la primera vez.
+                                                            line_int, write = False):
+                self.ops[str(self.active_op)]['destino_id'] = line_int
+                self.step == 13
+                message += u'\n%s Asignar Pick Zone\n%s No asignar'%(KEY_RUN, KEY_NO)
+                self._snd(self.get_str_form_repo_ops() + message)
+                return
 
-                    message += u'\n%s Asignar Pick Zone\n'%KEY_CONFIRM
-                    self._snd(self.get_str_form_repo_ops() + message)
-                    return
-
-                message =u"Ubicacion no valida"
+            elif location:
+                self.step = 15
+                self.ops[str(self.active_op)]['destino_id'] = line_int
+                message = u"\n%s Confirmar"%KEY_CONFIRM
                 self._snd(self.get_str_form_repo_ops() + message)
                 return
 
 
+        if self.step == 13:
+            if line == KEY_YES:
+                #se actualiza
+                res = self.factory.odoo_con.check_picking_zone(self.user_id,
+                                                        self.product['product_id'],
+                                                        self.last_read, write = True)
+                self.step = 15
+                self.product['picking_location_id'] = self.last_read
+                self.ops[str(self.active_op)]['destino_id'] = self.line_int
+                message = u"\nAsignadaa Zona de Picking\%s Para Mover"%KEY_CONFIRM
+                self._snd(self.get_str_form_repo_ops() + message)
+                return
 
+
+            if line == KEY_NO:
+
+                self.ops[str(self.active_op)]['destino_id'] = self.last_read
+                self.last_read = False
+                self.step = 15
+                #res = self.finish_repo_op()
+                message += u'\n%s Mover'%KEY_CONFIRM
+                self._snd(self.get_str_form_ops() + message)
+                return
+
+        if self.step == 15:
+            res = self.finish_repo_op()
+            return
+
+        if self.step ==11:
+            if line_int:
+                if line_int >0 and line_int < len(self.subzones):
+                    self.step =10
+                    self.handle_form_repo_ops(PRE_LOC + self.subzones[line_int]['id'])
+                    return
+            #
+            #
+            #
+            #
+            # if line == KEY_RUN:
+            #         if self.factory.odoo_con.check_picking_zone(self.user_id,
+            #                                                 self.product['product_id'],
+            #                                                 self.last_read, write = True):
+            #             self.product['picking_location_id'] = self.last_read
+            #             message += u'\nAsignada'%KEY_RUN
+            #             self._snd(self.get_str_form_ops() + message)
+            #             return
+            #
+            # location_id = self.subzones[line_int]['id']
+            # self.last_read = location_id
+            # location = self.factory.odoo_con.get_location_gun_info(self, location_id=location_id)
+            #
+            # if location_id == self.product['picking_location_id']:
+            #     #1º caso, conincide con el que nos pide
+            #     if self.confirm_last_step==False or confirm == True:
+            #         res = self.finish_repo_op()
+            #         return
+            #
+            # else:
+            #     #si está libre, pregunta si se asigna
+            #     if not self.factory.odoo_con.is_location_free(location_id):
+            #         message += u'\n%s Asignar Pick Zone\n'%KEY_CONFIRM
+            #         self._snd(self.get_str_form_ops(), message)
+            #         return
+            #
+            #     message =u"Ubicacion no valida"
+            #     self._snd(self.get_str_form_repo_ops() + message)
+            #     return
+            #
 
         if not default_line in self.ops.keys():
             message =u"\nNo Válido"
         self._snd(self.get_str_form_repo_ops() + message)
         return
 
-    def finish_repo_op(self):
+    def finish_repo_op(self, message = ''):
         #creamosop_
         #  el values
         op_ = self.ops[str(self.active_op)]
@@ -1887,7 +1921,7 @@ class ScanGunProtocol(LineReceiver):
             for op_ in self.waves:
                 op = self.waves[op_]
                 if op['origen'] == line or op['origen_id'] == line_int or \
-                                self.factory.odoo_con.get_parent_location_id(self.int_(op['origen'])) == line_int:
+                                self.factory.odoo_con.get_parent_location_id(self.user_id, self.int_(op['origen'])) == line_int:
                     #si el origen conincide con este o con el padre también vale.
                     #es un paquete de la lista de paquetes de esta tarea
                     self.last_state = "list_waves"
@@ -2482,36 +2516,39 @@ class ScanGunProtocol(LineReceiver):
         delimiter = "*"*25+"\n"
         strg = header
         strg += u"%s\n"%op_['product']
-        k = u"PAQUETE"
-        k_ = u'PACK'
-        if (self.step == 0 or self.step ==1) and not op_['PROCESADO']:
-            strg +=self.inverse(u"PK %s:%s - "%(self.show_id*str(op_['pack_id']), str(op_['PAQUETE']))) + u'(%s)\n'%op_['lot']
-        else:
-            strg +=u"PK %s:%s - "%(self.show_id*str(op_['pack_id']), str(op_['PAQUETE'])) + u'(%s)\n'%op_['lot']
 
-        k = u"CANTIDAD"
-        k_= u'CANT'
-        op_ok = True
-        if not op_[k]==1:
-            strg += u"%s %s\n"%(str(op_[k]), op_['uom'])
+        strg_ = u'%s %s:%s\n'%(op_['PAQUETE'], self.show_id*str(op_['pack_id']), op_['lot'])
+        if (self.step == 0 or self.step ==1) and not op_['PROCESADO']:
+            strg +=self.inverse(strg_)
+        else:
+            strg += strg_
+
+
+
+        if not op_['CANTIDAD']==1:
+            strg += u"%s %s\n"%(op['CANTIDAD'], op_['uom'])
 
         #aqui pongo cantidades informativas
         strg+="Mover: %s %s\n"%(op_['packed_qty'], op_['uom'])
+
         if op_['uom_id']!=op_['uos_id']:
             strg+="%s%s %s\n"%(' ' * 7, op_['uos_qty'], op_['uos'])
 
         if self.type != 'ubication':
+            strg_= u'De: %s %s\n'%(op_['origen_bcd'], op_['origen_id']* self.show_id)
             if self.step ==0 and not op_['PROCESADO'] :
-                strg += self.inverse(u"DE %s: %s\n"%(op_['origen_id'] * self.show_id , op_['origen_bcd']))
+                strg += self.inverse(strg_)
             else:
-                strg += u"DE %s: %s\n"%(op_['origen_id'] * self.show_id , op_['origen_bcd'])
+                strg +=  strg_
 
         if self.type != 'picking':
+            strg_= u'A: %s %s\n'%(op_['destino_bcd'], op_['destino_id']* self.show_id)
             if (self.step==2 or self.step ==3) and not op_['PROCESADO']:
-                strg += self.inverse(u"A %s: %s\n"%(op_['destino_id'] * self.show_id , op_['destino_bcd']))
+
+                strg += self.inverse(strg_)
                 op_ok = False
             else:
-                strg +=u"A %s: %s\n"%(op_['destino_id'] * self.show_id , op_['destino_bcd'])
+                strg +=strg_
 
         k = u"PROCESADO"
         if op_[k]:
@@ -2527,6 +2564,251 @@ class ScanGunProtocol(LineReceiver):
         if self.show_keys:
             strg += keys
         return strg
+
+    def handle_form_ubi_ops(self, line, confirm=False):
+
+        order_line = line[0:2]
+
+
+        if order_line in (PRE_LOC, PRE_LOT, PRE_PACK, PRE_PROD):
+            line = line [2:]
+        else:
+            order_line = False
+        line_int = self.int_(line)
+        active_op =str(self.active_op)
+        if line == KEY_VOLVER:
+
+            if self.last_state == 'list_ops':
+                self.state = 'list_ops'
+                self.reset_vals()
+                self.step =0
+                self._snd(self.get_str_list_ops())
+                return
+            self.last_state = self.state
+            self.state = "tasks"
+            self.reset_vals()
+            self.step =0
+            self._snd(self.get_str_menu_task())
+            return
+
+        #NOS MOVEMOS POR LOS FORMULARIOS DE OPERACIONES
+        if line == KEY_NEXT:
+
+            num_ops = len(self.ops)
+            self.active_op +=1
+            if self.active_op > num_ops:
+                self.active_op = 1
+            self.reset_vals()
+            self.step =0
+            self.get_views(line)
+            return
+
+        if line == KEY_PREV:
+            self.active_op -=1
+            if self.active_op <= 0:
+                self.active_op = len(self.ops)
+            self.reset_vals()
+            self.step =0
+            self.get_views(line)
+            return
+
+        #Si la tarea esta pausada, no pasa de aquí
+        if self.tasks[self.active_task]['paused'] == True:
+            self.reset_vals()
+            self.step = 0
+            self._snd(self.get_str_form_ops() + u'\nTarea en pausa')
+            return
+
+        #Si la operación está procesada, solo permito Cancelar el Proceso
+        if line == KEY_CANCEL:
+            res = self.factory.odoo_con.set_op_to_process(self.user_id, self.task_id, self.op_id, False)
+            self.ops = self.factory.odoo_con.get_ops(self.task_id)
+            self.reset_vals()
+            self.step =0
+            self._snd(self.get_str_form_ops())
+            return
+
+        #Si está procesada, no pasa de este if
+        if self.ops[active_op]['PROCESADO']== True:
+            self.reset_vals()
+            self.step = 0
+            self._snd(self.get_str_form_ops() + u'\nOpción no Válida')
+            return
+
+        if self.step == 2:
+            if order_line == PRE_LOC:
+                #Lo que leo es una ubicación
+                #Si lo que leo es la ubicación que me da la tarea, perfecto paso a step 10
+                #miramos si tiene hijas
+                #new_loc = self.factory.odoo_con.get_location_gun_info(self.user_id, line_int)
+                child_ids = self.factory.odoo_con.get_location_id_childs(self.user_id,line_int)
+                if line_int == self.ops[active_op]['destino_id'] or \
+                                line_int == self.factory.odoo_con.get_parent_location_id(self.user_id, self.ops[active_op]['destino_id']):
+
+                    self.vals['destino'] = str(self.ops[active_op]['destino_id'])
+                    self.vals['nuevo_destino'] = self.vals['destino']
+                    self.step = 10
+                    if self.confirm_last_step:
+                        message =u"\nConfirma Operación\n%s Si %s N0\n" %(KEY_YES, KEY_CANCEL)
+                        self._snd(self.get_str_form_ops() + message)
+                    else:
+                        self.handle_form_ubi_ops(line=KEY_YES)
+                    return
+
+                else:
+                    #miramos si es una localización o
+                    #caso 1 no es multiubi
+                    new_loc = self.factory.odoo_con.get_location_gun_info(self.user_id, line_int)
+                    if new_loc['exist'] and \
+                        self.factory.odoo_con.is_location_free(self.user_id, line_int):
+
+                        if child_ids == []: #no hay sub
+                            self.step = 5
+                            self.vals['nuevo_destino']= line_int
+                            message =u"\nDESTINO: %s \n%s Si %s No\n"%(new_loc['bcd_name'], KEY_YES, KEY_CANCEL)
+                            self._snd(self.get_str_form_ops() + message)
+                            self.subzones = False
+                            return
+
+                        else:#tienes sub y hay que seleccionarlas
+
+                            message = u'\n' * 20 + u'Selecciona subicación\n'
+                            self.subzones = new_loc['childs']
+                            inc=0
+                            for x in self.subzones:
+                                inc +=1
+                                message += u'%s > %s\n'%(inc, x['bcd_name'])
+                            self.step = 3
+                            message =u"[0 - %s]"%inc
+                            self._snd(self.get_str_form_ops() + message)
+                            return
+            # self.step=1
+            # message =u"\nError. Escanea Ubicación"
+            # self._snd(self.get_str_form_ops() + message)
+            # return
+
+
+        if self.step==3 and line_int>0 and line_int<=len(self.subzones):
+            self.vals['nuevo_destino']= self.subzones[line_int]['id']
+            self.step = 5
+            message =u"\nNuevo A: %s \n%s Si %s No\n"%(self.subzones[line_int]['bcd_name'], KEY_YES, KEY_VOLVER)
+            self._snd(self.get_str_form_ops() + message)
+            return
+
+
+        if self.step == 5:
+            if line ==KEY_YES:
+
+                self.ops[active_op]['destino_id'] = self.vals['nuevo_destino']
+                vals = {'to_procces' : True, 'location_dest_id': self.vals['nuevo_destino']}
+                res = self.factory.odoo_con.change_op_values(self.user_id, self.op_id, vals)
+                new_loc = self.factory.odoo_con.get_location_gun_info(self.user_id, self.vals['nuevo_destino'])
+                self.ops[active_op]['destino_bcd'] = new_loc['bcd_name']
+                if new_loc['zone']=='picking':
+                    #preguntamos si quiere asignarlo a la zona de picking
+                    message = u"\nAsignar zona a producto\n%s Si %s No"%(KEY_YES, KEY_VOLVER)
+                    self.step = 6
+                    self._snd(self.get_str_form_ops() + message)
+                    return
+                else:
+                    self.vals['destino'] = str(self.ops[active_op]['destino_id'])
+                    self.vals['nuevo_destino'] = self.vals['destino']
+
+                    self.step = 10
+                    if self.confirm_last_step:
+                        message =u"\nConfirma Operación\n%s Si %s N0\n" %(KEY_YES, KEY_VOLVER)
+                        self._snd(self.get_str_form_ops() + message)
+                    else:
+                        self.handle_form_ubi_ops(line=KEY_YES)
+                    return
+
+        if self.step == 6:
+            if line==KEY_YES:
+                res = self.factory.odoo_con.check_picking_zone(self.user_id,
+                                                               self.ops[active_op]['product_id'],
+                                                               self.ops[active_op]['destino_id'],
+                                                               True)
+                if res:
+                    self.handle_form_ubi_ops(line=KEY_CANCEL)
+                    return
+                else:
+                    self.step = 9
+                    self.subzones= False
+                    message = u'\nError al asignar la zona\n'
+                    self._snd(self.get_str_form_ops() + message)
+                    return
+
+            if line==KEY_CANCEL:
+                self.vals['destino'] = str(self.ops[active_op]['destino_id'])
+                self.vals['nuevo_destino'] = self.vals['destino']
+                self.step = 10
+                if self.confirm_last_step:
+                    message =u"\nConfirma Operación\n%s Si %s N0\n" %(KEY_YES, KEY_VOLVER)
+                    self._snd(self.get_str_form_ops() + message)
+                else:
+                    self.handle_form_ubi_ops(line=KEY_YES)
+                return
+
+
+        #paso 0 solo permito introducit Paquete
+        if self.step == 0 or self.step==2:
+            if order_line == PRE_PACK:
+                if line == self.ops[active_op]['PAQUETE'] or\
+                    self.int_(line) == self.ops[active_op]['pack_id']:
+                    self.vals ['paquete'] = self.ops[active_op]['pack_id']
+                    self.step = 2
+                    message =u"\nEscanea Ubicación"
+                    try:
+                        self._snd(self.get_str_form_ops() + message)
+                        return
+                    except:
+                        ee=1
+                        return
+                else:
+                    self.reset_vals()
+                    self.step = 0
+                    message = u'\nPaquete no Válido'
+                    self._snd(self.get_str_form_ops() + message)
+                    return
+            else:
+                self.step = 0
+                message = u'\nOpción no Válida'
+                self._snd(self.get_str_form_ops() + message)
+                return
+
+        if self.step ==10:
+            #si llegamos aquí, tenemos que confirmar
+
+            if line == KEY_YES:
+                new_state = True
+            else:
+                self.step = 0
+                message =u"\nCancelado."
+                self._snd(self.get_str_form_ops(), message)
+                return
+
+            print "Enviando " + str(new_state) + " para id :" +str(self.op_id)
+            task_ops_finish = self.factory.odoo_con.set_op_to_process(self.user_id, self.task_id, self.op_id, new_state)
+            self.ops = self.factory.odoo_con.get_ops(self.task_id)
+            #task_ops_finish es que están todas finalizadas.
+
+            if not task_ops_finish:
+                #llamamos a confirmar tarea
+                self.state="tasks"
+                self.step=0
+                self.handle_tasks(line=KEY_CONFIRM, confirm=False)
+                return
+            else:
+                self.step = 0
+                message = u"\nProcesada OK"
+                self.handle_form_ubi_ops(KEY_NEXT)
+                return
+        #Si llega aquí, hay un error no localizado.
+        self.reset_all_vals(self.vals)
+        self.step = 1
+        message = u"\nNo te entiendo"
+        self._snd(self.get_str_form_ops(), message)
+        return
 
     def handle_ops_ubi(self, line='0', confirm = False):
         # aqui veremos line en la pantalla de tasks
@@ -2676,14 +2958,20 @@ class ScanGunProtocol(LineReceiver):
         if self.step ==1:
              menu_str += self.inverse(u'\nOpcion o Scan Packet\n')
 
+
+        if self.step >=5 and self.new_uom_qty>0:
+            menu_str += u'\nMover: % s %s'%(self.new_uom_qty, self.vals['uom'])
+
         if self.step == 5:
             #ya tenemos pakete
             menu_str += self.inverse(u'\nScan Destino\n')
+
         if self.step>5:
              menu_str += u'\nA : %s'%self.loc['dest_bcd_name']
+
         if self.step==8:
             #Ya tenemos destino
-            menu_str+= u'\n\n1> Empaquetar\n2> Sin Paquete\n'
+            menu_str+= u'\n1> Sin Nuevo Paquete\n2> Empaquetar\n'
             menu_str += self.inverse(u'\nOpción o %s Mover\n'%KEY_CONFIRM)
 
         if self.step==10:
@@ -2699,7 +2987,7 @@ class ScanGunProtocol(LineReceiver):
 
     def handle_manual_transfer_packet(self, line, confirm=False):
         #menu eventos en manual
-
+        #import ipdb; ipdb.set_trace()
         order_line = line[0:2]
         if order_line in (PRE_LOC, PRE_LOT, PRE_PACK, PRE_PROD):
             line = line [2:]
@@ -2708,17 +2996,18 @@ class ScanGunProtocol(LineReceiver):
         message =''
 
         if order_line==PRE_LOC and self.step==0:
+
             #buscamos una ubicación de picking
             self.state="manual_picking_reposition"
             self.step=0
             self.handle_manual_picking_reposition(PRE_LOC + line)
             return
 
-        if len(line)==13:
-            #es un ean, pasamos a manehjar productos
-            self.state = "manual_transfer_product"
-            self.handle_manual_transfer_product(line=line)
-            return
+        # if len(line)==13 and False:
+        #     #es un ean, pasamos a manehjar productos
+        #     self.state = "manual_transfer_product"
+        #     self.handle_manual_transfer_product(line=line)
+        #     return
         if line==KEY_YES and self.step==0:
                 self.step = 5
                 self._snd(self.get_manual_transfer_packet())
@@ -2761,7 +3050,7 @@ class ScanGunProtocol(LineReceiver):
             self.vals={}
             self.vals = self.factory.odoo_con.get_pack_gun_info(self.user_id, package_id)
             busy = self.factory.odoo_con.get_user_packet_busy(self.user_id, package_id)
-
+            self.new_uom_qty = 0
             if self.vals['exist'] == False:
                 message = "\nNo encuentro el paquete"
                 self.step=0
@@ -2782,6 +3071,12 @@ class ScanGunProtocol(LineReceiver):
                     self.loc={}
                     self._snd(self.get_manual_transfer_packet(), message)
                     return
+
+        if self.step==5 and self.float_(line) and not order_line:
+            #introdujo un acantidad
+            self.new_uom_qty = self.float_(line)
+            self._snd(self.get_manual_transfer_packet(), message)
+            return
 
         if self.step==5  and order_line == PRE_LOC:
             self.loc={}
@@ -2806,27 +3101,28 @@ class ScanGunProtocol(LineReceiver):
             do=False
             do_key=False
             if not order_line and line in ['0','1','2']:
-                pack_ = 'do_pack'
-                if line == '1':
+                pack_ = 'no_pack'
+                if line == '2':
                     pack_ = 'do_pack'
 
                 self.step=10
                 do=True
             if line ==KEY_CONFIRM:
-                pack_ = 'do_pack'
+                pack_ = 'no_pack'
                 do_key=True
             if do or do_key:
                 self.move = {}
                 k=str(self.active_task)
                 self.step=10
+
                 self.move = {
-                    'product_id': False,
+                    'product_id': self.vals['product_id'],
                     'package_id': self.vals['package_id'],
-                    #'quantity': False,
+                    'quantity': self.new_uom_qty,
                     'src_location_id': self.vals['src_location_id'],
                     'dest_location_id': self.loc['dest_location_id'],
                     'do_pack':pack_,
-                    #'lot_id': False,
+                    'lot_id': self.vals['lot_id'],
                     'user_id': self.user_id
                 }
                 if do_key:
@@ -3279,205 +3575,6 @@ class ScanGunProtocol(LineReceiver):
 
         message = u"No te entiendo"
         self._snd(self.get_manual_picking_reposition(), message)
-        return
-
-    def handle_form_ubi_ops(self, line, confirm=False):
-
-        order_line = line[0:2]
-
-
-        if order_line in (PRE_LOC, PRE_LOT, PRE_PACK, PRE_PROD):
-            line = line [2:]
-        else:
-            order_line = False
-
-        if line == KEY_VOLVER:
-
-            if self.last_state == 'list_ops':
-                self.state = 'list_ops'
-                self.reset_vals()
-                self.step =0
-                self._snd(self.get_str_list_ops())
-                return
-            self.last_state = self.state
-            self.state = "tasks"
-            self.reset_vals()
-            self.step =0
-            self._snd(self.get_str_menu_task())
-            return
-
-        #NOS MOVEMOS POR LOS FORMULARIOS DE OPERACIONES
-        if line == KEY_NEXT:
-
-            num_ops = len(self.ops)
-            self.active_op +=1
-            if self.active_op > num_ops:
-                self.active_op = 1
-            self.reset_vals()
-            self.step =0
-            self.get_views(line)
-            return
-
-        if line == KEY_PREV:
-            self.active_op -=1
-            if self.active_op <= 0:
-                self.active_op = len(self.ops)
-            self.reset_vals()
-            self.step =0
-            self.get_views(line)
-            return
-
-        #Si la tarea esta pausada, no pasa de aquí
-        if self.tasks[self.active_task]['paused'] == True:
-            self.reset_vals()
-            self.step = 0
-            self._snd(self.get_str_form_ops() + u'\nTarea en pausa')
-            return
-
-        #Si la operación está procesada, solo permito Cancelar el Proceso
-        if line == KEY_CANCEL:
-            res = self.factory.odoo_con.set_op_to_process(self.user_id, self.task_id, self.op_id, False)
-            self.ops = self.factory.odoo_con.get_ops(self.task_id)
-            self.reset_vals()
-            self.step =0
-            self._snd(self.get_str_form_ops())
-            return
-
-        #Si está procesada, no pasa de este if
-        if self.ops[str(self.active_op)]['PROCESADO']== True:
-            self.reset_vals()
-            self.step = 0
-            self._snd(self.get_str_form_ops() + u'\nOpción no Válida')
-            return
-
-        if self.step == 2:
-            if order_line == PRE_LOC:
-                #Lo que leo es una ubicación
-                #Si lo que leo es la ubicación que me da la tarea, perfecto paso a step 3
-                if line == str(self.ops[str(self.active_op)]['destino_id']) or\
-                    line == str(self.ops[str(self.active_op)]['DESTINO']):
-                    self.vals['destino'] = str(self.ops[str(self.active_op)]['destino_id'])
-                    self.vals['nuevo_destino'] = self.vals['destino']
-                    self.step = 8
-                    if self.confirm_last_step:
-                        message =u"\nConfirma Operación\nSi <" + KEY_YES + "> NO <" + KEY_NO + ">"
-                        self._snd(self.get_str_form_ops() + message)
-                    else:
-                        self.handle_form_ubi_ops(line=KEY_YES)
-                    return
-
-                if line != str(self.ops[str(self.active_op)]['destino_id']):
-                    if not self.int_(line) in self.factory.odoo_con.get_locations_ids():
-                        self.step=1
-                        message =u"\nError. Escanea Ubicación"
-                        self._snd(self.get_str_form_ops() + message)
-                        return
-                    self.vals['nuevo_destino'] = line
-                    self.step = 3
-                    message =u"\nConfirma Nueva Ubicación"
-                    if self.factory.odoo_con.check_picking_zone(self.user_id,
-                                                                self.ops[str(self.active_op)]['product_id'],
-                                                                self.vals['nuevo_destino'], write =False):
-                        message += u'\n%s Asigna Pick Zone'%KEY_CONFIRM
-
-                    self._snd(self.get_str_form_ops() + message)
-                    return
-
-
-        #paso 0 solo permito introducit Paquete
-        if self.step == 0 or self.step==2:
-            if order_line == PRE_PACK:
-                if line == self.ops[str(self.active_op)]['PAQUETE'] or\
-                    self.int_(line) == self.ops[str(self.active_op)]['pack_id']:
-                    self.vals ['paquete'] = self.ops[str(self.active_op)]['pack_id']
-                    self.step = 2
-                    message =u"\nEscanea Ubicación"
-                    try:
-                        self._snd(self.get_str_form_ops() + message)
-                        return
-                    except:
-                        ee=1
-                        return
-                else:
-                    self.reset_vals()
-                    self.step = 0
-                    message = u'\nPaquete no Válido'
-                    self._snd(self.get_str_form_ops() + message)
-                    return
-            else:
-                self.step = 0
-                message = u'\nOpción no Válida'
-                self._snd(self.get_str_form_ops() + message)
-                return
-
-        if self.step == 3:
-            if line == KEY_CONFIRM:
-                res = self.factory.odoo_con.check_picking_zone(
-                    self.user_id, self.ops[str(self.active_op)]['product_id'],
-                    self.vals['nuevo_destino'])
-                if res:
-                    message =u"\nPick Zone Ok"
-                    self.handle_form_ubi_ops('%s%s'%(PRE_LOC, self.vals['nuevo_destino']))
-                else:
-                    message=u'\nPick Zone No OK'
-                    self.step = 2
-                self._snd(self.get_str_form_ops() + message)
-                return
-            if order_line == PRE_LOC:
-                if line == self.vals['nuevo_destino']:
-                    #Lo cambiamos en la ubicación
-                    res = self.factory.odoo_con.change_op_value(self.user_id, self.op_id, 'location_dest_id', self.int_(line))
-                    self.vals['destino'] = line
-                    self.vals['nuevo_destino'] = line
-                    self.ops = self.factory.odoo_con.get_ops(self.task_id)
-                    self.step = 8
-                    if self.confirm_last_step:
-                        message =u"\nConfirma Operación\nSi <" + KEY_YES + "> NO <" + KEY_NO + ">"
-                        self._snd(self.get_str_form_ops() + message)
-                    else:
-                        self.handle_form_ubi_ops(line=KEY_YES)
-                    return
-                else:
-                    self.step= 1
-                    message =u"\nError. Escanea Ubicación"
-                    self._snd(self.get_str_form_ops(), message)
-                    return
-
-
-
-
-        if self.step ==8:
-            #si llegamos aquí, tenemos que confirmar
-
-            if line == KEY_YES:
-                new_state = True
-            else:
-                self.step = 0
-                message =u"\nCancelado."
-                self._snd(self.get_str_form_ops(), message)
-                return
-
-            print "Enviando " + str(new_state) + " para id :" +str(self.op_id)
-            task_ops_finish = self.factory.odoo_con.set_op_to_process(self.user_id, self.task_id, self.op_id, new_state)
-            self.ops = self.factory.odoo_con.get_ops(self.task_id)
-            #task_ops_finish es que están todas finalizadas.
-
-            if not task_ops_finish:
-                #llamamos a confirmar tarea
-                self.state="tasks"
-                self.step=0
-                self.handle_tasks(line=KEY_CONFIRM, confirm=False)
-                return
-            else:
-                self.step = 0
-                message = u"\nProcesada OK"
-                self.handle_form_ubi_ops(KEY_NEXT)
-                return
-        #Si llega aquí, hay un error no localizado.
-        self.reset_all_vals(self.vals)
-        self.step = 1
-        message = u"\nNo te entiendo"
-        self._snd(self.get_str_form_ops(), message)
         return
 
     def handle_ops(self, line='0', confirm = False):
@@ -4183,8 +4280,8 @@ class ScanGunProtocol(LineReceiver):
         if line == KEY_VOLVER:
             self.vals={}
             self.step=0
-            self.state= 'menu_tools'
-            self._snd(self.get_menu_tool())
+            self.state= 'tools'
+            self._snd(self.get_menu_tools())
             return
 
         if self.step == 0:

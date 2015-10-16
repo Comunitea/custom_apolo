@@ -12,3 +12,4 @@ access_product_rappel_subgroup,access_product_rappel_subgroup,model_product_rapp
 access_preferential_agreement,access_preferential_agreement,model_preferential_agreement,base.group_user,1,1,1,1
 access_agreement_type,access_agreement_type,model_agreement_type,base.group_user,1,1,1,1
 access_sale_export_edi,access_sale_export_edi,model_sale_export_edi,base.group_user,1,1,1,1
+access_product_rappel_subgroup_estimation,access_product_rappel_subgroup_estimation,model_product_rappel_subgroup_estimation,base.group_user,1,1,1,1
