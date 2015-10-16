@@ -143,8 +143,7 @@ empty'))
         self.ensure_one()
         string_sections = ''
         for section in self.sections:
-            string_sections += str(section.rappel_from) + '-' + \
-                str(section.rappel_until) + ':' + str(section.percent) + ';'
+            string_sections += '%.2f-%.2f:%.2f;' % (section.rappel_from, section.rappel_until, section.percent)
         if string_sections[-1] == ';':
             string_sections = string_sections[:-1]
         return string_sections
