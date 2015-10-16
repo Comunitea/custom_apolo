@@ -42,10 +42,12 @@ class TourismGroup(models.Model):
     state = fields.Selection((('new', 'New'), ('validated', 'Validated'),
                              ('approved', 'Approved'), ('cancel', 'Cancel')),
                              'State', default='new')
-    min_price = fields.Float('Minimum price', required=True, help="Unit minimum price")
+    min_price = fields.Float('Minimum price', required=True,
+                             help="Unit minimum price")
     all_exported = fields.Boolean('All customer exported', readonly=True,
                                   compute='_get_exported_customer')
-    guar_price = fields.Float('Guaranteed price', required=True, help="Unit guaranteed price")
+    guar_price = fields.Float('Guaranteed price', required=True,
+                              help="Unit guaranteed price")
     qty_estimated = fields.Float('Estimated consumption')
     supplier_id = fields.Many2one('res.partner', 'Supplier', required=True)
 
@@ -118,7 +120,8 @@ class TourismGroup(models.Model):
                  ('invoice_id.date_invoice', '<=', date_end)])
             total_qty = 0.0
             for line in lines:
-                total_qty += line.product_id.uom_qty_to_uos_qty(line.quantity, line.product_id.log_unit_id.id)
+                total_qty += line.product_id.uom_qty_to_uos_qty(
+                    line.quantity, line.product_id.log_unit_id.id)
             if total_qty > 0:
                 self.env['tourism.consumption'].create(
                     {'customer_id': customer_line.customer_id.id,
@@ -235,7 +238,6 @@ than the minimum price')}}
             return self.agreed_price * product.un_ca
         else:
             return self.agreed_price
-
 
 
 class TourismConsumption(models.Model):

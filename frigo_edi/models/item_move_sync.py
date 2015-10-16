@@ -28,7 +28,7 @@ class ItemManagementItemMoveSync(models.Model):
 
     state = fields.Selection([('pending', 'Pending'),
                               ('sync', 'Synchronized')], "State",
-                              readonly=True, default="pending")
+                             readonly=True, default="pending")
     item_id = fields.Many2one("item.management.item", "Item", required=True)
     operation_type = fields.Selection([('C', 'Customer lent'),
                                        ('E', 'Customer removed'),

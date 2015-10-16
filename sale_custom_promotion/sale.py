@@ -92,7 +92,8 @@ minimum price'))
         for line in self:
             if line.tourism:
                 if line.price_unit * (line.discount and line.discount /
-                                      100 or 1) != line.tourism.get_box_price(line.product_id):
+                                      100 or 1) != \
+                        line.tourism.get_box_price(line.product_id):
                     raise exceptions.Warning(_('Price error'),
                                              _('can not sell below the \
 minimum price'))
