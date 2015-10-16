@@ -150,7 +150,7 @@ class ExportEdiFile(models.TransientModel):
         sinfo_ids = sinfo_obj.search([('name', 'child_of', [self[0].service_id.
                                                             related_partner_id.
                                                             id]),
-                                       ('product_tmpl_id.active', '=', True)])
+                                      ('product_tmpl_id.active', '=', True)])
 
         if sinfo_ids:
             products = list(sinfo_ids)
@@ -366,8 +366,10 @@ class ExportEdiFile(models.TransientModel):
                                                     date_start),
                                                    ('date_invoice', '<=',
                                                     date_end),
-                                                   ('state', 'in', ('open', 'paid')),
-                                                   ('type', '=', 'out_invoice')])
+                                                   ('state', 'in',
+                                                    ('open', 'paid')),
+                                                   ('type', '=',
+                                                    'out_invoice')])
         file_len = 0
         for obj in objs:
             for line in obj.invoice_line:
@@ -398,14 +400,14 @@ class ExportEdiFile(models.TransientModel):
         objs = [o for o in objs]
         doc = tmp.render_unicode(o=objs, datetime=datetime, user=self.env.user,
                                  supplier_id=supplier_id,
-                                 price_get=self.product_price_get).encode('utf-8', 'replace')
+                                 price_get=self.product_price_get).encode(
+            'utf-8', 'replace')
         file_name = self[0].service_id.output_path + os.sep + filename
         f = file(file_name, 'w')
         f.write(doc)
         f.close()
         file_obj = self.create_doc(filename, file_name, doc_type)
         file_obj.count = count
-
 
     @api.multi
     def export_file_ven(self, active_model, objs=False):
@@ -469,7 +471,8 @@ class ExportEdiFile(models.TransientModel):
 
     @api.multi
     def export_file_pol(self, active_model, objs=[]):
-        """En este fichero se exportan tanto nuevos clientes como liquidaciones."""
+        """En este fichero se exportan tanto nuevos clientes como
+           liquidaciones."""
         doc_type_obj = self.env["edi.doc.type"]
         doc_obj = self.env["edi.doc"]
         doc_type = doc_type_obj.search([("code", '=', "pol")])[0]
@@ -507,7 +510,6 @@ class ExportEdiFile(models.TransientModel):
         f.close()
         file_obj = self.create_doc(filename, file_name, doc_type)
         file_obj.count = count
-
 
     @api.multi
     def export_file_dto(self, active_model, objs=[], type=''):

@@ -52,7 +52,8 @@ class sale_joint_promotion(models.Model):
             wzd = False
             for dtype in service.doc_type_ids:
                 if dtype.code == "dto":
-                    wzd = self.env['edi.export.wizard'].create({'service_id': service.id})
+                    wzd = self.env['edi.export.wizard'].create({'service_id':
+                                                                service.id})
                     wzd.export_file_dto('sale.joint.promotion', res, 'A')
                     break
         return res
@@ -63,16 +64,20 @@ class sale_joint_promotion(models.Model):
         promos_by_partner = {}
         for promotion in self:
             if promotion.supplier_id not in promos_by_partner.keys():
-                promos_by_partner[promotion.supplier_id.id] = self.env['sale.joint.promotion']
+                promos_by_partner[promotion.supplier_id.id] = \
+                    self.env['sale.joint.promotion']
             promos_by_partner[promotion.supplier_id.id] += promotion
         for supplier in promos_by_partner.keys():
-            edis = self.env["edi"].search([('related_partner_id', '=', supplier)])
+            edis = self.env["edi"].search([('related_partner_id', '=',
+                                            supplier)])
             for service in edis:
                 wzd = False
                 for dtype in service.doc_type_ids:
                     if dtype.code == "dto":
-                        wzd = self.env['edi.export.wizard'].create({'service_id': service.id})
-                        wzd.export_file_dto('sale.joint.promotion', promos_by_partner[supplier], 'M')
+                        wzd = self.env['edi.export.wizard'].create(
+                            {'service_id': service.id})
+                        wzd.export_file_dto('sale.joint.promotion',
+                                            promos_by_partner[supplier], 'M')
                         break
         return res
 
@@ -81,16 +86,20 @@ class sale_joint_promotion(models.Model):
         promos_by_partner = {}
         for promotion in self:
             if promotion.supplier_id.id not in promos_by_partner.keys():
-                promos_by_partner[promotion.supplier_id.id] = self.env['sale.joint.promotion']
+                promos_by_partner[promotion.supplier_id.id] = \
+                    self.env['sale.joint.promotion']
             promos_by_partner[promotion.supplier_id.id] += promotion
         for supplier in promos_by_partner.keys():
-            edis = self.env["edi"].search([('related_partner_id', '=', supplier)])
+            edis = self.env["edi"].search([('related_partner_id', '=',
+                                            supplier)])
             for service in edis:
                 wzd = False
                 for dtype in service.doc_type_ids:
                     if dtype.code == "dto":
-                        wzd = self.env['edi.export.wizard'].create({'service_id': service.id})
-                        wzd.export_file_dto('sale.joint.promotion', promos_by_partner[supplier], 'B')
+                        wzd = self.env['edi.export.wizard'].create(
+                            {'service_id': service.id})
+                        wzd.export_file_dto('sale.joint.promotion',
+                                            promos_by_partner[supplier], 'B')
                         break
         return super(sale_joint_promotion, self).unlink()
 
@@ -202,9 +211,9 @@ class sale_joint_promotion(models.Model):
         self.ensure_one()
         customers = self.env['res.partner']
         if self.type == 'rappel':
-            customer_setted =  self.rappel_id.customer_ids
+            customer_setted = self.rappel_id.customer_ids
         elif self.type == 'discount':
-            customer_setted =  self.promotion_id.customer_ids
+            customer_setted = self.promotion_id.customer_ids
         for customer in customer_setted:
             customers += self.env['res.partner'].search(
                 [('id', 'child_of', customer.id), ('is_company', '=', True)])
