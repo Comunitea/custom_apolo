@@ -30,10 +30,15 @@
           .no-padd-right {
             padding-right: 0px !important;
           }
+          .my_margin_top {
+            min-height: 50mm;
+          }
       </style>
           <t t-call="report.html_container">
               <t t-foreach="docs" t-as="o">
                   <div class="page">
+                      <div class="my_margin_top">
+                      </div>
                       <t t-call="custom_documents.invoice_top_part"/>
 
                       <div class="row middle_part">
