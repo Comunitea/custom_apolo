@@ -1,17 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-        <template id="report_custom_invoice">
-            <t t-call="report.html_container">
-                <t t-foreach="docs" t-as="o">
-                    <t t-call="report.external_layout">
-                        <div class="page">
-                             <h1>Custom Invoice Report</h1>
-                             <h3><span t-field="o.partner_id.name"/></h3>
+        <!-- TOP HEADER -->
+      <template id="report_custom_invoice">
+        <style type="text/css">
+          .top_part{
+            min-height:30mm;
+          }
+          .middle_part{
+            min-height:162mm;
+          }
+          .top-border {
+            border-top: solid 2px #000000;
+          }
+          .table1{
+            width: 100%;
+            font-size: 10px;
+          }
+          p{
+            line-height: 9px;
+            font-size: 11px;
+          }
+          strong {
+            font-size: 12px;
+          }
+          .no-padd-left {
+            padding-left: 0px !important;
+          }
+      </style>
+          <t t-call="report.html_container">
+              <t t-foreach="docs" t-as="o">
+                  <div class="page">
+                      <t t-call="custom_documents.invoice_top_part"/>
+
+                      <div class="row middle_part">
+                          <div t-if="o.partner_id.inv_print_op == 'give_deliver'">
+                            <t t-call="custom_documents.op_give_deliver"/>
+                          </div>
+                      </div>
+
+                  </div>
+               </t>
+          </t>
+      </template>
+
+      <!-- TOP HEADER -->
+      <template id="invoice_top_part">
+          <div class="row top_part">
+              <div class="col-xs-7 top-border no-padd-left">
+                  <div class="col-xs-3 no-padd-left">
+                        <strong>INVOICE:</strong>
+                  </div>
+                  <div class="col-xs-4">
+                      <strong><span t-field="o.number"/></strong>
+                  </div>
+                  <div class="col-xs-5">
+                    <strong>DATE: <span t-esc="totals[o.id]['inv_date']"/></strong>
+                  </div>
+                  <div t-if="o.partner_id">
+                      <br/>
+                      <p><strong>SOLICITANT</strong></p>
+                      <p><span t-field="o.partner_id.ref"/> <span t-field="o.partner_id.name"/></p>
+                      <p><span t-field="o.partner_id.street"/></p>
+                      <p><span t-field="o.partner_id.zip"/> - <span t-field="o.partner_id.city"/></p>
+                      <p>Tlfo. <span t-field="o.partner_id.phone"/></p>
+                  </div>
+                  <div>
+                      <table class="table1">
+                      <thead>
+                          <tr>
+                              <th><strong>Agent</strong></th>
+                              <th><strong>Delivery Man</strong></th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr>
+                              <td>
+                                  <span t-field="o.user_id.name"/>
+                              </td>
+                              <td>
+                                  <span t-esc="totals[o.id]['deliver_man']"/>
+                              </td>
+                          </tr>
+                      </tbody>
+                      </table>
+                    </div>
+                </div>
+                <div class="col-xs-1">
+                </div>
+                <div class="col-xs-4">
+                    <div t-if="o.partner_id.commercial_partner_id">
+                        <br/>
+                        <br/>
+                        <!-- Page: <span class="page"/> de <span class="topage"/> -->
+                        <div class="col-xs-7 no-padd-left">
+                          <p><strong>INVOICE TO</strong></p>
                         </div>
-                    </t>
-                 </t>
-             </t>
+                        <div class="col-xs-5 no-padd-left text-right">
+                          <p>Pág. 1 de 1</p>
+                        </div>
+                        <p><span t-field="o.partner_id.commercial_partner_id.ref"/> <span t-field="o.partner_id.commercial_partner_id.name"/></p>
+                        <p><span t-field="o.partner_id.commercial_partner_id.street"/></p>
+                        <p><span t-field="o.partner_id.commercial_partner_id.zip"/> - <span t-field="o.partner_id.commercial_partner_id.city"/></p>
+                        <br/>
+                        <p><strong>NIF: </strong><span t-field="o.partner_id.commercial_partner_id.vat"/> </p>
+                    </div>
+                </div>
+            </div>
         </template>
+
+        <template id="op_give_deliver">
+            <span>Entrega en reparto</span>
+        </template>
+
     </data>
 </openerp>
