@@ -27,17 +27,38 @@
           .no-padd-left {
             padding-left: 0px !important;
           }
+          .no-padd-right {
+            padding-right: 0px !important;
+          }
+          .my_margin_top {
+            min-height: 50mm;
+          }
       </style>
           <t t-call="report.html_container">
               <t t-foreach="docs" t-as="o">
                   <div class="page">
+                      <div class="my_margin_top">
+                      </div>
                       <t t-call="custom_documents.invoice_top_part"/>
 
                       <div class="row middle_part">
                           <div t-if="o.partner_id.inv_print_op == 'give_deliver'">
                             <t t-call="custom_documents.op_give_deliver"/>
                           </div>
+                          <div t-if="o.partner_id.inv_print_op == 'group_pick'">
+                            <t t-call="custom_documents.op_group_pick"/>
+                          </div>
+                          <div t-if="o.partner_id.inv_print_op == 'group_by_partner'">
+                            <t t-call="custom_documents.op_group_by_partner"/>
+                          </div>
                       </div>
+
+                      <t t-call="custom_documents.invoice_bottom_part"/>
+                  </div>
+                  <div class="page" t-if="o.partner_id.add_summary">
+
+
+                      <h1>Resumen de artículos</h1>
 
                   </div>
                </t>
@@ -110,7 +131,231 @@
         </template>
 
         <template id="op_give_deliver">
-            <span>Entrega en reparto</span>
+            <style type="text/css">
+            .table-del{
+              width: 100%;
+            }
+            .table-del td span{
+              font-size: 10px;
+            }
+            .table-del .col-ref{
+              width: 5%;
+            }
+            .table-del .col-des{
+              width: 25%;
+            }
+            .table-del .col-iva{
+              width: 10%;
+            }
+            .table-del .col-qty{
+              width: 10%;
+            }
+            .table-del .col-unit{
+              width: 20%;
+            }
+            .table-del .col-pp{
+              width: 10%;
+            }
+            .table-del .col-ap{
+              width: 10%;
+            }
+            .table-del .col-net{
+              width: 10%;
+            }
+
+            .table-del td{
+             padding-right:4px;
+            }
+            .table-del th{
+              padding-right:4px;
+             }
+            .table-del thead{
+              border-top: solid 2px #000000;
+              border-bottom: solid 2px #000000;
+            }
+            .table-del tfoot{
+              border-top: solid 2px #000000;
+            }
+            </style>
+            <table class="table-del no-padd-left">
+                <thead>
+                    <tr>
+                        <th class="col-ref"><strong>Ref.</strong></th>
+                        <th class="col-des"><strong>Description</strong></th>
+                        <th class="col-iva text-right"><strong>% IVA</strong></th>
+                        <th class="col-qty text-right"><strong>Qty.</strong></th>
+                        <th class="col-unit"><strong>Unit</strong></th>
+                        <th class="col-pp text-right"><strong>Pricelist Price</strong></th>
+                        <th class="col-ap text-right"><strong>Applied Price</strong></th>
+                        <th class="col-net text-right"><strong>Net import</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="lines[o.id]" t-as="l">
+                          <tr>
+                            <td>
+                              <span t-esc="l['ref']"/>
+                            </td>
+                            <td>
+                                <span t-esc="l['des']"/>
+                            </td>
+                            <td class="text-right">
+                                <span t-esc="l['iva']"/>
+                            </td>
+                            <td class="text-right">
+                                <span t-esc="l['qty']"/>
+                            </td>
+                            <td>
+                                <span t-esc="l['unit']"/>
+                            </td>
+                            <td class="text-right">
+                                <span t-esc="l['pric_price']"/>
+                            </td>
+                            <td class="text-right">
+                                <span t-esc="l['app_price']"/>
+                            </td>
+                            <td class="text-right">
+                                <span t-esc="l['net']"/>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+                <tfoot>
+                    <td>
+                    </td>
+                    <td>
+                    </td>
+                    <td class="text-right">
+                      TOTALS:
+                    </td>
+                    <td class="text-right">
+                      <span t-esc="tfoot[o.id]['sum_qty']"/>
+                    </td>
+                    <td>
+                    </td>
+                    <td class="text-right">
+                    </td>
+                    <td class="text-right">
+                    </td>
+                    <td class="text-right">
+                      <div>
+                        <span t-esc="tfoot[o.id]['sum_net']"/>
+                      </div>
+                    </td>
+                </tfoot>
+            </table>
+        </template>
+
+
+        <template id="op_group_pick">
+            <span>Agrupada por albarán</span>
+        </template>
+
+        <template id="op_group_by_partner">
+            <span>Agrupada por cliente</span>
+        </template>
+
+
+        <template id="invoice_bottom_part">
+          <style type="text/css">
+            .my_footer{
+        border-top: solid 2px #000000;
+        border-bottom: solid 2px #000000;
+        min-height:13mm;
+        }
+        .table_totals{
+        width: 100%;
+        }
+        .table_totals th strong{
+          font-size: 10px;
+        }
+        .table_totals .col-fbase{
+        width:20%;
+        }
+        .table_totals .col-fiva{
+        width:6%;
+        }
+        .table_totals .col-fivaimp{
+        width:20%;
+        }
+        .table_totals .col-freq{
+        width:6%;
+        }
+        .table_totals .col-freqimp{
+        width:15%;
+        }
+        .table_totals .col-ftd{
+        width:20%;
+        }
+        .table_totals .col-fap"{
+        width:20%;
+        }
+        .table_totals .col-ftotal{
+        width:20%;
+        }
+        .table_totals td{
+        font-size: 9px;
+        }
+          </style>
+          <div class="row my_footer">
+              <div class="col-xs-6 no-padd-left">
+                <table class="table_totals">
+                <thead>
+                    <tr>
+                        <th class="col-taxbase text-right"><strong>IMPONIBLE BASE</strong></th>
+                        <th class="col-taxname text-right"><strong>TAX NAME</strong></th>
+                        <th class="col-taximport text-right"><strong>TAX IMPORT</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="o.tax_line" t-as="tax">
+                        <tr>
+                          <td class="col-xs-4 no-padd-left no-padd-right text-right">
+                            <span t-esc="tax.base"/>
+                          </td>
+                          <td class="col-xs-4 no-padd-left no-padd-right text-right">
+                            <span t-esc="tax.name"/>
+                          </td>
+                          <td class="col-xs-4 no-padd-left no-padd-right text-right">
+                            <span t-esc="tax.amount"/>
+                          </td>
+                        </tr>
+                    </t>
+                </tbody>
+                </table>
+              </div>
+              <div class=" col-xs-6 no-padd-left">
+                  <table class="table_totals">
+                  <thead>
+                      <tr>
+                          <th class="col-xs-4 no-padd-left no-padd-right text-right"><strong>TOTAL INVOICE</strong></th>
+                          <th class="col-xs-4 no-padd-left no-padd-right text-right"><strong t-if="o.partner_id.inv_print_op != 'give_deliver'">ACCOUNT PAID</strong></th>
+                          <th class="col-xs-4 no-padd-left no-padd-right text-right"><strong t-if="o.partner_id.inv_print_op != 'give_deliver'">TOTAL TO PAY</strong></th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      <t t-foreach="o.tax_line" t-as="tax">
+                          <tr>
+                            <td class="text-right">
+                              <span t-esc="tax.base"/>
+                            </td>
+                            <td class="text-right">
+                              <div t-if="o.partner_id.inv_print_op != 'give_deliver'">
+                            <span t-esc="totals[o.id]['acc_paid']"/>
+                              </div>
+                            </td>
+                            <td class="text-right">
+                              <div t-if="o.partner_id.inv_print_op != 'give_deliver'">
+                              <span t-esc="totals[o.id]['total_paid']"/>
+                              </div>
+                            </td>
+                          </tr>
+                      </t>
+                  </tbody>
+                  </table>
+                </div>
+
+          </div>
         </template>
 
     </data>

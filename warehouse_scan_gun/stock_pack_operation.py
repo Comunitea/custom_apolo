@@ -364,6 +364,7 @@ class stock_pack_operation(models.Model):
         operations in task are visited to return true in order to finish task
         or False because we need to show the next operation.
         """
+
         user_id = my_args.get('user_id', False)
         op_id = my_args.get('op_id', False)
         field = my_args.get ('field', False)

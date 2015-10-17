@@ -60,15 +60,15 @@ class ResPartnerSync(models.Model):
                     email[:50].ljust(50, " ") or "".ljust(50, " ")
                 res += contacts[cont].phone and contacts[cont].\
                     phone[:15].ljust(15, " ") or "".ljust(15, " ")
-                res+= "".ljust(16, " ")
+                res += "".ljust(16, " ")
             else:
-                res+= "".ljust(126, " ")
+                res += "".ljust(126, " ")
             cont += 1
         self.contact_str = res
 
     state = fields.Selection([('pending', 'Pending'),
                               ('sync', 'Synchronized')], "State",
-                              readonly=True, default="pending")
+                             readonly=True, default="pending")
     partner_id = fields.Many2one("res.partner", "Partner", required=True)
     operation_type = fields.Selection([('A', 'New'), ('B', 'Delete'),
                                        ('M', 'Update')], 'Operation type',
@@ -96,4 +96,3 @@ class ResPartnerSync(models.Model):
         else:
             self.create({'partner_id': partner_id,
                          'operation_type': opt_type})
-

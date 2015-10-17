@@ -199,8 +199,6 @@ class OdooDao:
         return res
 
     def get_routes_menu2(self, type = False):
-        #import ipdb; ipdb.set_trace()
-
         res = {}
         domain =[]
         domain = [('picking_type_id', '=',5), ('validated', '=', True), ('state', 'not in', ('draft','done','cancel'))]
@@ -350,6 +348,7 @@ class OdooDao:
         my_args = {'user_id': user_id, 'task_id': task_id}
         op_data = self.connection.execute('stock.task', 'gun_finish_task', [], my_args)
         return op_data
+
     def gun_cancel_task(self, user_id, task_id):
         my_args = {'user_id': user_id, 'task_id': task_id}
         op_data = self.connection.execute('stock.task', 'gun_cancel_task', [], my_args)
@@ -413,6 +412,16 @@ class OdooDao:
     def get_parent_location_id(self, user_id, location_id):
         my_args = {'user_id': user_id, 'location_id': location_id}
         op_data = self.connection.execute('stock.location', 'get_parent_location_id', [], my_args)
+        return op_data
+
+    def get_location_id_childs(self, user_id, location_id):
+        my_args = {'user_id': user_id, 'location_id': location_id}
+        op_data = self.connection.execute('stock.location', 'get_location_id_childs', [], my_args)
+        return op_data
+
+    def get_list_location(self, user_id, location_id):
+        my_args = {'user_id': user_id, 'location_id': location_id}
+        op_data = self.connection.execute('stock.location', 'get_list_location', [], my_args)
         return op_data
 
     def is_location_free(self, user_id, location_id):

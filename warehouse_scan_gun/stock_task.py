@@ -29,7 +29,7 @@ class StockTask(models.Model):
 
     @api.multi
     def create_task_from_gun(self, my_args):
-        #import ipdb; ipdb.set_trace()
+
         user_id = my_args.get('user_id', False)
         from_gun = True
         task_obj = self.env['stock.task']
@@ -45,7 +45,7 @@ class StockTask(models.Model):
 
     @api.multi
     def add_loc_operation_from_gun(self, my_args):
-        #import ipdb; ipdb.set_trace()
+
         user_id = my_args.get('user_id', False)
         pack_id = my_args.get('pack_id', False)
         task_id = my_args.get('task_id', False)
@@ -119,7 +119,7 @@ class StockTask(models.Model):
         """
         Get a task for a user and type defined in my args.
         """
-        #import ipdb; ipdb.set_trace()
+
         user_id = my_args.get('user_id', False)
         camera_id = my_args.get('camera_id', False)
         task_type = my_args.get('task_type', False)
@@ -283,9 +283,12 @@ class StockTask(models.Model):
         task_obj = self.browse(task_id)
         env2 = task_obj.env(self._cr, user_id, self._context)
         task_obj_uid = task_obj.with_env(env2)
+        try:
+            res = task_obj_uid.finish_partial_task()
+        except:
+            res = False
 
-        task_obj_uid.finish_partial_task()
-        return True
+        return res
 
     @api.multi
     def gun_cancel_task(self, my_args):

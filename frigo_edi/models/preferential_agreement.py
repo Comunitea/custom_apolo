@@ -51,7 +51,8 @@ class PreferentialAgreement(models.Model):
             wzd = False
             for dtype in service.doc_type_ids:
                 if dtype.code == "col":
-                    wzd = self.env['edi.export.wizard'].create({'service_id': service.id})
+                    wzd = self.env['edi.export.wizard'].create({'service_id':
+                                                                service.id})
                     wzd.export_file_col('preferential.agreement', self, 'A')
                     break
         self.write({'state': 'confirmed'})
@@ -65,7 +66,8 @@ class PreferentialAgreement(models.Model):
             wzd = False
             for dtype in service.doc_type_ids:
                 if dtype.code == "col":
-                    wzd = self.env['edi.export.wizard'].create({'service_id': service.id})
+                    wzd = self.env['edi.export.wizard'].create({'service_id':
+                                                                service.id})
                     wzd.export_file_col('preferential.agreement', self, 'B')
                     break
         self.write({'state': 'cancel'})
@@ -81,7 +83,8 @@ class PreferentialAgreement(models.Model):
                 wzd = False
                 for dtype in service.doc_type_ids:
                     if dtype.code == "col":
-                        wzd = self.env['edi.export.wizard'].create({'service_id': service.id})
+                        wzd = self.env['edi.export.wizard'].create(
+                            {'service_id': service.id})
                         wzd.export_file_col('preferential.agreement', self,
                                             'M')
                         break

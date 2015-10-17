@@ -204,7 +204,7 @@ class manual_transfer_wzd(models.TransientModel):
         # CHANGUING USER ID t_wzd.sudo(user_id) no funciona
         wzd_obj = wzd_obj_uid.create({'pack_line_ids': vals_pack_line_ids})
 
-        if quantity >1 or product_id!=False or lot_id!=False or package_id==False:
+        if quantity >1 : #or product_id!=False or lot_id!=False or package_id==False:
             vals = vals_prod_line_ids
             val_ids = 'prod_line_ids'
 

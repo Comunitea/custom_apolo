@@ -53,7 +53,6 @@
         .table2 .col-net{
         width: 10%;
         }
-
         .table2 td{
          padding-right:4px;
         }
@@ -115,7 +114,28 @@
         background-color:#C0C0C0;
         font-size:9px;
         }
-        .full-border-no-used{
+        .table4{
+        width: 100%;
+        }
+        .table4 .col-ref{
+        width:10%;
+        }
+        .table4 .col-prod{
+        width:23.5%;
+        }
+        .table4 .col-sc{
+        width:6.5%;
+        }
+        .table4 .col-ean{
+        width:13%;
+        }
+        .table4 .col-total{
+        width:14%;
+        }
+        .table4 thead{
+        border-bottom: solid 2px #000000;
+        }
+        .full-border{
         border-top: solid 1px #000000;
         border-left: solid 1px #000000;
         border-bottom: solid 1px #000000;
@@ -123,108 +143,45 @@
         margin-left: 6px;
         margin-right: 6px;
         }
+        .full-border2{
+        border-top: solid 1px #000000;
+        border-left: solid 1px #000000;
+        border-bottom: solid 1px #000000;
+        border-right: solid 1px #000000;
+        }
+        .header_part{
+        min-height: 45mm;
+        }
+        .full-height{
+        height: 45mm;
+        }
+        .header-font{
+        font-weight: bold;
+        font-size: 14px;
+        }
+        .reference-font{
+        font-weight: bold;
+        font-size: 20px;
+        font-family: monospace;
+        }
+        .tr-separated{
+        line-height: 170%;
+        }
        </style>
           <t t-call="report.html_container">
                 <t t-foreach="docs" t-as="o">
                     <!-- CUSTOM VALUED REPORT -->
                     <div class="page">
+                      <t t-call="custom_documents.picking_header_part"/>
                         <t t-call="custom_documents.picking_top_part"/>
                          <div class="row middle_part">
-                          <table class="table2 no-padd-left">
-                            <thead>
-                              <tr>
-                                  <th class="col-ref"><strong>Ref.</strong></th>
-                                  <th class="col-des"><strong>Description</strong></th>
-                                  <th class="col-iva text-right"><strong>% IVA</strong></th>
-                                  <th class="col-qty text-right"><strong>Qty.</strong></th>
-                                  <th class="col-unit"><strong>Unit</strong></th>
-                                  <th class="col-pp text-right"><strong t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">Pricelist Price</strong></th>
-                                  <th class="col-ap text-right"><strong t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">Applied Price</strong></th>
-                                  <th class="col-net text-right"><strong t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">Net import</strong></th>
-                              </tr>
+                           <div t-if="o.indirect">
+                             <t t-call="custom_documents.picking_indirect_table"/>
+                           </div>
+                           <div t-if="not o.indirect">
+                             <t t-call="custom_documents.picking_direct_table"/>
+                           </div>
 
-                            </thead>
-                            <tbody>
-                              <t t-foreach="lines[o.id]" t-as="l">
-                                <tr>
-                                  <td>
-                                      <span t-esc="l['ref']"/>
-                                  </td>
-                                  <td>
-                                      <span t-esc="l['des']"/>
-                                  </td>
-                                  <td class="text-right">
-                                      <span t-esc="l['iva']"/>
-                                  </td>
-                                  <td class="text-right">
-                                      <span t-esc="l['qty']"/>
-                                  </td>
-                                  <td>
-                                      <span t-esc="l['unit']"/>
-                                  </td>
-                                  <td class="text-right">
-                                    <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">
-                                      <span t-esc="l['pric_price']"/>
-                                    </div>
-                                  </td>
-                                  <td class="text-right">
-                                    <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">
-                                      <span t-esc="l['app_price']"/>
-                                    </div>
-                                  </td>
-                                  <td class="text-right">
-                                    <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">
-                                      <span t-esc="l['net']"/>
-                                    </div>
-                                  </td>
-                              </tr>
-                              <tr class="track_info" t-if="o.partner_id.pick_print_op == 'tracked'">
-                                 <t t-foreach="l['lots']" t-as="op_info">
-                                   <td></td>
-                                   <td style="font-size: 9px" colspan="1">
-                                     Lot: <span t-esc="op_info['lot_name']"/>
-                                   </td>
-                                   <td style="font-size: 9px" colspan="2">
-                                     Life Date: <span t-esc="op_info['lot_date']"/>
-                                   </td>
-                                   <td style="font-size: 9px" colspan="1">
-                                     Sale units: <span t-esc="op_info['uos_qty']"/> <span t-esc="op_info['uos_name']"/>
-                                   </td>
-                                   <td style="font-size: 9px" colspan="2">
-                                     Stock units: <span t-esc="op_info['uom_qty']"/> <span t-esc="op_info['uom_name']"/>
-                                   </td>
-                                   <td></td>
-                                 </t>
-                              </tr>
-                              </t>
-                            </tbody>
-                            <tfoot>
-                              <td>
-                              </td>
-                              <td>
-                              </td>
-                              <td class="text-right">
-                                TOTALS:
-                              </td>
-                              <td class="text-right">
-                                <span t-esc="tfoot[o.id]['sum_qty']"/>
-                              </td>
-                              <td>
-
-                              </td>
-                              <td class="text-right">
-
-                              </td>
-                              <td class="text-right">
-
-                              </td>
-                              <td class="text-right">
-                                <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">
-                                  <span t-esc="tfoot[o.id]['sum_net']"/>
-                                </div>
-                              </td>
-                            </tfoot>
-                          </table>
                           </div>
                           <t t-call="custom_documents.picking_bottom_part"/>
                     </div>
@@ -232,8 +189,168 @@
             </t>
         </template>
 
+        <template id="picking_direct_table">
+          <table class="table2 no-padd-left">
+            <thead>
+              <tr>
+                  <th class="col-ref"><strong>Ref.</strong></th>
+                  <th class="col-des"><strong>Description</strong></th>
+                  <th class="col-iva text-right"><strong>% IVA</strong></th>
+                  <th class="col-qty text-right"><strong>Qty.</strong></th>
+                  <th class="col-unit"><strong>Unit</strong></th>
+                  <th class="col-pp text-right"><strong t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">Pricelist Price</strong></th>
+                  <th class="col-ap text-right"><strong t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">Applied Price</strong></th>
+                  <th class="col-net text-right"><strong t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">Net import</strong></th>
+              </tr>
+
+            </thead>
+            <tbody>
+              <t t-foreach="lines[o.id]" t-as="l">
+                <tr>
+                  <td>
+                      <span t-esc="l['ref']"/>
+                  </td>
+                  <td>
+                      <span t-esc="l['des']"/>
+                  </td>
+                  <td class="text-right">
+                      <span t-esc="l['iva']"/>
+                  </td>
+                  <td class="text-right">
+                      <span t-esc="l['qty']"/>
+                  </td>
+                  <td>
+                      <span t-esc="l['unit']"/>
+                  </td>
+                  <td class="text-right">
+                    <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">
+                      <span t-esc="l['pric_price']"/>
+                    </div>
+                  </td>
+                  <td class="text-right">
+                    <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">
+                      <span t-esc="l['app_price']"/>
+                    </div>
+                  </td>
+                  <td class="text-right">
+                    <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">
+                      <span t-esc="l['net']"/>
+                    </div>
+                  </td>
+              </tr>
+              <tr class="track_info" t-if="o.partner_id.pick_print_op == 'tracked'">
+                 <t t-foreach="l['lots']" t-as="op_info">
+                   <td></td>
+                   <td style="font-size: 9px" colspan="1">
+                     Lot: <span t-esc="op_info['lot_name']"/>
+                   </td>
+                   <td style="font-size: 9px" colspan="2">
+                     Life Date: <span t-esc="op_info['lot_date']"/>
+                   </td>
+                   <td style="font-size: 9px" colspan="1">
+                     Sale units: <span t-esc="op_info['uos_qty']"/> <span t-esc="op_info['uos_name']"/>
+                   </td>
+                   <td style="font-size: 9px" colspan="2">
+                     Stock units: <span t-esc="op_info['uom_qty']"/> <span t-esc="op_info['uom_name']"/>
+                   </td>
+                   <td></td>
+                 </t>
+              </tr>
+              </t>
+            </tbody>
+            <tfoot>
+              <td>
+              </td>
+              <td>
+              </td>
+              <td class="text-right">
+                TOTALS:
+              </td>
+              <td class="text-right">
+                <span t-esc="tfoot[o.id]['sum_qty']"/>
+              </td>
+              <td>
+
+              </td>
+              <td class="text-right">
+
+              </td>
+              <td class="text-right">
+
+              </td>
+              <td class="text-right">
+                <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">
+                  <span t-esc="tfoot[o.id]['sum_net']"/>
+                </div>
+              </td>
+            </tfoot>
+          </table>
+        </template>
+
+        <template id="picking_indirect_table">
+          <table class="table4 no-padd-left">
+            <thead>
+              <th class="col-ref"><strong>Ref.</strong></th>
+              <th class="col-prod"><strong>Product</strong></th>
+              <th class="col-sc"><strong>U / C</strong></th>
+              <th class="col-ean"><strong>EAN BOX</strong></th>
+              <th class="col-ean"><strong>EAN CONSUM</strong></th>
+              <th class="col-sc"><strong>Boxes</strong></th>
+              <th class="col-sc"><strong>S / C</strong></th>
+              <th class="col-sc"><strong>Unit</strong></th>
+              <th class="col-sc"><strong>S / C</strong></th>
+              <th class="col-total"><strong>Total Units</strong></th>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col-ref">Ref.</td>
+                <td class="col-prod">Product</td>
+                <td class="col-sc">U / C</td>
+                <td class="col-ean">EAN BOX</td>
+                <td class="col-ean">EAN CONSUM</td>
+                <td class="col-sc">Boxes</td>
+                <td class="col-sc">S / C</td>
+                <td class="col-sc">Unit</td>
+                <td class="col-sc">S / C</td>
+                <td class="col-total">Total Units</td>
+              </tr>
+            </tbody>
+            <tfoot>
+
+            </tfoot>
+          </table>
+        </template>
+
+        <template id="picking_header_part">
+          <div class="header_part row">
+            <div t-if="o.indirect">
+              <div class="col-xs-4 header_part">
+                <img t-if="o.supplier_id.image" t-att-src="'data:image/png;base64,%s' % o.supplier_id.image" style="max-height: 45mm;"/>
+              </div>
+              <div class="col-xs-8 header_part">
+                <h4>Delivery Pick</h4>
+                <br/>
+                <table>
+                  <tr class="tr-separated">
+                    <td><label class="header-font">Delivery Number </label></td>
+                    <td> : <span t-esc="o.sale_id.client_order_ref" class="reference-font"/></td>
+                  </tr>
+                  <tr class="tr-separated">
+                    <td><label class="header-font">Date Of Delivery </label></td>
+                    <td> : <span t-esc="o.min_date"/></td>
+                  </tr>
+                  <tr class="tr-separated">
+                    <td><label class="header-font">Customer Control Nº</label></td>
+                    <td> : ¿?<!--span t-esc="o.supplier_id.name"/--></td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </template>
+
         <template id="picking_top_part">
-            <div class="row top_part">
+            <div class="row top_part" t-if="not o.indirect">
               <div class="col-xs-7 top-border no-padd-left">
                   <div class="col-xs-3 no-padd-left">
                         <strong>PICKING:</strong>
@@ -296,10 +413,40 @@
                     </div>
                 </div>
             </div>
+
+            <div  class="row top_part"  t-if="o.indirect">
+              <div class="col-xs-7 no-padd-left">
+                <br/>
+                <br/>
+                <br/>
+                <p>Agente / Repartidor: <span t-if="o.route_detail_id" t-field="o.user_id.name"/> / <span t-if="o.route_detail_id" t-field="o.route_detail_id.comercial_id.name"/></p>
+                <span t-esc="o.sale_id.client_order_ref" class="reference-font"/>
+              </div>
+              <div class="col-xs-1 no-padd-left">
+              </div>
+              <div class="col-xs-4 no-padd-left">
+                <div t-if="o.partner_id.commercial_partner_id">
+                    <br/>
+                    <div class="col-xs-8 row">
+                      <p>Customer Nº: </p>
+                    </div>
+                    <div class="col-xs-4 row">
+                      <p><span t-field="o.partner_id.commercial_partner_id.ref"/></p>
+                    </div>
+                    <br/>
+                    <p><span t-field="o.partner_id.commercial_partner_id.name"/></p>
+                    <p><span t-field="o.partner_id.commercial_partner_id.comercial"/></p>
+                    <p><span t-field="o.partner_id.commercial_partner_id.street"/></p>
+                    <p><span t-field="o.partner_id.commercial_partner_id.city"/></p>
+                    <br/>
+                </div>
+              </div>
+            </div>
+
         </template>
 
         <template id="picking_bottom_part">
-          <div class="row my_footer">
+          <div class="row my_footer" t-if="not o.indirect">
               <table class="table3" t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">
               <thead>
                   <tr>
@@ -319,7 +466,7 @@
                         <span t-esc="totals[o.id]['iva_import']"/>
                     </td>
                     <td class="text-center">
-                       <div class="full-border full-border-no-used">
+                       <div class="full-border">
                         <strong><span t-esc="totals[o.id]['total_doc']"/></strong>
                       </div>
                     </td>

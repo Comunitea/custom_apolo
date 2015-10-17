@@ -16,8 +16,8 @@
            <!-- <field name="page_height">150</field>
            <field name="page_width">100</field> -->
 
-           <field name="margin_top">50</field>
-           <field name="margin_bottom">22</field>
+           <field name="margin_top">5</field>
+           <field name="margin_bottom">0</field>
            <field name="margin_left">10</field>
            <field name="margin_right">2</field>
            <field name="header_line" eval="False"/>
@@ -33,6 +33,14 @@
             name="custom_documents.report_custom_picking"
             file="custom_documents.report_custom_picking"
         />
+        <!-- <report
+            string="Custom Picking Report 2"
+            id="action_report_custom_picking2"
+            model="stock.picking"
+            report_type="qweb-pdf"
+            name="custom_documents.report_custom_picking"
+            file="custom_documents.report_custom_picking"
+        /> -->
 
         <record id="action_report_custom_picking" model="ir.actions.report.xml">
             <field name="paperformat_id" ref="my_A4_paperformat"/>

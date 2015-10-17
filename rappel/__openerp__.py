@@ -35,7 +35,6 @@ Rappel Management
                 "stock",
                 "purchase",
                 "product",
-                "frigo_edi",
                 "sale_custom_promotion",
                 ],
     "data": ["security/rappel_security.xml",
