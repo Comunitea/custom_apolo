@@ -16,6 +16,7 @@
         <record id="product_unilever_family_filter" model="ir.ui.view">
             <field name="name">product.unilever.family.search</field>
             <field name="model">product.unilever.family</field>
+            <field name="priority">16</field>
             <field name="arch" type="xml">
                 <search string="Unilever families">
                     <field name="code"/>
