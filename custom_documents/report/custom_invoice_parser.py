@@ -43,8 +43,10 @@ class custom_invoice_parser(models.AbstractModel):
             docs.append(inv)
             lines[inv.id] = []
             tfoot[inv.id] = {'sum_qty': 0.0, 'sum_net': 0.0}
-            idate = inv.date_invoice.split("-")
-            inv_date = idate[2] + '/' + idate[1] + '/' + idate[0]
+            inv_date = ''
+            if inv.date_invoice:
+                idate = inv.date_invoice.split("-")
+                inv_date = idate[2] + '/' + idate[1] + '/' + idate[0]
             deliver_man = ''
             if inv.pick_ids and inv.pick_ids[0].route_detail_id:
                 detail_route = inv.pick_ids[0].route_detail_id
