@@ -19,7 +19,19 @@
 #
 ##############################################################################
 
-from . import res_users
-from . import account_voucher
-from . import account_payment
-from . import sale
+from openerp import models, fields
+
+
+class SaleOrder(models.Model):
+
+    _inherit = "sale.order"
+
+    state = fields.Selection(selection_add=[("history", "History")])
+
+
+class SaleOrderLine(models.Model):
+
+    _inherit = "sale.order.line"
+
+    state = fields.Selection(selection_add=[("history", "History")])
+
