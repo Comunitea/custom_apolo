@@ -5,20 +5,19 @@ import sys
 import xmlrpclib
 import socket
 import traceback
-import xlrd
 
-class import_prices(object):
-    def __init__(self, dbname, user, passwd, prices_file):
+class fix_stock_location(object):
+    def __init__(self, dbname, user, passwd, loc_name):
         """método incial"""
 
         try:
             self.url_template = "http://%s:%s/xmlrpc/%s"
             self.server = "localhost"
-            self.port = 8069
+            self.port = 9069
             self.dbname = dbname
             self.user_name = user
             self.user_passwd = passwd
-            self.prices_file = prices_file
+            self.loc_name = loc_name
 
             #
             # Conectamos con OpenERP
@@ -27,7 +26,7 @@ class import_prices(object):
             self.user_id = login_facade.login(self.dbname, self.user_name, self.user_passwd)
             self.object_facade = xmlrpclib.ServerProxy(self.url_template % (self.server, self.port, 'object'))
 
-            res = self.import_pricelist()
+            res = self.fix_stock_location()
             #con exito
             if res:
                 print ("All created")
@@ -166,32 +165,38 @@ class import_prices(object):
             categ_ids = [categ_id]
         return categ_ids and categ_ids[-1] or False
 
-    def import_pricelist(self):
-        pwb = xlrd.open_workbook(self.prices_file, encoding_override="utf-8")
-        sh = pwb.sheet_by_index(0)
-
-        cont = 1
-        all_lines = sh.nrows - 1
-        print "prices no: ", all_lines
-        for rownum in range(1, all_lines):
-            record = sh.row_values(rownum)
-            try:
-                product_ids = self.search('product.product', [('default_code', '=', str(int(record[0]))),'|',('active', '=', True),('active', '=', False)])
-                if product_ids:
-                    self.write('product.product', product_ids[0], {'list_price': float(record[7])})
-                else:
-                    print "Producto no encontrado %s" % str(int(record[0]))
-
-                print "%s de %s" % (cont, all_lines)
-                cont += 1
-            except Exception, e:
-                print "EXCEPTION: REC: ",(record, e)
-
+    def fix_stock_location(self):
+        try:
+            picking_loc_ids = self.search('stock.location', [('name', 'like',self.loc_name),
+                                                             '|',('active', '=', True),
+                                                             ('active', '=', False)])
+            print picking_loc_ids
+            if len(picking_loc_ids)>1:
+                def_loc_id = picking_loc_ids[0]
+                picking_ids = self.search('stock.location', [('location_id', 'in', picking_loc_ids),
+                                                             '|',('active', '=', True),
+                                                             ('active', '=', False)])
+                print picking_ids
+                print len(picking_ids)
+                cont = 0
+                for id in picking_ids:
+                    print id
+                    cont += 1
+                    print cont
+                    self.write('stock.location', id, {'location_id': False})
+                    self.write('stock.location', id, {'location_id': def_loc_id})
+                print "Desactivando ubicaciones"
+                picking_loc_ids.remove(def_loc_id)
+                self.write('stock.location', picking_loc_ids, {'active': False})
+            else:
+                print "No se han encontrado problemas en la ubicación %s" % self.loc_name
+        except Exception, e:
+            print "EXCEPTION: REC: ",(self.loc_name, e)
         return True
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
-        print u"Uso: %s <dbname> <user> <password> <prices.xls>" % sys.argv[0]
+        print u"Uso: %s <dbname> <user> <password> <location to fix>" % sys.argv[0]
     else:
-        import_prices(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+        fix_stock_location(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
