@@ -10,7 +10,7 @@ params = {}
 
 
 def read_file():
-    import ipdb; ipdb.set_trace()
+    #import ipdb; ipdb.set_trace()
     if sys.argv:
         telnet_cfg = sys.argv
     else:

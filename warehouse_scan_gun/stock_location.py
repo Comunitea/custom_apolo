@@ -45,7 +45,7 @@ class StockLocation(osv.osv):
 
 class stock_location(models.Model):
 
-    _inherit = "stock.location"
+    _inherit = 'stock.location'
     #no funciona
     _rec_name = "bcd_name"
 
@@ -111,7 +111,7 @@ class stock_location(models.Model):
         if location_ids:
             location_child_ids = self.search([('location_id', 'in', location_ids)])
             for loc in location_child_ids:
-                res.append({'id':loc.id, 'cdb_name' : loc.cdb_name})
+                res.append({'id':loc.id, 'bcd_name' : loc.cdb_name})
         return res
 
     @api.multi
@@ -179,12 +179,12 @@ class stock_location(models.Model):
             location_id = self.search(domain).id
 
         domain = [('location_id', '=', location_id)]
-        location_ids = self.search(domain)
+        location_ids = self.search(domain, order = "bcd_name asc")
         res = []
         if location_ids:
             for loc in location_ids:
                 res.append ({'id': loc.id,
-                             'loc.bcd_name': loc.bcd_name
+                             'bcd_name': loc.bcd_name
                              })
         return res
 
