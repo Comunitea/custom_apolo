@@ -78,7 +78,7 @@ class product_product (models.Model):
                 'virtual_available': product.virtual_available,
                 'picking_location_id':product.picking_location_id.id,
                 'picking_location':product.picking_location_id.name_get()[0][1],
-                'picking_location_cdb':product.picking_location_id.bcd_name,
+                'bcd_picking_location':product.picking_location_id.bcd_name,
                 'temp_type_id': product.temp_type.id,
                 'qty_available' :product.qty_available
             }
@@ -157,7 +157,7 @@ class product_product (models.Model):
 
     @api.multi
     def check_picking_zone(self, my_args):
-       
+
         picking_location_id = my_args.get("picking_location_id", False)
         product_id = my_args.get("product_id", True)
         write = my_args.get("write", False)

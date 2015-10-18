@@ -104,7 +104,7 @@ class ScanGunProtocol(LineReceiver):
         self.user_id = False
         self.user_name = False
         self.code = False
-        self.show_id = True
+        self.show_id = False
         self.show_keys = True
         self.views = 0 # ver pendientes, 1# ver no vistas, 2 ver todoas
         self.confirm_last_step = False
@@ -198,7 +198,7 @@ class ScanGunProtocol(LineReceiver):
         """
         Método del framework. LLamado cada vez que se recibe una linea
         """
-
+        line = line.upper()
         print "Estado: " +self.state + " Anterior: " + self.last_state
         izq = line.encode('hex')[0:2]
 
@@ -284,7 +284,7 @@ class ScanGunProtocol(LineReceiver):
             self.handle_set_picking_zone(line)
         elif self.state == 'create_picking_zone':
             self.handle_create_picking_zone(line)
-        elif self.state == 'select_sub_picking':
+        elif self.state == 'select_subzone':
             self.handle_select_picking_subzone(line)
         else:
             self._snd(u"Introduciste %s, pero paso olimpicamente:" % line)
@@ -327,7 +327,7 @@ class ScanGunProtocol(LineReceiver):
                 u'\nFiltrar : %s'%self.show_op_processed+\
                 u'\n' * 25
 
-        clean =''
+        clean = u'\n' * 25
         self.last = '-'
         if not self.show_id:
             clean =''
@@ -1021,6 +1021,7 @@ class ScanGunProtocol(LineReceiver):
             self.qty_calc=[]
 
         default_line = line
+
         if self.debug == True:
             import ipdb; ipdb.set_trace()
 
@@ -1078,6 +1079,10 @@ class ScanGunProtocol(LineReceiver):
             self._snd(self.get_str_form_repo_ops())
             return
 
+
+
+
+
         #NOS MOVEMOS POR LOS FORMULARIOS DE OPERACIONES
         if line == KEY_NEXT:
             num_ops = len(self.ops)
@@ -1116,7 +1121,7 @@ class ScanGunProtocol(LineReceiver):
             self.step =0
             self._snd(self.get_str_form_repo_ops())
             return
-        #
+
         # if self.step==0 and not order_line:
         #     if line_int== self.ops[str(self.active_op)]['pack_id']:
         #         self.vals ['paquete'] = self.ops[str(self.active_op)]['pack_id']
@@ -1313,9 +1318,14 @@ class ScanGunProtocol(LineReceiver):
             #coincide con la ubicación padre del producto
             elif location['parent_id'] == line_int:
                 #hemos escaneado una ubicación padre, muestra el menu hijas
+                #para seleccionar
                 self.step=11
                 self.last_read = line_int
                 self.subzones = False
+                self.last_state= self.state
+                self.state ='select_subzone'
+                self.selected_subzone = False
+                self.menu_anterior = 'get_str_form_repo_ops'
                 self._snd(self.get_str_select_picking_subzone(line_int))
                 return
             #producto sin zona de picking asignada y escaneamos una cantidad
@@ -2550,16 +2560,10 @@ class ScanGunProtocol(LineReceiver):
             else:
                 strg +=strg_
 
-        k = u"PROCESADO"
-        if op_[k]:
-            str_proc =u'SI'
-        else:
-            str_proc = self.inverse(u'NO')
-        strg += k + u":" + str_proc + "\n"
-
-        keys = "\n"
         if op_['PROCESADO']:
-            keys += self.inverse(u"%s Cancelar "%KEY_CANCEL)
+            strg += self.inverse(u"[x] %s Cancel Op\n"%KEY_CANCEL)
+
+        keys = ""
         keys += KEY_VOLVER + " Atras"
         if self.show_keys:
             strg += keys
@@ -2568,8 +2572,7 @@ class ScanGunProtocol(LineReceiver):
     def handle_form_ubi_ops(self, line, confirm=False):
 
         order_line = line[0:2]
-
-
+        #import ipdb; ipdb.set_trace()
         if order_line in (PRE_LOC, PRE_LOT, PRE_PACK, PRE_PROD):
             line = line [2:]
         else:
@@ -2620,7 +2623,7 @@ class ScanGunProtocol(LineReceiver):
             return
 
         #Si la operación está procesada, solo permito Cancelar el Proceso
-        if line == KEY_CANCEL:
+        if line == KEY_CANCEL and self.step <3:
             res = self.factory.odoo_con.set_op_to_process(self.user_id, self.task_id, self.op_id, False)
             self.ops = self.factory.odoo_con.get_ops(self.task_id)
             self.reset_vals()
@@ -2665,7 +2668,8 @@ class ScanGunProtocol(LineReceiver):
                         if child_ids == []: #no hay sub
                             self.step = 5
                             self.vals['nuevo_destino']= line_int
-                            message =u"\nDESTINO: %s \n%s Si %s No\n"%(new_loc['bcd_name'], KEY_YES, KEY_CANCEL)
+                            message =self.inverse(u"\nA : %s"%new_loc['bcd_name']) +\
+                                     u"\n%s Si %s No"%(KEY_YES, KEY_CANCEL)
                             self._snd(self.get_str_form_ops() + message)
                             self.subzones = False
                             return
@@ -2687,14 +2691,12 @@ class ScanGunProtocol(LineReceiver):
             # self._snd(self.get_str_form_ops() + message)
             # return
 
-
         if self.step==3 and line_int>0 and line_int<=len(self.subzones):
             self.vals['nuevo_destino']= self.subzones[line_int]['id']
             self.step = 5
             message =u"\nNuevo A: %s \n%s Si %s No\n"%(self.subzones[line_int]['bcd_name'], KEY_YES, KEY_VOLVER)
             self._snd(self.get_str_form_ops() + message)
             return
-
 
         if self.step == 5:
             if line ==KEY_YES:
@@ -2706,7 +2708,7 @@ class ScanGunProtocol(LineReceiver):
                 self.ops[active_op]['destino_bcd'] = new_loc['bcd_name']
                 if new_loc['zone']=='picking':
                     #preguntamos si quiere asignarlo a la zona de picking
-                    message = u"\nAsignar zona a producto\n%s Si %s No"%(KEY_YES, KEY_VOLVER)
+                    message = u"\nAsignar zona a producto\n%s Si %s No"%(KEY_YES, KEY_CANCEL)
                     self.step = 6
                     self._snd(self.get_str_form_ops() + message)
                     return
@@ -2716,7 +2718,7 @@ class ScanGunProtocol(LineReceiver):
 
                     self.step = 10
                     if self.confirm_last_step:
-                        message =u"\nConfirma Operación\n%s Si %s N0\n" %(KEY_YES, KEY_VOLVER)
+                        message =u"\nConfirma Operación\n%s Si %s N0\n" %(KEY_YES, KEY_CANCEL)
                         self._snd(self.get_str_form_ops() + message)
                     else:
                         self.handle_form_ubi_ops(line=KEY_YES)
@@ -2743,7 +2745,7 @@ class ScanGunProtocol(LineReceiver):
                 self.vals['nuevo_destino'] = self.vals['destino']
                 self.step = 10
                 if self.confirm_last_step:
-                    message =u"\nConfirma Operación\n%s Si %s N0\n" %(KEY_YES, KEY_VOLVER)
+                    message =u"\nConfirma Operación\n%s Si %s N0\n" %(KEY_YES, KEY_CANCEL)
                     self._snd(self.get_str_form_ops() + message)
                 else:
                     self.handle_form_ubi_ops(line=KEY_YES)
@@ -2778,7 +2780,7 @@ class ScanGunProtocol(LineReceiver):
 
         if self.step ==10:
             #si llegamos aquí, tenemos que confirmar
-
+            #import ipdb; ipdb.set_trace()
             if line == KEY_YES:
                 new_state = True
             else:
@@ -2971,7 +2973,7 @@ class ScanGunProtocol(LineReceiver):
 
         if self.step==8:
             #Ya tenemos destino
-            menu_str+= u'\n1> Sin Nuevo Paquete\n2> Empaquetar\n'
+            menu_str+= u'\n1> Sin Empaquetar\n2> Empaquetar\n'
             menu_str += self.inverse(u'\nOpción o %s Mover\n'%KEY_CONFIRM)
 
         if self.step==10:
@@ -2994,7 +2996,7 @@ class ScanGunProtocol(LineReceiver):
         else:
             order_line = False
         message =''
-
+        line_int = self.int_(line)
         if order_line==PRE_LOC and self.step==0:
 
             #buscamos una ubicación de picking
@@ -3046,7 +3048,7 @@ class ScanGunProtocol(LineReceiver):
         #Si en ccualquier momento meto un opaquete reinicio la operación
         if order_line == PRE_PACK:
 
-            package_id = self.int_(line)
+            package_id = line_int
             self.vals={}
             self.vals = self.factory.odoo_con.get_pack_gun_info(self.user_id, package_id)
             busy = self.factory.odoo_con.get_user_packet_busy(self.user_id, package_id)
@@ -3087,6 +3089,19 @@ class ScanGunProtocol(LineReceiver):
                     message=u'Error: De = A'
                     self._snd(self.get_manual_transfer_packet(), message)
                     return
+
+                if self.loc['childs']:
+                    #es un loc padre ... hay que seleccionar
+                    #self.step=11
+                    self.last_read = line_int
+                    self.subzones = False
+                    self.last_state= self.state
+                    self.state ='select_subzone'
+                    self.selected_subzone = False
+                    self.menu_anterior = 'get_str_manual_transfer_packet'
+                    self._snd(self.get_str_select_picking_subzone(line_int))
+                    return
+
                 if self.loc['usage']!='internal':
                     message = u"Seguro (No es interno)"
                 self.step=8
@@ -3123,7 +3138,8 @@ class ScanGunProtocol(LineReceiver):
                     'dest_location_id': self.loc['dest_location_id'],
                     'do_pack':pack_,
                     'lot_id': self.vals['lot_id'],
-                    'user_id': self.user_id
+                    'user_id': self.user_id,
+                    'package': self.vals['packed_qty']==self.new_uom_qty,
                 }
                 if do_key:
                     self.handle_manual_transfer_packet(line=KEY_CONFIRM)
@@ -4366,12 +4382,14 @@ class ScanGunProtocol(LineReceiver):
 
         if self.step == 6:
             str_menu += u"\n%s\n(%s)"%(self.vals['product'], self.old_zone or "Sin Zona de Picking")
-            str_menu += u"\nNueva zona:\n%s"%(self.vals['picking_location'])
+            str_menu += u"\nNueva zona:\n%s"%(self.vals['bcd_picking_location'])
             if self.step==6:
                 str_menu += self.inverse(u"\n\n%s Si %s No")%(KEY_YES, KEY_CANCEL)
 
         keys = u"\n%s Volver"%KEY_VOLVER
-        str_menu +=keys
+
+        if self.show_keys:
+            str_menu +=keys
 
         return str_menu
 
@@ -4385,15 +4403,9 @@ class ScanGunProtocol(LineReceiver):
         message =''
 
         if line == KEY_VOLVER:
-            if self.step == 0:
-                self.state='menu1'
-                self._snd(self.get_str_menu1())
-                return
-
-            if self.step==3:
-                self.step == 0
-                self._snd(self.get_set_picking_zone())
-                return
+            self.state='tools'
+            self._snd(self.get_menu_tools())
+            return
 
         if self.step==0:
             self.vals = False
@@ -4416,8 +4428,8 @@ class ScanGunProtocol(LineReceiver):
                     self._snd(self.get_set_picking_zone(), message)
                     return
                 else:
-                    self.old_zone_id = self.vals["picking_location_id"] or False
-                    self.old_zone = self.vals["picking_location"] or "Sin Asignar"
+                    self.old_zone_id = self.vals["bcd_picking_location"] or False
+                    self.old_zone = self.vals["bcd_picking_location"] or "Sin Asignar"
                     self.step=3
                     self._snd(self.get_set_picking_zone())
                     return
@@ -4468,8 +4480,9 @@ class ScanGunProtocol(LineReceiver):
 
         if self.step == 6:
             if line ==KEY_YES:
-                message = u"%s \npara\n%s\n"% (self.vals["picking_location"],self.vals['product'])
+                message = u"Asig: %s \npara: %s\n"% (self.vals["bcd_picking_location"],self.vals['product'])
                 self.step = 0
+                self.old_zone_id = False
                 self._snd(self.get_set_picking_zone(), message)
                 return
 
@@ -4477,8 +4490,8 @@ class ScanGunProtocol(LineReceiver):
                 #Cualquier otra cosa cancela la operación ...
                 res = self.factory.odoo_con.check_picking_zone(
                     self.user_id, self.vals['product_id'], self.old_zone_id)
-                self.old_zone_id = self.vals["picking_location_id"] or False
-                self.old_zone = self.vals["picking_location"] or u"Sin Asignar"
+                self.old_zone_id = self.vals["bcd_picking_location"] or False
+                self.old_zone = self.vals["bcd_picking_location"] or u"Sin Asignar"
                 message = u"Canceled\n"
                 self.step = 0
                 self._snd(self.get_set_picking_zone(), message)
@@ -4487,20 +4500,29 @@ class ScanGunProtocol(LineReceiver):
         self._snd(self.get_set_picking_zone(), message)
         return
 
-    def get_str_select_picking_subzone(self, parent_pick_id):
-
+    def get_str_select_picking_subzone(self, parent_pick_id = False, message = ''):
+        #import ipdb; ipdb.set_trace()
         menu_strg =''
         menu_strg += "Selecciona Subzona:\n"
-        self.parent_pick_id = parent_pick_id
+        if not parent_pick_id:
+            parent_pick_id = self.parent_pick_id
+        else:
+            self.parent_pick_id = parent_pick_id
+
         self.subzones = self.factory.odoo_con.get_subpicking_zones(self.user_id, location_id = parent_pick_id)
         inc=1
         for x in self.subzones:
-            menu_strg += u'%s > %s\n'%(inc, x['name'])
+            str = u'%s > %s\n'%(inc, x['bcd_name'])
+            if self.selected_subzone == x['id']:
+                str = self.inverse(str)
+            menu_strg += str
             inc +=1
 
+        self.selected_subzone = False
+        menu_strg += u'SubZona [1 - %s]\n'%(inc-1)
         menu_strg += u'%s Volver\n'%KEY_VOLVER
-        menu_strg += u'Selecciona SubZona [1 - %s]\n'%(inc-1)
-        return
+        self._snd(menu_strg, message)
+        return menu_strg
 
     def handle_select_picking_subzone(self, line):
 
@@ -4514,15 +4536,36 @@ class ScanGunProtocol(LineReceiver):
 
         if line == KEY_VOLVER:
             self.parent_pick_id = False
+            self.selected_subzone = False
             self.state = self.last_state
-            self._snd(self.menu_anterior)
+            self.lineReceived(KEY_VOLVER)
+            return
+        if line == KEY_CONFIRM:
+            message = u'\nNo implementado'
+            self._snd(self.get_str_select_picking_subzone(self.parent_pick_id), message)
             return
 
-        if line_int and line_int>0 and line_int<=len(self.subzones):
-            self.parent_pick_id = self.subzones['id']
+
+        elif line_int and line_int>0 and line_int<=len(self.subzones):
+            self.parent_pick_id = self.subzones[line_int-1]['id']
+            self.selected_subzone = self.parent_pick_id
             self.state = self.last_state
-            self._snd(self.menu_anterior)
+            self.lineReceived(u'%s%s'%(PRE_LOC, self.selected_subzone))
             return
+
+        else:
+            message = u'\nNo te entiendo\n'
+            self._snd(self.get_str_select_picking_subzone(self.parent_pick_id))
+            return
+
+        #
+        # if self.menu_anterior == 'get_str_form_repo_ops':
+        #     self._snd(self.get_str_form_repo_ops())
+        # elif self.menu_anterior == 'get_str_manual_transfer_packet':
+        #     self._snd(self.get_str_manual_transfer_packet())
+        #
+        # return
+        #
 
     # def get_location_gun_info(self, user_id, location_id = False, bcd_code = False, type =''):
     #
@@ -4539,6 +4582,11 @@ class ScanGunProtocol(LineReceiver):
     #     return res
 
             #es que es una sububicación de picking
+
+    #def get_str_show_package(self, location_id):
+        # aqui mostramos el contenido del paquete.
+        #
+
 
     def create_package_from_gun(self, op):
 
