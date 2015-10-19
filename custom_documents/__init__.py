@@ -3,6 +3,7 @@
 #
 #    Copyright (C) 2015 Comunitea Servicios Informáticos All Rights Reserved
 #    $Carlos Lombardía Rodríguez$ <carlos@comunitea.com>
+#    $Javier Colmenero Fernández$ <javier@comunitea.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published
