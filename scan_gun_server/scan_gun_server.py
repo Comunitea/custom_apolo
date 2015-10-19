@@ -33,26 +33,29 @@ KEY_PREV = "KU"
 KEY_CONFIRM = "F1"
 KEY_YES ="F1"
 
-KEY_PAUSE = "F2"
+KEY_PAUSE = "F6"
 KEY_MANUAL ="F3"
-KEY_PRINT = "F4"
 
+KEY_PRINT = "F7"
 KEY_RUN = "F5"
 KEY_FINISH = "F5"
 
 KEY_ORIGEN = "F6"
 KEY_WAVE_OPS = "F6"
+
 KEY_PAQUETE = "F7"
-KEY_QTY = "F8"
+KEY_QTY = "F8"##
+
 KEY_DESTINO = "F9"
 KEY_CALCULADORA = "F8"
+
 KEY_DEBUG="F9"
 KEY_NO_REALIZADA = "F10"
 
-KEY_NO ="F11"
-KEY_CANCEL = "F11"
+KEY_NO ="F4" # "F11"
+KEY_CANCEL ="F4" # "F11"
 
-KEY_VOLVER = "F12"
+KEY_VOLVER = "F2"#"F12"
 KEY_SHOW_PROCESSED = "F3"
 VALS = {'paquete': False, 'destino' : False, 'origen' : False, 'cantidad' : 0, 'lote' : False, 'packets' : {}}
 VALS_MANUAL = {'exist': False, 'package_id': False, 'product_id' : False, 'quantity': 0,
@@ -212,12 +215,16 @@ class ScanGunProtocol(LineReceiver):
         if len(line)==9:
             line = self.check_ubi(line) or line
 
+        if len (line) == 6:
+            line = self.check_package(line) or line
+
         if line == KEY_DEBUG:
             if self.debug == True:
                 self.debug = False
             else:
                 self.debug = True
             return
+
         if line == "F3":
             self.show_op_processed = not self.show_op_processed
             self.lineReceived(line=KEY_VOLVER)
@@ -330,7 +337,7 @@ class ScanGunProtocol(LineReceiver):
         clean = u'\n' * 25
         self.last = '-'
         if not self.show_id:
-            clean =''
+            clean = u'\n' * 25
 
         if self.user_id:
             cabecera = self.user_name
@@ -432,6 +439,14 @@ class ScanGunProtocol(LineReceiver):
         menu_str += delimiter + keys
 
         return menu_str
+
+    def check_ubi(self, line):
+        #import ipdb; ipdb.set_trace()
+        res = self.factory.odoo_con.get_package_gun_info(self.user_id, name)
+        check = False
+        if res['exist']:
+            check = PRE_PACK + str(res['package_id'])
+        return check
 
     def check_ubi(self, line):
         #import ipdb; ipdb.set_trace()
