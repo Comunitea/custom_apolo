@@ -413,7 +413,6 @@ class OdooDao:
         op_data = self.connection.execute('product.product', 'get_product_gun_info', [], my_args)
         return op_data
 
-
     def get_parent_location_id(self, user_id, location_id):
         my_args = {'user_id': user_id, 'location_id': location_id}
         op_data = self.connection.execute('stock.location', 'get_parent_location_id', [], my_args)
