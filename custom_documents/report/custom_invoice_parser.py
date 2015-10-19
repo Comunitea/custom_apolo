@@ -38,14 +38,12 @@ class custom_invoice_parser(models.AbstractModel):
         docs = []
         lines = {}  # For give delivery option table
         lines_ga = {}   # For group by fiscal address option table
-        lines_bp = {}   # For group by fiscal breakdown pick table
         tfoot = {}
         totals = {}
         for inv in self.env[report.model].browse(self._ids):
             docs.append(inv)
             lines[inv.id] = []
             lines_ga[inv.id] = {}
-            lines_bp[inv.id] = {}
             tfoot[inv.id] = {'sum_qty': 0.0, 'sum_net': 0.0}
             inv_date = ''
             if inv.date_invoice:
@@ -62,7 +60,8 @@ class custom_invoice_parser(models.AbstractModel):
                 'acc_paid': '{0:.2f}'.format(0.00),
                 'total_paid': '{0:.2f}'.format(inv.amount_total - 0.0),
             }
-            if inv.partner_id.inv_print_op == 'give_deliver':
+            if inv.partner_id.inv_print_op == 'give_deliver' or \
+                    not inv.partner_id.inv_print_op:
                 line_qty = 0.0
                 line_net = 0.0
                 for line in inv.invoice_line:
@@ -99,16 +98,6 @@ class custom_invoice_parser(models.AbstractModel):
                     if part_obj not in lines_ga[inv.id]:
                         lines_ga[inv.id][pick.partner_id] = []
                     lines_ga[inv.id][pick.partner_id].append(pick)
-
-            # elif inv.partner_id.inv_print_op == 'group_pick':
-            #     for pick in inv.pick_ids:
-            #         part_obj = pick.partner_id
-            #
-            #         # Group by partner
-            #         if part_obj not in lines_ga[inv.id]:
-            #             lines_ga[inv.id][pick.partner_id] = []
-            #         lines_ga[inv.id][pick.partner_id].append(pick)
-
         docargs = {
             'doc_ids': self._ids,
             'doc_model': report.model,
