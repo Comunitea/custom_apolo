@@ -1020,8 +1020,7 @@ class ScanGunProtocol(LineReceiver):
         strg += orden
         #keys += u"\n%s "%KEY_VOLVER
         if op_['PROCESADO']:
-            keys += self.inverse(u"\n%s>Cancel OP "%KEY_CANCEL)
-
+            strg += self.inverse(u"[x] %s Cancel Op\n"%KEY_CANCEL)
         if self.show_keys:
             strg += keys
 
@@ -2392,9 +2391,8 @@ class ScanGunProtocol(LineReceiver):
             menu_str += str_
 
         if wave_['PROCESADO']:
-            str_=self.inverse(u"Proc. %s Cancelar\n"%KEY_CANCEL)
-        else:
-            str_=self.inverse(u"NO Procesado\n")
+            str_= self.inverse(u"[x] %s Cancel Op\n"%KEY_CANCEL)
+
         menu_str += str_
         keys =''
 

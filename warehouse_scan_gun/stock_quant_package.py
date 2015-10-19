@@ -78,9 +78,17 @@ class stock_quant(models.Model):
 
 class stock_quant_package(models.Model):
 
-
     _inherit = 'stock.quant.package'
 
+    @api.multi
+    def get_package_gun_info(self, my_args):
+        name = my_args.get('name', False)
+        domain = [('name', '=', name)]
+        package = self.search(domain)
+        package_id = False
+        if package:
+            package_id = package[0].id
+        return package_id
 
     @api.multi
     def get_pack_gun_info(self, my_args):

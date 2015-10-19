@@ -31,7 +31,8 @@
     "images": [],
     "depends": [
         "stock_valued_picking",
-        "stock_picking_review"
+        "stock_picking_review",
+        "depot_invoice",
     ],
     "data": ['views/res_partner_view.xml',
              #  'views/custom_assets.xml', NO ME FUNCIONA en esta revision
