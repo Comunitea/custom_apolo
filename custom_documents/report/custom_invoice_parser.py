@@ -90,7 +90,8 @@ class custom_invoice_parser(models.AbstractModel):
                     lines[inv.id].append(dic)
                 tfoot[inv.id]['sum_qty'] = '{0:.2f}'.format(line_qty)
                 tfoot[inv.id]['sum_net'] = '{0:.2f}'.format(line_net)
-            elif inv.partner_id.inv_print_op == 'group_by_partner':
+            elif inv.partner_id.inv_print_op == 'group_by_partner' or \
+                    inv.partner_id.inv_print_op == 'group_pick':
                 for pick in inv.pick_ids:
                     part_obj = pick.partner_id
 
@@ -99,14 +100,14 @@ class custom_invoice_parser(models.AbstractModel):
                         lines_ga[inv.id][pick.partner_id] = []
                     lines_ga[inv.id][pick.partner_id].append(pick)
 
-            elif inv.partner_id.inv_print_op == 'group_pick':
-                for pick in inv.pick_ids:
-                    part_obj = pick.partner_id
-
-                    # Group by partner
-                    if part_obj not in lines_ga[inv.id]:
-                        lines_ga[inv.id][pick.partner_id] = []
-                    lines_ga[inv.id][pick.partner_id].append(pick)
+            # elif inv.partner_id.inv_print_op == 'group_pick':
+            #     for pick in inv.pick_ids:
+            #         part_obj = pick.partner_id
+            #
+            #         # Group by partner
+            #         if part_obj not in lines_ga[inv.id]:
+            #             lines_ga[inv.id][pick.partner_id] = []
+            #         lines_ga[inv.id][pick.partner_id].append(pick)
 
         docargs = {
             'doc_ids': self._ids,

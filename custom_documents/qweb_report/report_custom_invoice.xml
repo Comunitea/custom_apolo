@@ -290,7 +290,7 @@
                       </tr>
                   </thead>
                   <tbody>
-                          <t t-foreach="lines_ga[o.id].keys()" t-as="partner">
+                      <t t-foreach="lines_ga[o.id].keys()" t-as="partner">
                           <tr>
                               <td>
                                 <span t-esc="partner.ref"/>
@@ -327,33 +327,45 @@
 
         <template id="op_group_pick">
           <style type="text/css">
-            .table-ga{
+            .table-bp{
               width: 100%;
             }
-            .table-bypick td span{
+            .tablebdp td span{
               font-size: 10px;
             }
-            .table-bypick .col-ga-name{
-              width: 50%;
-            }
-            .table-ga .col-ga-date{
-              width: 30%;
-            }
-            .table-ga .col-ga-import{
-              width: 20%;
-            }
-            .table-ga td{
+            .table-bp td{
              padding-right:4px;
             }
-            .table-ga th{
+            .table-bp th{
               padding-right:4px;
              }
-            .table-ga thead{
+            .table-bp thead{
               border-top: solid 2px #000000;
               border-bottom: solid 2px #000000;
             }
-            .table-ga tfoot{
+            .table-bp tfoot{
               border-top: solid 2px #000000;
+            }
+            .table-bypick .col-bp-code{
+              width: 10%;
+            }
+            .table-bypick .col-bp-desc{
+              width: 40%;
+            }
+            .table-bypick .col-bp-qty{
+              width: 10%;
+            }
+            .table-bypick .col-bp-unit{
+              width: 10%;
+            }
+            .table-bypick .col-bp-price{
+              width: 10%;
+            }
+            .table-bypick .col-bp-disc{
+              width: 10%;
+            }
+            .table-bypick .col-bp-total{
+              width: 10%;
             }
           </style>
             <table class="table-bp no-padd-left">
@@ -365,23 +377,79 @@
                         <th class="col-bp-unit"><strong>Unit</strong></th>
                         <th class="col-bp-price"><strong>Price</strong></th>
                         <th class="col-bp-disc"><strong>% Disc.</strong></th>
-                        <th class="col-bp-unit"><strong>Total</strong></th>
+                        <th class="col-bp-total"><strong>Total</strong></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <t t-foreach="lines-bp[o.id]" t-as="l">
+                  <t t-foreach="lines_ga[o.id].keys()" t-as="partner">
+                      <tr>
+                          <td>
+                            <span t-esc="partner.ref"/>
+                          </td>
+                          <td>
+                            <span t-esc="partner.name_get()[0][1]"/>
+                          </td>
+                          <td>
+                          </td>
+                          <td>
+                          </td>
+                          <td>
+                          </td>
+                          <td>
+                          </td>
+                          <td>
+                          </td>
+                      </tr>
+                      <t t-foreach="lines_ga[o.id][partner]" t-as="pick">
                           <tr>
                             <td>
-                              <span t-esc="l[code']"/>
+                              Pick Number:
                             </td>
                             <td>
-                                <span t-esc="l['desc']"/>
+                              <span t-esc="pick.name"/>
+                            </td>
+                            <td>
+                              Pick Date:
+                            </td>
+                            <td>
+                              <span t-esc="pick.date.split(' ')[0].split('-')[2] + '/' + pick.date.split(' ')[0].split('-')[1] + '/' + pick.date.split(' ')[0].split('-')[0]"/>
+                            </td>
+                            <td>
+                              Pick Import:
                             </td>
                             <td class="text-right">
-                                <span t-esc="l['qty']"/>
+                              <span t-esc="pick.amount_total_acc"/>
                             </td>
-                        </tr>
-                    </t>
+                            <td>
+                            </td>
+                          </tr>
+                          <tr t-foreach="pick.move_lines" t-as="move">
+                            <td>
+                              <span t-esc="move.product_id.default_code"/>
+                            </td>
+                            <td>
+                              <span t-esc="move.product_id.name"/>
+                            </td>
+                            <td>
+                              <span t-esc="move.product_uos_qty"/>
+                            </td>
+                            <td>
+                                <span t-esc="move.product_uos.name"/>
+                            </td>
+                            <td>
+                              <span t-esc="move.procurement_id and (move.procurement_id.sale_line_id and move.procurement_id.sale_line_id.price_udv or False) or move.price_unit"/>
+                            </td>
+                            <td>
+                              <span t-esc="move.procurement_id.sale_line_id.discount"/>
+                            </td>
+                            <td class="text-right">
+                              <span t-esc="move.price_subtotal"/>
+                            </td>
+
+                          </tr>
+                      </t>
+
+                  </t>
                 </tbody>
                 <tfoot>
                 </tfoot>
