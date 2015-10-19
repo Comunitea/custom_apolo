@@ -388,6 +388,11 @@ class OdooDao:
         op_data = self.connection.execute('stock.quant.package', 'get_pack_gun_info', [], my_args)
         return op_data
 
+    def get_package_gun_info(self, user_id, name):
+        my_args = {'user_id': user_id, 'name': name}
+        op_data = self.connection.execute('stock.quant.package', 'get_package_gun_info', [], my_args)
+        return op_data
+
     def create_package_from_gun(self, user_id, values):
         my_args = {'user_id': user_id, 'values': values}
         package_data = self.connection.execute('stock.quant.package', 'create_package_from_gun', [], my_args)

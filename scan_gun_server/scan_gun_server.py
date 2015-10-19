@@ -440,12 +440,12 @@ class ScanGunProtocol(LineReceiver):
 
         return menu_str
 
-    def check_ubi(self, line):
+    def check_package(self, line):
         #import ipdb; ipdb.set_trace()
-        res = self.factory.odoo_con.get_package_gun_info(self.user_id, name)
-        check = False
-        if res['exist']:
-            check = PRE_PACK + str(res['package_id'])
+        res = self.factory.odoo_con.get_package_gun_info(self.user_id, line)
+        check=line
+        if res:
+            check = PRE_PACK + str(res)
         return check
 
     def check_ubi(self, line):
