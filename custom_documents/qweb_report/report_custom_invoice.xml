@@ -81,7 +81,7 @@
                   <div t-if="o.partner_id">
                       <br/>
                       <p><strong>SOLICITANT</strong></p>
-                      <p><span t-field="o.partner_id.ref"/> <span t-field="o.partner_id.name"/></p>
+                      <p><span t-field="o.partner_id.ref"/> <span t-esc="o.partner_id.comercial or o.partner_id.name"/></p>
                       <p><span t-field="o.partner_id.street"/></p>
                       <p><span t-field="o.partner_id.zip"/> - <span t-field="o.partner_id.city"/></p>
                       <p>Tlfo. <span t-field="o.partner_id.phone"/></p>
