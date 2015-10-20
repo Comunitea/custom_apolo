@@ -190,8 +190,6 @@ class manual_transfer_wzd(models.TransientModel):
         """
         Get a task for a user and type defined in my args.
         """
-        #import ipdb; ipdb.set_trace()
-
         user_id = my_args.get('user_id', False)
         package_id= my_args.get('package_id', False)
         product_id= my_args.get('product_id', False)
