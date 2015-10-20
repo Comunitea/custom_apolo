@@ -115,14 +115,18 @@ class custom_invoice_parser(models.AbstractModel):
                         prod_group[key] = {
                             'code': line.product_id.default_code,
                             'name': line.product_id.name,
-                            'qty': '{0:.2f}'.format(line.quantity),
+                            'qty': line.quantity,
                             'unit': line.uos_id.name,
-                            'total': '{0:.2f}'.format(line.price_subtotal),
+                            'total': line.price_subtotal,
                             'iva': iva,
                         }
                     else:
                         prod_group[key]['qty'] += line.quantity
                         prod_group[key]['total'] += line.price_subtotal
+                prod_group[key]['qty'] = \
+                    '{0:.2f}'.format(prod_group[key]['qty'])
+                prod_group[key]['total'] =  \
+                    '{0:.2f}'.format(prod_group[key]['total'])
                 summary[inv.id] = prod_group.values()
         docargs = {
             'doc_ids': self._ids,
