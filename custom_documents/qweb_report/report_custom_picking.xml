@@ -30,142 +30,164 @@
          font-size: 12px;
         }
         .table2 .col-ref{
-        width: 10%;
+          width: 10%;
         }
         .table2 .col-des{
-        width: 20%;
+          width: 20%;
         }
         .table2 .col-iva{
-        width: 10%;
+          width: 10%;
         }
         .table2 .col-qty{
-        width: 10%;
+          width: 10%;
         }
         .table2 .col-unit{
-        width: 20%;
+          width: 20%;
         }
         .table2 .col-pp{
-        width: 10%;
+          width: 10%;
         }
         .table2 .col-ap{
-        width: 10%;
+          width: 10%;
         }
         .table2 .col-net{
-        width: 10%;
+          width: 10%;
         }
         .table2 td{
-         padding-right:4px;
+          padding-right:4px;
         }
         .table2 th{
           padding-right:4px;
          }
         .table2 thead{
-           border-top: solid 2px #000000;
-           border-bottom: solid 2px #000000;
+          border-top: solid 2px #000000;
+          border-bottom: solid 2px #000000;
         }
         .table2 tfoot{
-           border-top: solid 2px #000000;
+          border-top: solid 2px #000000;
         }
         .top_part{
-        min-height:30mm;
+          min-height:30mm;
         }
         .middle_part{
-        min-height:162mm;
+          min-height:162mm;
         }
-        .my_footer{
-        border-top: solid 2px #000000;
-        border-bottom: solid 2px #000000;
-        min-height:13mm;
+        .my_footer_direct{
+          border-top: solid 2px #000000;
+          border-bottom: solid 2px #000000;
+          min-height:18mm;
+        }
+        .my_footer_indirect{
+          border-top: solid 2px #000000;
+          min-height:18mm;
+          font-size: 10px;
+          font-weight: bold;
+        }
+        .my_footer_indirect .right{
+          text-align: right;
         }
         .table3{
-        width: 100%;
+          width: 100%;
         }
         .table3 th strong{
           font-size: 10px;
         }
         .table3 .col-fbase{
-        width:20%;
+          width:20%;
         }
         .table3 .col-fiva{
-        width:6%;
+          width:6%;
         }
         .table3 .col-fivaimp{
-        width:20%;
+          width:20%;
         }
         .table3 .col-freq{
-        width:6%;
+          width:6%;
         }
         .table3 .col-freqimp{
-        width:15%;
+          width:15%;
         }
         .table3 .col-ftd{
-        width:20%;
+          width:20%;
         }
         .table3 .col-fap"{
-        width:20%;
+          width:20%;
         }
         .table3 .col-ftotal{
-        width:20%;
+          width:20%;
         }
         .table3 td{
-        font-size: 11px;
+          font-size: 11px;
         }
         .track_info{
-        background-color:#C0C0C0;
-        font-size:9px;
+          background-color:#C0C0C0;
+          font-size:9px;
         }
         .table4{
-        width: 100%;
+          width: 100%;
         }
         .table4 .col-ref{
-        width:10%;
+          width:10%;
         }
         .table4 .col-prod{
-        width:23.5%;
+          width:23.5%;
         }
         .table4 .col-sc{
-        width:6.5%;
+          width:6.5%;
         }
         .table4 .col-ean{
-        width:13%;
+          width:13%;
         }
         .table4 .col-total{
-        width:14%;
+          width:14%;
         }
         .table4 thead{
-        border-bottom: solid 2px #000000;
+          border-bottom: solid 2px #000000;
+        }
+        .table4 tfoot{
+          border-top: solid 2px #000000;
         }
         .full-border{
-        border-top: solid 1px #000000;
-        border-left: solid 1px #000000;
-        border-bottom: solid 1px #000000;
-        border-right: solid 1px #000000;
-        margin-left: 6px;
-        margin-right: 6px;
+          border-top: solid 1px #000000;
+          border-left: solid 1px #000000;
+          border-bottom: solid 1px #000000;
+          border-right: solid 1px #000000;
+          margin-left: 6px;
+          margin-right: 6px;
         }
         .full-border2{
-        border-top: solid 1px #000000;
-        border-left: solid 1px #000000;
-        border-bottom: solid 1px #000000;
-        border-right: solid 1px #000000;
+          border-top: solid 1px #000000;
+          border-left: solid 1px #000000;
+          border-bottom: solid 1px #000000;
+          border-right: solid 1px #000000;
         }
         .header_part{
-        min-height: 45mm;
+          min-height: 45mm;
         }
         .full-height{
-        height: 45mm;
+          height: 45mm;
         }
         .header-font{
-        font-weight: bold;
-        font-size: 14px;
+          font-weight: bold;
+          font-size: 14px;
         }
         .reference-font{
-        font-weight: bold;
-        font-size: 20px;
-        font-family: monospace;
+          font-weight: bold;
+          font-size: 20px;
+          font-family: monospace;
         }
         .tr-separated{
-        line-height: 170%;
+          line-height: 170%;
+        }
+        .foot-text .Text1{
+          font-size: 10px;
+          text-align: center;
+        }
+        .table5{
+          width: 100%;
+        }
+        .table5 td .totaluds{
+          text-aligh: right;
         }
        </style>
           <t t-call="report.html_container">
@@ -303,22 +325,52 @@
             </thead>
             <tbody>
               <tr>
-                <td class="col-ref">Ref.</td>
-                <td class="col-prod">Product</td>
-                <td class="col-sc">U / C</td>
-                <td class="col-ean">EAN BOX</td>
-                <td class="col-ean">EAN CONSUM</td>
-                <td class="col-sc">Boxes</td>
-                <td class="col-sc">S / C</td>
-                <td class="col-sc">Unit</td>
-                <td class="col-sc">S / C</td>
-                <td class="col-total">Total Units</td>
+                <td class="col-ref">Referencia</td>
+                <td class="col-prod">Producto</td>
+                <td class="col-sc">U</td>
+                <td class="col-ean">EAN caja</td>
+                <td class="col-ean">EAN consumoo</td>
+                <td class="col-sc">cajas</td>
+                <td class="col-sc">C</td>
+                <td class="col-sc">Unidad</td>
+                <td class="col-sc">S</td>
+                <td class="col-total">Total Unidades</td>
               </tr>
             </tbody>
             <tfoot>
-
+              <table class="table5">
+                <tr class="">
+                  <td><strong>Total cajas: 13</strong></td>
+                  <td><strong>Total cajas sin cargo: 1</strong></td>
+                  <td><strong>Total cajas albarán: 14</strong></td>
+                  <td class="totaluds"><strong>Total unids.: 291</strong></td>
+                </tr>
+                <tr>
+                  <td><strong>Total unid.: 0</strong></td>
+                  <td><strong>Total unid. sin cargo: 0</strong></td>
+                  <td><strong>Total unid. albarán: 0</strong></td>
+                </tr>
+            </table>
             </tfoot>
           </table>
+          <!-- <div class="col-xs-3">
+            <span><strong>Total cajas: 13</strong></span>
+            <br/>
+            <span><strong>Total unid.: 0</strong></span>
+          </div>
+          <div class="col-xs-3">
+            <span><strong>Total cajas sin cargo: 1</strong></span>
+            <br/>
+            <span><strong>Total unid. sin cargo: 0</strong></span>
+          </div>
+          <div class="col-xs-3">
+            <span><strong>Total cajas albarán: 14</strong></span>
+            <br/>
+            <span><strong>Total unid. albarán: 0</strong></span>
+          </div>
+          <div class="col-xs-3">
+            <span><strong>Total unids.: </strong>291</span>
+          </div> -->
         </template>
 
         <template id="picking_header_part">
@@ -446,7 +498,7 @@
         </template>
 
         <template id="picking_bottom_part">
-          <div class="row my_footer" t-if="not o.indirect">
+          <div class="row my_footer_direct" t-if="not o.indirect">
               <table class="table3" t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">
               <thead>
                   <tr>
@@ -479,6 +531,21 @@
                   </tr>
               </tbody>
               </table>
+          </div>
+          <div class="row" t-if="o.indirect">
+            <div class="my_footer_indirect">
+              <div class="col-xs-4">
+                OBSERVATIONS:
+              </div>
+              <div class="col-xs-8 right">
+                SIGN, STAMP ACCORDING CUSTOMER AND DATE RECEIVING MERCHANDISE
+              </div>
+            </div>
+            <div class="foot-text">
+              <p class="Text1"><span t-esc="o.supplier_id.name"/>, <span t-esc="o.supplier_id.street"/> <span t-esc="o.supplier_id.street2"/> - Teléfono <span t-esc="o.supplier_id.phone"/> - Fax <span t-esc="o.supplier_id.fax"/> - <span t-esc="o.supplier_id.zip"/> <span t-esc="o.supplier_id.city"/></p>
+              <p class="Text1"><span t-esc="o.supplier_id.vat"/></p>
+              <!-- <p class="Text2">Registro Mercantil de Barcelona, Hoja B343092, Inscripción 129, Folio 140, Tomo 39375 A28660520</p> -->
+            </div>
           </div>
         </template>
     </data>

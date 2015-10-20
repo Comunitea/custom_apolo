@@ -36,12 +36,14 @@ class custom_invoice_parser(models.AbstractModel):
         report_name = 'custom_documents.report_custom_invoice'
         report = report_obj._get_report_from_name(report_name)
         docs = []
-        lines = {}
+        lines = {}  # For give delivery option table
+        lines_ga = {}   # For group by fiscal address option table
         tfoot = {}
         totals = {}
         for inv in self.env[report.model].browse(self._ids):
             docs.append(inv)
             lines[inv.id] = []
+            lines_ga[inv.id] = {}
             tfoot[inv.id] = {'sum_qty': 0.0, 'sum_net': 0.0}
             inv_date = ''
             if inv.date_invoice:
@@ -58,34 +60,44 @@ class custom_invoice_parser(models.AbstractModel):
                 'acc_paid': '{0:.2f}'.format(0.00),
                 'total_paid': '{0:.2f}'.format(inv.amount_total - 0.0),
             }
-            line_qty = 0.0
-            line_net = 0.0
-            for line in inv.invoice_line:
-                iva = ""
-                if line.invoice_line_tax_id:
-                    for tax in line.invoice_line_tax_id:
-                        if iva:
-                            iva += ''
-                        iva += str('{0:.2f}'.format(int(tax.amount * 100)))
-                dic = {
-                    'ref': line.product_id.default_code,
-                    'des': line.product_id.name,
-                    'iva': iva,
-                    'qty': '{0:.2f}'.format(line.quantity),
-                    'unit': line.uos_id.name,
-                    'pric_price': '{0:.2f}'.format(line.price_unit),
-                    'app_price': '{0:.2f}'.format(line.price_unit),
-                    'net': '{0:.2f}'.format(line.price_subtotal),
-                }
+            if inv.partner_id.inv_print_op == 'give_deliver' or \
+                    not inv.partner_id.inv_print_op:
+                line_qty = 0.0
+                line_net = 0.0
+                for line in inv.invoice_line:
+                    iva = ""
+                    if line.invoice_line_tax_id:
+                        for tax in line.invoice_line_tax_id:
+                            if iva:
+                                iva += ''
+                            iva += str('{0:.2f}'.format(int(tax.amount * 100)))
+                    dic = {
+                        'ref': line.product_id.default_code,
+                        'des': line.product_id.name,
+                        'iva': iva,
+                        'qty': '{0:.2f}'.format(line.quantity),
+                        'unit': line.uos_id.name,
+                        'pric_price': '{0:.2f}'.format(line.price_unit),
+                        'app_price': '{0:.2f}'.format(line.price_unit),
+                        'net': '{0:.2f}'.format(line.price_subtotal),
+                    }
 
-                line_qty += line.quantity
-                line_net += line.price_subtotal
-                # for i in range(0, 25):
-                #     lines[pick.id].append(dic)
-                lines[inv.id].append(dic)
-            tfoot[inv.id]['sum_qty'] = '{0:.2f}'.format(line_qty)
-            tfoot[inv.id]['sum_net'] = '{0:.2f}'.format(line_net)
+                    line_qty += line.quantity
+                    line_net += line.price_subtotal
+                    # for i in range(0, 25):
+                    #     lines[pick.id].append(dic)
+                    lines[inv.id].append(dic)
+                tfoot[inv.id]['sum_qty'] = '{0:.2f}'.format(line_qty)
+                tfoot[inv.id]['sum_net'] = '{0:.2f}'.format(line_net)
+            elif inv.partner_id.inv_print_op == 'group_by_partner' or \
+                    inv.partner_id.inv_print_op == 'group_pick':
+                for pick in inv.pick_ids:
+                    part_obj = pick.partner_id
 
+                    # Group by partner
+                    if part_obj not in lines_ga[inv.id]:
+                        lines_ga[inv.id][pick.partner_id] = []
+                    lines_ga[inv.id][pick.partner_id].append(pick)
         docargs = {
             'doc_ids': self._ids,
             'doc_model': report.model,
@@ -93,5 +105,6 @@ class custom_invoice_parser(models.AbstractModel):
             'totals': totals,
             'tfoot': tfoot,
             'lines': lines,
+            'lines_ga': lines_ga
         }
         return report_obj.render(report_name, docargs)

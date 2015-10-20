@@ -27,8 +27,8 @@ class ResPartner(models.Model):
 
     INV_PRINT_OPTIONS = [
         ('give_deliver', 'Give in Delivery'),
-        ('group_pick', 'Group by Pick'),
-        ('group_by_partner', 'Group by Partner'),
+        ('group_pick', 'Group parent partner, breakdown picks'),
+        ('group_by_partner', 'Group parent partner, summary picks'),
     ]
     PICK_PRINT_OPTIONS = [
         ('not_valued', 'Not Valued Picking'),

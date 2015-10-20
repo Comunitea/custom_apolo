@@ -88,14 +88,18 @@ class custom_picking_parser(models.AbstractModel):
                         life_date = ld[2] + "/" + ld[1] + "/" + ld[0]
                         op_info['lot_date'] = life_date
                         lots.append(op_info)
+
+                pu = 0.0
+                if move.procurement_id and move.procurement_id.sale_line_id:
+                    pu = move.procurement_id.sale_line_id.price_udv
                 dic = {
                     'ref': move.product_id.default_code,
                     'des': move.product_id.name,
                     'iva': iva,
                     'qty': '{0:.2f}'.format(move.product_uos_qty),
                     'unit': move.product_uos.name,
-                    'pric_price': '{0:.2f}'.format(move.order_price_unit),
-                    'app_price': '{0:.2f}'.format(move.order_price_unit),
+                    'pric_price': '{0:.2f}'.format(pu),
+                    'app_price': '{0:.2f}'.format(pu),
                     'net': '{0:.2f}'.format(move.price_subtotal),
                     'lots': lots
                 }
