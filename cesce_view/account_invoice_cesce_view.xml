@@ -10,12 +10,14 @@
                 <tree string="Cesce invoices" create="false" edit="false" editable="top">
                     <field name="reference"/>
                     <field name="name"/>
+                    <field name="cesce_policy"/>
                     <field name="nif"/>
                     <field name="street"/>
                     <field name="city"/>
                     <field name="zip"/>
                     <field name="amount"/>
                     <field name="payment_mode"/>
+                    <field name="date_due"/>
                     <field name="invoice_year"/>
                 </tree>
             </field>
