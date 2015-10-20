@@ -41,6 +41,7 @@ class custom_invoice_parser(models.AbstractModel):
         tfoot = {}
         totals = {}
         summary = {}
+
         for inv in self.env[report.model].browse(self._ids):
             docs.append(inv)
             lines[inv.id] = []
@@ -124,10 +125,12 @@ class custom_invoice_parser(models.AbstractModel):
                     else:
                         prod_group[key]['qty'] += line.quantity
                         prod_group[key]['total'] += line.price_subtotal
-                prod_group[key]['qty'] = \
-                    '{0:.2f}'.format(prod_group[key]['qty'])
-                prod_group[key]['total'] =  \
-                    '{0:.2f}'.format(prod_group[key]['total'])
+
+                for key in prod_group:
+                    prod_group[key]['qty'] = \
+                        '{0:.2f}'.format(prod_group[key]['qty'])
+                    prod_group[key]['total'] =  \
+                        '{0:.2f}'.format(prod_group[key]['total'])
                 summary[inv.id] = prod_group.values()
         docargs = {
             'doc_ids': self._ids,
