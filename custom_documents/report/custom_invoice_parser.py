@@ -55,8 +55,8 @@ class custom_invoice_parser(models.AbstractModel):
             deliver_man = ''
             if inv.pick_ids and inv.pick_ids[0].route_detail_id:
                 detail_route = inv.pick_ids[0].route_detail_id
-                if detail_route.commercial_id:
-                    deliver_man = detail_route.commercial_id.name
+                if detail_route.comercial_id:
+                    deliver_man = detail_route.comercial_id.name
             totals[inv.id] = {
                 'inv_date': inv_date,
                 'deliver_man': deliver_man,

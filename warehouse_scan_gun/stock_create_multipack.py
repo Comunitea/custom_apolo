@@ -43,7 +43,6 @@ class StockCreateMultiPack(models.TransientModel):
 
     @api.multi
     def create_multipack_from_gun(self, my_args):
-        #import ipdb; ipdb.set_trace()
 
         user_id = my_args.get('user_id', False)
         package_ids = my_args.get ('package_id', [])

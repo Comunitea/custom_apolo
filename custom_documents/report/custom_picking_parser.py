@@ -32,8 +32,6 @@ class custom_picking_parser(models.AbstractModel):
 
     @api.multi
     def render_html(self, data=None):
-        # import ipdb; ipdb.set_trace()
-
         report_obj = self.env['report']
         report_name = 'custom_documents.report_custom_picking'
         report = report_obj._get_report_from_name(report_name)

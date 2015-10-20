@@ -31,7 +31,7 @@ class ProductTemplate(models.Model):
 
     # @api.constrains('picking_location_id')
     # def _check_picking_location(self):
-    #     #import ipdb; ipdb.set_trace()
+    #
     #     if self.picking_location_id.default_picking_zone == False:
     #         domain =[('picking_location_id', '=', self.picking_location_id.id),
     #              ('id', '!=', self.id)]
