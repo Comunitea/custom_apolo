@@ -33,7 +33,9 @@
         "stock_valued_picking",
         "stock_picking_review",
         "depot_invoice",
-        "process_sale_order"
+        "process_sale_order",
+        "stock",
+        "account"
     ],
     "data": ['views/res_partner_view.xml',
              #  'views/custom_assets.xml', NO ME FUNCIONA en esta revision

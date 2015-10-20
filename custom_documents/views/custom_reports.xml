@@ -25,27 +25,31 @@
            <field name="dpi">0</field>
       </record>
 
-        <report
+        <!-- <report
             string="Custom Picking Report"
             id="action_report_custom_picking"
             model="stock.picking"
             report_type="qweb-pdf"
             name="custom_documents.report_custom_picking"
             file="custom_documents.report_custom_picking"
-        />
-        <!-- <report
-            string="Custom Picking Report 2"
-            id="action_report_custom_picking2"
+        /> -->
+        <!-- <record id="action_report_custom_picking" model="ir.actions.report.xml">
+            <field name="paperformat_id" ref="my_A4_paperformat"/>
+        </record> -->
+        <!-- PISSAMOS EL ORIGINAL -->
+        <report
+            string="Picking"
+            id="stock.action_report_picking"
             model="stock.picking"
             report_type="qweb-pdf"
             name="custom_documents.report_custom_picking"
             file="custom_documents.report_custom_picking"
-        /> -->
+        />
 
-        <record id="action_report_custom_picking" model="ir.actions.report.xml">
+        <record id="stock.action_report_picking" model="ir.actions.report.xml">
             <field name="paperformat_id" ref="my_A4_paperformat"/>
         </record>
-        <report
+        <!-- <report
             string="Custom Invoice Report"
             id="action_report_custom_invoice"
             model="account.invoice"
@@ -54,6 +58,21 @@
             file="custom_documents.report_custom_invoice"
         />
         <record id="action_report_custom_invoice" model="ir.actions.report.xml">
+            <field name="paperformat_id" ref="my_A4_paperformat"/>
+        </record> -->
+
+        <!-- PISSAMOS EL ORIGINAL -->
+        <report
+            id="account.account_invoices"
+            model="account.invoice"
+            string="Invoices"
+            report_type="qweb-pdf"
+            name="custom_documents.report_custom_invoice"
+            file="custom_documents.report_custom_invoice"
+            attachment_use="True"
+            attachment="(object.state in ('open','paid')) and ('INV'+(object.number or '').replace('/','')+'.pdf')"
+        />
+        <record id="account.account_invoices" model="ir.actions.report.xml">
             <field name="paperformat_id" ref="my_A4_paperformat"/>
         </record>
     </data>
