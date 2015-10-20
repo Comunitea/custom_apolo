@@ -467,7 +467,7 @@
               border-bottom: solid 2px #000000;
             }
             .table-bp tfoot{
-              border-top: solid 2px #000000;
+              border-top: solid 1px #000000;
             }
             .table-bp .col-bp-code{
               width: 10%;
@@ -522,7 +522,12 @@
                           </td>
                           <td>
                           </td>
-                          <td>
+                          <td class="text-right">
+                            <t t-set="sum_picks" t-value="0"/>
+                            <t t-foreach="lines_ga[o.id][partner]" t-as="pick">
+                                <t t-set="sum_picks" t-value="sum_picks + pick.amount_total_acc"/>
+                            </t>
+                            <strong><span t-esc="'{0:.2f}'.format(sum_picks)"/></strong>
                           </td>
                       </tr>
                       <t t-foreach="lines_ga[o.id][partner]" t-as="pick">
@@ -664,7 +669,6 @@
                           <tr>
                             <td class="text-right full-border">
                               <span t-esc="totals[o.id]['total_invoice']"/>
-                              <!-- <span t-esc="'{0:.2f}'.format(tax.base)"/> -->
                             </td>
                             <td class="text-right">
                               <div t-if="o.partner_id.inv_print_op != 'give_deliver'">
