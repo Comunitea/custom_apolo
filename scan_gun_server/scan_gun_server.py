@@ -201,22 +201,26 @@ class ScanGunProtocol(LineReceiver):
         """
         Método del framework. LLamado cada vez que se recibe una linea
         """
+        #import ipdb; ipdb.set_trace()
+        key = False
+
         line = line.upper()
         print "Estado: " +self.state + " Anterior: " + self.last_state
         izq = line.encode('hex')[0:2]
-
-        if izq == "8f" or izq == "9b":
+        print "Codificación Tecla: %s > %s"%(line, line.encode('hex'))
+        if izq == "8f" or izq == "9b" or izq=="1b":
             #son teclas de fucnion
             line = self.function_keys(line.encode('hex'))
+            key == True
         print "Entrada: " + str(line)
 
-
         line= str(line)
-        if len(line)==9:
-            line = self.check_ubi(line) or line
+        if not key:
+            if len(line)==9:
+                line = self.check_ubi(line) or line
 
-        if len (line) == 6:
-            line = self.check_package(line) or line
+            if len (line) == 6:
+                line = self.check_package(line) or line
 
         if line == KEY_DEBUG:
             if self.debug == True:
@@ -293,6 +297,9 @@ class ScanGunProtocol(LineReceiver):
             self.handle_create_picking_zone(line)
         elif self.state == 'select_subzone':
             self.handle_select_picking_subzone(line)
+        elif self.state == 'create_multipack':
+            self.handle_create_multipack(line)
+
         else:
             self._snd(u"Introduciste %s, pero paso olimpicamente:" % line)
         # except Exception, e:
@@ -441,7 +448,8 @@ class ScanGunProtocol(LineReceiver):
         return menu_str
 
     def check_package(self, line):
-        #import ipdb; ipdb.set_trace()
+
+        line = str(line)
         res = self.factory.odoo_con.get_package_gun_info(self.user_id, line)
         check=line
         if res:
@@ -639,7 +647,6 @@ class ScanGunProtocol(LineReceiver):
             self.state ='menu1'
             self._snd(self.get_str_menu1())
         return
-
 
     def handle_tasks(self, line='0', confirm = False):
         line_in_keys = False
@@ -2558,14 +2565,14 @@ class ScanGunProtocol(LineReceiver):
             strg+="%s%s %s\n"%(' ' * 7, op_['uos_qty'], op_['uos'])
 
         if self.type != 'ubication':
-            strg_= u'De: %s %s\n'%(op_['origen_bcd'], op_['origen_id']* self.show_id)
+            strg_= u'De: %s %s\n'%(op_['origen_bcd'], str(op_['origen_id'])* self.show_id)
             if self.step ==0 and not op_['PROCESADO'] :
                 strg += self.inverse(strg_)
             else:
                 strg +=  strg_
 
         if self.type != 'picking':
-            strg_= u'A: %s %s\n'%(op_['destino_bcd'], op_['destino_id']* self.show_id)
+            strg_= u'A: %s %s\n'%(op_['destino_bcd'], str(op_['destino_id'])* self.show_id)
             if (self.step==2 or self.step ==3) and not op_['PROCESADO']:
 
                 strg += self.inverse(strg_)
@@ -3676,13 +3683,13 @@ class ScanGunProtocol(LineReceiver):
         str_menu=""
         if self.type== 'ubication':
             str_menu +=u"0-> Ubicación Manual\n"
-
+        #import ipdb; ipdb.set_trace()
         for key in self.factory.menu_cameras:
             key_ = str(key)
             intro = key_ + "-> "
             if key_ in self.camera_ids:
                 intro = self.inverse(intro)
-            str_menu += intro + self.factory.menu_cameras[key][1] + "\n"
+            str_menu += intro + (self.factory.menu_cameras[key][1] or 'Sin BCD Name') + "\n"
 
         keys = "<" + KEY_VOLVER +"> Salir"
         if self.camera_ids:
@@ -3738,7 +3745,7 @@ class ScanGunProtocol(LineReceiver):
             try:
                 self.camera_id=[]
                 for camera_ in self.camera_ids:
-                    self.camera_id.append(self.factory.menu_cameras[self.int_(camera_)][0])
+                    self.camera_id.append(self.factory.menu_cameras[self.int_(camera_)][0] or 'Sin BCD Name')
                 date_planned=datetime.date.today().strftime("%Y-%m-%d")
                 self.task_id = self.factory.odoo_con.get_task_of_type(self.user_id,self.camera_id, self.type, self.machine_id, self.route_id, date_planned)
 
@@ -4260,8 +4267,9 @@ class ScanGunProtocol(LineReceiver):
 
         menu_str = u"1 >Asignar Zona Picking\n" \
                    u"2 >Dividir Zona Picking\n" \
-                   u"3 >Info Producto\n" \
-                   u"4 >Info Paquete\n" \
+                   u"3 >Crear Multipack\n" \
+                   u"4 >Info Producto\n" \
+                   u"5 >Info Paquete\n" \
                    u"9 >Volver\n"
         if self.show_keys:
             keys = "\n<" + KEY_VOLVER +"> Salir"
@@ -4271,7 +4279,7 @@ class ScanGunProtocol(LineReceiver):
     def handle_menu_tool(self, line):
 
         print "Menu Tools"
-        if line not in ["1","2", "9"] and line != KEY_VOLVER:
+        if line not in ["1","2", "3", "9"] and line != KEY_VOLVER:
             str_error = u"La opcion %s no es valida.\nReintentar:\n" % line
             self.state='tools'
             self._snd(self.get_menu_tools(), str_error)
@@ -4289,12 +4297,102 @@ class ScanGunProtocol(LineReceiver):
             self.step=0
             self._snd(self.get_str_create_picking_zone())
 
+        elif line == '3':
+            self.state = 'create_multipack'
+            self.step=0
+            self.num_order_list_ops = 1
+            self.state= "create_multipack"
+            self.packs = []
+            self._snd(self.get_str_create_multipack())
 
         else:
             str_error = u"La opcion %s no está implementada.\nReintentar:\n" % line
             self.state='tools'
             self._snd(self.get_menu_tools(), str_error)
         return
+
+    def get_str_create_multipack(self, message =''):
+
+        str_menu=u"Crear Multipack\n"
+        #import ipdb; ipdb.set_trace()
+        if self.step == 0:
+            str_menu += self.inverse(u"Escanea los paquetes\n")
+            str_menu += self.inverse(u"%s Confimar"%KEY_CONFIRM)
+
+        if self.step == 1:
+            str_menu += u"Escanea los paquetes\n"
+
+            for inc in range(self.num_order_list_ops, self.num_order_list_ops+MAX_NUM_ONE):
+                if inc <= len(self.packs):
+                    str_menu += u'%s > %s\n'%(inc, self.packs[inc-1]['name'])
+
+            str_menu += self.inverse(u"%s Confimar"%KEY_CONFIRM)
+            str_menu += message
+        return str_menu
+
+    def handle_create_multipack(self, line):
+
+        #import ipdb; ipdb.set_trace()
+        order_line = line[0:2]
+        if order_line in (PRE_LOC, PRE_LOT, PRE_PACK, PRE_PROD):
+            line = line [2:]
+        else:
+            order_line = False
+        line_int = self.int_(line)
+
+        if line == KEY_NEXT:
+            if self.num_order_list_ops + MAX_NUM_ONE <=len(self.packs):
+                self.num_order_list_ops += MAX_NUM_ONE
+            self._snd(self.get_str_create_multipack())
+            return
+        if line == KEY_PREV:
+            self.num_order_list_ops -= MAX_NUM
+            if self.num_order_list_ops <1:
+                self.num_order_list_ops=1
+            self._snd(self.get_str_create_multipack())
+            return
+
+        if order_line == PRE_PACK:
+            add_pack = True
+            for pack in self.packs:
+                if line_int == pack['id']:
+                    self.packs.remove(pack)
+                    add_pack = False
+                    message = u"\nPaquete Borrado"
+                    break
+
+            if add_pack:
+                self.step=1
+                new_pack = self.factory.odoo_con.get_pack_gun_info(self.user_id, line_int)
+                if new_pack['exist']:
+                    self.packs.append({
+                        'id': new_pack['package_id'],
+                        'name': new_pack['package']
+                    })
+
+                    message = u'%s: %s\n%s %s'%(
+                        new_pack['package'], new_pack['lot'],
+                        new_pack['packed_qty'], new_pack['uom'])
+                else:
+                    message = u'\nPaquete no encontrado'
+            self._snd(self.get_str_create_multipack(), message)
+            return
+        if line == KEY_CONFIRM:
+            res = self.create_multipack()
+
+    def create_multipack(self):
+
+        #import ipdb; ipdb.set_trace()
+        if len(self.packs)<1:
+            message = "\nNecesitas un paquete"
+            return False, message
+        packs = []
+        for pack in self.packs:
+            packs.append(pack['id'])
+        res = self.factory.odoo_con.create_multipack_from_gun(self.user_id, packs)
+        return res
+
+
 
     def handle_create_picking_zone(self, line):
 
