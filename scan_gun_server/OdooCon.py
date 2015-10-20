@@ -504,3 +504,8 @@ class OdooDao:
         my_args = {'user_id': user_id, 'pick_zone_id' : pick_zone_id, 'sub_cols' : sub_cols}
         res = self.connection.execute('stock.location', 'create_picking_sublocation_from_gun', [], my_args)
         return res
+
+    def create_multipack_from_gun(self, user_id, package_id):
+        my_args = {'user_id': user_id, 'package_id': package_id}
+        op_data = self.connection.execute('stock.picking.create.multipack', 'create_multipack_from_gun', [], my_args)
+        return op_data

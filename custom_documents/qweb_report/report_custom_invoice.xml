@@ -10,6 +10,9 @@
           .middle_part{
             min-height:162mm;
           }
+          .middle_part_summary{
+            min-height:172mm;
+          }
           .top-border {
             border-top: solid 2px #000000;
           }
@@ -33,9 +36,11 @@
           .my_margin_top {
             min-height: 50mm;
           }
+
       </style>
           <t t-call="report.html_container">
               <t t-foreach="docs" t-as="o">
+
                   <div class="page">
                       <div class="my_margin_top">
                       </div>
@@ -55,16 +60,105 @@
 
                       <t t-call="custom_documents.invoice_bottom_part"/>
                   </div>
+
                   <div class="page" t-if="o.partner_id.add_summary">
-
-
-                      <h1>Resumen de artículos</h1>
-
+                      <div class="my_margin_top">
+                      </div>
+                      <t t-call="custom_documents.invoice_top_part"/>
+                      <h4 align="center">Summary products</h4>
+                      <div class="row middle_part_summary">
+                          <t t-call="custom_documents.invoice_summary_products"/>
+                      </div>
                   </div>
                </t>
           </t>
       </template>
 
+      <template id="invoice_summary_products">
+        <style type="text/css">
+          .summary-table{
+            width: 100%;
+          }
+          .summary-table td{
+           padding-right:4px;
+          }
+          .summary-table th{
+            padding-right:4px;
+           }
+          .summary-table thead{
+            border-top: solid 2px #000000;
+            border-bottom: solid 2px #000000;
+          }
+          .summary-table td span{
+            font-size: 10px;
+          }
+          .summary-table .col-sp-empty1{
+            width: 5%;
+          }
+          .summary-table .col-sp-code{
+            width: 10%;
+          }
+          .summary-table .col-sp-name{
+            width: 30%;
+          }
+          .summary-table .col-sp-qty{
+            width: 10%;
+          }
+          .summary-table .col-sp-unit{
+            width: 10%;
+          }
+          .summary-table .col-sp-total{
+            width: 10%;
+          }
+          .summary-table .col-sp-iva{
+            width: 10%;
+          }
+          .summary-table .col-sp-empty2{
+            width: 20%;
+          }
+
+        </style>
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th class="col-sp-empty1"></th>
+                    <th class="col-sp-code"><strong>Code</strong></th>
+                    <th class="col-sp-name"><strong>Description</strong></th>
+                    <th class="col-sp-qty"><strong>Qty.</strong></th>
+                    <th class="col-sp-unit"><strong>Unit</strong></th>
+                    <th class="col-sp-total"><strong>Total</strong></th>
+                    <th class="col-sp-iva"><strong>% IVA</strong></th>
+                    <th class="col-sp-empty2"></th>
+
+                </tr>
+            </thead>
+            <tbody>
+                <tr t-foreach="summary[o.id]" t-as="s">
+                    <td>
+
+                    </td>
+                    <td>
+                        <span t-esc="s['code']"/>
+                    </td>
+                    <td>
+                        <span t-esc="s['name']"/>
+                    </td>
+                    <td>
+                        <span t-esc="s['qty']"/>
+                    </td>
+                    <td>
+                        <span t-esc="s['unit']"/>
+                    </td>
+                    <td>
+                        <span t-esc="s['total']"/>
+                    </td>
+                    <td>
+                        <span t-esc="s['iva']"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+      </template>
       <!-- TOP HEADER -->
       <template id="invoice_top_part">
           <div class="row top_part">
