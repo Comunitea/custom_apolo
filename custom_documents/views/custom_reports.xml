@@ -62,6 +62,11 @@
         </record> -->
 
         <!-- PISSAMOS EL ORIGINAL -->
+        <!-- Las líneas attachment_use y attachment del siguiente report. Si se dejan, sale
+        mal la impresión de facturas desglosada cuando está en estado abierta (validada).
+        La primera vez que imprimes la factura crea la factura y una segunda página con el resumen
+        de productos. Si se vuelve a imprimir sale 2 veces el resumen, pero si se eliminan los adjuntos
+        sale correctamente. Hay que borrar los adjuntos de cada vez.-->
         <report
             id="account.account_invoices"
             model="account.invoice"
@@ -71,6 +76,7 @@
             file="custom_documents.report_custom_invoice"
             attachment_use="True"
             attachment="(object.state in ('open','paid')) and ('INV'+(object.number or '').replace('/','')+'.pdf')"
+
         />
         <record id="account.account_invoices" model="ir.actions.report.xml">
             <field name="paperformat_id" ref="my_A4_paperformat"/>

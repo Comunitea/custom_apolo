@@ -109,6 +109,7 @@
           }
           .summary-table .col-sp-total{
             width: 10%;
+            text-align: right;
           }
           .summary-table .col-sp-iva{
             width: 10%;
@@ -116,7 +117,6 @@
           .summary-table .col-sp-empty2{
             width: 20%;
           }
-
         </style>
         <table class="summary-table">
             <thead>
@@ -124,10 +124,10 @@
                     <th class="col-sp-empty1"></th>
                     <th class="col-sp-code"><strong>Code</strong></th>
                     <th class="col-sp-name"><strong>Description</strong></th>
-                    <th class="col-sp-qty"><strong>Qty.</strong></th>
+                    <th class="col-sp-qty text-center"><strong>Qty.</strong></th>
                     <th class="col-sp-unit"><strong>Unit</strong></th>
                     <th class="col-sp-total"><strong>Total</strong></th>
-                    <th class="col-sp-iva"><strong>% IVA</strong></th>
+                    <th class="col-sp-iva text-right"><strong>% IVA</strong></th>
                     <th class="col-sp-empty2"></th>
 
                 </tr>
@@ -143,16 +143,16 @@
                     <td>
                         <span t-esc="s['name']"/>
                     </td>
-                    <td>
+                    <td class="text-right">
                         <span t-esc="s['qty']"/>
                     </td>
                     <td>
                         <span t-esc="s['unit']"/>
                     </td>
-                    <td>
+                    <td class="col-sp-total">
                         <span t-esc="s['total']"/>
                     </td>
-                    <td>
+                    <td class="text-right">
                         <span t-esc="s['iva']"/>
                     </td>
                 </tr>
