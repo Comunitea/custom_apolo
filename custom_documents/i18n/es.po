@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-19 19:37+0000\n"
-"PO-Revision-Date: 2015-10-19 19:37+0000\n"
+"POT-Creation-Date: 2015-10-20 17:28+0000\n"
+"PO-Revision-Date: 2015-10-20 17:28+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -21,6 +21,7 @@ msgid "% Disc."
 msgstr "% Dcto."
 
 #. module: custom_documents
+#: view:website:custom_documents.invoice_summary_products
 #: view:website:custom_documents.op_give_deliver
 #: view:website:custom_documents.picking_direct_table
 msgid "% IVA"
@@ -53,7 +54,6 @@ msgid "Add a page to the invoice with the summary of invoiced products"
 msgstr "Añade un página a la factura con el resumen de productos facturados"
 
 #. module: custom_documents
-#: view:website:custom_documents.invoice_top_part
 #: view:website:custom_documents.picking_top_part
 msgid "Agent"
 msgstr "Agente"
@@ -64,30 +64,21 @@ msgid "Agente / Repartidor:"
 msgstr "Agente / Repartidor:"
 
 #. module: custom_documents
+#: view:website:custom_documents.op_group_by_partner
+msgid "Amount"
+msgstr "Importe"
+
+#. module: custom_documents
 #: view:website:custom_documents.op_give_deliver
 #: view:website:custom_documents.picking_direct_table
 msgid "Applied Price"
 msgstr "Precio Aplicado"
 
 #. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "Boxes"
-msgstr "Cajas"
-
-#. module: custom_documents
+#: view:website:custom_documents.invoice_summary_products
 #: view:website:custom_documents.op_group_pick
 msgid "Code"
 msgstr "Código"
-
-#. module: custom_documents
-#: model:ir.actions.report.xml,name:custom_documents.action_report_custom_invoice
-msgid "Custom Invoice Report"
-msgstr "Factura personalizada"
-
-#. module: custom_documents
-#: model:ir.actions.report.xml,name:custom_documents.action_report_custom_picking
-msgid "Custom Picking Report"
-msgstr "Albarán personalizado"
 
 #. module: custom_documents
 #: view:website:custom_documents.picking_header_part
@@ -111,7 +102,6 @@ msgid "Date Of Delivery"
 msgstr "Fecha de entrega"
 
 #. module: custom_documents
-#: view:website:custom_documents.invoice_top_part
 #: view:website:custom_documents.picking_top_part
 msgid "Delivery Man"
 msgstr "Repartidor"
@@ -127,6 +117,7 @@ msgid "Delivery Pick"
 msgstr "Albarán entrega"
 
 #. module: custom_documents
+#: view:website:custom_documents.invoice_summary_products
 #: view:website:custom_documents.op_give_deliver
 #: view:website:custom_documents.op_group_pick
 #: view:website:custom_documents.picking_direct_table
@@ -144,14 +135,9 @@ msgid "EAN CONSUM"
 msgstr "EAN CONSUMO"
 
 #. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "EAN caja"
-msgstr "EAN caja"
-
-#. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "EAN consumoo"
-msgstr "EAN consumoo"
+#: view:website:custom_documents.invoice_top_part
+msgid "Expiration:"
+msgstr "Vencimiento:"
 
 #. module: custom_documents
 #: selection:res.partner,inv_print_op:0
@@ -195,11 +181,6 @@ msgstr "FACTURAR A"
 #: view:website:custom_documents.invoice_top_part
 msgid "INVOICE:"
 msgstr "FACTURA:"
-
-#. module: custom_documents
-#: view:website:custom_documents.op_group_by_partner
-msgid "Import"
-msgstr "Importe"
 
 #. module: custom_documents
 #: field:res.partner,inv_print_op:0
@@ -266,7 +247,7 @@ msgstr "Importe del albarán:"
 #. module: custom_documents
 #: view:website:custom_documents.op_group_by_partner
 msgid "Pick Number"
-msgstr "Pick Number"
+msgstr "Número de albarán"
 
 #. module: custom_documents
 #: view:website:custom_documents.op_group_pick
@@ -295,22 +276,24 @@ msgid "Product"
 msgstr "Producto"
 
 #. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "Producto"
-msgstr "Producto"
-
-#. module: custom_documents
 #: view:website:custom_documents.invoice_top_part
 #: view:website:custom_documents.picking_top_part
 msgid "Pág. 1 de 1"
 msgstr "Pág. 1 de 1"
 
 #. module: custom_documents
+#: view:website:custom_documents.invoice_summary_products
 #: view:website:custom_documents.op_give_deliver
 #: view:website:custom_documents.op_group_pick
 #: view:website:custom_documents.picking_direct_table
+#: view:website:custom_documents.picking_indirect_table
 msgid "Qty."
 msgstr "Cant."
+
+#. module: custom_documents
+#: view:website:custom_documents.picking_indirect_table
+msgid "Qty. S/C"
+msgstr "Cant. S/C"
 
 #. module: custom_documents
 #: view:website:custom_documents.op_give_deliver
@@ -320,29 +303,14 @@ msgid "Ref."
 msgstr "Ref."
 
 #. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "Referencia"
-msgstr "Referencia"
-
-#. module: custom_documents
 #: view:res.partner:custom_documents.custom_documents_view_form
 msgid "Reports Preferences"
 msgstr "Preferencias informes"
 
 #. module: custom_documents
-#: view:website:custom_documents.report_custom_invoice
-msgid "Resumen de artículos"
-msgstr "Resumen de artículos"
-
-#. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "S / C"
-msgstr "S / C"
-
-#. module: custom_documents
 #: view:website:custom_documents.picking_bottom_part
 msgid "SIGN, STAMP ACCORDING CUSTOMER AND DATE RECEIVING MERCHANDISE"
-msgstr "SIGN, STAMP ACCORDING CUSTOMER AND DATE RECEIVING MERCHANDISE"
+msgstr "FIRMA, SELLO CONFORME CLIENTE Y FECHA RECEPCIÓN MERCANCÍA"
 
 #. module: custom_documents
 #: view:website:custom_documents.invoice_top_part
@@ -359,6 +327,11 @@ msgstr "Un. Venta:"
 #: view:website:custom_documents.picking_direct_table
 msgid "Stock units:"
 msgstr "Un. Stock:"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_custom_invoice
+msgid "Summary products"
+msgstr "Resumen productos"
 
 #. module: custom_documents
 #: view:website:custom_documents.invoice_bottom_part
@@ -399,54 +372,15 @@ msgid "Tlfo."
 msgstr "Tlfo."
 
 #. module: custom_documents
+#: view:website:custom_documents.invoice_summary_products
 #: view:website:custom_documents.op_group_pick
 msgid "Total"
 msgstr "Total"
 
 #. module: custom_documents
 #: view:website:custom_documents.picking_indirect_table
-msgid "Total Unidades"
-msgstr "Total Unidades"
-
-#. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "Total Units"
-msgstr "Total Unidades"
-
-#. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "Total cajas albarán: 14"
-msgstr "Total cajas albarán: 14"
-
-#. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "Total cajas sin cargo: 1"
-msgstr "Total cajas sin cargo: 1"
-
-#. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "Total cajas: 13"
-msgstr "Total cajas: 13"
-
-#. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "Total unid. albarán: 0"
-msgstr "Total unid. albarán: 0"
-
-#. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "Total unid. sin cargo: 0"
-msgstr "Total unid. sin cargo: 0"
-
-#. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "Total unid.: 0"
-msgstr "Total unid.: 0"
-
-#. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "Total unids.: 291"
-msgstr "Total unids.: 291"
+msgid "Total Qty"
+msgstr "Cant. total"
 
 #. module: custom_documents
 #: selection:res.partner,pick_print_op:0
@@ -459,17 +393,22 @@ msgid "U / C"
 msgstr "U / C"
 
 #. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "Unidad"
-msgstr "Unidad"
-
-#. module: custom_documents
+#: view:website:custom_documents.invoice_summary_products
 #: view:website:custom_documents.op_give_deliver
 #: view:website:custom_documents.op_group_pick
 #: view:website:custom_documents.picking_direct_table
-#: view:website:custom_documents.picking_indirect_table
 msgid "Unit"
 msgstr "Unidad"
+
+#. module: custom_documents
+#: view:website:custom_documents.picking_indirect_table
+msgid "Units"
+msgstr "Unids."
+
+#. module: custom_documents
+#: view:website:custom_documents.picking_indirect_table
+msgid "Units S/C"
+msgstr "Unid. S/C"
 
 #. module: custom_documents
 #: selection:res.partner,pick_print_op:0
@@ -477,7 +416,7 @@ msgid "Valued Picking"
 msgstr "Albarán valorado"
 
 #. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "cajas"
-msgstr "cajas"
+#: view:website:custom_documents.invoice_top_part
+msgid "Way To Pay:"
+msgstr "Forma de pago:"
 

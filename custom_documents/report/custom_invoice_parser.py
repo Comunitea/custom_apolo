@@ -40,9 +40,12 @@ class custom_invoice_parser(models.AbstractModel):
         lines_ga = {}   # For group by fiscal address option table
         tfoot = {}
         totals = {}
+        summary = {}
+
         for inv in self.env[report.model].browse(self._ids):
             docs.append(inv)
             lines[inv.id] = []
+            summary[inv.id] = []
             lines_ga[inv.id] = {}
             tfoot[inv.id] = {'sum_qty': 0.0, 'sum_net': 0.0}
             inv_date = ''
@@ -52,11 +55,12 @@ class custom_invoice_parser(models.AbstractModel):
             deliver_man = ''
             if inv.pick_ids and inv.pick_ids[0].route_detail_id:
                 detail_route = inv.pick_ids[0].route_detail_id
-                if detail_route.commercial_id:
-                    deliver_man = detail_route.commercial_id.name
+                if detail_route.comercial_id:
+                    deliver_man = detail_route.comercial_id.name
             totals[inv.id] = {
                 'inv_date': inv_date,
                 'deliver_man': deliver_man,
+                'total_invoice': '{0:.2f}'.format(inv.amount_total),
                 'acc_paid': '{0:.2f}'.format(0.00),
                 'total_paid': '{0:.2f}'.format(inv.amount_total - 0.0),
             }
@@ -98,6 +102,36 @@ class custom_invoice_parser(models.AbstractModel):
                     if part_obj not in lines_ga[inv.id]:
                         lines_ga[inv.id][pick.partner_id] = []
                     lines_ga[inv.id][pick.partner_id].append(pick)
+
+            if inv.partner_id.add_summary:
+                prod_group = {}
+                for line in inv.invoice_line:
+                    key = (line.product_id.id, line.uos_id.id)
+                    iva = ""
+                    if line.invoice_line_tax_id:
+                        for tax in line.invoice_line_tax_id:
+                            if iva:
+                                iva += ''
+                            iva += str('{0:.2f}'.format(int(tax.amount * 100)))
+                    if key not in prod_group:
+                        prod_group[key] = {
+                            'code': line.product_id.default_code,
+                            'name': line.product_id.name,
+                            'qty': line.quantity,
+                            'unit': line.uos_id.name,
+                            'total': line.price_subtotal,
+                            'iva': iva,
+                        }
+                    else:
+                        prod_group[key]['qty'] += line.quantity
+                        prod_group[key]['total'] += line.price_subtotal
+
+                for key in prod_group:
+                    prod_group[key]['qty'] = \
+                        '{0:.2f}'.format(prod_group[key]['qty'])
+                    prod_group[key]['total'] =  \
+                        '{0:.2f}'.format(prod_group[key]['total'])
+                summary[inv.id] = prod_group.values()
         docargs = {
             'doc_ids': self._ids,
             'doc_model': report.model,
@@ -105,6 +139,7 @@ class custom_invoice_parser(models.AbstractModel):
             'totals': totals,
             'tfoot': tfoot,
             'lines': lines,
-            'lines_ga': lines_ga
+            'lines_ga': lines_ga,
+            'summary': summary,
         }
         return report_obj.render(report_name, docargs)
