@@ -155,10 +155,10 @@ class custom_picking_parser(models.AbstractModel):
             tfoot[pick.id]['sum_qty'] = '{0:.2f}'.format(move_qty)
             tfoot[pick.id]['sum_net'] = '{0:.2f}'.format(move_net)
             # Calc indirect totals
-            i = 1
             rem_num_units = len(ind_total_units.keys())
             total_list = []
             for unit_name in ind_total_units:
+                rem_num_units -= 1
                 qty_units = ind_total_units[unit_name]
                 str_total = 'Total ' + unit_name + ' : ' + \
                     str(qty_units[0])
@@ -172,10 +172,6 @@ class custom_picking_parser(models.AbstractModel):
                             total_list.append('')
                     ind_totals[pick.id].append(total_list)
                     total_list = []
-                    i = 1
-                i += 1
-                rem_num_units -= 1
-
         docargs = {
             'doc_ids': self._ids,
             'doc_model': report.model,
