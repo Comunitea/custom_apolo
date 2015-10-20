@@ -195,6 +195,10 @@ class DatabaseImport:
         temp_ids = self.search("temp.type", [("name", "=", temp_name)])
         return temp_ids and temp_ids[0] or False
 
+    def _get_bank_by_bic(self, bank_bic):
+        bank_ids = self.search("res.bank", [("bic", '=', bank_bic)])
+        return bank_ids and bank_ids[0] or False
+
     def import_product_category(self, cr):
         parent_categ_map = {}
         cr.execute("select count(*) as count from dbo.adsd_gru")
@@ -500,6 +504,98 @@ class DatabaseImport:
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
+    def import_bank_accounts(self, cr):
+        cr.execute("select iban_banco + ' ' + cl5_dig1 + ' ' + cl5_dig2 + ' ' + cl5_dig3 + ' ' + cl5_ncta as acc_number, "
+                   "cli_codi as customer_id_map, fecha_mandato as signature_date, entidad_bic as bank_bic_map, referencia_mandato as unique_mandate_reference "
+                    "from dbo.VWTA_cliente_bancarios where iban_banco != '' and cl5_dig1 != 0 and cl5_dig2 != 0 and cl5_dig3 != 0 and cl5_ncta != ''")
+        data = cr.fetchall()
+        num_rows = len(data)
+        cont = 0
+        for row in data:
+            try:
+                partner_ids = self.search("res.partner", [('ref', '=', str(int(row.customer_id_map))),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
+                if partner_ids:
+                    acc_vals = {'state': "iban",
+                                'acc_number': row.acc_number,
+                                'partner_id': partner_ids[0],
+                                'bank_bic': row.bank_bic_map or False,
+                                'bank': row.bank_bic_map and self._get_bank_by_bic(ustr(row.bank_bic_map)) or False}
+                    bank_id = self.create("res.partner.bank", acc_vals)
+
+                    if row.unique_mandate_reference:
+                        mandate_vals = {
+                            "unique_mandate_reference": row.unique_mandate_reference,
+                            "signature_date": row.signature_date and row.signature_date.strftime("%Y-%m-%d %H:%M:%S") or time.strftime("%Y-%m-%d %H:%M:%S"),
+                            "recurrent_sequence_type": "recurring",
+                            "scheme": "B2B",
+                            "type": "recurrent",
+                            "partner_bank_id": bank_id
+                        }
+                        mandate_id = self.create("account.banking.mandate", mandate_vals)
+                        self.execute("account.banking.mandate", "validate", [mandate_id])
+                cont += 1
+                print "%s de %s" % (str(cont), str(num_rows))
+            except Exception, e:
+                print "Exception %s: account %s" % (e, row.acc_number)
+                cont += 1
+                print "%s de %s" % (str(cont), str(num_rows))
+
+    def import_master_frigo_data(self, cr):
+        print "Familas Unilever Clientes"
+        cr.execute("select conversion as code, establecimiento as name from dbo.establecimiento_frigo")
+        unilever_fam_data = cr.fetchall()
+        num_rows = len(unilever_fam_data)
+        cont = 0
+        for row in unilever_fam_data:
+            vals = {'code': str(int(row.code)),
+                    'name': ustr(row.name)}
+            self.create("res.partner.unilever.family", vals)
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+        print "Grupos rappel"
+        cr.execute("select codigo as internal_code, proveedor as supplier_id_map, descripcion as name, grupo_frigo as code from dbo.grupo_rappel")
+        rappel_group_data = cr.fetchall()
+        num_rows = len(rappel_group_data)
+        cont = 0
+        for row in rappel_group_data:
+            supplier_ids = self.search("res.partner", [('ref', '=', str(int(row.supplier_id_map))),('supplier', '=', True),'|',('active', '=', True),('active', '=', False)])
+            vals = {'internal_code': str(int(row.internal_code)),
+                    'name': ustr(row.name),
+                    'supplier_id': supplier_ids and supplier_ids[0] or False,
+                    'code': row.code != '00' and row.code or str(int(row.internal_code))}
+            self.create("product.rappel.group", vals)
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+        print "Subgrupo rappel"
+        cr.execute("select codigo as internal_code, descripcion as name, grupo_rappel as group_id_map, informe_frigo as code from dbo.subgrupo_rappel")
+        rappel_subgroup_data = cr.fetchall()
+        num_rows = len(rappel_subgroup_data)
+        cont = 0
+        for row in rappel_subgroup_data:
+            rappel_group_ids = self.search("product.rappel.group", [('internal_code', '=', str(int(row.internal_code)))])
+            vals = {'internal_code': str(int(row.internal_code)),
+                    'name': ustr(row.name),
+                    'group_id': rappel_group_ids and rappel_group_ids[0] or False,
+                    'code': row.code != '00' and row.code or str(int(row.internal_code))}
+            self.create("product.rappel.subgroup", vals)
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+        print "Familas Unilever Productos"
+        cr.execute("select codigo as code, descripcion as name from dbo.jerarquia_frigo")
+        unilever_fam_data = cr.fetchall()
+        num_rows = len(unilever_fam_data)
+        cont = 0
+        for row in unilever_fam_data:
+            vals = {'code': row.code,
+                    'name': ustr(row.name)}
+            self.create("product.unilever.family", vals)
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+
     def process_data(self):
         """
         Importa la bbdd
@@ -519,6 +615,8 @@ class DatabaseImport:
             self.import_indirect_customer(cr)
             self.import_rel_product_supplier(cr)
             #self.fix_products(cr)
+            self.import_bank_accounts(cr)
+            self.import_master_frigo_data(cr)
 
         except Exception, ex:
             print u"Error al conectarse a las bbdd: ", repr(ex)
