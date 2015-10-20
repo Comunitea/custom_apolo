@@ -40,7 +40,7 @@ class stock_quant(models.Model):
                         'quant' : quant.name,
                         'quant_id' :quant.id,
                         'location_id' : quant.location_id.id,
-                        'location': quant.location_id.name_get()[0][1],
+                        'location': quant.location_id.bcd_name,
                         'product_id': quant.product_id.id,
                         'product' : quant.product_id.short_name or quant.product_id.name,
                         'quantity' : quant.qty,
@@ -223,7 +223,6 @@ class manual_transfer_wzd(models.TransientModel):
 
         # CHANGUING USER ID t_wzd.sudo(user_id) no funciona
         wzd_obj = wzd_obj_uid.create({'pack_line_ids': vals_pack_line_ids})
-
         if package: #or product_id!=False or lot_id!=False or package_id==False:
             vals = vals_pack_line_ids
             val_ids = 'pack_line_ids'

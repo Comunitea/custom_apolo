@@ -3149,6 +3149,10 @@ class ScanGunProtocol(LineReceiver):
                 self.move = {}
                 k=str(self.active_task)
                 self.step=10
+                #import ipdb; ipdb.set_trace()
+                package_=False
+                if self.vals['packed_qty']==self.new_uom_qty or self.new_uom_qty==0:
+                    package_ = True
 
                 self.move = {
                     'product_id': self.vals['product_id'],
@@ -3159,7 +3163,7 @@ class ScanGunProtocol(LineReceiver):
                     'do_pack':pack_,
                     'lot_id': self.vals['lot_id'],
                     'user_id': self.user_id,
-                    'package': self.vals['packed_qty']==self.new_uom_qty,
+                    'package': package_#self.vals['packed_qty']==self.new_uom_qty,
                 }
                 if do_key:
                     self.handle_manual_transfer_packet(line=KEY_CONFIRM)
@@ -3475,7 +3479,8 @@ class ScanGunProtocol(LineReceiver):
                         'src_location_id': self.vals['packets'][k]['location_id'],
                         'dest_location_id': self.loc['dest_location_id'],
                         'do_pack':pack_,
-                        'user_id': self.user_id
+                        'user_id': self.user_id,
+                        'package':True
                     }
                 if do_key:
                     self.handle_manual_transfer_product(line=KEY_CONFIRM)
