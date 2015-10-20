@@ -57,6 +57,7 @@ class custom_invoice_parser(models.AbstractModel):
             totals[inv.id] = {
                 'inv_date': inv_date,
                 'deliver_man': deliver_man,
+                'total_invoice': '{0:.2f}'.format(inv.amount_total),
                 'acc_paid': '{0:.2f}'.format(0.00),
                 'total_paid': '{0:.2f}'.format(inv.amount_total - 0.0),
             }

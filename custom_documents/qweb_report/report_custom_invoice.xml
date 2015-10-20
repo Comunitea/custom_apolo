@@ -84,10 +84,26 @@
                       <p><span t-field="o.partner_id.ref"/> <span t-esc="o.partner_id.comercial or o.partner_id.name"/></p>
                       <p><span t-field="o.partner_id.street"/></p>
                       <p><span t-field="o.partner_id.zip"/> - <span t-field="o.partner_id.city"/></p>
-                      <p>Tlfo. <span t-field="o.partner_id.phone"/></p>
+                      <p><strong>Tlfo.</strong> <span t-field="o.partner_id.phone"/></p>
                   </div>
-                  <div>
-                      <table class="table1">
+                  <div class="col-xs-6">
+                  </div>
+                  <div class="col-xs-6">
+                    <table class="table1">
+                      <thead>
+                        <tr>
+                          <th><strong>Way To Pay:</strong>
+                          </th>
+                          <td><span t-field="o.payment_mode_id"/></td>
+                        </tr>
+                        <tr>
+                          <th><strong>Expiration:</strong>
+                          </th>
+                          <td><span t-field="o.date_due"/></td>
+                        </tr>
+                      </thead>
+                    </table>
+                      <!-- <table class="table1">
                       <thead>
                           <tr>
                               <th><strong>Agent</strong></th>
@@ -104,7 +120,7 @@
                               </td>
                           </tr>
                       </tbody>
-                      </table>
+                      </table> -->
                     </div>
                 </div>
                 <div class="col-xs-1">
@@ -123,7 +139,8 @@
                         <p><span t-field="o.partner_id.commercial_partner_id.ref"/> <span t-field="o.partner_id.commercial_partner_id.name"/></p>
                         <p><span t-field="o.partner_id.commercial_partner_id.street"/></p>
                         <p><span t-field="o.partner_id.commercial_partner_id.zip"/> - <span t-field="o.partner_id.commercial_partner_id.city"/></p>
-                        <br/>
+                        <p><strong>Tlfo. </strong><span t-field="o.partner_id.commercial_partner_id.phone"/></p>
+                        <!-- <br/> -->
                         <p><strong>NIF: </strong><span t-field="o.partner_id.commercial_partner_id.vat"/> </p>
                     </div>
                 </div>
@@ -276,8 +293,12 @@
                 border-top: solid 2px #000000;
                 border-bottom: solid 2px #000000;
               }
-              .table-ga tfoot{
-                border-top: solid 2px #000000;
+
+              .table-ga .col-ga-blank{
+                min-width: 40mm;
+              }
+              .table-ga .text-bold{
+                font-weight: bold;
               }
             </style>
               <table class="table-ga no-padd-left">
@@ -286,21 +307,28 @@
                           <th class="col-ga-code text-right"><strong></strong></th>
                           <th class="col-ga-name"><strong>Pick Number</strong></th>
                           <th class="col-ga-date"><strong>Pick Date</strong></th>
-                          <th class="col-ga-import text-right"><strong>Import</strong></th>
+                          <th class="col-ga-import text-right"><strong>Amount</strong></th>
+                          <th class="col-ga-blank text-right"></th>
                       </tr>
                   </thead>
                   <tbody>
                       <t t-foreach="lines_ga[o.id].keys()" t-as="partner">
                           <tr>
-                              <td>
+                              <td class="text-right text-bold">
                                 <span t-esc="partner.ref"/>
                               </td>
-                              <td>
-                                <span t-esc="partner.name_get()[0][1]"/>
+                              <td class="text-bold">
+                                <!-- <span t-esc="partner.name_get()[0][1]"/> -->
+                                <span t-esc="partner.name"/>
                               </td>
                               <td>
                               </td>
-                              <td class="text-right">
+                              <td class="text-right text-bold">
+                                <t t-set="sum_picks" t-value="0"/>
+                                <t t-foreach="lines_ga[o.id][partner]" t-as="pick">
+                                    <t t-set="sum_picks" t-value="sum_picks + pick.amount_total_acc"/>
+                                </t>
+                                <span t-esc="'{0:.2f}'.format(sum_picks)"/>
                               </td>
                           </tr>
                           <tr t-foreach="lines_ga[o.id][partner]" t-as="pick">
@@ -313,14 +341,15 @@
                               <span t-esc="pick.date.split(' ')[0].split('-')[2] + '/' + pick.date.split(' ')[0].split('-')[1] + '/' + pick.date.split(' ')[0].split('-')[0]"/>
                             </td>
                             <td class="text-right">
-                              <span t-esc="pick.amount_total_acc"/>
+                              <span t-esc="'{0:.2f}'.format(pick.amount_total_acc)"/>
                             </td>
+                              <td>
+                              </td>
                           </tr>
 
                       </t>
                   </tbody>
-                  <tfoot>
-                  </tfoot>
+
               </table>
 
         </template>
@@ -389,7 +418,7 @@
                           <td>
                             <!-- <span t-esc="partner.name"/> -->
                             <!-- <span t-esc="partner.name_get()[0][1]"/> -->
-                            <strong><span t-esc="partner.comercial or partner.name"/></strong>
+                            <strong><span t-esc="partner.name"/></strong>
                           </td>
                           <td>
                           </td>
@@ -488,6 +517,17 @@
         .table_totals td{
         font-size: 9px;
         }
+        .table_totals .full-border{
+          border-top: solid 1px #000000;
+          border-left: solid 1px #000000;
+          border-bottom: solid 1px #000000;
+          border-right: solid 1px #000000;
+          margin-left: 6px;
+          margin-right: 6px;
+          text-align: center;
+          font-weight: bold;
+          font-size: 10px;
+        }
           </style>
           <div class="row my_footer">
               <div class="col-xs-6 no-padd-left">
@@ -503,13 +543,13 @@
                     <t t-foreach="o.tax_line" t-as="tax">
                         <tr>
                           <td class="col-xs-4 no-padd-left no-padd-right text-right">
-                            <span t-esc="tax.base"/>
+                            <span t-esc="'{0:.2f}'.format(tax.base)"/>
                           </td>
                           <td class="col-xs-4 no-padd-left no-padd-right text-right">
                             <span t-esc="tax.name"/>
                           </td>
                           <td class="col-xs-4 no-padd-left no-padd-right text-right">
-                            <span t-esc="tax.amount"/>
+                            <span t-esc="'{0:.2f}'.format(tax.amount)"/>
                           </td>
                         </tr>
                     </t>
@@ -520,16 +560,17 @@
                   <table class="table_totals">
                   <thead>
                       <tr>
-                          <th class="col-xs-4 no-padd-left no-padd-right text-right"><strong>TOTAL INVOICE</strong></th>
+                          <th class="col-xs-4 no-padd-left no-padd-right text-center"><strong>TOTAL INVOICE</strong></th>
                           <th class="col-xs-4 no-padd-left no-padd-right text-right"><strong t-if="o.partner_id.inv_print_op != 'give_deliver'">ACCOUNT PAID</strong></th>
                           <th class="col-xs-4 no-padd-left no-padd-right text-right"><strong t-if="o.partner_id.inv_print_op != 'give_deliver'">TOTAL TO PAY</strong></th>
                       </tr>
                   </thead>
                   <tbody>
-                      <t t-foreach="o.tax_line" t-as="tax">
+                      <!-- <t t-foreach="o.tax_line" t-as="tax"> -->
                           <tr>
-                            <td class="text-right">
-                              <span t-esc="tax.base"/>
+                            <td class="text-right full-border">
+                              <span t-esc="totals[o.id]['total_invoice']"/>
+                              <!-- <span t-esc="'{0:.2f}'.format(tax.base)"/> -->
                             </td>
                             <td class="text-right">
                               <div t-if="o.partner_id.inv_print_op != 'give_deliver'">
@@ -542,7 +583,7 @@
                               </div>
                             </td>
                           </tr>
-                      </t>
+                      <!-- </t> -->
                   </tbody>
                   </table>
                 </div>
