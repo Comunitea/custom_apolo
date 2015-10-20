@@ -317,60 +317,37 @@
               <th class="col-sc"><strong>U / C</strong></th>
               <th class="col-ean"><strong>EAN BOX</strong></th>
               <th class="col-ean"><strong>EAN CONSUM</strong></th>
-              <th class="col-sc"><strong>Boxes</strong></th>
-              <th class="col-sc"><strong>S / C</strong></th>
-              <th class="col-sc"><strong>Unit</strong></th>
-              <th class="col-sc"><strong>S / C</strong></th>
-              <th class="col-total"><strong>Total Units</strong></th>
+              <th class="col-sc"><strong>Qty.</strong></th>
+              <th class="col-sc"><strong>Units</strong></th>
+              <th class="col-sc"><strong>Qty. S/C</strong></th>
+              <th class="col-sc"><strong>Units S/C</strong></th>
+              <th class="col-total"><strong>Total Qty</strong></th>
             </thead>
             <tbody>
-              <tr>
-                <td class="col-ref">Referencia</td>
-                <td class="col-prod">Producto</td>
-                <td class="col-sc">U</td>
-                <td class="col-ean">EAN caja</td>
-                <td class="col-ean">EAN consumoo</td>
-                <td class="col-sc">cajas</td>
-                <td class="col-sc">C</td>
-                <td class="col-sc">Unidad</td>
-                <td class="col-sc">S</td>
-                <td class="col-total">Total Unidades</td>
+              <tr t-foreach="ind_lines[o.id]" t-as="lin">
+                <td class="col-ref"><span t-esc="lin['ref']"/></td>
+                <td class="col-prod"><span t-esc="lin['prod']"/></td>
+                <td class="col-sc"><span t-esc="lin['uc']"/></td>
+                <td class="col-ean"><span t-esc="lin['ean_box']"/></td>
+                <td class="col-ean"><span t-esc="lin['ean_consum']"/></td>
+                <td class="col-sc"><span t-esc="lin['qty']"/></td>
+                <td class="col-sc"><span t-esc="lin['unit']"/></td>
+                <td class="col-sc"><span t-esc="lin['qty_sc']"/></td>
+                <td class="col-sc"><span t-esc="lin['unit_sc']"/></td>
+                <td class="col-total"><span t-esc="lin['total']"/></td>
               </tr>
             </tbody>
             <tfoot>
               <table class="table5">
-                <tr class="">
-                  <td><strong>Total cajas: 13</strong></td>
-                  <td><strong>Total cajas sin cargo: 1</strong></td>
-                  <td><strong>Total cajas albarán: 14</strong></td>
-                  <td class="totaluds"><strong>Total unids.: 291</strong></td>
-                </tr>
-                <tr>
-                  <td><strong>Total unid.: 0</strong></td>
-                  <td><strong>Total unid. sin cargo: 0</strong></td>
-                  <td><strong>Total unid. albarán: 0</strong></td>
+                <tr t-foreach="ind_totals[o.id]" t-as="ind_t">
+                  <td colspan="2"><strong><span t-esc="ind_t[0]"/></strong></td>
+                  <td colspan="2"><strong><span t-esc="ind_t[1]"/></strong></td>
+                  <td colspan="2"><strong><span t-esc="ind_t[2]"/></strong></td>
+                  <td colspan="2"><strong><span t-esc="ind_t[3]"/></strong></td>
                 </tr>
             </table>
             </tfoot>
           </table>
-          <!-- <div class="col-xs-3">
-            <span><strong>Total cajas: 13</strong></span>
-            <br/>
-            <span><strong>Total unid.: 0</strong></span>
-          </div>
-          <div class="col-xs-3">
-            <span><strong>Total cajas sin cargo: 1</strong></span>
-            <br/>
-            <span><strong>Total unid. sin cargo: 0</strong></span>
-          </div>
-          <div class="col-xs-3">
-            <span><strong>Total cajas albarán: 14</strong></span>
-            <br/>
-            <span><strong>Total unid. albarán: 0</strong></span>
-          </div>
-          <div class="col-xs-3">
-            <span><strong>Total unids.: </strong>291</span>
-          </div> -->
         </template>
 
         <template id="picking_header_part">

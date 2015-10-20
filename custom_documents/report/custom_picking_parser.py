@@ -37,11 +37,15 @@ class custom_picking_parser(models.AbstractModel):
         report = report_obj._get_report_from_name(report_name)
         docs = []
         lines = {}
+        ind_lines = {}
         tfoot = {}
         totals = {}
+        ind_totals = {}
         for pick in self.env[report.model].browse(self._ids):
             docs.append(pick)
             lines[pick.id] = []
+            ind_lines[pick.id] = []
+            ind_totals[pick.id] = []
             tfoot[pick.id] = {'sum_qty': 0.0, 'sum_net': 0.0}
             pick_date = pick.date.split(' ')[0]
             pd = pick_date.split("-")
@@ -106,6 +110,29 @@ class custom_picking_parser(models.AbstractModel):
                 # for i in range(0, 25):
                 #     lines[pick.id].append(dic)
                 lines[pick.id].append(dic)
+
+                if pick.indirect:
+                    prod_code = move.product_id.default_code
+                    prod_name = move.product_id.name
+                    prod_ean = '1234567891234'
+                    prod_ean_consum = '7896325874125'
+                    qty = move.product_uos_qty
+                    unit = move.product_uos.name
+                    ind_dic = {
+                        'ref': prod_code,
+                        'prod': prod_name,
+                        'uc': int(move.product_id.un_ca),
+                        'ean_box': prod_ean,
+                        'ean_consum': prod_ean_consum,
+                        'qty': qty,
+                        'unit': unit,
+                        'qty_sc': qty,
+                        'unit_sc': unit,
+                        'total': move.price_subtotal,
+                    }
+                    ind_lines[pick.id].append(ind_dic)
+                    totals_list = ['Total Cajas 18', 'Total Unidades', 'Total Cajitas: 18', 'Total botes:14']
+                    ind_totals[pick.id].append(totals_list)
             tfoot[pick.id]['sum_qty'] = '{0:.2f}'.format(move_qty)
             tfoot[pick.id]['sum_net'] = '{0:.2f}'.format(move_net)
         docargs = {
@@ -113,7 +140,9 @@ class custom_picking_parser(models.AbstractModel):
             'doc_model': report.model,
             'docs': docs,
             'lines': lines,
+            'ind_lines': ind_lines,
             'tfoot': tfoot,
             'totals': totals,
+            'ind_totals': ind_totals,
         }
         return report_obj.render(report_name, docargs)
