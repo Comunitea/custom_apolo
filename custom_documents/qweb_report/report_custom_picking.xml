@@ -123,30 +123,6 @@
           background-color:#C0C0C0;
           font-size:9px;
         }
-        .table4{
-          width: 100%;
-        }
-        .table4 .col-ref{
-          width:10%;
-        }
-        .table4 .col-prod{
-          width:23.5%;
-        }
-        .table4 .col-sc{
-          width:6.5%;
-        }
-        .table4 .col-ean{
-          width:13%;
-        }
-        .table4 .col-total{
-          width:14%;
-        }
-        .table4 thead{
-          border-bottom: solid 2px #000000;
-        }
-        .table4 tfoot{
-          border-top: solid 2px #000000;
-        }
         .full-border{
           border-top: solid 1px #000000;
           border-left: solid 1px #000000;
@@ -183,13 +159,7 @@
           font-size: 10px;
           text-align: center;
         }
-        .table5{
-          width: 100%;
-        }
-        .table5 td .totaluds{
-          text-aligh: right;
-        }
-       </style>
+        </style>
           <t t-call="report.html_container">
                 <t t-foreach="docs" t-as="o">
                     <!-- CUSTOM VALUED REPORT -->
@@ -310,67 +280,91 @@
         </template>
 
         <template id="picking_indirect_table">
+          <style type="text/css">
+            .table4{
+              width: 100%;
+            }
+            .table4 .col-ref{
+              width:9%;
+            }
+            .table4 .col-prod{
+              width:31%;
+            }
+            .table4 .col-sc{
+              width:6%;
+            }
+            .table4 .col-sc-right{
+              width:6%;
+              text-align: right;
+              padding-right: 4px;
+            }
+            .table4 .col-ean{
+              width:14%;
+            }
+            .table4 .col-total{
+              width:8%;
+            }
+            .table4 thead{
+              border-bottom: solid 2px #000000;
+            }
+            .table4 tfoot{
+              border-top: solid 2px #000000;
+            }
+            .table4 .col-ref-td{
+              text-align: right;
+              padding-right: 3px;
+            }
+            .table4 td{
+              font-size: 12px;
+            }
+            .table5{
+              width: 100%;
+            }
+            .table5 td .totaluds{
+              text-aligh: right;
+            }
+            .table5 td{
+              padding-top: 5px;
+            }
+          </style>
           <table class="table4 no-padd-left">
             <thead>
-              <th class="col-ref"><strong>Ref.</strong></th>
+              <th class="col-ref text-center"><strong>Ref.</strong></th>
               <th class="col-prod"><strong>Product</strong></th>
-              <th class="col-sc"><strong>U / C</strong></th>
-              <th class="col-ean"><strong>EAN BOX</strong></th>
-              <th class="col-ean"><strong>EAN CONSUM</strong></th>
-              <th class="col-sc"><strong>Boxes</strong></th>
-              <th class="col-sc"><strong>S / C</strong></th>
-              <th class="col-sc"><strong>Unit</strong></th>
-              <th class="col-sc"><strong>S / C</strong></th>
-              <th class="col-total"><strong>Total Units</strong></th>
+              <th class="col-sc text-center"><strong>U / C</strong></th>
+              <th class="col-ean text-center"><strong>EAN BOX</strong></th>
+              <th class="col-ean text-center"><strong>EAN CONSUM</strong></th>
+              <th class="col-sc text-center"><strong>Qty.</strong></th>
+              <th class="col-sc text-center"><strong>Units</strong></th>
+              <th class="col-sc text-center"><strong>Qty. S/C</strong></th>
+              <!-- <th class="col-sc text-center"><strong>Units S/C</strong></th> -->
+              <th class="col-total text-center"><strong>Total Qty</strong></th>
             </thead>
             <tbody>
-              <tr>
-                <td class="col-ref">Referencia</td>
-                <td class="col-prod">Producto</td>
-                <td class="col-sc">U</td>
-                <td class="col-ean">EAN caja</td>
-                <td class="col-ean">EAN consumoo</td>
-                <td class="col-sc">cajas</td>
-                <td class="col-sc">C</td>
-                <td class="col-sc">Unidad</td>
-                <td class="col-sc">S</td>
-                <td class="col-total">Total Unidades</td>
+              <tr t-foreach="ind_lines[o.id]" t-as="lin">
+                <td class="col-ref-td"><strong><span t-esc="lin['ref']"/></strong></td>
+                <td class="col-prod"><span t-esc="lin['prod']"/></td>
+                <td class="col-sc-right"><span t-esc="lin['uc']"/></td>
+                <td class="col-ean"><span t-esc="lin['ean_box']"/></td>
+                <td class="col-ean"><span t-esc="lin['ean_consum']"/></td>
+                <td class="col-sc-right"><span t-esc="lin['qty']"/></td>
+                <td class="col-sc"><span t-esc="lin['unit']"/></td>
+                <td class="col-sc-right"><span t-esc="lin['qty_sc']"/></td>
+                <!-- <td class="col-sc"><span t-esc="lin['unit_sc']"/></td> -->
+                <td class="col-total text-right"><span t-esc="lin['total']"/></td>
               </tr>
             </tbody>
             <tfoot>
               <table class="table5">
-                <tr class="">
-                  <td><strong>Total cajas: 13</strong></td>
-                  <td><strong>Total cajas sin cargo: 1</strong></td>
-                  <td><strong>Total cajas albarán: 14</strong></td>
-                  <td class="totaluds"><strong>Total unids.: 291</strong></td>
-                </tr>
-                <tr>
-                  <td><strong>Total unid.: 0</strong></td>
-                  <td><strong>Total unid. sin cargo: 0</strong></td>
-                  <td><strong>Total unid. albarán: 0</strong></td>
+                <tr t-foreach="ind_totals[o.id]" t-as="ind_t">
+                  <td colspan="2"><strong><span t-esc="ind_t[0]"/></strong></td>
+                  <td colspan="2"><strong><span t-esc="ind_t[1]"/></strong></td>
+                  <td colspan="2"><strong><span t-esc="ind_t[2]"/></strong></td>
+                  <td colspan="2"><strong><span t-esc="ind_t[3]"/></strong></td>
                 </tr>
             </table>
             </tfoot>
           </table>
-          <!-- <div class="col-xs-3">
-            <span><strong>Total cajas: 13</strong></span>
-            <br/>
-            <span><strong>Total unid.: 0</strong></span>
-          </div>
-          <div class="col-xs-3">
-            <span><strong>Total cajas sin cargo: 1</strong></span>
-            <br/>
-            <span><strong>Total unid. sin cargo: 0</strong></span>
-          </div>
-          <div class="col-xs-3">
-            <span><strong>Total cajas albarán: 14</strong></span>
-            <br/>
-            <span><strong>Total unid. albarán: 0</strong></span>
-          </div>
-          <div class="col-xs-3">
-            <span><strong>Total unids.: </strong>291</span>
-          </div> -->
         </template>
 
         <template id="picking_header_part">
@@ -471,7 +465,7 @@
                 <br/>
                 <br/>
                 <br/>
-                <p>Agente / Repartidor: <span t-if="o.route_detail_id" t-field="o.user_id.name"/> / <span t-if="o.route_detail_id" t-field="o.route_detail_id.comercial_id.name"/></p>
+                <p><strong>Agente / Repartidor:</strong> <span t-if="o.route_detail_id" t-field="o.user_id.name"/> / <span t-if="o.route_detail_id" t-field="o.route_detail_id.comercial_id.name"/></p>
                 <span t-esc="o.sale_id.client_order_ref" class="reference-font"/>
               </div>
               <div class="col-xs-1 no-padd-left">
@@ -479,10 +473,10 @@
               <div class="col-xs-4 no-padd-left">
                 <div t-if="o.partner_id.commercial_partner_id">
                     <br/>
-                    <div class="col-xs-8 row">
+                    <div class="col-xs-6 row">
                       <p>Customer Nº: </p>
                     </div>
-                    <div class="col-xs-4 row">
+                    <div class="col-xs-6 row text-right">
                       <p><span t-field="o.partner_id.commercial_partner_id.ref"/></p>
                     </div>
                     <br/>

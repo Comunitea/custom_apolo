@@ -10,6 +10,9 @@
           .middle_part{
             min-height:162mm;
           }
+          .middle_part_summary{
+            min-height:172mm;
+          }
           .top-border {
             border-top: solid 2px #000000;
           }
@@ -33,9 +36,11 @@
           .my_margin_top {
             min-height: 50mm;
           }
+
       </style>
           <t t-call="report.html_container">
               <t t-foreach="docs" t-as="o">
+
                   <div class="page">
                       <div class="my_margin_top">
                       </div>
@@ -55,16 +60,105 @@
 
                       <t t-call="custom_documents.invoice_bottom_part"/>
                   </div>
+
                   <div class="page" t-if="o.partner_id.add_summary">
-
-
-                      <h1>Resumen de artículos</h1>
-
+                      <div class="my_margin_top">
+                      </div>
+                      <t t-call="custom_documents.invoice_top_part"/>
+                      <h4 align="center">Summary products</h4>
+                      <div class="row middle_part_summary">
+                          <t t-call="custom_documents.invoice_summary_products"/>
+                      </div>
                   </div>
                </t>
           </t>
       </template>
 
+      <template id="invoice_summary_products">
+        <style type="text/css">
+          .summary-table{
+            width: 100%;
+          }
+          .summary-table td{
+           padding-right:4px;
+          }
+          .summary-table th{
+            padding-right:4px;
+           }
+          .summary-table thead{
+            border-top: solid 2px #000000;
+            border-bottom: solid 2px #000000;
+          }
+          .summary-table td span{
+            font-size: 10px;
+          }
+          .summary-table .col-sp-empty1{
+            width: 5%;
+          }
+          .summary-table .col-sp-code{
+            width: 10%;
+          }
+          .summary-table .col-sp-name{
+            width: 30%;
+          }
+          .summary-table .col-sp-qty{
+            width: 10%;
+          }
+          .summary-table .col-sp-unit{
+            width: 10%;
+          }
+          .summary-table .col-sp-total{
+            width: 10%;
+            text-align: right;
+          }
+          .summary-table .col-sp-iva{
+            width: 10%;
+          }
+          .summary-table .col-sp-empty2{
+            width: 20%;
+          }
+        </style>
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th class="col-sp-empty1"></th>
+                    <th class="col-sp-code"><strong>Code</strong></th>
+                    <th class="col-sp-name"><strong>Description</strong></th>
+                    <th class="col-sp-qty text-center"><strong>Qty.</strong></th>
+                    <th class="col-sp-unit"><strong>Unit</strong></th>
+                    <th class="col-sp-total"><strong>Total</strong></th>
+                    <th class="col-sp-iva text-right"><strong>% IVA</strong></th>
+                    <th class="col-sp-empty2"></th>
+
+                </tr>
+            </thead>
+            <tbody>
+                <tr t-foreach="summary[o.id]" t-as="s">
+                    <td>
+
+                    </td>
+                    <td>
+                        <span t-esc="s['code']"/>
+                    </td>
+                    <td>
+                        <span t-esc="s['name']"/>
+                    </td>
+                    <td class="text-right">
+                        <span t-esc="s['qty']"/>
+                    </td>
+                    <td>
+                        <span t-esc="s['unit']"/>
+                    </td>
+                    <td class="col-sp-total">
+                        <span t-esc="s['total']"/>
+                    </td>
+                    <td class="text-right">
+                        <span t-esc="s['iva']"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+      </template>
       <!-- TOP HEADER -->
       <template id="invoice_top_part">
           <div class="row top_part">
@@ -84,10 +178,26 @@
                       <p><span t-field="o.partner_id.ref"/> <span t-esc="o.partner_id.comercial or o.partner_id.name"/></p>
                       <p><span t-field="o.partner_id.street"/></p>
                       <p><span t-field="o.partner_id.zip"/> - <span t-field="o.partner_id.city"/></p>
-                      <p>Tlfo. <span t-field="o.partner_id.phone"/></p>
+                      <p><strong>Tlfo.</strong> <span t-field="o.partner_id.phone"/></p>
                   </div>
-                  <div>
-                      <table class="table1">
+                  <div class="col-xs-6">
+                  </div>
+                  <div class="col-xs-6">
+                    <table class="table1">
+                      <thead>
+                        <tr>
+                          <th><strong>Way To Pay:</strong>
+                          </th>
+                          <td><span t-field="o.payment_mode_id"/></td>
+                        </tr>
+                        <tr>
+                          <th><strong>Expiration:</strong>
+                          </th>
+                          <td><span t-field="o.date_due"/></td>
+                        </tr>
+                      </thead>
+                    </table>
+                      <!-- <table class="table1">
                       <thead>
                           <tr>
                               <th><strong>Agent</strong></th>
@@ -104,7 +214,7 @@
                               </td>
                           </tr>
                       </tbody>
-                      </table>
+                      </table> -->
                     </div>
                 </div>
                 <div class="col-xs-1">
@@ -123,7 +233,8 @@
                         <p><span t-field="o.partner_id.commercial_partner_id.ref"/> <span t-field="o.partner_id.commercial_partner_id.name"/></p>
                         <p><span t-field="o.partner_id.commercial_partner_id.street"/></p>
                         <p><span t-field="o.partner_id.commercial_partner_id.zip"/> - <span t-field="o.partner_id.commercial_partner_id.city"/></p>
-                        <br/>
+                        <p><strong>Tlfo. </strong><span t-field="o.partner_id.commercial_partner_id.phone"/></p>
+                        <!-- <br/> -->
                         <p><strong>NIF: </strong><span t-field="o.partner_id.commercial_partner_id.vat"/> </p>
                     </div>
                 </div>
@@ -276,8 +387,12 @@
                 border-top: solid 2px #000000;
                 border-bottom: solid 2px #000000;
               }
-              .table-ga tfoot{
-                border-top: solid 2px #000000;
+
+              .table-ga .col-ga-blank{
+                min-width: 40mm;
+              }
+              .table-ga .text-bold{
+                font-weight: bold;
               }
             </style>
               <table class="table-ga no-padd-left">
@@ -286,21 +401,28 @@
                           <th class="col-ga-code text-right"><strong></strong></th>
                           <th class="col-ga-name"><strong>Pick Number</strong></th>
                           <th class="col-ga-date"><strong>Pick Date</strong></th>
-                          <th class="col-ga-import text-right"><strong>Import</strong></th>
+                          <th class="col-ga-import text-right"><strong>Amount</strong></th>
+                          <th class="col-ga-blank text-right"></th>
                       </tr>
                   </thead>
                   <tbody>
-                          <t t-foreach="lines_ga[o.id].keys()" t-as="partner">
+                      <t t-foreach="lines_ga[o.id].keys()" t-as="partner">
                           <tr>
-                              <td>
+                              <td class="text-right text-bold">
                                 <span t-esc="partner.ref"/>
                               </td>
-                              <td>
-                                <span t-esc="partner.name_get()[0][1]"/>
+                              <td class="text-bold">
+                                <!-- <span t-esc="partner.name_get()[0][1]"/> -->
+                                <span t-esc="partner.name"/>
                               </td>
                               <td>
                               </td>
-                              <td class="text-right">
+                              <td class="text-right text-bold">
+                                <t t-set="sum_picks" t-value="0"/>
+                                <t t-foreach="lines_ga[o.id][partner]" t-as="pick">
+                                    <t t-set="sum_picks" t-value="sum_picks + pick.amount_total_acc"/>
+                                </t>
+                                <span t-esc="'{0:.2f}'.format(sum_picks)"/>
                               </td>
                           </tr>
                           <tr t-foreach="lines_ga[o.id][partner]" t-as="pick">
@@ -313,75 +435,140 @@
                               <span t-esc="pick.date.split(' ')[0].split('-')[2] + '/' + pick.date.split(' ')[0].split('-')[1] + '/' + pick.date.split(' ')[0].split('-')[0]"/>
                             </td>
                             <td class="text-right">
-                              <span t-esc="pick.amount_total_acc"/>
+                              <span t-esc="'{0:.2f}'.format(pick.amount_total_acc)"/>
                             </td>
+                              <td>
+                              </td>
                           </tr>
 
                       </t>
                   </tbody>
-                  <tfoot>
-                  </tfoot>
+
               </table>
 
         </template>
 
         <template id="op_group_pick">
           <style type="text/css">
-            .table-ga{
+            .table-bp{
               width: 100%;
             }
-            .table-bypick td span{
+            .table-bp td span{
               font-size: 10px;
             }
-            .table-bypick .col-ga-name{
-              width: 50%;
-            }
-            .table-ga .col-ga-date{
-              width: 30%;
-            }
-            .table-ga .col-ga-import{
-              width: 20%;
-            }
-            .table-ga td{
+            .table-bp td{
              padding-right:4px;
             }
-            .table-ga th{
+            .table-bp th{
               padding-right:4px;
              }
-            .table-ga thead{
+            .table-bp thead{
               border-top: solid 2px #000000;
               border-bottom: solid 2px #000000;
             }
-            .table-ga tfoot{
-              border-top: solid 2px #000000;
+            .table-bp tfoot{
+              border-top: solid 1px #000000;
+            }
+            .table-bp .col-bp-code{
+              width: 10%;
+            }
+            .table-bp .col-bp-desc{
+              width: 35%;
+            }
+            .table-bp .col-bp-qty{
+              width: 10%;
+            }
+            .table-bp .col-bp-unit{
+              width: 10%;
+            }
+            .table-bp .col-bp-price{
+              width: 10%;
+            }
+            .table-bp .col-bp-disc{
+              width: 15%;
+            }
+            .table-bp .col-bp-total{
+              width: 10%;
             }
           </style>
             <table class="table-bp no-padd-left">
                 <thead>
                     <tr>
-                        <th class="col-bp-code"><strong>Code</strong></th>
+                        <th class="col-bp-code text-center"><strong>Code</strong></th>
                         <th class="col-bp-desc"><strong>Description</strong></th>
-                        <th class="col-bp-qty"><strong>Qty.</strong></th>
-                        <th class="col-bp-unit"><strong>Unit</strong></th>
-                        <th class="col-bp-price"><strong>Price</strong></th>
-                        <th class="col-bp-disc"><strong>% Disc.</strong></th>
-                        <th class="col-bp-unit"><strong>Total</strong></th>
+                        <th class="col-bp-qty text-right"><strong>Qty.</strong></th>
+                        <th class="col-bp-uni text-rightt"><strong>Unit</strong></th>
+                        <th class="col-bp-price text-right"><strong>Price</strong></th>
+                        <th class="col-bp-disc text-right"><strong>% Disc.</strong></th>
+                        <th class="col-bp-total text-right"><strong>Total</strong></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <t t-foreach="lines-bp[o.id]" t-as="l">
+                  <t t-foreach="lines_ga[o.id].keys()" t-as="partner">
+                      <tr>
+                          <td class="text-right">
+                            <strong><span t-esc="partner.ref"/></strong>
+                          </td>
+                          <td>
+                            <!-- <span t-esc="partner.name"/> -->
+                            <!-- <span t-esc="partner.name_get()[0][1]"/> -->
+                            <strong><span t-esc="partner.name"/></strong>
+                          </td>
+                          <td>
+                          </td>
+                          <td>
+                          </td>
+                          <td>
+                          </td>
+                          <td>
+                          </td>
+                          <td class="text-right">
+                            <t t-set="sum_picks" t-value="0"/>
+                            <t t-foreach="lines_ga[o.id][partner]" t-as="pick">
+                                <t t-set="sum_picks" t-value="sum_picks + pick.amount_total_acc"/>
+                            </t>
+                            <strong><span t-esc="'{0:.2f}'.format(sum_picks)"/></strong>
+                          </td>
+                      </tr>
+                      <t t-foreach="lines_ga[o.id][partner]" t-as="pick">
                           <tr>
-                            <td>
-                              <span t-esc="l[code']"/>
+                            <td colspan="2">
+                              <strong>Pick Number: </strong>  <span t-esc="pick.name"/>
+                            </td>
+                            <td colspan="2">
+                             <strong>Pick Date: </strong> <span t-esc="pick.date.split(' ')[0].split('-')[2] + '/' + pick.date.split(' ')[0].split('-')[1] + '/' + pick.date.split(' ')[0].split('-')[0]"/>
+                            </td>
+                            <td colspan="3" class="text-center">
+                              <strong>Pick Import: </strong> <span t-esc="'{0:.2f}'.format(pick.amount_total_acc)"/>
+                            </td>
+                          </tr>
+                          <tr t-foreach="pick.move_lines" t-as="move">
+                            <td class="text-center">
+                              <span t-esc="move.product_id.default_code"/>
                             </td>
                             <td>
-                                <span t-esc="l['desc']"/>
+                              <span t-esc="move.product_id.name"/>
                             </td>
                             <td class="text-right">
-                                <span t-esc="l['qty']"/>
+                              <span t-esc="'{0:.2f}'.format(move.product_uos_qty)"/>
                             </td>
-                        </tr>
-                    </t>
+                            <td>
+                                <span t-esc="move.product_uos.name"/>
+                            </td>
+                            <td class="text-right">
+                              <span t-esc="'{0:.2f}'.format(move.procurement_id and (move.procurement_id.sale_line_id and move.procurement_id.sale_line_id.price_udv or False) or move.price_unit)"/>
+                            </td>
+                            <td class="text-right">
+                              <span t-esc="'{0:.2f}'.format(move.procurement_id and (move.procurement_id.sale_line_id and move.procurement_id.sale_line_id.discount or False) or 0.0)"/>
+                            </td>
+                            <td class="text-right">
+                              <span t-esc="'{0:.2f}'.format(move.price_subtotal)"/>
+                            </td>
+
+                          </tr>
+                      </t>
+
+                  </t>
                 </tbody>
                 <tfoot>
                 </tfoot>
@@ -429,6 +616,17 @@
         .table_totals td{
         font-size: 9px;
         }
+        .table_totals .full-border{
+          border-top: solid 1px #000000;
+          border-left: solid 1px #000000;
+          border-bottom: solid 1px #000000;
+          border-right: solid 1px #000000;
+          margin-left: 6px;
+          margin-right: 6px;
+          text-align: center;
+          font-weight: bold;
+          font-size: 10px;
+        }
           </style>
           <div class="row my_footer">
               <div class="col-xs-6 no-padd-left">
@@ -444,13 +642,13 @@
                     <t t-foreach="o.tax_line" t-as="tax">
                         <tr>
                           <td class="col-xs-4 no-padd-left no-padd-right text-right">
-                            <span t-esc="tax.base"/>
+                            <span t-esc="'{0:.2f}'.format(tax.base)"/>
                           </td>
                           <td class="col-xs-4 no-padd-left no-padd-right text-right">
                             <span t-esc="tax.name"/>
                           </td>
                           <td class="col-xs-4 no-padd-left no-padd-right text-right">
-                            <span t-esc="tax.amount"/>
+                            <span t-esc="'{0:.2f}'.format(tax.amount)"/>
                           </td>
                         </tr>
                     </t>
@@ -461,16 +659,16 @@
                   <table class="table_totals">
                   <thead>
                       <tr>
-                          <th class="col-xs-4 no-padd-left no-padd-right text-right"><strong>TOTAL INVOICE</strong></th>
+                          <th class="col-xs-4 no-padd-left no-padd-right text-center"><strong>TOTAL INVOICE</strong></th>
                           <th class="col-xs-4 no-padd-left no-padd-right text-right"><strong t-if="o.partner_id.inv_print_op != 'give_deliver'">ACCOUNT PAID</strong></th>
                           <th class="col-xs-4 no-padd-left no-padd-right text-right"><strong t-if="o.partner_id.inv_print_op != 'give_deliver'">TOTAL TO PAY</strong></th>
                       </tr>
                   </thead>
                   <tbody>
-                      <t t-foreach="o.tax_line" t-as="tax">
+                      <!-- <t t-foreach="o.tax_line" t-as="tax"> -->
                           <tr>
-                            <td class="text-right">
-                              <span t-esc="tax.base"/>
+                            <td class="text-right full-border">
+                              <span t-esc="totals[o.id]['total_invoice']"/>
                             </td>
                             <td class="text-right">
                               <div t-if="o.partner_id.inv_print_op != 'give_deliver'">
@@ -483,7 +681,7 @@
                               </div>
                             </td>
                           </tr>
-                      </t>
+                      <!-- </t> -->
                   </tbody>
                   </table>
                 </div>

@@ -47,7 +47,7 @@ class stock_pack_operation(models.Model):
 
         #si está enun poicking. Revisar con un pick
         if not res:
-            #import ipdb; ipdb.set_trace()
+
             tasks_pool = self.env['stock.task']
             picks_pool = self.env['stock.picking']
             domain = [('state', '=','assigned'), ('picking_id', '!=', False)]
@@ -64,7 +64,7 @@ class stock_pack_operation(models.Model):
 
     @api.multi
     def set_wave_ops_values(self, my_args):
-        # import ipdb; ipdb.set_trace()
+
         wave_id = my_args.get ('wave_id', 0)
         op_id = my_args.get('op_id',0)
         user_id = my_args.get('user_id', 0)

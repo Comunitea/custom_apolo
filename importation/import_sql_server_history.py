@@ -51,7 +51,7 @@ class DatabaseImport:
 
         self.url_template = "http://%s:%s/xmlrpc/%s"
         self.server = "localhost"
-        self.port = 8069
+        self.port = 9069
         self.dbname = dbname
         self.user_name = user
         self.user_passwd = passwd
@@ -480,7 +480,7 @@ class DatabaseImport:
                          'product_uos': product_data["uom_id"][0],
                          'product_uom_qty': loc_qty,
                          'product_uos_qty': loc_qty,
-                         'prie_unit': row.price_unit,
+                         'price_unit': row.price_unit,
                          'price_udv': row.price_unit,
                          'name': ustr(row.name),
                          'discount': row.discount,
@@ -499,6 +499,9 @@ class DatabaseImport:
         cont = 0
         print "no. lineas abiertas: ", num_rows
         for row in data:
+            if cont <= 45704:
+                cont += 1
+                continue
             sale_ids = self.search("sale.order", [('name', '=', str(int(row.order_id_map)))])
             if not sale_ids:
                 print "No se ha encontrado un pedido con la referencia ", int(row.order_id_map)
@@ -538,7 +541,7 @@ class DatabaseImport:
                          'product_uos': uom_id,
                          'product_uom_qty': loc_qty or 1.0,
                          'product_uos_qty': loc_qty or 1.0,
-                         'prie_unit': row.price_subtotal / (loc_qty or 1.0),
+                         'price_unit': row.price_subtotal / (loc_qty or 1.0),
                          'price_udv': row.price_subtotal / (loc_qty or 1.0),
                          'name': ustr(row.name),
                          'tax_id': [(6, 0, self._getTaxes(IVA_MAP[str(int(row.tax_id_map))][0]))],
@@ -559,8 +562,8 @@ class DatabaseImport:
             conn = pyodbc.connect("DRIVER={FreeTDS};SERVER=" + self.sql_server_host + ";UID=midban;PWD=midban2015;DATABASE=" + self.sql_server_dbname + ";Port=1433;TDS_Version=10.0")
             cr = conn.cursor()
 
-            self.import_sale_orders(cr)
-            self.import_sale_order_lines_open(cr)
+            #self.import_sale_orders(cr)
+            #self.import_sale_order_lines_open(cr)
             self.import_sale_order_lines_history(cr)
 
         except Exception, ex:
