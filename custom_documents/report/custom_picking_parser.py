@@ -158,7 +158,7 @@ class custom_picking_parser(models.AbstractModel):
             rem_num_units = len(ind_total_units.keys())
             total_list = []
             for unit_name in ind_total_units:
-                rem_num_units -= 1
+
                 qty_units = ind_total_units[unit_name]
                 str_total = 'Total ' + unit_name + ' : ' + \
                     str(qty_units[0])
@@ -166,12 +166,13 @@ class custom_picking_parser(models.AbstractModel):
                     str(qty_units[1])
                 total_list.append(str_total)
                 total_list.append(str_total_sc)
-                if len(total_list) == 4 or len(total_list) == rem_num_units:
+                if len(total_list) == 4 or rem_num_units < 4:
                     if len(total_list) < 4:
                         for r in range(0, 4 - len(total_list)):
                             total_list.append('')
                     ind_totals[pick.id].append(total_list)
                     total_list = []
+                rem_num_units -= 1
         docargs = {
             'doc_ids': self._ids,
             'doc_model': report.model,
