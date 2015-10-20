@@ -35,7 +35,8 @@
         "depot_invoice",
         "process_sale_order",
         "stock",
-        "account"
+        "account",
+        "midban_product",
     ],
     "data": ['views/res_partner_view.xml',
              #  'views/custom_assets.xml', NO ME FUNCIONA en esta revision
