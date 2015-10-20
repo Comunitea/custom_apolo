@@ -177,7 +177,7 @@ class import_normalize_customer_addressses(object):
             try:
                 if len(str(int(record[0]))) == 9:
                     partner_code = str(int(str(int(record[0]))[2:]))
-                    partner_ids = self.search("res.partner", [("ref", '=', partner_code),'|',('active','=',True),('active','=',False)])
+                    partner_ids = self.search("res.partner", [("ref", '=', partner_code),('customer','=',True),'|',('active','=',True),('active','=',False)])
                     if partner_ids:
                         self.write("res.partner", [partner_ids[0]], {"name": record[1]})
                         partner_data = self.read("res.partner", partner_ids[0], ["vat"])
