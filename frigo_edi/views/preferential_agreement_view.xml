@@ -40,8 +40,8 @@
                                 <field name="init_date"/>
                                 <field name="end_date"/>
                                 <field name="type"/>
-                                <field name="rappel_group_id"/>
-                                <field name="rappel_subgroup_id" domain="[('group_id', '=', rappel_group_id)]"/>
+                                <!--field name="rappel_group_id"/>
+                                <field name="rappel_subgroup_id" domain="[('group_id', '=', rappel_group_id)]"/-->
                                 <field name="cons_est"/>
                             </group>
                         </group>
@@ -73,6 +73,28 @@
         </record>
 
         <menuitem name="Preferential agreement" parent="base.menu_sale_config_sales" action="action_preferential_agreement" id="preferential_agreement_menu"/>
+
+        <record id="agreement_type_form_view" model="ir.ui.view">
+            <field name="name">agreement.type.form</field>
+            <field name="model">agreement.type</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Agreement type">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="code"/>
+                                <field name="name"/>
+                            </group>
+                            <group>
+                                <field name="rappel_group_id"/>
+                                <field name="rappel_subgroup_id" domain="[('group_id', '=', rappel_group_id)]"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
 
     </data>
 </openerp>
