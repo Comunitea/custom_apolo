@@ -215,8 +215,9 @@ class ScanGunProtocol(LineReceiver):
         line= str(line)
         if not key:
             if len(line)==9:
-                line, child = self.check_ubi(line)
-                if line:
+                line_, child = self.check_ubi(line)
+                if line_:
+                    line = line_
                     if child:
                         self.last_read = line
                         self.subzones = False
@@ -229,7 +230,8 @@ class ScanGunProtocol(LineReceiver):
                     else:
                         line = PRE_LOC + str(line)
                 else:
-                    self._snd(u"No encuentro:\n%s:" % line)
+
+                    self._snd(u"%s no encontrada\n %s Volver" %(line, KEY_VOLVER))
                     return
 
             if len (line) == 6:
@@ -1598,7 +1600,7 @@ class ScanGunProtocol(LineReceiver):
                     if not op_processed:
                         op = self.inverse(op)
                     #op +=data_[k_]['PAQUETE'] + ' ' + data_[k_][after_PAQUETE] + '\n'
-                    op +=u'%s %s\n >%s\n'%(data_[k_]['PAQUETE'],data_[k_]['pack_id'], data_[k_][after_PAQUETE])
+                    op +=u'%s \n >%s\n'%(data_[k_]['PAQUETE'], data_[k_][after_PAQUETE])
                     strg += op
 
         keys ='\n'
@@ -2440,6 +2442,23 @@ class ScanGunProtocol(LineReceiver):
             self.reset_vals()
             self._snd(self.get_str_menu_task())
             return
+
+        if line ==KEY_PRINT:
+            print_ids=[]
+            inc = 0
+            for op_ in self.ops:
+                inc+=1
+                package_id = self.ops[op_]['pack_id']
+                print_ids.append[inc]({
+                    'id': package_id,
+                    'name':self.ops[op_]['paquete']
+                })
+            self.last_state = self.state
+            self.packs= print_ids
+            self.state = 'print_tags'
+            self._snd(self.get_str_print_tags())
+            return
+
 
         if self.ops and not order_line:
             if line == KEY_CONFIRM:
@@ -4362,11 +4381,23 @@ class ScanGunProtocol(LineReceiver):
                     message = u'\nPaquete no encontrado'
             self._snd(self.get_str_create_multipack(), message)
             return
+
         if line == KEY_CONFIRM:
+
             res = self.create_multipack()
+            message=''
+            if res:
+                message = u'Ok Multipack:\n%s'%res
+                self.step = 0
+                self.packs =[]
+                self._snd(self.get_str_create_multipack(), message)
+            else:
+                message=u'\nError.'
+                self._snd(self.get_str_create_multipack(), message)
+            return
 
     def create_multipack(self):
-
+        import ipdb; ipdb.set_trace()
         if len(self.packs)<1:
             message = "\nNecesitas un paquete"
             return False, message
@@ -4441,8 +4472,12 @@ class ScanGunProtocol(LineReceiver):
                     message = u'\nPaquete no encontrado'
             self._snd(self.get_str_print_tags(), message)
             return
+
         if line == KEY_CONFIRM:
             res = self.print_tags()
+            return
+
+
 
     def print_packs(self):
 
