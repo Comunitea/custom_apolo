@@ -3866,20 +3866,12 @@ class ScanGunProtocol(LineReceiver):
                 self._snd(str_error + self.get_route_menu(self.type))
                 return
             else:
-                if line=='0':
-                    self.route_id=False
-                    self.route = ""
-                    self.state= 'picking'
-                    self.camera_ids=[]
-                    self._snd(self.get_cameras_menu(type = 'picking'))
-                    return
-                else:
-                    self.camera_ids=[]
-                    self.route_id = self.routes[(line)][0]
-                    self.route = self.routes[(line)][1]
-                    self.state = "picking"
-                    self._snd(self.get_cameras_menu(type = 'picking'))
-                    return
+                self.camera_ids=[]
+                self.route_id = self.routes[(line)][0]
+                self.route = self.routes[(line)][1]
+                self.state = "picking"
+                self._snd(self.get_cameras_menu(type = 'picking'))
+                return
 
         self.route = ""
         self.route_id = False
