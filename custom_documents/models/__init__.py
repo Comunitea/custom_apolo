@@ -2,6 +2,7 @@
 ##############################################################################
 #
 #    Copyright (C) 2015 Comunitea Servicios Informáticos All Rights Reserved
+#    $Javier Colmenero Fernández$ <javier@comunitea.com>
 #    $Carlos Lombardía Rodríguez$ <carlos@comunitea.com>
 #
 #    This program is free software: you can redistribute it and/or modify

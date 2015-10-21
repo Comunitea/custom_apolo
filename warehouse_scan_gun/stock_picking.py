@@ -29,7 +29,7 @@ class stock_picking(models.Model):
 
     @api.multi
     def get_routes_menu(self):
-        #import ipdb; ipdb.set_trace()
+
         res = {}
         domain = [('picking_type_id', '=',5), ('validated', '=', True), ('state', 'not in', ('draft','done','cancel'))]
         route_ids = self.search(domain, order ='route_detail_id, orig_planned_date, min_date, name asc')

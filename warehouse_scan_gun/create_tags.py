@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Copyright (C) 2015 Comunitea All Rights Reserved
-#    $Javier Colmenero Fernández <javier@comunitea.com>$
+#    Copyright (C) 2015-2014 Comunitea Servicios Tecnológicos All Rights Reserved
+#    $Kiko Sánchez$ <kiko@comunitea.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published
@@ -18,12 +18,28 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-import res_users
-import stock_task
-import stock, stock_location, stock_picking, stock_create_multipack
-import stock_quant_package, stock_pack_operation, stock_production_lot, reposition_wizard
 
-import wave_report_revised, create_tags
+from openerp import models, fields, api
+from openerp.exceptions import except_orm
+from openerp.tools.translate import _
 
-import product
 
+class create_tag_wizard(models.TransientModel):
+    _inherit = "create.tag.wizard"
+
+
+    @api.multi
+    def print_from_gun(self, my_args):
+
+        package_ids= my_args.get("package_ids", [])
+        user_id = my_args.get("user_id", False)
+
+        new_wzd = self.create()
+
+        for package_id in package_ids:
+            val = {'package_id' : package_id,
+                   'wizard_id': new_wzd.id}
+            res = new_wzd.write({'tag_ids': [(0,0, val)]})
+
+        res = self.print_report()
+        return res

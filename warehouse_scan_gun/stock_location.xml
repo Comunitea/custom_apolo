@@ -6,8 +6,9 @@
             <field name="model">stock.location</field>
             <field name="inherit_id" ref="stock.view_location_tree2"/>
             <field name="arch" type="xml">
-                <field name="complete_name" position="after">
+                <field name="complete_name" position="replace">
                     <field name="bcd_name"/>
+                    <field name="name"/>
                 </field>
             </field>
         </record>
@@ -21,7 +22,7 @@
                     <group colspan ="4">
                         <group>
                             <!--<label for="bcd_name" class="oe_edit_only"/>-->
-                            <h1><field name="bcd_name" readonly = "1"/></h1>
+                            <h1><field name="bcd_name"/></h1>
                         </group>
                         <group>
                             <field name="bcd_code" readonly = "1"/>

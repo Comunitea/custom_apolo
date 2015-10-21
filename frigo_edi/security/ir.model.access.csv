@@ -13,3 +13,5 @@ access_preferential_agreement,access_preferential_agreement,model_preferential_a
 access_agreement_type,access_agreement_type,model_agreement_type,base.group_user,1,1,1,1
 access_sale_export_edi,access_sale_export_edi,model_sale_export_edi,base.group_user,1,1,1,1
 access_product_rappel_subgroup_estimation,access_product_rappel_subgroup_estimation,model_product_rappel_subgroup_estimation,base.group_user,1,1,1,1
+access_res_partner_unilever_family_user,res.partner.unilever.family.user,model_res_partner_unilever_family,base.group_user,1,0,0,0
+access_res_partner_unilever_family_sale_manager,res.partner.unilever.family salemanager,model_res_partner_unilever_family,base.group_sale_manager,1,1,1,1

@@ -40,7 +40,7 @@ class stock_quant(models.Model):
                         'quant' : quant.name,
                         'quant_id' :quant.id,
                         'location_id' : quant.location_id.id,
-                        'location': quant.location_id.name_get()[0][1],
+                        'location': quant.location_id.bcd_name,
                         'product_id': quant.product_id.id,
                         'product' : quant.product_id.short_name or quant.product_id.name,
                         'quantity' : quant.qty,
@@ -78,47 +78,65 @@ class stock_quant(models.Model):
 
 class stock_quant_package(models.Model):
 
-
     _inherit = 'stock.quant.package'
 
+    @api.multi
+    def get_package_gun_info(self, my_args):
+        name = my_args.get('name', False)
+        domain=[('name', 'ilike', '%' + name)]
+        package = self.search(domain)
+        package_id = False
+        if package:
+            package_id = package[0].id
+        return package_id
 
     @api.multi
     def get_pack_gun_info(self, my_args):
+
         package_id = my_args.get("package_id", False)
         domain = [('id', '=', package_id)]
         package = self.search(domain)
         vals = {'exist':False}
-        if package and package.quant_ids:
-            qtys= [t.qty for t in package.quant_ids if t.product_id.id == package.packed_lot_id.product_id.id]
+
+        if package:# and package.quant_ids:
             qty = 0
-            for qty_ in qtys:
-                qty+= qty_
+            if package.quant_ids:
+                qtys= [t.qty for t in package.quant_ids if t.product_id.id == package.packed_lot_id.product_id.id]
+                for qty_ in qtys:
+                    qty+= qty_
+
+
+
             picking_zone_id = False
             picking_zone = ''
 
             if not package.is_multiproduct:
-                picking_zone_id = package.product_id.picking_location_id.id \
-                               or package.packed_lot_id.product_id.picking_location_id.id
-                picking_zone = package.product_id.picking_location_id.name_get()[0][1] \
-                               or package.packed_lot_id.product_id.picking_location_id.name_get()[0][1]
+                if package.product_id:
+                    picking_zone_id = package.product_id.picking_location_id.id or False
+                    picking_zone = package.product_id.picking_location_id.bcd_name or\
+                               package.product_id.picking_location_id.name or False
+                else:
+                    picking_zone_id = package.packed_lot_id.product_id.picking_location_id.id or False
+                    picking_zone = package.packed_lot_id.product_id.picking_location_id.bcd_name or\
+                               package.packed_lot_id.product_id.picking_location_id.name or False
 
             vals = {
                 'exist' : True,
                 'package' : package.name,
                 'package_id' :package.id,
                 'src_location_id' : package.location_id.id,
-                'src_location': package.location_id.name_get()[0][1] or package.quant_ids[0].location_id.name_get()[0][1],
+                'src_location': package.location_id.bcd_name or package.location_id.name or False,
                 'dest_location_id' : False,
                 'dest_location': False,
                 'lot_id': package.packed_lot_id.id or False,
                 'lot': package.packed_lot_id.name or "",
                 'product_id' : package.packed_lot_id.product_id.id,
                 'product' : package.packed_lot_id.product_id.short_name
-                                        or
-                                       package.packed_lot_id.product_id.name,
+                            or package.packed_lot_id.product_id.name or 'Vacío'
+                ,
                 'packed_qty': package.packed_qty or 0,
                 'uom' : package.uom_id.name or '',
-                'uom_id': package.uom_id.id or package.packed_lot_id.product_id.uom_id or False,
+                'uom_id': package.uom_id.id or package.packed_lot_id.product_id.uom_id.id or False,
                 'is_multiproduct':package.is_multiproduct,
                 'qty':qty,
                 'uos_id':package.uos_id.id or False,
@@ -127,7 +145,7 @@ class stock_quant_package(models.Model):
                 'change': False,
                 'picking_location_id':picking_zone_id,
                 'picking_location':picking_zone,
-                'src_location_bcd': package.location_id.bcd_name or False,
+                'src_location_bcd': package.location_id.bcd_name or package.location_id.name or False,
                 'dest_location_bcd': False,
             }
         return vals
@@ -172,8 +190,6 @@ class manual_transfer_wzd(models.TransientModel):
         """
         Get a task for a user and type defined in my args.
         """
-        #import ipdb; ipdb.set_trace()
-
         user_id = my_args.get('user_id', False)
         package_id= my_args.get('package_id', False)
         product_id= my_args.get('product_id', False)
@@ -205,7 +221,6 @@ class manual_transfer_wzd(models.TransientModel):
 
         # CHANGUING USER ID t_wzd.sudo(user_id) no funciona
         wzd_obj = wzd_obj_uid.create({'pack_line_ids': vals_pack_line_ids})
-
         if package: #or product_id!=False or lot_id!=False or package_id==False:
             vals = vals_pack_line_ids
             val_ids = 'pack_line_ids'

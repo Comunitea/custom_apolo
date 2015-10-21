@@ -388,6 +388,11 @@ class OdooDao:
         op_data = self.connection.execute('stock.quant.package', 'get_pack_gun_info', [], my_args)
         return op_data
 
+    def get_package_gun_info(self, user_id, name):
+        my_args = {'user_id': user_id, 'name': name}
+        op_data = self.connection.execute('stock.quant.package', 'get_package_gun_info', [], my_args)
+        return op_data
+
     def create_package_from_gun(self, user_id, values):
         my_args = {'user_id': user_id, 'values': values}
         package_data = self.connection.execute('stock.quant.package', 'create_package_from_gun', [], my_args)
@@ -407,7 +412,6 @@ class OdooDao:
         my_args = {'user_id': user_id, 'product_ean': product_ean}
         op_data = self.connection.execute('product.product', 'get_product_gun_info', [], my_args)
         return op_data
-
 
     def get_parent_location_id(self, user_id, location_id):
         my_args = {'user_id': user_id, 'location_id': location_id}
@@ -500,3 +504,8 @@ class OdooDao:
         my_args = {'user_id': user_id, 'pick_zone_id' : pick_zone_id, 'sub_cols' : sub_cols}
         res = self.connection.execute('stock.location', 'create_picking_sublocation_from_gun', [], my_args)
         return res
+
+    def create_multipack_from_gun(self, user_id, package_id):
+        my_args = {'user_id': user_id, 'package_id': package_id}
+        op_data = self.connection.execute('stock.picking.create.multipack', 'create_multipack_from_gun', [], my_args)
+        return op_data

@@ -49,8 +49,16 @@ class stock_location(models.Model):
     #no funciona
     _rec_name = "bcd_name"
 
-    bcd_name = fields.Char ("C.D.B. Name")
-    bcd_code = fields.Char("C.D.B. Code", size=25)
+    bcd_name = fields.Char ("BCD. Name", required = True)
+    bcd_code = fields.Char("BCD. Code", size=25)
+
+    def _name_get(self, cr, uid, location, context=None):
+        name = location.name
+        if location.bcd_name:
+            name = location.bcd_name
+        else:
+            return super(stock_location, self)._name_get(cr, uid, location, context=context)
+        return name
 
     @api.multi
     def get_short_name(self):
