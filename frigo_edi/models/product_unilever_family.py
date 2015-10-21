@@ -28,6 +28,21 @@ class ProductUnileverFamily(models.Model):
     name = fields.Char("Name", size=30, required=True)
     code = fields.Char("Code", size=6, required=True)
 
+class PartnerUnileverFamily(models.Model):
+
+    _name = "res.partner.unilever.family"
+
+    name = fields.Char("Name", size=30, required=True)
+    code = fields.Char("Code", size=6, required=True)
+
+
+class ResPartner(models.Model):
+
+    _inherit = "res.partner"
+
+    unilever_family_id = fields.Many2one("res.partner.unilever.family",
+                                         "Unilever family")
+
 
 class ProductRappelGroup(models.Model):
 
@@ -35,6 +50,8 @@ class ProductRappelGroup(models.Model):
 
     name = fields.Char("Name", size=30, required=True)
     code = fields.Char("Code", size=2, required=True)
+    supplier_id = fields.Many2one("res.partner", "Supplier")
+    internal_code = fields.Char("Internal code")
     subgroup_ids = fields.One2many('product.rappel.subgroup', 'group_id',
                                    'Subgroups')
 
@@ -46,6 +63,7 @@ class ProductRappelSubgroup(models.Model):
     name = fields.Char('name', required=True)
     code = fields.Char('Code', size=2, required=True)
     group_id = fields.Many2one('product.rappel.group', 'Group')
+    internal_code = fields.Char("Internal code")
     estimation_ids = fields.One2many('product.rappel.subgroup.estimation',
                                      'subgroup_id', 'Estimations')
 

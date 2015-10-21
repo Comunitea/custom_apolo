@@ -13,10 +13,32 @@
             </field>
         </record>
 
+        <record id="res_partner_unilever_family_tree" model="ir.ui.view">
+            <field name="name">res.partner.unilever.family.tree</field>
+            <field name="model">res.partner.unilever.family</field>
+            <field name="arch" type="xml">
+                <tree string="Unilever families">
+                    <field name="code"/>
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
         <record id="product_unilever_family_filter" model="ir.ui.view">
             <field name="name">product.unilever.family.search</field>
             <field name="model">product.unilever.family</field>
             <field name="priority">16</field>
+            <field name="arch" type="xml">
+                <search string="Unilever families">
+                    <field name="code"/>
+                    <field name="name"/>
+               </search>
+            </field>
+        </record>
+
+        <record id="res_partner_unilever_family_filter" model="ir.ui.view">
+            <field name="name">res.partner.unilever.family.search</field>
+            <field name="model">res.partner.unilever.family</field>
             <field name="arch" type="xml">
                 <search string="Unilever families">
                     <field name="code"/>
@@ -38,6 +60,19 @@
             </field>
         </record>
 
+        <record id="res_partner_unilever_family_form" model="ir.ui.view">
+            <field name="name">res.partner.unilever.family.form</field>
+            <field name="model">res.partner.unilever.family</field>
+            <field name="arch" type="xml">
+                <form string="Unilever family">
+                    <group colspan="4">
+                        <field name="code"/>
+                        <field name="name"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
         <record model="ir.actions.act_window" id="action_product_unilever_family">
             <field name="name">Unilever families</field>
             <field name="res_model">product.unilever.family</field>
@@ -47,8 +82,20 @@
             <field name="search_view_id" ref="product_unilever_family_filter"/>
         </record>
 
+        <record model="ir.actions.act_window" id="action_res_partner_unilever_family">
+            <field name="name">Unilever families</field>
+            <field name="res_model">res.partner.unilever.family</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="res_partner_unilever_family_tree"/>
+            <field name="search_view_id" ref="res_partner_unilever_family_filter"/>
+        </record>
+
         <menuitem id="menu_product_unilever_family" parent="product.prod_config_main"
                   name="Unilever families" action="action_product_unilever_family"/>
+
+        <menuitem id="menu_res_partner_unilever_family" parent="base.menu_config_address_book"
+                  name="Unilever families" action="action_res_partner_unilever_family"/>
 
         <record id="product_rappel_group_tree" model="ir.ui.view">
             <field name="name">product.rappel.group.tree</field>
@@ -57,6 +104,7 @@
                 <tree string="Product rappel groups">
                     <field name="code"/>
                     <field name="name"/>
+                    <field name="supplier_id"/>
                 </tree>
             </field>
         </record>
@@ -68,6 +116,7 @@
                 <search string="Product rappel groups">
                     <field name="code"/>
                     <field name="name"/>
+                    <field name="supplier_id"/>
                </search>
             </field>
         </record>

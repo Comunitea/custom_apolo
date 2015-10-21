@@ -60,6 +60,7 @@ class custom_picking_parser(models.AbstractModel):
             }
             move_qty = 0.0
             move_net = 0.0
+            ind_total_units = {}
             for move in pick.move_lines:
                 iva = ""
                 sale_line = False
@@ -114,27 +115,68 @@ class custom_picking_parser(models.AbstractModel):
                 if pick.indirect:
                     prod_code = move.product_id.default_code
                     prod_name = move.product_id.name
-                    prod_ean = '1234567891234'
-                    prod_ean_consum = '7896325874125'
-                    qty = move.product_uos_qty
+                    if move.product_id.seller_ids:
+                        supp_info = move.product_id.seller_ids[0]
+                        if supp_info.product_name:
+                            prod_name = supp_info.product_name
+                        if supp_info.product_code:
+                            prod_name = supp_info.product_code
+
+                    prod_ean_box = move.product_id.ean14 or ''
+                    prod_ean_consum = move.product_id.ean_consum or ''
+                    if move.price_subtotal:
+                        qty = move.product_uos_qty
+                        qty_sc = 0.00
+                    else:
+                        qty = 0.00
+                        qty_sc = move.product_uos_qty
                     unit = move.product_uos.name
                     ind_dic = {
                         'ref': prod_code,
                         'prod': prod_name,
                         'uc': int(move.product_id.un_ca),
-                        'ean_box': prod_ean,
+                        'ean_box': prod_ean_box,
                         'ean_consum': prod_ean_consum,
                         'qty': qty,
                         'unit': unit,
-                        'qty_sc': qty,
+                        'qty_sc': qty_sc,
                         'unit_sc': unit,
                         'total': move.price_subtotal,
                     }
                     ind_lines[pick.id].append(ind_dic)
-                    totals_list = ['Total Cajas 18', 'Total Unidades', 'Total Cajitas: 18', 'Total botes:14']
-                    ind_totals[pick.id].append(totals_list)
+
+                    if unit not in ind_total_units:
+                        ind_total_units[unit] = (qty, qty_sc)
+                    else:
+                        new_qty = ind_total_units[unit][0] + qty
+                        new_qty_sc = ind_total_units[unit][1] + qty_sc
+                        ind_total_units[unit] = (new_qty, new_qty_sc)
+
             tfoot[pick.id]['sum_qty'] = '{0:.2f}'.format(move_qty)
             tfoot[pick.id]['sum_net'] = '{0:.2f}'.format(move_net)
+            # Calc indirect totals
+            rem_num_units = len(ind_total_units.keys())
+            total_list = []
+            for unit_name in ind_total_units:
+
+                qty_units = ind_total_units[unit_name]
+                str_total = 'Total ' + unit_name + ' : ' + \
+                    str(qty_units[0])
+                str_total_sc = 'Total ' + unit_name + ' S/C : ' + \
+                    str(qty_units[1])
+                total_list.append(str_total)
+                total_list.append(str_total_sc)
+                rem_num_units -= 1
+                if len(total_list) == 4:
+
+                    ind_totals[pick.id].append(total_list)
+                    total_list = []
+                else:
+                    if not rem_num_units:
+                        for r in range(0, 4 - len(total_list)):
+                            total_list.append('')
+                            ind_totals[pick.id].append(total_list)
+                            total_list = []
         docargs = {
             'doc_ids': self._ids,
             'doc_model': report.model,
