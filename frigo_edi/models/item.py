@@ -42,7 +42,7 @@ class ItemManagementItem(models.Model):
         if "to_sync" in vals:
             for item in self:
                 sync_obj = self.env["item.management.item.move.sync"]
-                if not vals["to_sync"]:
+                if not vals["to_sync"] and (vals.get('contract_id', False) or vals.get('customer_id', False)):
                     sync_ids = sync_obj.search([('item_id', '=', item.id)],
                                                limit=1)
                     sync = sync_ids[0]

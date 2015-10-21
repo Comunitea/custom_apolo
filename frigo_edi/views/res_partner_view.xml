@@ -37,6 +37,9 @@
                         </group>
                     </group>
                 </field>
+                <field name="supplier_ids" position="after">
+                    <field name="unilever_family_id"/>
+                </field>
             </field>
         </record>
 

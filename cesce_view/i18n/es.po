@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* cesce_view
+#   * cesce_view
 #
 msgid ""
 msgstr ""
@@ -21,6 +21,12 @@ msgid "Amount"
 msgstr "Cantidad"
 
 #. module: cesce_view
+#: field:account.invoice.cesce,cesce_policy:0
+#: field:res.partner,cesce_policy:0
+msgid "CESCE policy"
+msgstr "Poliza CESCE"
+
+#. module: cesce_view
 #: model:ir.actions.act_window,name:cesce_view.action_account_invoice_cesce
 msgid "Cesce invoice"
 msgstr "Factura Cesce"
@@ -35,6 +41,11 @@ msgstr "Facturas Cesce"
 #: field:account.invoice.cesce,city:0
 msgid "City"
 msgstr "Ciudad"
+
+#. module: cesce_view
+#: field:account.invoice.cesce,date_due:0
+msgid "Date due"
+msgstr "Fecha de vencimiento"
 
 #. module: cesce_view
 #: field:account.invoice.cesce,id:0

@@ -28,21 +28,6 @@ class ProductUnileverFamily(models.Model):
     name = fields.Char("Name", size=30, required=True)
     code = fields.Char("Code", size=6, required=True)
 
-class PartnerUnileverFamily(models.Model):
-
-    _name = "res.partner.unilever.family"
-
-    name = fields.Char("Name", size=30, required=True)
-    code = fields.Char("Code", size=6, required=True)
-
-
-class ResPartner(models.Model):
-
-    _inherit = "res.partner"
-
-    unilever_family_id = fields.Many2one("res.partner.unilever.family",
-                                         "Unilever family")
-
 
 class ProductRappelGroup(models.Model):
 
