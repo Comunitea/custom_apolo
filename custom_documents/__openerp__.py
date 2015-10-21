@@ -42,7 +42,8 @@
              #  'views/custom_assets.xml', NO ME FUNCIONA en esta revision
              'views/custom_reports.xml',
              'qweb_report/report_custom_picking.xml',
-             'qweb_report/report_custom_invoice.xml'],
+             'qweb_report/report_custom_invoice.xml',
+             'qweb_report/report_purchase_order.xml'],
     "demo": [],
     "test": [],
     "installable": True,

@@ -21,3 +21,4 @@
 ##############################################################################
 import custom_picking_parser
 import custom_invoice_parser
+import custom_purchase_order_parser
