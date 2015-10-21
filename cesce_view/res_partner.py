@@ -18,15 +18,11 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from openerp import models, fields, api, exceptions, _
 
-{
-    'name': 'Invoice Cesce',
-    'version': '1.0',
-    'category': '',
-    'description': """Shows the invoices grouped by customer and year for export""",
-    'author': 'Comunitea',
-    'website': '',
-    "depends": ['account', 'account_payment_partner'],
-    "data": ['account_invoice_cesce_view.xml', 'res_partner.xml', 'security/ir.model.access.csv'],
-    "installable": True
-}
+
+class ResPartner(models.Model):
+
+    _inherit = 'res.partner'
+
+    cesce_policy = fields.Char('CESCE policy')

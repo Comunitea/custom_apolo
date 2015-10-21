@@ -8,6 +8,7 @@
             <field name="arch" type="xml">
                 <field name="complete_name" position="replace">
                     <field name="bcd_name"/>
+                    <field name="name"/>
                 </field>
             </field>
         </record>

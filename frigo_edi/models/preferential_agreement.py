@@ -36,11 +36,16 @@ class PreferentialAgreement(models.Model):
     state = fields.Selection((('draft', 'Draft'), ('confirmed', 'Confirmed'),
                               ('cancel', 'Cancelled')), 'state',
                              default='draft')
-    rappel_group_id = fields.Many2one('product.rappel.group', 'Rappel group',
-                                      required=True)
+    rappel_group_id = fields.Many2one('product.rappel.group', 'Rappel group')
     rappel_subgroup_id = fields.Many2one('product.rappel.subgroup',
-                                         'Rappel subgroup', required=True)
+                                         'Rappel subgroup')
     cons_est = fields.Float('Estimated consumptions', required=True)
+
+    @api.one
+    @api.onchange('type')
+    def onchange_type(self):
+        self.rappel_group_id = self.type.rappel_group_id
+        self.rappel_subgroup_id = self.type.rappel_subgroup_id
 
     @api.multi
     def confirm(self):
@@ -57,7 +62,7 @@ class PreferentialAgreement(models.Model):
                     break
         self.write({'state': 'confirmed'})
 
-    @api.multi
+    '''@api.multi
     def cancel(self):
         """Se exporta el fichero COL con tipo B"""
         edi_obj = self.env["edi"]
@@ -88,7 +93,7 @@ class PreferentialAgreement(models.Model):
                         wzd.export_file_col('preferential.agreement', self,
                                             'M')
                         break
-        return res
+        return res'''
 
 
 class AgreementType(models.Model):
@@ -97,3 +102,7 @@ class AgreementType(models.Model):
 
     name = fields.Char('Name', required=True)
     code = fields.Char('Code', size=1, required=True)
+    rappel_group_id = fields.Many2one('product.rappel.group', 'Rappel group',
+                                      required=True)
+    rappel_subgroup_id = fields.Many2one('product.rappel.subgroup',
+                                         'Rappel subgroup', required=True)

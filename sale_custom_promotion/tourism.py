@@ -156,6 +156,8 @@ class TourismGroup(models.Model):
         for tourism in self:
             to_export = self.env['tourism.consumption'].search(
                 [('exported', '=', False), ('tourism_id', '=', tourism.id)])
+            if not to_export:
+                return
             edi_obj = self.env["edi"]
             edis = edi_obj.search([])
             for service in edis:
