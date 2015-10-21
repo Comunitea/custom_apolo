@@ -3467,7 +3467,6 @@ class ScanGunProtocol(LineReceiver):
                 self.move = {}
                 k=str(self.active_task)
                 self.step=10
-                #import ipdb;ipdb.set_trace()
                 if self.vals['packets'][k]['packed_qty']!=self.new_uom_qty:
                     self.move = {
                         'product_id': self.vals['product_id'],
@@ -4397,7 +4396,6 @@ class ScanGunProtocol(LineReceiver):
             return
 
     def create_multipack(self):
-        import ipdb; ipdb.set_trace()
         if len(self.packs)<1:
             message = "\nNecesitas un paquete"
             return False, message
