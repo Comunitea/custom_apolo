@@ -32,15 +32,16 @@ class stock_picking(models.Model):
 
         res = {}
         domain = [('picking_type_id', '=',5), ('validated', '=', True), ('state', 'not in', ('draft','done','cancel'))]
-        route_ids = self.search(domain, order ='route_detail_id, orig_planned_date, min_date, name asc')
+        route_ids = self.search(domain, order ='name asc')
         if not route_ids:
             res = False
         #routes_pool = self.env['']
         indx = 1
         before = False
         for x in route_ids:
-            if before == x.route_detail_id.id:
+            if before == x.route_detail_id.detail_name_str:
                 continue
             res[str(indx)] = (x.route_detail_id.id, x.route_detail_id.detail_name_str)
+            before = x.route_detail_id.detail_name_str
             indx += 1
         return res
