@@ -2278,7 +2278,7 @@ class ScanGunProtocol(LineReceiver):
         if wave_['customer_id']:
             menu_str = "[%s] %s\n"%(wave_['ref'], wave_['customer_id'])
 
-        str_ = ('%s %s - ')%(wave_['PAQUETE'])
+        str_ = ('%s - ')%(wave_['PAQUETE'])
 
         if self.step in [0] and not wave_['PROCESADO']:
             menu_str+= self.inverse(str_)
@@ -2396,7 +2396,7 @@ class ScanGunProtocol(LineReceiver):
         else:
             menu_str += cantidad + cantidad_uos
 
-        str_ = 'De %s %s\n'%(wave_['origen_bcd'])
+        str_ = 'De %s\n'%(wave_['origen_bcd'])
         # com oe s picking no hay destino str_ = 'A %s\n'%wave_['DESTINO']
         if self.step in [1]:
             menu_str+= self.inverse(str_)
