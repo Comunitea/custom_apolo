@@ -29,17 +29,6 @@ class ProductTemplate(models.Model):
     short_name = fields.Char('Short Name', size=25,
                              help="Short name displayed in the gun")
 
-    # @api.constrains('picking_location_id')
-    # def _check_picking_location(self):
-    #
-    #     if self.picking_location_id.default_picking_zone == False:
-    #         domain =[('picking_location_id', '=', self.picking_location_id.id),
-    #              ('id', '!=', self.id)]
-    #         count = self.search(domain)
-    #         if count:
-    #             raise exceptions.Warning(_('Error!'), _('Picking ubication must be unique or default picking zone.'))
-
-
 class product_product (models.Model):
 
     _inherit = 'product.product'

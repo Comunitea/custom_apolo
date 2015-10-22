@@ -443,6 +443,10 @@ class OdooDao:
         op_data = self.connection.execute('stock.location', 'get_location_gun_info', [], my_args)
         return op_data
 
+    def get_product_by_picking_location(self, user_id, location_id=False):
+        my_args = {'user_id': user_id, 'location_id': location_id}
+        op_data = self.connection.execute('stock.location', 'get_product_by_picking_location', [], my_args)
+        return op_data
 
     def get_lot_gun_info(self, user_id, lot_id):
         my_args = {'user_id': user_id, 'lot_id': lot_id}

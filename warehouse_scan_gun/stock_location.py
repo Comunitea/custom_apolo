@@ -61,6 +61,23 @@ class stock_location(models.Model):
         return name
 
     @api.multi
+    def get_product_by_picking_location(self, my_args):
+        user_id = my_args.get("user_id", False)
+        location_id = my_args.get("location_id", False)
+        product = []
+        if not location_id:
+            return product
+
+        domain = [('location_id', '=', location_id)]
+        product_ids = self.env['product.product'].search(domain)
+        if product_ids:
+            for product_ in product_ids:
+                 product.append ({'id': product.id,
+                                  'bcd_name': product.short_name or product.name[20],
+                                  })
+        return product
+
+    @api.multi
     def get_short_name(self):
         short_name = self.name
         zone ="V"
@@ -73,6 +90,8 @@ class stock_location(models.Model):
 
     @api.multi
     def is_location_free(self, my_args):
+
+        return True
         location_id = my_args.get("location_id", False)
         domain = [('location_id','=', location_id)]
 

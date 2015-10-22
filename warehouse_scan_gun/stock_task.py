@@ -119,7 +119,6 @@ class StockTask(models.Model):
         """
         Get a task for a user and type defined in my args.
         """
-
         user_id = my_args.get('user_id', False)
         camera_id = my_args.get('camera_id', False)
         task_type = my_args.get('task_type', False)
