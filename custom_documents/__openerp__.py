@@ -44,7 +44,7 @@
              'views/custom_reports.xml',
              'qweb_report/report_custom_picking.xml',
              'qweb_report/report_custom_picking_batch.xml',
-             'qweb_report/report_custom_invoice.xml'],
+             'qweb_report/report_custom_invoice.xml',
              'qweb_report/report_purchase_order.xml'],
     "demo": [],
     "test": [],
