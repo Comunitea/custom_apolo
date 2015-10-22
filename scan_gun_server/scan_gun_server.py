@@ -467,7 +467,7 @@ class ScanGunProtocol(LineReceiver):
         menu_str+= u"4 -> Transferencia manual\n"
         menu_str+= u"9 -> Herramientas\n"
         if self.show_keys:
-            keys = "<" + KEY_VOLVER +"> Salir"
+            keys = u"%s Atrás"%KEY_VOLVER
         menu_str += delimiter + keys
 
         return menu_str
@@ -645,15 +645,16 @@ class ScanGunProtocol(LineReceiver):
             strg += "Sin Tareas Asignadas"
         #Miramo las teclas que necesitamos
         #Pause /Run tasks
-        keys=''
+        keys=u'\n'
         if run_ok:
             keys +=u"%s Pausar "%KEY_PAUSE
             if self.tasks[self.active_task]['ops']==0:
                 keys +=u"%s Cancel Task "%KEY_CANCEL
         if paused_ok:
             keys +=u"%s Run "%KEY_RUN
+        strg += keys
 
-        keys +=u"\n%s Atras"%KEY_VOLVER
+        keys = u"\n%s Atras"%KEY_VOLVER
         if self.show_keys:
             strg += keys
         return strg
@@ -676,6 +677,7 @@ class ScanGunProtocol(LineReceiver):
         return
 
     def handle_tasks(self, line='0', confirm = False):
+
         line_in_keys = False
 
         if line == "" or not line:
@@ -1046,9 +1048,10 @@ class ScanGunProtocol(LineReceiver):
                 orden += self.inverse (u'\nNo hay qty suficiente')
 
         strg += orden
-        #keys += u"\n%s "%KEY_VOLVER
+        keys += u"\n%s "%KEY_VOLVER
         if op_['PROCESADO']:
             strg += self.inverse(u"[x] %s Cancel Op\n"%KEY_CANCEL)
+
         if self.show_keys:
             strg += keys
 
@@ -1608,21 +1611,23 @@ class ScanGunProtocol(LineReceiver):
                     op +=u'%s \n >%s\n'%(data_[k_]['PAQUETE'], data_[k_][after_PAQUETE])
                     strg += op
 
-        keys ='\n'
+        keys =u'\n'
         # if self.num_order_list_ops > 1:
         #     keys += "%s "%KEY_PREV
         # if len(data_)-self.num_order_list_ops >=MAX_NUM:
         #     keys += "%s "%KEY_NEXT
 
-        keys += "%s "%KEY_VOLVER
+        #keys += u"%s Atrás"%KEY_VOLVER
 
         if self.tasks[self.active_task]['type']=="reposition":
-            keys += "%s>Finalizar Tarea"%KEY_CONFIRM
+            keys += u"%s Fin Tarea"%KEY_CONFIRM
         if self.tasks[self.active_task]['type']=="ubication":
-            keys += "%s>Finalizar Tarea"%KEY_CONFIRM
+            keys += u"%s Fin Tarea"%KEY_CONFIRM
         if self.tasks[self.active_task]['type']=="picking":
-            keys += "%s>Finalizar Picking"%KEY_FINISH
+            keys += u"%s Finalizar Picking"%KEY_FINISH
+        strg += keys
 
+        keys = u"\n%s Atrás"%KEY_VOLVER
         if self.show_keys:
             strg += keys
         return strg
@@ -2608,7 +2613,7 @@ class ScanGunProtocol(LineReceiver):
             strg += self.inverse(u"[x] %s Cancel Op\n"%KEY_CANCEL)
 
         keys = ""
-        keys += KEY_VOLVER + " Atras"
+        keys += u"%s Atrás"%KEY_VOLVER
         if self.show_keys:
             strg += keys
         return strg
@@ -2678,7 +2683,7 @@ class ScanGunProtocol(LineReceiver):
         if self.ops[active_op]['PROCESADO']== True:
             self.reset_vals()
             self.step = 0
-            self._snd(self.get_str_form_ops() + u'\nOpción no Válida')
+            self._snd(self.get_str_form_ops() + u'\nOp Procesada')
             return
 
         if self.step == 2:
@@ -2751,7 +2756,7 @@ class ScanGunProtocol(LineReceiver):
                 self.ops[active_op]['destino_bcd'] = new_loc['bcd_name']
                 if new_loc['zone']=='picking':
                     #preguntamos si quiere asignarlo a la zona de picking
-                    message = u"\nAsignar zona a producto\n%s Si %s No"%(KEY_YES, KEY_CANCEL)
+                    message = self.inverse(u"\nAsignar zona a producto") + u"\n%s Si %s No"%(KEY_YES, KEY_CANCEL)
                     self.step = 6
                     self._snd(self.get_str_form_ops() + message)
                     return
@@ -2761,7 +2766,7 @@ class ScanGunProtocol(LineReceiver):
 
                     self.step = 10
                     if self.confirm_last_step:
-                        message =u"\nConfirma Operación\n%s Si %s N0\n" %(KEY_YES, KEY_CANCEL)
+                        message =self.ivnerse(u"\nConfirma Operación") + "\n%s Si %s N0\n" %(KEY_YES, KEY_CANCEL)
                         self._snd(self.get_str_form_ops() + message)
                     else:
                         self.handle_form_ubi_ops(line=KEY_YES)
@@ -3086,7 +3091,7 @@ class ScanGunProtocol(LineReceiver):
             menu_str+= u'\n(%s)'%self.move['do_pack']
             menu_str += self.inverse(u'\n%s Mover\n'%KEY_CONFIRM)
 
-        keys = "<" + KEY_VOLVER + "> Volver <" + KEY_CANCEL + "> Canc"
+        keys = u"%s Atrás %s Cancelar"%(KEY_VOLVER, KEY_CANCEL)
         if self.show_keys:
             menu_str +=keys
 
@@ -3347,7 +3352,7 @@ class ScanGunProtocol(LineReceiver):
             menu_str += u'(%s)\n'%self.move['do_pack']
             menu_str += self.inverse(u'\n%s Mover\n'%KEY_CONFIRM)
 
-        keys = "<" + KEY_VOLVER + "> Volver <" + KEY_CANCEL + "> Canc"
+        keys = u"%s Volver %s Atrás"%(KEY_VOLVER, KEY_CANCEL)
         if self.show_keys:
             menu_str +=keys
 
@@ -3620,7 +3625,7 @@ class ScanGunProtocol(LineReceiver):
             menu_str+=u'\nMáx %% de llenado: %s'%self.vals['limit']
         if self.step==2:
             menu_str+=self.inverse(u'\n%% ó %s para buscar\n')%KEY_CONFIRM
-        keys = "<" + KEY_VOLVER + "> Volver <" + KEY_CANCEL + "> Canc"
+        keys = u"%s Atrás %s Cancelar"%(KEY_VOLVER, KEY_CANCEL)
         if self.show_keys:
             menu_str +=keys
 
@@ -3775,9 +3780,9 @@ class ScanGunProtocol(LineReceiver):
                 intro = self.inverse(intro)
             str_menu += intro + (self.factory.menu_cameras[key][1] or 'Sin BCD Name') + "\n"
 
-        keys = "<" + KEY_VOLVER +"> Salir"
+        keys = "%s Atrás"%KEY_VOLVER
         if self.camera_ids:
-            keys += "<" + KEY_CONFIRM +"> Buscar"
+            keys += "%s Buscar"%KEY_CONFIRM
 
         str_menu+= keys
         return str_menu
@@ -3879,7 +3884,7 @@ class ScanGunProtocol(LineReceiver):
         self.menu_machines = self.factory.odoo_con.get_machines_menu(type)
         for key in self.menu_machines:
             str_menu += str(key) + " -> " + self.menu_machines[key][1] + "\n"
-        keys = "<" + KEY_VOLVER +"> Salir"
+        keys = "%s Atrás"%KEY_VOLVER
         str_menu += delimiter + keys
         return str_menu
 
@@ -4107,7 +4112,7 @@ class ScanGunProtocol(LineReceiver):
         self.ops = self.factory.odoo_con.get_ops(self.task_id)
         op_=self.ops[str(self.active_op)]
         #introc cantidad o confirma la prpopuesta con f1
-        message = "Cantidad:/n <%s> para "%(KEY_CONFIRM, op_['CANTIDAD'])
+        message = "Cantidad:/n <%s> para %s"%(KEY_CONFIRM, op_['CANTIDAD'])
         self.last_state = from_state
         self.state="intro_qty"
         self._snd(message)
@@ -4340,9 +4345,9 @@ class ScanGunProtocol(LineReceiver):
                    u"4 >Info Producto\n" \
                    u"5 >Info Paquete\n" \
                    u"9 >Volver\n"
-        if self.show_keys:
-            keys = "\n<" + KEY_VOLVER +"> Salir"
-        menu_str += keys
+        # if self.show_keys:
+        #     keys = "\n%s Atrás"%KEY_VOLVER
+        #menu_str += # keys
         return menu_str
 
     def handle_menu_tool(self, line):
@@ -4385,7 +4390,7 @@ class ScanGunProtocol(LineReceiver):
         str_menu=u"Crear Multipack\n"
         if self.step == 0:
             str_menu += self.inverse(u"Escanea los paquetes\n")
-            str_menu += self.inverse(u"%s Confimar"%KEY_CONFIRM)
+            #str_menu += self.inverse(u"%s Confimar"%KEY_CONFIRM)
 
         if self.step == 1:
             str_menu += u"Escanea los paquetes\n"
@@ -4394,7 +4399,8 @@ class ScanGunProtocol(LineReceiver):
                 if inc <= len(self.packs):
                     str_menu += u'%s > %s\n'%(inc, self.packs[inc-1]['name'])
 
-            str_menu += self.inverse(u"%s Confimar"%KEY_CONFIRM)
+            if len(self.packs)>1:
+                str_menu += self.inverse(u"%s Confimar"%KEY_CONFIRM)
             str_menu += message
         return str_menu
 
@@ -4445,12 +4451,12 @@ class ScanGunProtocol(LineReceiver):
             self._snd(self.get_str_create_multipack(), message)
             return
 
-        if line == KEY_CONFIRM:
+        if line == KEY_CONFIRM and len(self.packs)>1:
 
             res = self.create_multipack()
             message=''
             if res:
-                message = u'Ok Multipack:\n%s'%res
+                message = u'Ok Multi: %s\n'%res
                 self.step = 0
                 self.packs =[]
                 self._snd(self.get_str_create_multipack(), message)
@@ -4458,6 +4464,17 @@ class ScanGunProtocol(LineReceiver):
                 message=u'\nError.'
                 self._snd(self.get_str_create_multipack(), message)
             return
+
+        if line == KEY_VOLVER:
+            self.packs = []
+            self.step=0
+            self.state='tools'
+            self._snd(self.get_menu_tools())
+            return
+
+        message=u'\nNo te entiendo.'
+        self._snd(self.get_str_create_multipack(), message)
+        return
 
     def create_multipack(self):
         if len(self.packs)<1:
