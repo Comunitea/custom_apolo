@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+    <template id="report_purchase_order">
+      <style type="text/css">
+        .small{
+          font-size: 10px;
+        }
+        .no-padding{
+          padding: 0px;
+        }
+        .toppart{
+          min-height:30mm;
+        }
+        .midpart{
+          min-height: 230mm;
+        }
+        .botpart{
+          min-height:15mm;
+        }
+      </style>
+      <t t-call="report.html_container">
+            <t t-foreach="docs" t-as="o">
+                <!-- CUSTOM VALUED REPORT -->
+                <div class="page">
+                  <div class="toppart no-padding">
+                    <t t-call="custom_documents.purchase_order_header_part"/>
+                  </div>
+                  <div class="midpart no-padding">
+                    <t t-call="custom_documents.purchase_order_middle_part"/>
+                  </div>
+                  <div class="botpart no-padding">
+                    <t t-call="custom_documents.purchase_order_bottom_part"/>
+                  </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <template id="purchase_order_header_part">
+      <style type="text/css">
+        .name-dist{
+          font-size: 12px;
+        }
+        .table-header{
+          font-weight: bold;
+          width: 100%;
+          line-height: 150%;
+        }
+        .table-header .number{
+          font-size: 14px;
+        }
+        .title{
+          font-size: 20px;
+          font-weight: bold;
+        }
+      </style>
+      <div class="col-xs-4 no-padding">
+        <strong><span class="name-dist" t-esc="o.partner_id.name"/></strong>
+        <br/><span class="small" t-esc="o.partner_id.street"/>
+        <br/><span class="small" t-esc="o.partner_id.street2"/>
+        <br/><span class="small" t-esc="o.partner_id.zip"/> <span class="small" t-esc="o.partner_id.city"/>
+        <br/><span class="small">Tlfo: </span><span class="small" t-esc="o.partner_id.phone"/>
+      </div>
+
+      <div class="col-xs-2 no-padding">
+      </div>
+
+      <div class="col-xs-6 no-padding">
+        <table class="table-header">
+          <tr>
+            <td class="text-right">Purchase Date:</td>
+            <td class="text-center"><span t-esc="o.date_order"/></td>
+          </tr>
+          <tr>
+            <td class="text-right number">Purchase Number:</td>
+            <td class="text-center"><span t-esc="o.name"/></td>
+          </tr>
+          <tr>
+            <td class="text-right">Receipt Date:</td>
+            <td class="text-center"><span t-esc="o.minimum_planned_date"/></td>
+          </tr>
+          <tr>
+            <td class="text-right">Deposit:</td>
+            <td class="text-center">---</td>
+          </tr>
+        </table>
+      </div>
+      <div class="col-xs-12 no-padding">
+        <table>
+          <tr>
+            <td><span class="small">Observations: </span></td>
+            <td><span class="small" t-esc="o.notes"/></td>
+          </tr>
+        </table>
+      </div>
+    </template>
+
+    <template id="purchase_order_middle_part">
+      <style type="text/css">
+        .table-middle{
+          width: 100%;
+        }
+        .table-middle th{
+          font-weight: bold;
+          text-align: center;
+        }
+        .table-middle thead{
+          border-bottom: 2px solid #000000;
+        }
+        .table-middle tfoot{
+          padding-top: 5px;
+          border-top: 2px solid #000000;
+        }
+        .table-middle .border1{
+          border: 0.5px solid #000000;
+        }
+        .table-middle .col-prod{
+          width: 40%;
+          padding-left: 3px;
+          padding-right: 3px;
+        }
+        .table-middle .col-numbers{
+          width: 7%;
+          padding-left: 3px;
+          padding-right: 3px;
+        }
+        .table-middle .col-ref{
+          width: 12%
+          padding-left: 3px;
+          padding-right: 3px;
+        }
+        .borde1{
+          border: 1px solid yellow;
+        }
+      </style>
+      <div class="row">
+        <div class="col-xs-12 text-center">
+          <p class="title">ORDER FORM TO <span t-esc="o.partner_id.name"/></p>
+        </div>
+        <table class="table-middle small">
+          <thead>
+            <tr>
+              <th colspan="2" class=""></th>
+              <th colspan="2" class="col-inf border1">INFORMATIVE</th>
+              <th colspan="4" class="col-req-order border1">REQUEST PURCHASE</th>
+            </tr>
+            <tr>
+              <th class="col-ref border1">REF.</th>
+              <th class="col-prod border1">PRODUCT</th>
+              <th class="col-numbers border1">BOXES MANTLE</th>
+              <th class="col-numbers border1">MANTLE PALET</th>
+              <th class="col-numbers border1">PALETS</th>
+              <th class="col-numbers border1">MANTLES</th>
+              <th class="col-numbers border1">BASE</th>
+              <th class="col-numbers border1">COMP.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr t-foreach="lines[o.id]" t-as="l">
+              <td class="col-ref text-right"><span t-esc="l['ref']"/></td>
+              <td class="col-prod"><span t-esc="l['prod']"/></td>
+              <td class="col-numbers text-right"><span t-esc="l['ca_ma']"/></td>
+              <td class="col-numbers text-right"><span t-esc="l['ma_pa']"/></td>
+              <td t-if="l['pa'] > 0" class="col-numbers text-right border1"><span t-esc="l['pa']"/></td>
+              <td t-if="l['pa'] == 0" class="col-numbers text-right"></td>
+              <td t-if="l['ma'] > 0" class="col-numbers text-right border1"><span t-esc="l['ma']"/></td>
+              <td t-if="l['ma'] == 0" class="col-numbers text-right"></td>
+              <td t-if="l['un'] > 0" class="col-numbers text-right border1"><span t-esc="l['un']"/></td>
+              <td t-if="l['un'] == 0" class="col-numbers text-right"></td>
+              <td t-if="l['ba'] > 0" class="col-numbers text-right border1"><span t-esc="l['ba']"/></td>
+              <td t-if="l['ba'] == 0" class="col-numbers text-right"></td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>Nº lines:</td>
+              <td><span t-esc="totals[o.id]['n_lines']"/></td>
+              <td></td>
+              <td>Totals:</td>
+              <td class="col-numbers borde1 text-right border1"><span t-esc="totals[o.id]['t_pa']"/></td>
+              <td class="col-numbers borde1 text-right border1"><span t-esc="totals[o.id]['t_ma']"/></td>
+              <td class="col-numbers borde1 text-right border1"><span t-esc="totals[o.id]['t_un']"/></td>
+              <td class="col-numbers borde1 text-right border1"><span t-esc="totals[o.id]['t_ba']"/></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </template>
+
+    <template id="purchase_order_bottom_part">
+      <p>Page 1 of 1</p>
+    </template>
+  </data>
+</openerp>
