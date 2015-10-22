@@ -77,7 +77,7 @@ class product_product (models.Model):
                 'ca_ma':product.ca_ma,
                 'virtual_available': product.virtual_available,
                 'picking_location_id':product.picking_location_id.id,
-                'picking_location':product.picking_location_id.name_get()[0][1],
+                'picking_location':product.picking_location_id.bcd_name,
                 'bcd_picking_location':product.picking_location_id.bcd_name,
                 'temp_type_id': product.temp_type.id,
                 'qty_available' :product.qty_available
@@ -100,7 +100,7 @@ class product_product (models.Model):
             packets = [(
                            x.package_id.id,
                            x.package_id.name,
-                           x.location_id.name_get()[0][1],
+                           x.location_id.bcd_name,
                            x.location_id.id,
                            x.package_id.is_multiproduct,
                            x.package_id.packed_qty,

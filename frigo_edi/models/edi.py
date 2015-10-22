@@ -23,7 +23,7 @@ import os
 from openerp.addons.depot_edi.wizard.edi_logging import logger
 import codecs
 from openerp.addons.product.product import check_ean
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 log = logger("frigo_edi")
 
@@ -78,7 +78,7 @@ class Edi(models.Model):
                linea de 0"""
             if line == '0' * 69:
                 break
-            product_code = line[:10].strip()
+            product_code = line[:10].strip()[:6]
             group_code = line[10:16].strip()
             description = line[16:46].strip()
             year = line[46:50].strip()
@@ -87,10 +87,11 @@ class Edi(models.Model):
             group = self.env['tourism.group'].search([('name', '=',
                                                        group_code)])
             supplierinfo = self.env['product.supplierinfo'].search(
-                [('product_code', '=', product_code)])
+                [('product_code', 'ilike', product_code), ('name', '=', self.related_partner_id.id)])
             if not supplierinfo:
                 log.error("Product with code %s not found." % product_code)
                 continue
+            supplierinfo = supplierinfo[0]
             if not group:
                 group = self.env['tourism.group'].create(
                     {'name': group_code,
@@ -142,9 +143,9 @@ class Edi(models.Model):
 
         visited_supp_ids = []
         for line in f:
-            product_code = str(int(line[:10]))
+            product_code = line[:10][2:8]
             product_ids = supp_obj.search([('id', 'in', supplier_product_ids),
-                                           ('product_code', '=',
+                                           ('product_code', 'ilike',
                                             product_code)])
             rappel_group_code = line[10:12]
             rappel_subgroup = self.env['product.rappel.subgroup'].search(
@@ -211,9 +212,9 @@ class Edi(models.Model):
                 prod.supplier_un_ca = int(line[98:106])
                 prod.volume = volume
                 prod.weight = weight
-                prod.supplier_kg_un = supplier_kg_un
-                prod.supplier_ca_ma = un_ma
-                prod.supplier_ma_pa = ma_pa
+                product_ids[0].supp_kg_un = supplier_kg_un
+                product_ids[0].supp_ca_ma = un_ma
+                product_ids[0].supp_ma_pa = ma_pa
                 prod.uom_po_id = purchase_uom.id
                 product_ids[0].pricelist_ids.unlink()
                 if stax:
@@ -223,7 +224,10 @@ class Edi(models.Model):
 
                 plst_sup.create({"suppinfo_id": product_ids[0].id,
                                  "min_quantity": 1,
-                                 "price": int(line[80:90]) / 100.0})
+                                 "price": int(line[80:90]) / 100.0,
+                                 "from_date": date.today(),
+                                 "to_date": date.today() + timedelta(365),}
+                                 )
             else:
                 create_vals = {'unilever_family_id': family.id,
                                'name': line[50:80].strip(),
@@ -232,10 +236,7 @@ class Edi(models.Model):
                                'standard_price': int(line[80:90]) / 100.0,
                                'volume': volume,
                                'weight': weight,
-                               'supplier_kg_un': supplier_kg_un,
-                               'supplier_ca_ma': un_ma,
-                               'supplier_ma_pa': ma_pa,
-                               'supplier_un_ca': int(line[98:106]),
+                               'temp_type': self.env.ref('midban_product.tt1').id,
                                'ean14': ean14.rjust(14, "0"),
                                'ean13': ean13_valid and ean13 or False,
                                'type': 'product',
@@ -252,10 +253,17 @@ class Edi(models.Model):
                                        "product_tmpl_id":
                                        prod.product_tmpl_id.id,
                                        "product_name": line[50:80].strip(),
-                                       "product_code": product_code})
+                                       "product_code": product_code,
+                                       'supp_kg_un': supplier_kg_un,
+                                       'supp_ca_ma': un_ma,
+                                       'supp_ma_pa': ma_pa,
+                                       'supp_un_ca': int(line[98:106]),
+                                    })
                 plst_sup.create({"suppinfo_id": sup.id,
                                  "min_quantity": 1,
-                                 "price": int(line[80:90]) / 100.0})
+                                 "price": int(line[80:90]) / 100.0,
+                                 "from_date": date.today(),
+                                 "to_date": date.today() + timedelta(365)})
 
         unlink_supp_ids = list(set(supplier_product_ids) -
                                set(visited_supp_ids))
@@ -362,7 +370,7 @@ class Edi(models.Model):
         for line in f:
             min_date_str = line[25:33]
             min_date = datetime.strptime(min_date_str, '%Y%m%d')
-            product_supplier_code = line[43:53]
+            product_supplier_code = line[43:53][2:8]
             lot_name = line[71:81].lstrip(' ')
             fab_date = line[81:89]
             life_date = datetime.strptime(line[89:97], '%Y%m%d')
@@ -393,11 +401,11 @@ class Edi(models.Model):
             if picking.picking.min_date != min_date:
                 picking.picking.min_date = min_date
             product_supp = self.env['product.supplierinfo'].search(
-                [('product_code', '=', product_supplier_code.lstrip('0')),
+                [('product_code', 'ilike', product_supplier_code),
                  ('name', '=', self.related_partner_id.id)])
             if not product_supp:
                 log.error('Product with code %s not found' %
-                          product_supplier_code.lstrip('0'))
+                          product_supplier_code)
                 errors = True
                 continue
             product = product_supp.product_tmpl_id.product_variant_ids[0]
@@ -471,9 +479,9 @@ class Edi(models.Model):
                 log.error('Customer with unilever code %s not found' %
                           customer_code)
                 continue
-            product_code = line[10:20].lstrip('0')
+            product_code = line[10:20][2:8]
             product_info = self.env['product.supplierinfo'].search(
-                [('product_code', '=', product_code)])
+                [('product_code', 'ilike', product_code)])
             if not product_info:
                 log.error('product with supplier code %s not found' %
                           product_code)
@@ -509,10 +517,9 @@ class Edi(models.Model):
                     'number': False,
                     'fiscal_position': partner_id.property_account_position.id,
                 })
-            product_code = line[20:27]  # Si el producto viene en 10 posiciones
-                                        # las 2 de la izquierda siempre son 0
+            product_code = line[20:27][:6]
             product_info = self.env['product.supplierinfo'].search(
-                [('product_code', '=', product_code)])
+                [('product_code', 'ilike', product_code)])
             if not product_info:
                 log.error('product with supplier code %s not found' %
                           product_code)

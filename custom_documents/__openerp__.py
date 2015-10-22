@@ -32,6 +32,7 @@
     "depends": [
         "stock_valued_picking",
         "stock_picking_review",
+        "stock_picking_batch",
         "depot_invoice",
         "process_sale_order",
         "stock",
@@ -42,7 +43,9 @@
              #  'views/custom_assets.xml', NO ME FUNCIONA en esta revision
              'views/custom_reports.xml',
              'qweb_report/report_custom_picking.xml',
-             'qweb_report/report_custom_invoice.xml'],
+             'qweb_report/report_custom_picking_batch.xml',
+             'qweb_report/report_custom_invoice.xml',
+             'qweb_report/report_purchase_order.xml'],
     "demo": [],
     "test": [],
     "installable": True,

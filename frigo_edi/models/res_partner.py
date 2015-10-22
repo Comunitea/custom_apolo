@@ -21,11 +21,21 @@
 from openerp import models, fields, api, exceptions, _
 
 
+class PartnerUnileverFamily(models.Model):
+
+    _name = "res.partner.unilever.family"
+
+    name = fields.Char("Name", size=30, required=True)
+    code = fields.Char("Code", size=2, required=True)
+
+
 class ResPartner(models.Model):
 
     _inherit = "res.partner"
 
     unilever_code = fields.Char("Unilever code", size=10)
+    unilever_family_id = fields.Many2one("res.partner.unilever.family",
+                                         "Unilever family")
     favorite = fields.Boolean('Favorite')
     high_competition = fields.Boolean('High competition')
     close_days = fields.Many2many('week.days', 'partner_close_week_days',

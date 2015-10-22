@@ -35,7 +35,8 @@ class ItemManagementItem(models.Model):
     partner_id = fields.Many2one("res.partner", "Owner", required=True)
     purchase_date = fields.Date("Purchase date", required=True)
     contract_id = fields.Many2one('item.management.contract', 'Contract',
-                                  readonly=True, track_visibility='onchange')
+                                  readonly=True, track_visibility='onchange',
+                                  copy=False)
     location_id = fields.Many2one('stock.location', 'Location', readonly=True,
                                   track_visibility='onchange')
     customer_id = fields.Many2one('res.partner', "Customer", readonly=True,
@@ -50,7 +51,8 @@ class ItemManagementItem(models.Model):
                                   ('warehouse', "Warehouse"),
                                   ('inactive', 'Inactive')], 'Situation',
                                  required=True, default="warehouse",
-                                 readonly=True, track_visibility='onchange')
+                                 readonly=True, track_visibility='onchange',
+                                 copy=False)
     inactive_motive = fields.Selection([('scrapping', 'Scrapping'),
                                         ('theft', 'Theft'),
                                         ('loss', 'Loss')], 'Inactive motive',

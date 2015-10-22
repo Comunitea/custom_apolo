@@ -81,6 +81,28 @@ class stock_quant_package(models.Model):
     _inherit = 'stock.quant.package'
 
     @api.multi
+    def create_multipack_from_gun(self, my_args):
+
+        user_id = my_args.get('user_id', False)
+        package_ids = my_args.get ('package_id', [])
+        vals= {
+            'is_multiproduct' : True
+        }
+        new_package = self.create(vals)
+        parent_id = new_package.id
+
+        for package_id in package_ids:
+            domain = [('id','=', package_id)]
+            package = self.search(domain)
+            location_id = package.location_id.id
+            vals = {
+                'parent_id':parent_id
+            }
+            package.write(vals)
+        new_package.write({'location_id':location_id})
+        return new_package.name
+
+    @api.multi
     def get_package_gun_info(self, my_args):
         name = my_args.get('name', False)
         domain=[('name', 'ilike', '%' + name)]

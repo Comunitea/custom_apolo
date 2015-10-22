@@ -166,7 +166,7 @@ class stock_location(models.Model):
             vals = {
                 'exist' : True,
                 type + 'location_id' : location.id,
-                type + 'location' : location.name_get()[0][1],
+                type + 'location' : location.bcd_name,
                 'usage':location.usage,
                 'zone':location.zone,
                 'temp_type_id':location.temp_type_id.id or False,
