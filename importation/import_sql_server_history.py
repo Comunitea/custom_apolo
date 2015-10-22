@@ -499,7 +499,7 @@ class DatabaseImport:
         cont = 0
         print "no. lineas abiertas: ", num_rows
         for row in data:
-            if cont <= 45704:
+            if cont <= 100292:
                 cont += 1
                 continue
             sale_ids = self.search("sale.order", [('name', '=', str(int(row.order_id_map)))])
