@@ -104,10 +104,11 @@ class custom_picking_parser(models.AbstractModel):
                 prod_name = move.product_id.name
                 if move.product_id.seller_ids:
                     supp_info = move.product_id.seller_ids[0]
-                    if supp_info.product_name:
+                    show_name = supp_info.name.supp_name_prod
+                    if show_name and supp_info.product_name:
                         prod_name = supp_info.product_name
-                    if supp_info.product_code:
-                        prod_name = supp_info.product_code
+                    if show_name and supp_info.product_code:
+                        prod_code = supp_info.product_code
 
                 prod_ean_box = move.product_id.ean14 or ''
                 prod_ean_consum = move.product_id.ean_consum or ''

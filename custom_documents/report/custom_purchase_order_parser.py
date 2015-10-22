@@ -55,6 +55,7 @@ class custom_purchase_order_parser(models.AbstractModel):
                 totals[po.id]['n_lines'] += 1
                 prod_obj = line.product_id
                 supp = prod_obj.get_product_supp_record(po.partner_id.id)
+
                 # import ipdb; ipdb.set_trace()
                 ba_un = supp.supp_kg_un
                 un_ca = supp.supp_un_ca
@@ -111,9 +112,18 @@ class custom_purchase_order_parser(models.AbstractModel):
                 un += bo * un_ca
                 bo = 0
 
+                ref = prod_obj.default_code
+                name = prod_obj.name
+                if prod_obj.seller_ids:
+                    supp = prod_obj.seller_ids[0]
+                    if supp.product_name:
+                        name = supp.product_name
+                    if supp.product_code:
+                        ref = supp.product_code
+
                 dic = {
-                    'ref': line.product_id.default_code,
-                    'prod': line.product_id.name,
+                    'ref': ref,
+                    'prod': name,
                     'ca_ma': ca_ma,
                     'ma_pa': ma_pa,
                     'pa': pa,

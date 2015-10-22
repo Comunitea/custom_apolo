@@ -43,3 +43,5 @@ class ResPartner(models.Model):
     add_summary = fields.Boolean('Add Summary Articles',
                                  help="Add a page to the invoice with the"
                                  " summary of invoiced products")
+    supp_name_prod = fields.Boolean('Use supplier names in indirect notes',
+                                 help="Use product name of supplier in indirect notes")
