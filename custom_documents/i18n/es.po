@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-22 09:53+0000\n"
-"PO-Revision-Date: 2015-10-22 09:53+0000\n"
+"POT-Creation-Date: 2015-10-22 12:37+0000\n"
+"PO-Revision-Date: 2015-10-22 12:37+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -178,6 +178,7 @@ msgstr "Agrupar empresa padre, resumen de albaranes"
 #: field:report.custom_documents.report_custom_invoice,id:0
 #: field:report.custom_documents.report_custom_picking,id:0
 #: field:report.custom_documents.report_purchase_order,id:0
+#: field:report.stock_picking_batch.report_picking_batch,id:0
 msgid "ID"
 msgstr "ID"
 
@@ -505,6 +506,16 @@ msgstr "Unidad"
 #: view:website:custom_documents.picking_indirect_table
 msgid "Units"
 msgstr "Unids."
+
+#. module: custom_documents
+#: help:res.partner,supp_name_prod:0
+msgid "Use product name of supplier in indirect notes"
+msgstr "Usar nombre de producto de proveedor en albaranes indirectos"
+
+#. module: custom_documents
+#: field:res.partner,supp_name_prod:0
+msgid "Use supplier names in indirect notes"
+msgstr "Usar nombre proveedor en albaranes indirectos"
 
 #. module: custom_documents
 #: selection:res.partner,pick_print_op:0
