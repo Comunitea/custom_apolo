@@ -4,7 +4,7 @@
     <template id="report_purchase_order">
       <style type="text/css">
         .small{
-          font-size: 10px;
+          font-size: 11px;
         }
         .no-padding{
           padding: 0px;
@@ -115,7 +115,7 @@
           border-top: 2px solid #000000;
         }
         .table-middle .border1{
-          border: 0.5px solid #000000;
+          border: 1px solid #000000;
         }
         .table-middle .col-prod{
           width: 40%;
@@ -173,14 +173,14 @@
           </tbody>
           <tfoot>
             <tr>
-              <td>Nº lines:</td>
+              <td class="text-right"><strong>Nº lines:</strong></td>
               <td><span t-esc="totals[o.id]['n_lines']"/></td>
               <td></td>
-              <td>Totals:</td>
-              <td class="col-numbers borde1 text-right border1"><span t-esc="totals[o.id]['t_pa']"/></td>
-              <td class="col-numbers borde1 text-right border1"><span t-esc="totals[o.id]['t_ma']"/></td>
-              <td class="col-numbers borde1 text-right border1"><span t-esc="'{0:.2f}'.format(totals[o.id]['t_un'])"/></td>
-              <td class="col-numbers borde1 text-right border1"><span t-esc="'{0:.2f}'.format(totals[o.id]['t_ba'])"/></td>
+              <td><strong>Totals:</strong></td>
+              <td class="col-numbers borde1 text-right border1"><strong><span t-esc="totals[o.id]['t_pa']"/></strong></td>
+              <td class="col-numbers borde1 text-right border1"><strong><span t-esc="totals[o.id]['t_ma']"/></strong></td>
+              <td class="col-numbers borde1 text-right border1"><strong><span t-esc="'{0:.2f}'.format(totals[o.id]['t_un'])"/></strong></td>
+              <td class="col-numbers borde1 text-right border1"><strong><span t-esc="'{0:.2f}'.format(totals[o.id]['t_ba'])"/></strong></td>
             </tr>
           </tfoot>
         </table>

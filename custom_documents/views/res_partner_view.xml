@@ -11,8 +11,9 @@
             <page string="Reports Preferences">
                 <group strinf="Print Preferences">
                     <field name="inv_print_op"/>
-                    <field name="pick_print_op"/>
                     <field name="add_summary"/>
+                    <field name="pick_print_op"/>
+                    <field name="supp_name_prod" attrs="{'invisible': [('customer', '=', True)]}"/>
                 </group>
             </page>
         </notebook>
