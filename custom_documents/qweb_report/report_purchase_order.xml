@@ -87,9 +87,11 @@
         </table>
       </div>
       <div class="col-xs-12 no-padding">
-        <table>
+        <table t-if="o.notes">
           <tr>
-            <td><span class="small">Observations: </span></td>
+            <td><strong><span class="small">Observations:</span></strong></td>
+          </tr>
+          <tr>
             <td><span class="small" t-esc="o.notes"/></td>
           </tr>
         </table>
@@ -130,9 +132,6 @@
           padding-left: 3px;
           padding-right: 3px;
         }
-        .borde1{
-          border: 1px solid yellow;
-        }
       </style>
       <div class="row">
         <div class="col-xs-12 text-center">
@@ -141,7 +140,7 @@
         <table class="table-middle small">
           <thead>
             <tr>
-              <th colspan="2" class=""></th>
+              <th colspan="2"></th>
               <th colspan="2" class="col-inf border1">INFORMATIVE</th>
               <th colspan="4" class="col-req-order border1">REQUEST PURCHASE</th>
             </tr>
@@ -166,10 +165,10 @@
               <td t-if="l['pa'] == 0" class="col-numbers text-right"></td>
               <td t-if="l['ma'] > 0" class="col-numbers text-right border1"><span t-esc="l['ma']"/></td>
               <td t-if="l['ma'] == 0" class="col-numbers text-right"></td>
-              <td t-if="l['un'] > 0" class="col-numbers text-right border1"><span t-esc="l['un']"/></td>
-              <td t-if="l['un'] == 0" class="col-numbers text-right"></td>
-              <td t-if="l['ba'] > 0" class="col-numbers text-right border1"><span t-esc="l['ba']"/></td>
-              <td t-if="l['ba'] == 0" class="col-numbers text-right"></td>
+              <td t-if="l['un'] != '0.00'" class="col-numbers text-right border1"><span t-esc="l['un']"/></td>
+              <td t-if="l['un'] == '0.00'" class="col-numbers text-right"></td>
+              <td t-if="l['ba'] != '0.00'" class="col-numbers text-right border1"><span t-esc="l['ba']"/></td>
+              <td t-if="l['ba'] == '0.00'" class="col-numbers text-right"></td>
             </tr>
           </tbody>
           <tfoot>
@@ -180,8 +179,8 @@
               <td>Totals:</td>
               <td class="col-numbers borde1 text-right border1"><span t-esc="totals[o.id]['t_pa']"/></td>
               <td class="col-numbers borde1 text-right border1"><span t-esc="totals[o.id]['t_ma']"/></td>
-              <td class="col-numbers borde1 text-right border1"><span t-esc="totals[o.id]['t_un']"/></td>
-              <td class="col-numbers borde1 text-right border1"><span t-esc="totals[o.id]['t_ba']"/></td>
+              <td class="col-numbers borde1 text-right border1"><span t-esc="'{0:.2f}'.format(totals[o.id]['t_un'])"/></td>
+              <td class="col-numbers borde1 text-right border1"><span t-esc="'{0:.2f}'.format(totals[o.id]['t_ba'])"/></td>
             </tr>
           </tfoot>
         </table>

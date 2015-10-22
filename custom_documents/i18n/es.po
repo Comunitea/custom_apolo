@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-20 17:28+0000\n"
-"PO-Revision-Date: 2015-10-20 17:28+0000\n"
+"POT-Creation-Date: 2015-10-22 09:53+0000\n"
+"PO-Revision-Date: 2015-10-22 09:53+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -75,6 +75,21 @@ msgid "Applied Price"
 msgstr "Precio Aplicado"
 
 #. module: custom_documents
+#: view:website:custom_documents.purchase_order_middle_part
+msgid "BASE"
+msgstr "BASE"
+
+#. module: custom_documents
+#: view:website:custom_documents.purchase_order_middle_part
+msgid "BOXES MANTLE"
+msgstr "CAJAS MANTO"
+
+#. module: custom_documents
+#: view:website:custom_documents.purchase_order_middle_part
+msgid "COMP."
+msgstr "COMP."
+
+#. module: custom_documents
 #: view:website:custom_documents.invoice_summary_products
 #: view:website:custom_documents.op_group_pick
 msgid "Code"
@@ -117,6 +132,11 @@ msgid "Delivery Pick"
 msgstr "Albarán entrega"
 
 #. module: custom_documents
+#: view:website:custom_documents.purchase_order_header_part
+msgid "Deposit:"
+msgstr "Depósito:"
+
+#. module: custom_documents
 #: view:website:custom_documents.invoice_summary_products
 #: view:website:custom_documents.op_give_deliver
 #: view:website:custom_documents.op_group_pick
@@ -157,6 +177,7 @@ msgstr "Agrupar empresa padre, resumen de albaranes"
 #. module: custom_documents
 #: field:report.custom_documents.report_custom_invoice,id:0
 #: field:report.custom_documents.report_custom_picking,id:0
+#: field:report.custom_documents.report_purchase_order,id:0
 msgid "ID"
 msgstr "ID"
 
@@ -170,6 +191,11 @@ msgstr "BASE IMPONIBLE"
 #: view:website:custom_documents.picking_bottom_part
 msgid "IMPORT IVA"
 msgstr "IMPORTE IVA"
+
+#. module: custom_documents
+#: view:website:custom_documents.purchase_order_middle_part
+msgid "INFORMATIVE"
+msgstr "INFORMATIVO"
 
 #. module: custom_documents
 #: view:website:custom_documents.invoice_top_part
@@ -198,6 +224,16 @@ msgid "Lot:"
 msgstr "Lote:"
 
 #. module: custom_documents
+#: view:website:custom_documents.purchase_order_middle_part
+msgid "MANTLE PALET"
+msgstr "MANTO PALET"
+
+#. module: custom_documents
+#: view:website:custom_documents.purchase_order_middle_part
+msgid "MANTLES"
+msgstr "MANTOS"
+
+#. module: custom_documents
 #: view:website:custom_documents.invoice_top_part
 #: view:website:custom_documents.picking_top_part
 msgid "NIF:"
@@ -215,14 +251,44 @@ msgid "Not Valued Picking"
 msgstr "Albarán sin valorar"
 
 #. module: custom_documents
+#: view:website:custom_documents.purchase_order_middle_part
+msgid "Nº lines:"
+msgstr "Nº líneas:"
+
+#. module: custom_documents
 #: view:website:custom_documents.picking_bottom_part
 msgid "OBSERVATIONS:"
 msgstr "OBSERVACIONES:"
 
 #. module: custom_documents
+#: view:website:custom_documents.purchase_order_middle_part
+msgid "ORDER FORM TO"
+msgstr "HOJA DE PEDIDO A"
+
+#. module: custom_documents
+#: view:website:custom_documents.purchase_order_header_part
+msgid "Observations:"
+msgstr "Observaciones:"
+
+#. module: custom_documents
+#: view:website:custom_documents.purchase_order_middle_part
+msgid "PALETS"
+msgstr "PALETS"
+
+#. module: custom_documents
 #: view:website:custom_documents.picking_top_part
 msgid "PICKING:"
 msgstr "ALBARÁN:"
+
+#. module: custom_documents
+#: view:website:custom_documents.purchase_order_middle_part
+msgid "PRODUCT"
+msgstr "PRODUCTO"
+
+#. module: custom_documents
+#: view:website:custom_documents.purchase_order_bottom_part
+msgid "Page 1 of 1"
+msgstr "Página 1 de 1"
 
 #. module: custom_documents
 #: model:ir.model,name:custom_documents.model_res_partner
@@ -276,6 +342,16 @@ msgid "Product"
 msgstr "Producto"
 
 #. module: custom_documents
+#: view:website:custom_documents.purchase_order_header_part
+msgid "Purchase Date:"
+msgstr "Fecha pedido:"
+
+#. module: custom_documents
+#: view:website:custom_documents.purchase_order_header_part
+msgid "Purchase Number:"
+msgstr "Número pedido:"
+
+#. module: custom_documents
 #: view:website:custom_documents.invoice_top_part
 #: view:website:custom_documents.picking_top_part
 msgid "Pág. 1 de 1"
@@ -294,6 +370,21 @@ msgstr "Cant."
 #: view:website:custom_documents.picking_indirect_table
 msgid "Qty. S/C"
 msgstr "Cant. S/C"
+
+#. module: custom_documents
+#: view:website:custom_documents.purchase_order_middle_part
+msgid "REF."
+msgstr "REF."
+
+#. module: custom_documents
+#: view:website:custom_documents.purchase_order_middle_part
+msgid "REQUEST PURCHASE"
+msgstr "PEDIDO SOLICITADO"
+
+#. module: custom_documents
+#: view:website:custom_documents.purchase_order_header_part
+msgid "Receipt Date:"
+msgstr "Fecha recepción:"
 
 #. module: custom_documents
 #: view:website:custom_documents.op_give_deliver
@@ -372,6 +463,11 @@ msgid "Tlfo."
 msgstr "Tlfo."
 
 #. module: custom_documents
+#: view:website:custom_documents.purchase_order_header_part
+msgid "Tlfo:"
+msgstr "Tlfo:"
+
+#. module: custom_documents
 #: view:website:custom_documents.invoice_summary_products
 #: view:website:custom_documents.op_group_pick
 msgid "Total"
@@ -381,6 +477,11 @@ msgstr "Total"
 #: view:website:custom_documents.picking_indirect_table
 msgid "Total Qty"
 msgstr "Cant. total"
+
+#. module: custom_documents
+#: view:website:custom_documents.purchase_order_middle_part
+msgid "Totals:"
+msgstr "Totales:"
 
 #. module: custom_documents
 #: selection:res.partner,pick_print_op:0
@@ -404,11 +505,6 @@ msgstr "Unidad"
 #: view:website:custom_documents.picking_indirect_table
 msgid "Units"
 msgstr "Unids."
-
-#. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "Units S/C"
-msgstr "Unid. S/C"
 
 #. module: custom_documents
 #: selection:res.partner,pick_print_op:0

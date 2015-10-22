@@ -86,12 +86,12 @@ class custom_purchase_order_parser(models.AbstractModel):
                     uom_pa = uom_ma * ma_pa
 
                 pa = 0 #palet
-                ma = 0 #manto - rellano
+                ma = 0 #manto (rellano en el informe)
                 bo = 0 #caja
-                un = 0 #unidad - base
-                ba = 0 #base - composición
+                un = 0 #unidad (base en el informe)
+                ba = 0 #base (composición en el informe)
                 rest_qty = line.product_qty
-                import ipdb; ipdb.set_trace()
+                # import ipdb; ipdb.set_trace()
                 while rest_qty > 0:
                     if rest_qty >= uom_pa:
                         rest_qty -= uom_pa
@@ -111,8 +111,6 @@ class custom_purchase_order_parser(models.AbstractModel):
                 un += bo * un_ca
                 bo = 0
 
-
-
                 dic = {
                     'ref': line.product_id.default_code,
                     'prod': line.product_id.name,
@@ -121,10 +119,11 @@ class custom_purchase_order_parser(models.AbstractModel):
                     'pa': pa,
                     'ma': ma,
                     'bo': bo,
-                    'un': un,
-                    'ba': ba,
+                    'un': '{0:.2f}'.format(un),
+                    'ba': '{0:.2f}'.format(ba),
                     'n_lines': n_lines,
                 }
+
                 totals[po.id]['t_pa'] += pa
                 totals[po.id]['t_ma'] += ma
                 totals[po.id]['t_bo'] += bo
