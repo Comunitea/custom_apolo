@@ -4,7 +4,7 @@ import sys
 import xmlrpclib
 import socket
 import pyodbc
-import traceback
+import time
 
 UOM_MAP = {"K": "kg",
            "U": "Unit(s)",
@@ -361,7 +361,7 @@ class DatabaseImport:
                    "c.email_comercial as email, c.observaciones as comment from dbo.LG_clientes vc inner join dbo.adsd_clie c on c.cli_codi = vc.cliente where c.cli_asoc = 0")
         parent_partner_data = cr.fetchall()
         for row in parent_partner_data:
-            parent_id = self._create_or_update_partner(row, unregister_id)
+            self._create_or_update_partner(row, unregister_id)
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
@@ -374,7 +374,7 @@ class DatabaseImport:
             for row in child_partner_data:
                 partner_parent_ids = self.search("res.partner", [('ref', '=', str(row[12])),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
                 if partner_parent_ids:
-                    parent_id = self._create_or_update_partner(row, unregister_id, parent_id=partner_parent_ids[0])
+                    self._create_or_update_partner(row, unregister_id, parent_id=partner_parent_ids[0])
                     child_partner_data.remove(row)
                     cont += 1
                     print "%s de %s" % (str(cont), str(num_rows))
@@ -466,18 +466,32 @@ class DatabaseImport:
                     vals = {"product_tmpl_id": product_data['product_tmpl_id'][0],
                             "name": supplier_ids[0],
                             "product_code": str(row.supplier_code),
-                            "log_unit_id": uom_id,
-                            "unit_use_purchase": True,
-                            "log_box_id": False,
-                            "log_base_id": False,
-                            "supp_kg_un": row.supp_kg_un,
                             "supp_ca_ma": row.supp_ca_ma or 0,
                             "supp_ma_pa": row.supp_ma_pa or 0,
                             "var_coeff_un": row.var_coeff_un == "V" and True or False}
 
+                    if row.uom_id_map.strip() == "C":
+                        vals["log_box_id"] = uom_id
+                        vals["box_use_purchase"] = True
+                        if row.uomb_map.strip() not in ["L", "K"]:
+                            vals["supp_un_ca"] = row.supp_kg_un
+                            vals["supp_kg_un"] = 1
+                        else:
+                            vals["supp_kg_un"] = row.supp_kg_un
+                            vals["supp_un_ca"] = 1
+                    elif row.uom_id_map.strip() == "U":
+                        vals["log_unit_id"] = uom_id
+                        vals["unit_use_purchase"] = True
+                        vals["supp_kg_un"] = row.supp_kg_un
+                    else:
+                        vals["log_base_id"] = uom_id
+                        vals["base_use_purchase"] = True
+                        vals["supp_kg_un"] = 1
                     if uom_id != uob_id:
-                        vals["log_base_id"] = uob_id
-                        vals["base_use_purchase"] = row.base_use_purchase == "S" and True or False
+                        if row.uomb_map.strip() == "U":
+                            vals["log_unit_id"] = uob_id
+                        else:
+                            vals["log_base_id"] = uob_id
                     self.create("product.supplierinfo", vals)
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
@@ -589,12 +603,77 @@ class DatabaseImport:
         num_rows = len(unilever_fam_data)
         cont = 0
         for row in unilever_fam_data:
-            vals = {'code': row.code,
+            vals = {'code': ustr(row.code),
                     'name': ustr(row.name)}
             self.create("product.unilever.family", vals)
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
+    def import_product_frigo_data(self, cr):
+        cr.execute("select codigo_ficha as product_id_map, codigo_producto as supplier_code, proveedor as supplier_id_map, descripcion_producto as supplier_name, "
+                   "subgrupo_producto as rappel_subgroup_id_map, grupo_rappel as rappel_group_id_map, jerarquia as unilever_family_id_map from dbo.informe_productos "
+                   "where codigo_ficha != 0")
+        unilever_prod_data = cr.fetchall()
+        num_rows = len(unilever_prod_data)
+        cont = 0
+        for row in unilever_prod_data:
+            product_ids = self.search("product.product", [('default_code', '=', str(int(row.product_id_map))),'|',('active', '=', True),('active', '=', False)])
+            if product_ids:
+                product_data = self.read("product.product", product_ids[0], ["product_tmpl_id"])
+                supplier_ids = self.search("res.partner", [('supplier', '=', True),('ref', '=', str(int(row.supplier_id_map))),'|',('active', '=',True),('active','=',False)])
+                if supplier_ids:
+                    supp_info_ids = self.search("product.supplierinfo", [('product_tmpl_id', '=', product_data["product_tmpl_id"][0]),('name', '=', supplier_ids[0])])
+                    if supp_info_ids:
+                        supp_vals = {
+                            'product_code': row.supplier_code and ustr(str(int(row.supplier_code))) or "",
+                            'product_name': row.supplier_name and ustr(row.supplier_name) or ""
+                        }
+                        self.write("product.supplierinfo", [supp_info_ids[0]], supp_vals)
+
+                vals = {}
+                if row.rappel_subgroup_id_map:
+                    subgroup_ids = self.search("product.rappel.subgroup", [("code", '=', row.rappel_subgroup_id_map)])
+                    if subgroup_ids:
+                        vals["rappel_subgroup_id"] = subgroup_ids[0]
+                if row.rappel_group_id_map:
+                    group_ids = self.search("product.rappel.group", [("internal_code", '=', str(int(row.rappel_group_id_map)))])
+                    if group_ids:
+                        vals["rappel_group_id"] = group_ids[0]
+                if row.unilever_family_id_map and row.unilever_family_id_map != "00":
+                    family_ids = self.search("product.unilever.family", [("code", '=', row.unilever_family_id_map)])
+                    if family_ids:
+                        vals["unilever_family_id"] = family_ids[0]
+                if vals:
+                    self.write("product.product", [product_ids[0]], vals)
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+    def import_other_prices(self, cr):
+        cr.execute("select distinct tari_arti as product_id_map from dbo.adsd_tari where tari_pre1 != 0.0 or tari_pre6 != 0.0")
+        product_data = cr.fetchall()
+        num_rows = len(product_data)
+        cont = 0
+        for product in product_data:
+            product_ids = self.search("product.product", [('default_code', '=', str(int(product.product_id_map))),'|',('active','=',True),('active','=',False)])
+            if product_ids:
+                cr.execute("select tari_pre1 as nook_price, tari_pre6 as doorstep_price from dbo.adsd_tari where  (tari_pre1 != 0.0 or "
+                           "tari_pre6 != 0.0) and tari_arti = ? order by tari_desd desc", (int(product.product_id_map),))
+                prices_data = cr.fetchall()
+                nook_price = 0.0
+                doorstep_price = 0.0
+                for row in prices_data:
+                    if nook_price and doorstep_price:
+                        break
+                    if not nook_price and row.nook_price:
+                        nook_price = float(row.nook_price)
+                    if not doorstep_price and row.doorstep_price:
+                        doorstep_price = float(row.doorstep_price)
+
+                if doorstep_price or nook_price:
+                    self.write("product.product", [product_ids[0]], {'nook_price': nook_price,
+                                                                     'doorstep_price': doorstep_price})
+            cont +=1
+            print "%s de %s" % (str(cont), str(num_rows))
 
     def process_data(self):
         """
@@ -608,15 +687,17 @@ class DatabaseImport:
             conn = pyodbc.connect("DRIVER={FreeTDS};SERVER=" + self.sql_server_host + ";UID=midban;PWD=midban2015;DATABASE=gest2015;Port=1433;TDS_Version=10.0")
             cr = conn.cursor()
 
-            self.import_product_category(cr)
-            self.import_products(cr)
-            self.import_customers(cr)
-            self.import_suppliers(cr)
-            self.import_indirect_customer(cr)
-            self.import_rel_product_supplier(cr)
+            #self.import_product_category(cr)
+            #self.import_products(cr)
+            #self.import_customers(cr)
+            #self.import_suppliers(cr)
+            #self.import_indirect_customer(cr)
+            #self.import_rel_product_supplier(cr)
             #self.fix_products(cr)
-            self.import_bank_accounts(cr)
-            self.import_master_frigo_data(cr)
+            #self.import_bank_accounts(cr)
+            #self.import_master_frigo_data(cr)
+            #self.import_product_frigo_data(cr)
+            self.import_other_prices(cr)
 
         except Exception, ex:
             print u"Error al conectarse a las bbdd: ", repr(ex)
