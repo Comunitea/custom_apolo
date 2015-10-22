@@ -15,7 +15,7 @@ KEY_F1 = '8f50' #'\x8fP'
 KEY_F2 = '8f51' #'\x8fQ'
 KEY_F3 = '8f52' #'\x8fR'
 KEY_F4 = '8f53' #'\x8fS'
-KEY_F5 = '9b31367e' #'\x9b16~'
+KEY_F5 = '9b31367e' #'\x9bf5~'
 KEY_F6 = '9b31377e' #'\x9b17~'
 KEY_F7 = '9b31387e' #'\x9b18~'
 KEY_F8 = '9b31397e' #'\x9b19~'
@@ -37,8 +37,8 @@ KEY_PAUSE = "F6"
 KEY_MANUAL ="F3"
 
 KEY_PRINT = "F7"
-KEY_RUN = "F5"
-KEY_FINISH = "F5"
+KEY_RUN = "F10" #"F5"
+KEY_FINISH = "F10" #"F5"
 
 KEY_ORIGEN = "F6"
 KEY_WAVE_OPS = "F6"
@@ -211,7 +211,8 @@ class ScanGunProtocol(LineReceiver):
             line = self.function_keys(line.encode('hex'))
             key == True
         print u"Entrada: " + str(line)
-
+        if line[0:1]=="F":
+            key=True
         line= str(line)
         if not key:
             if len(line)==9:
@@ -273,6 +274,10 @@ class ScanGunProtocol(LineReceiver):
             self.handle_manual_transfer_product(line)
         elif self.state =="manual_transfer_packet":
             self.handle_manual_transfer_packet(line)
+
+        elif self.state =="products_by_zone":
+            self.handle_products_by_zone(line)
+
         elif self.state =="manual_picking_reposition":
             self.handle_manual_picking_reposition(line)
         elif self.state == "form_repo_ops":
@@ -2974,6 +2979,73 @@ class ScanGunProtocol(LineReceiver):
 
         #self._snd(self.get_str_form_ops())
 
+    def get_str_products_by_zone(self, location_id):
+        """
+        Devuelve el menú con las cámaras disponibles
+        """
+        delimiter = "\n********************\n"
+        #str_menu = "0 -> Volver\n"
+        str_menu=""
+        self.products = self.factory.odoo_con.get_product_by_picking_location(self, location_id)
+
+        inc=1
+        if self.products:
+            for key in self.products:
+                key_ = int(key)
+                if key_>= self.num_order_list_ops and key_<= self.num_order_list_ops + MAX_NUM_ONE:
+                    str_menu += str(key) + " -> " + self.products[1] + "\n"
+        else:
+            str_menu +=u"\nNo hay Productos\n"
+        keys = u"%s Volver"%KEY_VOLVER
+        str_menu += delimiter + keys
+        return str_menu
+
+    def handle_products_by_zone(self, line):
+        print "handle_products_by_zone" + str(line)
+
+        if line== KEY_VOLVER:
+            self.state = "menu1"
+            self.machine_id = False
+            self.route = False
+            self.route_id = False
+            self._snd(self.get_str_menu1())
+            return
+
+        if line == KEY_NEXT:
+            if len(self.products)>self.num_order_list_ops:
+                self.num_order_list_ops +=MAX_NUM_ONE
+            self._snd(self.get_str_products_by_zone())
+            return
+
+        if line == KEY_PREV:
+            self.num_order_list_ops -=MAX_NUM_ONE
+            if self.num_order_list_ops <1:
+                self.num_order_list_ops ==1
+            self._snd(self.get_str_products_by_zone())
+            return
+
+
+        if self.routes:
+            str_keys = [str(x) for x in self.products.keys()]
+            str_keys.append([0])
+            if line not in str_keys:
+                str_error = u"La opcion %s no es valida.\nReintentar\n" % line
+                self._snd(str_error + self.get_str_products_by_zone())
+                return
+            else:
+
+                self.camera_ids=[]
+                self.route_id = self.routes[(line)][0]
+                self.route = self.routes[(line)][1]
+                self.state = "picking"
+                self._snd(self.get_cameras_menu(type = 'picking'))
+                return
+
+        self.route = ""
+        self.route_id = False
+        self._snd(self.get_str_products_by_zone(), u'No válido\n')
+        return
+
     def get_manual_transfer_packet(self):
         #Menu de opciones de movimiento manual
         #cuando se escanea un EAN
@@ -3031,7 +3103,12 @@ class ScanGunProtocol(LineReceiver):
         line_int = self.int_(line)
         if order_line==PRE_LOC and self.step==0:
 
-            #buscamos una ubicación de picking
+            #buscamos una ubicación de picking, pero antes seleccionamos de que producto es ...
+            self.state = "products_by_zone"
+            self.step=0
+            self._snd(self.get_str_products_by_zone(PRE_LOC + line))
+            return
+
             self.state="manual_picking_reposition"
             self.step=0
             self.handle_manual_picking_reposition(PRE_LOC + line)
@@ -3732,9 +3809,6 @@ class ScanGunProtocol(LineReceiver):
             self._snd(self.get_str_menu1())
             return False
 
-
-
-
         str_keys = [str(x) for x in self.factory.menu_cameras.keys()]
 
         if line in str_keys:
@@ -3744,8 +3818,6 @@ class ScanGunProtocol(LineReceiver):
                 self.camera_ids.remove (line)
             self._snd(self.get_cameras_menu())
             return
-
-
 
         if line == KEY_CONFIRM and self.camera_ids:
             try:
