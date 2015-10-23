@@ -31,6 +31,11 @@ class SaleOrder(models.Model):
                                   states={'draft': [('readonly', False)],
                                           'sent': [('readonly', False)]})
 
+    indirect_customer = fields.Boolean("Is Indirect Customer", readonly=True,
+                                #    default=False) #checked:is indirect customer
+                                   related="partner_id.indirect_customer") #checked:is indirect customer
+
+
     @api.onchange('supplier_id')
     def onchange_supplier_id(self):
         self.order_policy = "picking"
