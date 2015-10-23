@@ -48,7 +48,6 @@ class TourismGroup(models.Model):
                                   compute='_get_exported_customer')
     guar_price = fields.Float('Guaranteed price', required=True,
                               help="Unit guaranteed price")
-    qty_estimated = fields.Float('Estimated consumption')
     supplier_id = fields.Many2one('res.partner', 'Supplier', required=True)
 
     @api.one
@@ -207,7 +206,8 @@ class TourismCustomer(models.Model):
     exported = fields.Boolean('Customer exported')
     modified_edi = fields.Boolean('Modified')
     product_group = fields.Many2one('product.rappel.group', 'Product group')
-    qty_estimated = fields.Float('Estimated consumption')
+    qty_estimated = fields.Float('Estimated consumption in product group')
+    qty_estimated_tourism = fields.Float('Estimated consumption in tourism group')
 
     @api.multi
     @api.onchange('agreed_price')

@@ -50,7 +50,6 @@
                             <group>
                                 <field name="date_start"/>
                                 <field name="date_end"/>
-                                <field name="qty_estimated"/>
                                 <field name="supplier_id" domain="[('supplier', '=', True)]"/>
                             </group>
                         </group>
@@ -66,6 +65,7 @@
                                         <field name="agreement_date" />
                                         <field name="product_group" />
                                         <field name="qty_estimated" />
+                                        <field name="qty_estimated_tourism" />
                                     </tree>
                                 </field>
                             </page>

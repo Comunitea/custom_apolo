@@ -38,8 +38,8 @@ class ResPartnerSync(models.Model):
         res = ""
         for x in ["morning_open_time", "morning_close_time",
                   "afternoon_open_time", "afternoon_close_time"]:
-            if eval("p.x", p=self.partner_id, x=x):
-                t = eval("p.x", p=self.partner_id, x=x)
+            if self.partner_id[x]:
+                t = self.partner_id[x]
                 res += "%02d:%02d" % (int(t), round((t % 1) * 60))
             else:
                 res += "00:00"
@@ -80,7 +80,7 @@ class ResPartnerSync(models.Model):
     date = fields.Date("Date", default=fields.Date.today(), required=True)
     close_days = fields.Char("Closure days", compute='_get_closure_days',
                              readonly=True)
-    timetable_str = fields.Char("Timetable", compue='_get_timetable',
+    timetable_str = fields.Char("Timetable", compute='_get_timetable',
                                 readonly=True)
     contact_str = fields.Char("Contacts str.", readonly=True,
                               compute="_get_contact_str")
