@@ -9,6 +9,7 @@
             <field name="arch" type="xml">
 
                 <field name="invoice_method" position="before">
+                  <field name="indirect_customer"/>
                   <field name="supplier_ids" widget="many2many_tags"/>
               </field>
             </field>

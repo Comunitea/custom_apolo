@@ -12,9 +12,9 @@
                     <field name="is_parent_chain" invisible="1"/>
                     <field name="concession_code" attrs="{'invisible': [('is_parent_chain', '=', False)]}"/>
                 </field>
-                <field name="invoice_method" position="before">
+                <!-- <field name="invoice_method" position="before">
                     <field name="indirect_customer"/>
-                </field>
+                </field> -->
                 <field name="category_id" position="after">
                     <group>
                         <field name="from_competence_id"/>

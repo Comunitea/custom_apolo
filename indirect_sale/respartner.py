@@ -32,3 +32,4 @@ class partner_supplier_rel(models.Model):
                                     'supplier_id','partner_id',
                                     string='Customers',
                                     domain=[('customer', '=', True)])
+    indirect_customer = fields.Boolean("Indirect customer")
