@@ -26,6 +26,20 @@
                 </filter>
             </field>
         </record>
+<!-- //////////////////////// -->
+        <record id="view_sales_indirect_customer" model="ir.ui.view">
+            <field name="name">sales.indirect.customer</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                  <h3>
+                    <label string="Is an indirect customer?"/>
+                    <field name="indirect_customer" class="oe_inline"/>
+                  </h3>
+                </field>
+            </field>
+        </record>
 
     </data>
 </openerp>

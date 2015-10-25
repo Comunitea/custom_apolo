@@ -1,6 +1,0 @@
-%for customer in o:
-A${ datetime.strftime(datetime.strptime(customer.agreement_date, "%Y-%m-%d"),"%d%m%Y") }${ user.company_id.frigo_code.rjust(3, "0") }${ customer.customer_id.ref and customer.customer_id.ref.rjust(7, "0") or ''.rjust(7, "0")}${ customer.tourism_id.name.rjust(6, "0")}${ ('%.2f' % customer.agreed_price).rjust(8, "0")}000000${customer.product_group.code.ljust(2, " ")}${ ('%.2f' % customer.qty_estimated).rjust(12, "0")}PT${ ('%.2f' % customer.tourism_id.qty_estimated).rjust(12, "0")}
-%endfor
-%for consumption in o2:
-A${ datetime.strftime(datetime.strptime(consumption.period_end, "%Y-%m-%d"),"%d%m%Y") }${ user.company_id.frigo_code.rjust(3, "0") }${ consumption.customer_id.ref and consumption.customer_id.ref.rjust(7, "0") or ''.rjust(7, "0")}${ consumption.tourism_id.name.rjust(6, "0")}${ ('%.2f' % consumption.agreed_price).rjust(8, "0")}${str(consumption.qty).rjust(6, "0")}           0           0
-%endfor

@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* sale_custom_promotion
+#   * sale_custom_promotion
 #
 msgid ""
 msgstr ""
@@ -161,9 +161,13 @@ msgstr "Fecha fin"
 
 #. module: sale_custom_promotion
 #: field:tourism.customer,qty_estimated:0
-#: field:tourism.group,qty_estimated:0
-msgid "Estimated consumption"
-msgstr "Consumo estimado"
+msgid "Estimated consumption in product group"
+msgstr "Consumo estimado en grupo de producto"
+
+#. module: sale_custom_promotion
+#: field:tourism.customer,qty_estimated_tourism:0
+msgid "Estimated consumption in tourism group"
+msgstr "Consumo estimado en política de turismo"
 
 #. module: sale_custom_promotion
 #: view:tourism.group:sale_custom_promotion.tourism_form
