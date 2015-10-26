@@ -108,7 +108,7 @@ class ScanGunProtocol(LineReceiver):
         self.user_name = False
         self.code = False
         self.show_id = False
-        self.show_keys = True
+        self.show_keys = False
         self.views = 0 # ver pendientes, 1# ver no vistas, 2 ver todoas
         self.confirm_last_step = False
         self.debug = False
@@ -253,8 +253,14 @@ class ScanGunProtocol(LineReceiver):
 
             if line == "F3":
                 self.show_op_processed = not self.show_op_processed
-                self.lineReceived(line=KEY_VOLVER)
+                #self.lineReceived(line=KEY_VOLVER)
                 return
+
+            if line == "F9":
+                self.show_keys= not self.show_keys
+                #self.lineReceived(line=KEY_VOLVER)
+                return
+
 
             if line == "quit":
                 sys.exit(0)
@@ -1144,7 +1150,6 @@ class ScanGunProtocol(LineReceiver):
 
         strg += orden
         keys += u"\n%s "%KEY_VOLVER
-        keys += u"%s"%self.step
         if op_['PROCESADO']:
             strg += self.inverse(u"\n[x] %s Cancel Op\n"%KEY_CANCEL)
 
