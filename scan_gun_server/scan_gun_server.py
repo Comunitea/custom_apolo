@@ -857,7 +857,7 @@ class ScanGunProtocol(LineReceiver):
     def get_str_list_repo_ops(self):
         self.last = "get_str_list_repo_ops"
         if not self.ops:
-            self.ops = self.factory.odoo_con.get_ops(self.task_id, self.type)
+            self.ops = self.factory.odoo_con.get_ops(self.user_id, self.task_id, self.type)
         header = "Ops en %s\n"%str(self.tasks[self.active_task]['ref'])
         return self.get_str(self.ops, header)
 
@@ -932,7 +932,7 @@ class ScanGunProtocol(LineReceiver):
 
         self.last = "get_str_form_repo_ops"
         if not self.ops:
-            self.ops = self.factory.odoo_con.get_ops(self.task_id, self.type)
+            self.ops = self.factory.odoo_con.get_ops(self.user_id, self.task_id, self.type)
         num_ops = len(self.ops)
         op_=self.ops[str(self.active_op)]
         self.op_id = op_['ID']
