@@ -3121,10 +3121,10 @@ class ScanGunProtocol(LineReceiver):
         if order_line==PRE_LOC and self.step==0:
 
             #buscamos una ubicación de picking, pero antes seleccionamos de que producto es ...
-            self.state = "products_by_zone"
-            self.step=0
-            self._snd(self.get_str_products_by_zone(PRE_LOC + line))
-            return
+            #self.state = "products_by_zone"
+            #self.step=0
+            #self._snd(self.get_str_products_by_zone(PRE_LOC + line))
+            #return
 
             self.state="manual_picking_reposition"
             self.step=0
@@ -3667,6 +3667,7 @@ class ScanGunProtocol(LineReceiver):
 
         if self.step==2:
             if line==KEY_CONFIRM:
+                #import ipdb; ipdb.set_trace()
                 new_repo = self.factory.odoo_con.create_reposition_from_gun(\
                     self.user_id,self.vals['selected_loc_ids'], self.vals['limit'])
 
@@ -3843,8 +3844,6 @@ class ScanGunProtocol(LineReceiver):
 
             except Exception, e:
                 print e.message
-                #expt_str = e.message
-                #str_error = expt_str + u"\nIntroduzca camara de nuevo\n"
                 self._snd_error(self.get_cameras_menu(), e.message)
                 return
 
