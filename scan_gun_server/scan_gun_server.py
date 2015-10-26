@@ -1089,7 +1089,7 @@ class ScanGunProtocol(LineReceiver):
         strg = header
 
         strg_product = u"%s"%op_['product']
-        import ipdb; ipdb.set_trace()
+        #import ipdb; ipdb.set_trace()
         if self.step==0:
             strg_package = u"\n%s - %s"%(str(op_['paquete']), op_['lot'])
             strg_de = u"\nDe %s"%op_['origen_bcd']
@@ -1341,7 +1341,7 @@ class ScanGunProtocol(LineReceiver):
 
 
         if line == KEY_CONFIRM:
-            import ipdb; ipdb.set_trace()
+            #import ipdb; ipdb.set_trace()
 
             if self.step == 3:
                 self.step = 10
@@ -1794,7 +1794,7 @@ class ScanGunProtocol(LineReceiver):
     def finish_repo_op(self, message = ''):
         #creamosop_
         #  el values
-        import ipdb; ipdb.set_trace()
+        #import ipdb; ipdb.set_trace()
         op_ = self.ops[str(self.active_op)]
         values = {}
         self.op_id=op_['id']
@@ -1884,6 +1884,8 @@ class ScanGunProtocol(LineReceiver):
         self.active_wave = 1
         self.waves = self.factory.odoo_con.get_wave_reports_from_task(self.user_id, self.task_id, self.type)
         header = u"Picks %s %s\n" %(self.task_id, self.route)
+        if self.waves:
+            header = u"%s\n"%self.waves['1']['name']
         return self.get_str(self.waves , header)
 
     def get_str_list_wave_ops(self):
@@ -2622,8 +2624,7 @@ class ScanGunProtocol(LineReceiver):
         wave_=self.waves[str(self.active_wave)]
         #self.product = self.factory.odoo_con.get_product_gun_complete_info(self.user_id, wave_['product_id'])
         #Esta cabecera es común a rdos los estados
-        import ipdb; ipdb.set_trace()
-        header = u"Pick (%s)\n"%str(wave_['ID'])
+        header = u"%s\n"%wave_['name']
         menu_str = ''
         if wave_['customer_id']:
             menu_str = u"[%s] %s\n"%(wave_['ref'], wave_['customer_id'])
@@ -3400,15 +3401,15 @@ class ScanGunProtocol(LineReceiver):
         delimiter = u"********************\n"
         menu_str = header
         if self.step == 0:
-            menu_str =self.inverse(u"Scan Pack"
-                                   u" (mov. man.)\nó Ubicación de pick\n")
+            menu_str =self.inverse(u"Scan Paquete para mover"
+                                   u"\nUbicación para reposición\n")
         else:
             menu_str+=u'%s > %s\n'%(self.vals['product'], self.vals['lot'])
         if self.step>0:
             menu_str += u'%s : %s %s \nDe: %s'%(self.vals['package'] ,self.vals['packed_qty'], self.vals['uom'], self.vals['src_location_bcd'])
 
         if self.step ==1:
-             menu_str += self.inverse(u'\nOpcion o Scan Packet\n')
+             menu_str += self.inverse(u'\nOpcion o Scan paquete\n')
 
 
         if self.step >=5 and self.new_uom_qty>0:
