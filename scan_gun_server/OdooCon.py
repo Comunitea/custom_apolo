@@ -178,14 +178,14 @@ class OdooDao:
         _write = self.connection.write('stock.pack.operation', pool, vals )
         return _write
 
-    def get_locations_ids(self):
+    def get_locations_ids(self, user_id=1):
         loc_ids = []
         domain = []
         loc_ids = self.connection.search('stock.location', domain, order ='id desc')
         return loc_ids
 
 
-    def get_cameras_menu(self):
+    def get_cameras_menu(self, user_id=1):
         res = {}
         domain = [('camera', '=', True)]
         camera_ids = self.connection.search('stock.location', domain, order ='name asc')
@@ -250,26 +250,26 @@ class OdooDao:
         task_id, tasks = self.connection.execute('stock.task', 'get_task_assigned', [], my_args)
         return task_id, tasks
 
-    def get_ops (self, id, type='ubication'):
+    def get_ops (self, user_id, id, type='ubication'):
         if type == 'ubication':
-            return self.get_ops_from_tasks(id)
+            return self.get_ops_from_tasks(user_id, id)
         if type == 'picking':
-            return self.get_ops_from_wave(id)
+            return self.get_ops_from_wave(user_id, id)
         if type == 'reposition':
-            return self.get_ops_from_tasks(id)
+            return self.get_ops_from_tasks(user_id, id)
 
-    def get_ops_from_tasks(self, task_id):
-        my_args = {'task_id': task_id}
+    def get_ops_from_tasks(self, user_id, task_id):
+        my_args = {'user_id': user_id, 'task_id': task_id}
         ops_data = self.connection.execute('stock.pack.operation', 'get_ops_from_task', [], my_args)
         return ops_data
 
-    def get_wave_reports_from_task (self, task_id, type):
-        my_args = {'task_id': task_id, 'type' : type}
+    def get_wave_reports_from_task (self, user_id, task_id, type):
+        my_args = {'user_id': user_id, 'task_id': task_id, 'type' : type}
         ops_data = self.connection.execute('stock.picking.wave', 'get_wave_reports_from_task', [], my_args)
         return ops_data
 
-    def get_ops_from_wave (self, wave_id):
-        my_args = {'wave_id': wave_id}
+    def get_ops_from_wave (self, user_id, wave_id):
+        my_args = {'user_id': user_id, 'wave_id': wave_id}
         ops_data = self.connection.execute('stock.pack.operation', 'get_ops_from_wave', [], my_args)
         return ops_data
 
@@ -294,13 +294,13 @@ class OdooDao:
         task_id = self.connection.execute('stock.task', 'get_reposition_gun_operations', [], my_args)
         return task_id
 
-    def set_processed_val(self, op_id, new_state):
-        my_args = {'op_id' : op_id, 'state' : new_state}
+    def set_processed_val(self, user_id, op_id, new_state):
+        my_args = {'user_id': user_id, 'op_id' : op_id, 'state' : new_state}
         done = self.connection.execute('stock.pack.operation', 'set_processed_val', [], my_args)
         return done
 
     def set_wave_ops_values(self, user_id, wave_id, op_id, field, value):
-        my_args= {'wave_id' : wave_id, 'op_id' : op_id, 'user_id' :user_id, 'field': field, 'value' :value}
+        my_args= {'user_id' :user_id, 'wave_id' : wave_id, 'op_id' : op_id, 'field': field, 'value' :value}
         done = self.connection.execute('stock.pack.operation', 'set_wave_ops_values', [], my_args)
         return done
 
@@ -324,8 +324,8 @@ class OdooDao:
         done = self.connection.execute('stock.pack.operation', 'check_op_visited', [], my_args)
         return done
 
-    def check_op_to_proccess(self, op_id):
-        my_args = {'op_id': op_id}
+    def check_op_to_proccess(self, user_id, op_id):
+        my_args = {'user_id': user_id, 'op_id': op_id}
         done = self.connection.execute('stock.pack.operation', 'check_op_to_process', [], my_args)
         return done
 
@@ -453,11 +453,11 @@ class OdooDao:
         op_data = self.connection.execute('stock.production.lot', 'get_lot_gun_info', [], my_args)
         return op_data
 
-    def do_manual_trasfer_from_gun(self, vals):
+    def do_manual_trasfer_from_gun(self, user_id, vals):
         self.connection.execute('manual.transfer.wzd', 'do_manual_trasfer_from_gun', [], vals)
         return True
 
-    def conv_units_from_gun(self, product_id, uom_origen, uom_destino, supplier_id =0):
+    def conv_units_from_gun(self, user_id,  product_id, uom_origen, uom_destino, supplier_id =0):
         my_args = {'product_id': product_id, 'uom_origen': uom_origen, 'uom_destino': uom_destino,'supplier_id': 0}
         op_data = self.connection.execute('product.product', 'conv_units_from_gun', [], my_args)
         return op_data

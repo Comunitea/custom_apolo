@@ -139,11 +139,12 @@ class StockTask(models.Model):
             route_detail= self.env['route.detail'].search([('id', '=', route_id)])
             date_planned= route_detail.date
             route_id = route_detail.route_id.id
+
         vals = {
             'operator_id': user_id,
             'machine_id': machine_id,
             'location_ids': [],
-            'mandatory_camera': True,
+            'mandatory_camera': False,
             'print_report': False,
             #'date_planned':date_planned,
             'trans_route_id':route_id,

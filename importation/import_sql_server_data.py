@@ -28,13 +28,86 @@ TEMP_TYPE_MAP = {
     "A": "Congelado"
 }
 
+MPAGO_MAP = {
+    "1": u"Giro SEPA",
+    "2": u"Giro SEPA",
+    "3": u"Giro SEPA",
+    "4": u"Giro SEPA",
+    "5": u"Giro SEPA",
+    "6": u"Giro SEPA",
+    "7": u"Giro SEPA",
+    "8": u"Giro SEPA",
+    "9": u"Giro SEPA",
+    "10": u"Giro SEPA",
+    "11": u"Efectivo",
+    "12": u"Giro SEPA",
+    "13": False,
+    "14": False,
+    "15": u"Giro SEPA",
+    "16": u"Giro SEPA",
+    "17": u"Giro SEPA",
+    "18": u"Pago inmediato",
+    "19": u"Giro SEPA",
+    "20": u"Efectivo",
+    "21": u"Giro SEPA",
+    "22": u"Giro SEPA",
+    "23": u"Transferencia Manual"
+}
+
+PPAGO_MAP = {
+    "1": u"0 días",
+    "2": u"Día 25",
+    "3": u"Día 15",
+    "4": u"Día 30",
+    "5": u"Día 5",
+    "6": u"Día 10",
+    "7": u"15 días, día 30",
+    "8": u"40 días F.Fact.",
+    "9": u"45 días F.Fact.",
+    "10": u"60 días F.Fact.",
+    "11": u"0 días",
+    "12": u"Día 20",
+    "13": u"0 días",
+    "14": u"0 días",
+    "15": u"15 días",
+    "16": u"50 días F.Fact.",
+    "17": u"75 días F.Fact.",
+    "18": u"0 días",
+    "19": u"30 días F.Fact.",
+    "20": u"Contado Riguroso",
+    "21": u"15 días F.Fact.",
+    "22": u"15 días, día 15",
+    "23": u"60 días, día 25"
+}
+
+PFISC_MAP = {
+    "1": u"Régimen Nacional",
+    "2": u"Recargo de Equivalencia",
+    "3": u"Régimen Intracomunitario"
+}
+
+PLIST_MAP = {
+    "6": u"Tarifa a domicilio",
+    "1": u"Tarifa rincón",
+    "0": u"Tarifa pública"
+}
+
+PREF_AGREE_MAP = {
+    "A": ("H","IM"),
+    "E": ("H","IM"),
+    "M": ("H","IM"),
+    "P": ("H","IM"),
+    "C": ("MC","MC"),
+    "O": ("H","IM"),
+}
+
 def ustr(text):
     """convierte las cadenas de sql server en iso-8859-1 a utf-8 que es la cofificaciï¿œn de postgresql"""
     return unicode(text.strip(), 'iso-8859-15').encode('utf-8')
 
 class DatabaseImport:
     """
-    Importa a OpenERP datos de una base de datos SqlServer para Calor Color.
+    Importa a OpenERP datos de una base de datos SqlServer.
     """
 
     def __init__(self, dbname, user, passwd, sql_server_host):
@@ -102,13 +175,13 @@ class DatabaseImport:
         except xmlrpclib.Fault, err:
             raise Exception(u'Error %s en exec_workflow: %s' % (err.faultCode, err.faultString))
 
-    def search(self, model, query, context={}):
+    def search(self, model, query, offset=0, limit=False, order=False, context={}, count=False):
         """
         Wrapper del método search.
         """
         try:
             ids = self.object_facade.execute(self.dbname, self.user_id, self.user_passwd,
-                                model, 'search', query, context)
+                                model, 'search', query, offset, limit, order, context, count)
             return ids
         except socket.error, err:
             raise Exception(u'Conexión rechazada: %s!' % err)
@@ -187,6 +260,18 @@ class DatabaseImport:
         categ_ids = self.search("product.category", [("code", "=", str(code))])
         return categ_ids and categ_ids[0] or False
 
+    def _getRappelGroup_byCode(self, code):
+        group_ids = self.search("product.rappel.group", [("code", "=", code)])
+        return group_ids and group_ids[0] or False
+
+    def _getRappelSubgroup_byCode(self, code):
+        subgroup_ids = self.search("product.rappel.subgroup", [("code", "=", code)])
+        return subgroup_ids and subgroup_ids[0] or False
+
+    def _getAgreeType_byCode(self, code):
+        agree_ids = self.search("agreement.type", [("code", "=", code)])
+        return agree_ids and agree_ids[0] or False
+
     def _getTaxes(self, tax_name):
         tax_ids = self.search("account.tax", [('description', '=', tax_name)])
         return tax_ids
@@ -198,6 +283,30 @@ class DatabaseImport:
     def _get_bank_by_bic(self, bank_bic):
         bank_ids = self.search("res.bank", [("bic", '=', bank_bic)])
         return bank_ids and bank_ids[0] or False
+
+    def _get_fiscal_position_byname(self, fiscal_name):
+        fiscal_ids = self.search("account.fiscal.position", [('name', '=', fiscal_name)], context={'lang': 'es_ES'})
+        if not fiscal_ids:
+            raise Exception("Ninguna posicion fiscal con el nombre %s" % fiscal_name)
+        return fiscal_ids[0]
+
+    def _get_payment_mode_by_name(self, pmode_name):
+        if not pmode_name:
+            return pmode_name
+        else:
+            pmode_ids = self.search("payment.mode", [('name', '=', pmode_name),('sale_ok', '=', True)], context={'lang': 'es_ES'})
+            if not pmode_ids:
+                raise Exception("Ningun modo de pago para ventas con el nombre %s" % pmode_name)
+            return pmode_ids[0]
+
+    def _get_payment_term_by_name(self, pterm_name):
+        if not pterm_name:
+            return pterm_name
+        else:
+            pterm_ids = self.search("account.payment.term", [('name', '=', pterm_name)], context={'lang': 'es_ES'})
+            if not pterm_ids:
+                raise Exception("Ningun modo de pago para ventas con el nombre %s" % pterm_name)
+            return pterm_ids[0]
 
     def import_product_category(self, cr):
         parent_categ_map = {}
@@ -577,7 +686,7 @@ class DatabaseImport:
             vals = {'internal_code': str(int(row.internal_code)),
                     'name': ustr(row.name),
                     'supplier_id': supplier_ids and supplier_ids[0] or False,
-                    'code': row.code != '00' and row.code or str(int(row.internal_code))}
+                    'code': row.code != '00' and ustr(row.code) or str(int(row.internal_code))}
             self.create("product.rappel.group", vals)
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
@@ -592,7 +701,7 @@ class DatabaseImport:
             vals = {'internal_code': str(int(row.internal_code)),
                     'name': ustr(row.name),
                     'group_id': rappel_group_ids and rappel_group_ids[0] or False,
-                    'code': row.code != '00' and row.code or str(int(row.internal_code))}
+                    'code': row.code != '00' and ustr(row.code) or str(int(row.internal_code))}
             self.create("product.rappel.subgroup", vals)
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
@@ -632,7 +741,7 @@ class DatabaseImport:
 
                 vals = {}
                 if row.rappel_subgroup_id_map:
-                    subgroup_ids = self.search("product.rappel.subgroup", [("code", '=', row.rappel_subgroup_id_map)])
+                    subgroup_ids = self.search("product.rappel.subgroup", [("code", '=', ustr(row.rappel_subgroup_id_map))])
                     if subgroup_ids:
                         vals["rappel_subgroup_id"] = subgroup_ids[0]
                 if row.rappel_group_id_map:
@@ -675,6 +784,182 @@ class DatabaseImport:
             cont +=1
             print "%s de %s" % (str(cont), str(num_rows))
 
+    def import_customers_other_data(self, cr):
+        cr.execute("select cl3_fpag as payment_type_map, cli_regi as fiscal_position_map, cl3_raf3 as valued_picking, cl3_facl as inv_print_op_map, "
+                   "cl3_fdet as  add_summary, cl3_raf2 as pricelist_id_map, trazabilidad as picking_traceability, cli_codi as partner_id_map from dbo.adsd_clie")
+        data = cr.fetchall()
+        num_rows = len(data)
+        cont = 0
+        for row in data:
+            partner_ids = self.search("res.partner", [('ref', '=', str(int(row.partner_id_map))),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
+            if partner_ids:
+                vals = {'property_account_position': self._get_fiscal_position_byname(PFISC_MAP[str(int(row.fiscal_position_map))]),
+                        'property_product_pricelist': self.search("product.pricelist", [('name', '=', PLIST_MAP[str(int(row.pricelist_id_map))])], context={'lang': 'es_ES'})[0]}
+                if row.payment_type_map != 0:
+                    vals["customer_payment_mode"] = self._get_payment_mode_by_name(MPAGO_MAP[str(int(row.payment_type_map))])
+                    vals["property_payment_term"] = self._get_payment_term_by_name(PPAGO_MAP[str(int(row.payment_type_map))])
+                if row.picking_traceability == 'S':
+                    vals['pick_print_op'] = "tracked"
+                else:
+                    if int(row.valued_picking) == 1:
+                        vals["pick_print_op"] = "not_valued"
+                    else:
+                        vals["pick_print_op"] = "valued"
+
+                if row.add_summary == "A":
+                    vals["add_sumary"] = True
+                    vals["inv_print_op"] = "group_by_partner"
+                else:
+                    if int(row.payment_type_map) in (11,13,18,20):
+                        vals["inv_print_op"] = "give_deliver"
+                        vals["invoice_method"] = "a"
+                    else:
+                        vals["inv_print_op"] = "group_pick"
+                self.write("res.partner", [partner_ids[0]], vals)
+
+            cont +=1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+    def import_preferential_agree_data(self, cr):
+        print "tipos de acuerdos"
+        cr.execute("select codigo as  code, concepto + '  '  + descripcion as name from dbo.acuerdos_preferentes")
+        agree_type_data = cr.fetchall()
+        num_rows = len(agree_type_data)
+        cont = 0
+        for row in agree_type_data:
+            vals = {
+                'code': row.code,
+                'name': ustr(row.name),
+                'rappel_group_id': self._getRappelGroup_byCode(PREF_AGREE_MAP[ustr(row.code)][0]),
+                'rappel_subgroup_id': self._getRappelSubgroup_byCode(PREF_AGREE_MAP[ustr(row.code)][1])
+            }
+            self.create("agreement.type", vals)
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+        print "acuerdos activos"
+        cr.execute("select cliente as customer_id_map, fecha_inicio as init_date, fecha_fin as end_date, fecha_operacion as date, tipo_colaboracion as type_map, "
+                   "importe_total as amount, participacion as joint_percentage, consumo_previsto as cons_est, observaciones as note from "
+                   "dbo.VW_listado_acuerdos_preferente where anio = 2015 and fecha_fin > getdate()")
+        agreements_data = cr.fetchall()
+        num_rows = len(agreements_data)
+        cont = 0
+        for row in agreements_data:
+            customer_ids = self.search("res.partner", [('ref', '=', str(int(row.customer_id_map))),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
+            if customer_ids:
+                vals = {
+                    'customer_id': customer_ids[0],
+                    'init_date': row.init_date.strftime("%Y-%m-%d"),
+                    'end_date': row.end_date.strftime("%Y-%m-%d"),
+                    'date': row.date.strftime("%Y-%m-%d"),
+                    'type': self._getAgreeType_byCode(row.type_map),
+                    'amount': float(row.amount),
+                    'joint_percentage': float(row.joint_percentage),
+                    'cons_est': float(row.cons_est),
+                    'note': ustr(row.note),
+                    'state': "confirmed"
+                }
+                agree_id = self.create("preferential.agreement", vals)
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+    def import_tourism_data(self, cr):
+        cr.execute("select codigo_politica as name, descripcion as description, precio_minimo as min_price, precio_asegurado as guar_price "
+                   "from dbo.politica_frigo where situacion = 'A' group by codigo_politica, descripcion, precio_minimo, precio_asegurado")
+        tourism_data = cr.fetchall()
+        num_rows = len(tourism_data)
+        cont = 0
+        unilever_id = self.search("res.partner", [('ref', '=', '2'),('supplier', '=', True),'|',('active','=',False),('active','=',True)])[0]
+        for row in tourism_data:
+            tourism_vals = {
+                'name': str(int(row.name)),
+                'description': ustr(row.description),
+                'min_price': float(row.min_price),
+                'guar_price': float(row.guar_price),
+                'state': 'approved',
+                'supplier_id': unilever_id,
+                'date_start': "2015-01-01",
+                'date_end': "2015-12-31"
+            }
+            tourism_id = self.create("tourism.group", tourism_vals)
+            cr.execute("select codigo_producto as product_id_map from dbo.politica_frigo where codigo_politica = ?", (int(row.name),))
+            products_data = cr.fetchall()
+            tourism_product_ids = []
+            for product_row in products_data:
+                supp_ids = self.search("product.supplierinfo", [('product_code', '=', str(int(product_row.product_id_map))),('name', '=', unilever_id)])
+                if supp_ids:
+                    supp_data = self.read("product.supplierinfo", supp_ids[0], ["product_tmpl_id"])
+                    product_ids = self.search("product.product", [('product_tmpl_id', '=', supp_data["product_tmpl_id"][0]),'|',('active','=',True),('active','=',False)])
+                    if product_ids:
+                        tourism_product_ids.append(product_ids[0])
+            if tourism_product_ids:
+                self.write("tourism.group", [tourism_id], {'product_ids': [(6, 0, list(set(tourism_product_ids)))]})
+
+            cr.execute("select cliente as customer_id_map, consumo_estimado as qty_estimated, consumo_politica as qty_estimated_tourism, precio as agreed_price, "
+                       "grupo as product_rappel_group_map, fecha as agreement_date from dbo.envio_politica where producto = ? order by fecha desc", (int(row.name),))
+            customers_data = cr.fetchall()
+            customer_ids = []
+            for customer_row in customers_data:
+                if int(customer_row.customer_id_map) not in customer_ids:
+                    customer_ids.append(int(customer_row.customer_id_map))
+                    customer_ids = self.search("res.partner", [('ref', '=', str(int(customer_row.customer_id_map))),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
+                    if customer_ids:
+                        vals = {
+                            "customer_id": customer_ids[0],
+                            "tourism_id": tourism_id,
+                            "agreed_price": float(customer_row.agreed_price),
+                            "qty_estimated": float(customer_row.qty_estimated),
+                            "qty_estimated_tourism": float(customer_row.qty_estimated_tourism),
+                            "agreement_date": customer_row.agreement_date.strftime("%Y-%m-%d"),
+                            "product_group": self._getRappelGroup_byCode(ustr(customer_row.product_rappel_group_map))
+                        }
+                        self.create("tourism.customer", vals)
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+    def import_giras(self, cr):
+        cr.execute("select descripcion as name, fecha_inicio as from_date, fecha_fin as to_date, numero_gira as num from dbo.cabecera_giras where fecha_fin > getdate()")
+        giras_data = cr.fetchall()
+        num_rows = len(giras_data)
+        cont = 0
+        for row in giras_data:
+            vals = {
+                "name": ustr(row.name),
+                "from_date": row.from_date.strftime("%Y-%m-%d %H:%M:%S"),
+                "to_date": row.to_date.strftime("%Y-%m-%d %H:%M:%S"),
+                "login": "and",
+                "expected_logic_result": "True",
+                "sequence": 1
+            }
+            promoton_id = self.create("promos.rules", vals)
+
+            cr.execute("select codigo_producto as product_id_map, dcto as discount from dbo.aVW_lista_giras where numero_gira = ?", (int(row.num),))
+            promo_lines_data = cr.fetchall()
+            for line in promo_lines_data:
+                product_ids = self.search("product.product", [('default_code','=',str(int(line.product_id_map))),'|',('active','=',True),('active','=',False)])
+                if product_ids:
+                    action_vals = {
+                        "action_type": "prod_disc_perc",
+                        "product_code": "'" + str(int(line.product_id_map)) + "'",
+                        "arguments": str(float(line.discount)),
+                        "promotion": promoton_id,
+                        "sequence": 1
+                    }
+                    action = self.create("promos.rules.actions", action_vals)
+
+                    rule_vals = {
+                        'stop_further': True,
+                        'attribute': "product",
+                        'comparator': 'in',
+                        'value': "'" + str(int(line.product_id_map)) + "'",
+                        'promotion': promoton_id,
+                        "sequence": 1
+                    }
+                    self.create("promos.rules.conditions.exps", rule_vals)
+
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
     def process_data(self):
         """
         Importa la bbdd
@@ -687,17 +972,21 @@ class DatabaseImport:
             conn = pyodbc.connect("DRIVER={FreeTDS};SERVER=" + self.sql_server_host + ";UID=midban;PWD=midban2015;DATABASE=gest2015;Port=1433;TDS_Version=10.0")
             cr = conn.cursor()
 
-            #self.import_product_category(cr)
-            #self.import_products(cr)
-            #self.import_customers(cr)
-            #self.import_suppliers(cr)
-            #self.import_indirect_customer(cr)
-            #self.import_rel_product_supplier(cr)
+            self.import_product_category(cr)
+            self.import_products(cr)
+            self.import_customers(cr)
+            self.import_suppliers(cr)
+            self.import_indirect_customer(cr)
+            self.import_rel_product_supplier(cr)
             #self.fix_products(cr)
-            #self.import_bank_accounts(cr)
-            #self.import_master_frigo_data(cr)
-            #self.import_product_frigo_data(cr)
+            self.import_bank_accounts(cr)
+            self.import_master_frigo_data(cr)
+            self.import_product_frigo_data(cr)
             self.import_other_prices(cr)
+            self.import_customers_other_data(cr)
+            self.import_preferential_agree_data(cr)
+            self.import_tourism_data(cr)
+            self.import_giras(cr)
 
         except Exception, ex:
             print u"Error al conectarse a las bbdd: ", repr(ex)
