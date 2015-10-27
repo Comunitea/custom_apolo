@@ -351,21 +351,21 @@ class stock_pack_operation(models.Model):
                             _('No operation founded to set as visited'))
 
         # Browse with correct uid, an mark as visited
+        #import ipdb; ipdb.set_trace()
         try:
             env2 = op_obj.env(self._cr, user_id, self._context)
             op_obj_uid = op_obj.with_env(env2)
             #op_obj_uid.write(field_values)
-            if op_obj_uid.package_id == field_values['package_id']:
+            if not 'package_id' in field_values.keys():
                 res = op_obj_uid.write(field_values)
+                res = op_id
             else:
-                vals=({'picking_id':op_obj_uid.picking_id.id,'task_id':op_obj_uid.task_id.id})
+                field_values['picking_id']=op_obj_uid.picking_id.id
+                field_values['task_id'] = op_obj_uid.task_id.id
                 op_obj_uid.unlink()
-                res = op_obj_uid.create(field_values)
-                res = op_obj_uid.write(vals)
-
-
-
-            return True
+                new_op = op_obj_uid.create(field_values)
+                res = new_op.id
+            return res
         except Exception:
             return False
     @api.multi

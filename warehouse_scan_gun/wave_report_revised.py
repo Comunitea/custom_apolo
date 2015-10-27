@@ -59,6 +59,7 @@ class wave_report(models.Model):
 
     @api.multi
     def change_wave_op_values_packed_change(self, my_args):
+
         id = my_args.get('id', False)
         user_id = my_args.get('user_id', False)
         vals = my_args.get('values', False)
@@ -75,7 +76,6 @@ class wave_report(models.Model):
 
     @api.multi
     def change_wave_op_values(self, my_args):
-
         id = my_args.get('id', 0)
         user_id = my_args.get('user_id', False)
         wave_obj = self.browse(id)
@@ -88,6 +88,8 @@ class wave_report(models.Model):
                         'visited': True}
                 res = op.write(vals) and res
         return res
+
+
 
 class wave_report_revised(models.Model):
 

@@ -36,7 +36,7 @@ class reposition_wizard(models.Model):
             'specific_locations': True,
             'selected_loc_ids':  [(6, 0, selected_loc_ids)],
             'limit': limit,
-            'capacity': 100,
+            'capacity': 80,
             'warehouse_id' : 1,
         }
         env2 = self.env(self._cr, 1, self._context)
