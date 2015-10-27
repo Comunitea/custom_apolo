@@ -135,6 +135,7 @@ class stock_pack_operation(models.Model):
 
     @api.multi
     def get_ops_from_task (self, my_args):
+
         task_id = my_args.get ('task_id', 0)
         domain = [
             ('task_id', '=', task_id)
@@ -353,7 +354,17 @@ class stock_pack_operation(models.Model):
         try:
             env2 = op_obj.env(self._cr, user_id, self._context)
             op_obj_uid = op_obj.with_env(env2)
-            op_obj_uid.write(field_values)
+            #op_obj_uid.write(field_values)
+            if op_obj_uid.package_id == field_values['package_id']:
+                res = op_obj_uid.write(field_values)
+            else:
+                vals=({'picking_id':op_obj_uid.picking_id.id,'task_id':op_obj_uid.task_id.id})
+                op_obj_uid.unlink()
+                res = op_obj_uid.create(field_values)
+                res = op_obj_uid.write(vals)
+
+
+
             return True
         except Exception:
             return False
