@@ -50,7 +50,7 @@ KEY_DESTINO = "F9"
 KEY_CALCULADORA = "F8"
 
 KEY_DEBUG="F9"
-KEY_NO_REALIZADA = "F10"
+KEY_NO_REALIZADA = "F9"
 
 KEY_NO ="F4" # "F11"
 KEY_CANCEL ="F4" # "F11"
@@ -2173,7 +2173,7 @@ class ScanGunProtocol(LineReceiver):
         qty = packet_values['qty']
         if self.new_uom_qty > qty:
             message = u'%s %s: (max %s)\nInsuficiente. %s Forzar'%\
-                      (self.new_uom_qty, packet_values['uom'], qty, KEY_YES)
+                      (self.new_uom_qty, packet_values['uom'], qty, KEY_FINISH)
             return message
         return False
 
@@ -2354,7 +2354,7 @@ class ScanGunProtocol(LineReceiver):
             self._snd(self.get_str_form_wave(), message)
             return
 
-        if line in [KEY_CONFIRM, KEY_CANCEL, KEY_NEXT, KEY_PREV, KEY_QTY,KEY_VOLVER]:
+        if line in [KEY_CONFIRM, KEY_CANCEL, KEY_NEXT, KEY_PREV, KEY_QTY, KEY_VOLVER, KEY_FINISH]:
 
             if line == KEY_CANCEL:
                 if wave_['PROCESADO']==True:
@@ -2500,7 +2500,8 @@ class ScanGunProtocol(LineReceiver):
                         return
                 self._snd(self.get_str_form_wave(), '')
                 return
-            if line == KEY_YES and self.step==10:
+
+            if line == KEY_FINISH and self.step==10:
                 self.finish_picking(force=True)
                 return
 
@@ -2787,6 +2788,9 @@ class ScanGunProtocol(LineReceiver):
         else:
             menu_str += str_
         str_ = ''
+
+
+
         if wave_['PROCESADO']:
             str_= self.inverse(u"[x] %s Cancel Op\n"%KEY_CANCEL)
 
@@ -2802,7 +2806,8 @@ class ScanGunProtocol(LineReceiver):
             if h:
                  menu_str += qtys_ +u'\n'
 
-
+        if self.step in [2,3,4,5,6]:
+            keys += u'\n%s Cambiar Unidad'%KEY_QTY
 
 
         menu_str += message
