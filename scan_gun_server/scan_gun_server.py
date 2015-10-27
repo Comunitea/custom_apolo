@@ -4302,14 +4302,14 @@ class ScanGunProtocol(LineReceiver):
         if line == KEY_NEXT:
             if len(self.routes)>self.num_order_list_ops:
                 self.num_order_list_ops +=MAX_NUM_ONE
-            self._snd(self.get_route_menu(self.type))
+            self._snd(self.get_routes_menu(self.type))
             return
 
         if line == KEY_PREV:
             self.num_order_list_ops -=MAX_NUM_ONE
             if self.num_order_list_ops <1:
                 self.num_order_list_ops ==1
-            self._snd(self.get_route_menu(self.type))
+            self._snd(self.get_routes_menu(self.type))
             return
 
 
@@ -4318,7 +4318,7 @@ class ScanGunProtocol(LineReceiver):
             str_keys.append([0])
             if line not in str_keys:
                 str_error = u"La opcion %s no es valida.\nReintentar\n" % line
-                self._snd(str_error + self.get_route_menu(self.type))
+                self._snd(str_error + self.get_routes_menu(self.type))
                 return
             else:
                 self.camera_ids=[]
