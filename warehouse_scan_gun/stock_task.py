@@ -185,12 +185,13 @@ class StockTask(models.Model):
             raise except_orm(_("Error"), _("Task not founded after create it"))
         for op in task_obj.operation_ids:
             op.write({'visited': False})
-        if task_type=='picking':
-            for wave in task_obj.wave_id:
-                for op in wave.operation_ids:
-                    vals={'to_process':False, 'visited':False}
-                    op.write (vals)
 
+        if task_type=='picking':
+            for wave_report in task_obj.wave_id:
+                for wave in wave_report.wave_report_ids:
+                    for op in wave.operation_ids:
+                        vals={'to_process':False, 'visited':False}
+                        op.write (vals)
 
         print "te doy una creada: Id" +str(task_obj.id)
         return task_obj.id
