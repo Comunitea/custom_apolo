@@ -25,7 +25,7 @@
                             <h1><field name="bcd_name"/></h1>
                         </group>
                         <group>
-                            <field name="bcd_code" readonly = "1"/>
+                            <field name="bcd_code"/>
                         </group>
                     </group>
 
