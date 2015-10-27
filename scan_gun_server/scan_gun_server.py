@@ -202,145 +202,145 @@ class ScanGunProtocol(LineReceiver):
         """
         Método del framework. LLamado cada vez que se recibe una linea
         """
-        # try:
-        if line == '' or not line:
-            return
-        key = False
-        line = line.upper()
-        print u"[%s] Estado: %s Anterior: %s "%(self.step, self.state, self.last_state)
-        izq = line.encode('hex')[0:2]
-        print u"Codificación Tecla: %s > %s"%(line, line.encode('hex'))
-        if izq == "8f" or izq == "9b" or izq=="1b":
-            #son teclas de fucnion
-            line = self.function_keys(line.encode('hex'))
-            key == True
-        print u"Entrada: " + str(line)
-        if line[0:1]=="F":
-            key=True
-        line= str(line)
-        if not key:
-            if len(line)==9:
-                line_, child = self.check_ubi(line)
-                if line_:
-                    line = line_
-                    if child:
-                        self.last_read = line
-                        self.subzones = False
-                        self.selected_subzone = False
-                        self.last_state = self.state
+        try:
+            if line == '' or not line:
+                return
+            key = False
+            line = line.upper()
+            print u"[%s] Estado: %s Anterior: %s "%(self.step, self.state, self.last_state)
+            izq = line.encode('hex')[0:2]
+            print u"Codificación Tecla: %s > %s"%(line, line.encode('hex'))
+            if izq == "8f" or izq == "9b" or izq=="1b":
+                #son teclas de fucnion
+                line = self.function_keys(line.encode('hex'))
+                key == True
+            print u"Entrada: " + str(line)
+            if line[0:1]=="F":
+                key=True
+            line= str(line)
+            if not key:
+                if len(line)==9:
+                    line_, child = self.check_ubi(line)
+                    if line_:
+                        line = line_
+                        if child:
+                            self.last_read = line
+                            self.subzones = False
+                            self.selected_subzone = False
+                            self.last_state = self.state
 
-                        self._snd(self.get_str_select_picking_subzone(line))
-                        self.state = 'select_subzone'#self.handle_select_picking_subzone(line)
-                        return
+                            self._snd(self.get_str_select_picking_subzone(line))
+                            self.state = 'select_subzone'#self.handle_select_picking_subzone(line)
+                            return
+                        else:
+                            line = PRE_LOC + str(line)
                     else:
-                        line = PRE_LOC + str(line)
+
+                        self._snd(u"%s no encontrada\n %s Volver" %(line, KEY_VOLVER))
+                        return
+
+                if len (line) == 6:
+                    line = self.check_package(line) or line
+
+
+
+            if line == KEY_DEBUG:
+                if self.debug == True:
+                    self.debug = False
                 else:
+                    self.debug = True
+                return
 
-                    self._snd(u"%s no encontrada\n %s Volver" %(line, KEY_VOLVER))
-                    return
+            if line == "F3":
+                self.show_op_processed = not self.show_op_processed
+                #self.lineReceived(line=KEY_VOLVER)
+                return
 
-            if len (line) == 6:
-                line = self.check_package(line) or line
+            if line == "F9":
+                self.show_keys= not self.show_keys
+                #self.lineReceived(line=KEY_VOLVER)
+                return
 
 
+            if line == "quit":
+                sys.exit(0)
+            elif self.state=="message":
+                self.handle_message(line)
+            elif self.state=="error":
+                self.handle_error(line)
+            elif self.state =="yes_no":
+                self.handle_yes_no(line)
+            elif self.state == "register":
+                self.handle_register(line)
+            elif self.state == "menu1":
+                self.handle_menu1(line)
+            elif self.state == "tasks":
+                self.handle_tasks(line, confirm = confirm)
+            elif self.state =="routes":
+                self.handle_route_selected(line)
+            elif self.state =="machines":
+                self.handle_machine_selected(line)
+            elif self.state =="manual_transfer_product":
+                self.handle_manual_transfer_product(line)
+            elif self.state =="manual_transfer_packet":
+                self.handle_manual_transfer_packet(line)
 
-        if line == KEY_DEBUG:
-            if self.debug == True:
-                self.debug = False
+            elif self.state =="products_by_zone":
+                self.handle_products_by_zone(line)
+
+            elif self.state =="manual_picking_reposition":
+                self.handle_manual_picking_reposition(line)
+            elif self.state == "form_repo_ops":
+                self.handle_form_repo_ops(line, confirm=confirm)
+            elif self.state == "list_ops":
+                self.handle_list_ubi_ops(line, confirm=confirm)
+            elif self.state == "list_waves":
+                self.handle_list_waves(line, confirm=confirm)
+            elif self.state == "form_wave":
+                self.handle_form_wave(line, confirm=confirm)
+            elif self.state == "list_wave_ops":
+                self.handle_list_wave_ops(line, confirm=confirm)
+            elif self.state == "list_repo_ops":
+                self.handle_list_repo_ops(line, confirm=confirm)
+            elif self.state == "form_ops":
+                self.handle_form_ubi_ops(line, confirm=confirm)
+                #self.handle_ops(line, confirm=confirm)
+            elif self.state in ["ubication", "reposition", "picking"]:
+                self.handle_camera_selected(line)
+            elif self.state =="form_product":
+                self.handle_form_product(line)
+            elif self.state =="list_product":
+                self.handle_list_product(line)
+            elif self.state == "scan_op":
+                self.handle_scan_op(line)
+            elif self.state == "scan_location":
+                self.handle_scan_location(line)
+            elif self.state == 'scan_op_rep':
+                self.handle_scan_op_rep(line)
+            elif self.state == 'scan_location_rep':
+                self.handle_scan_location_rep(line)
+            elif self.state == 'scan_quantity':
+                self.handle_quantity(line)
+            elif self.state == 'tools':
+                self.handle_menu_tool(line)
+            elif self.state == 'set_picking_zone':
+                self.handle_set_picking_zone(line)
+            elif self.state == 'create_picking_zone':
+                self.handle_create_picking_zone(line)
+            elif self.state == 'select_subzone':
+                self.handle_select_picking_subzone(line)
+            elif self.state == 'create_multipack':
+                self.handle_create_multipack(line)
+            elif self.state == 'print_tags':
+                self.handle_print_tags(line)
+
+
             else:
-                self.debug = True
+                self._snd(u"Introduciste %s, pero paso olimpicamente:" % line)
+        except Exception, e:
+            print Exception, e.message
+            self._snd(self.last_send)
             return
-
-        if line == "F3":
-            self.show_op_processed = not self.show_op_processed
-            #self.lineReceived(line=KEY_VOLVER)
-            return
-
-        if line == "F9":
-            self.show_keys= not self.show_keys
-            #self.lineReceived(line=KEY_VOLVER)
-            return
-
-
-        if line == "quit":
-            sys.exit(0)
-        elif self.state=="message":
-            self.handle_message(line)
-        elif self.state=="error":
-            self.handle_error(line)
-        elif self.state =="yes_no":
-            self.handle_yes_no(line)
-        elif self.state == "register":
-            self.handle_register(line)
-        elif self.state == "menu1":
-            self.handle_menu1(line)
-        elif self.state == "tasks":
-            self.handle_tasks(line, confirm = confirm)
-        elif self.state =="routes":
-            self.handle_route_selected(line)
-        elif self.state =="machines":
-            self.handle_machine_selected(line)
-        elif self.state =="manual_transfer_product":
-            self.handle_manual_transfer_product(line)
-        elif self.state =="manual_transfer_packet":
-            self.handle_manual_transfer_packet(line)
-
-        elif self.state =="products_by_zone":
-            self.handle_products_by_zone(line)
-
-        elif self.state =="manual_picking_reposition":
-            self.handle_manual_picking_reposition(line)
-        elif self.state == "form_repo_ops":
-            self.handle_form_repo_ops(line, confirm=confirm)
-        elif self.state == "list_ops":
-            self.handle_list_ubi_ops(line, confirm=confirm)
-        elif self.state == "list_waves":
-            self.handle_list_waves(line, confirm=confirm)
-        elif self.state == "form_wave":
-            self.handle_form_wave(line, confirm=confirm)
-        elif self.state == "list_wave_ops":
-            self.handle_list_wave_ops(line, confirm=confirm)
-        elif self.state == "list_repo_ops":
-            self.handle_list_repo_ops(line, confirm=confirm)
-        elif self.state == "form_ops":
-            self.handle_form_ubi_ops(line, confirm=confirm)
-            #self.handle_ops(line, confirm=confirm)
-        elif self.state in ["ubication", "reposition", "picking"]:
-            self.handle_camera_selected(line)
-        elif self.state =="form_product":
-            self.handle_form_product(line)
-        elif self.state =="list_product":
-            self.handle_list_product(line)
-        elif self.state == "scan_op":
-            self.handle_scan_op(line)
-        elif self.state == "scan_location":
-            self.handle_scan_location(line)
-        elif self.state == 'scan_op_rep':
-            self.handle_scan_op_rep(line)
-        elif self.state == 'scan_location_rep':
-            self.handle_scan_location_rep(line)
-        elif self.state == 'scan_quantity':
-            self.handle_quantity(line)
-        elif self.state == 'tools':
-            self.handle_menu_tool(line)
-        elif self.state == 'set_picking_zone':
-            self.handle_set_picking_zone(line)
-        elif self.state == 'create_picking_zone':
-            self.handle_create_picking_zone(line)
-        elif self.state == 'select_subzone':
-            self.handle_select_picking_subzone(line)
-        elif self.state == 'create_multipack':
-            self.handle_create_multipack(line)
-        elif self.state == 'print_tags':
-            self.handle_print_tags(line)
-
-
-        else:
-            self._snd(u"Introduciste %s, pero paso olimpicamente:" % line)
-        # except Exception, e:
-        #     print Exception, e.message
-        #     self._snd(self.last_send)
-        #     return
 
     def handle_error(self, line):
 
