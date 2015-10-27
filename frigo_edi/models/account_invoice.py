@@ -59,7 +59,7 @@ class AccountInvoiceLine(models.Model):
         promo_discounts = []
         for promo in joint_promos:
             if promo.type == 'discount':
-                promo_discounts.append((total_discount, total_discount * (promo.discount_assumed / 100)))
+                promo_discounts.append(total_discount)
             elif promo.type == 'rappel':
                 rappel_product = promo.rappel_id.type_id.product_id
                 week = self._get_invoice_week()
@@ -77,7 +77,7 @@ class AccountInvoiceLine(models.Model):
                      ('invoice_id.partner_id', '=', self.invoice_id.partner_id.id),
                      ('invoice_id.state', 'in', ('open', 'paid'))])
                 rappel_line_qty = rappel_qty / (len(total_lines) or 1)
-                promo_discounts.append((rappel_line_qty, rappel_line_qty * (promo.discount_assumed / 100)))
+                promo_discounts.append(rappel_line_qty)
         return promo_discounts
 
     @api.one
@@ -100,19 +100,15 @@ class AccountInvoiceLine(models.Model):
                                                    self.product_id.log_unit_id.id)
         else:
             self.tourism_discount = 0.0
-        promotion_lines = self.search([('invoice_id', '=', self.invoice_id.id),
-                                       ('id', '!=', self.id),
-                                       ('promotion_line', '=', True),
-                                       ('product_id', '=',
-                                        self.product_id.id)])
         total_discount = (self.price_unit * self.quantity) * (self.discount / 100)
-        if promotion_lines:
-            for line in promotion_lines:
-                pricelist = self.invoice_id.partner_id.property_product_pricelist
-                price = pricelist.price_get(line.product_id.id, line.quantity)[pricelist.id]
-                total_discount += price
-        self.tpr_discount = total_discount
-        sale_line = self.stock_move_id.procurement_id.sale_line_id
-        discounts = self._get_applicable_promotions(sale_line, total_discount)
-        self.supplier_disc_qty = sum([x[1] for x in discounts])
-        self.rest_disc_qty = sum([x[0] - x[1] for x in discounts])
+        if self.promotion_line:
+            pricelist = self.invoice_id.partner_id.property_product_pricelist
+            price = pricelist.price_get(self.product_id.id, self.quantity)[pricelist.id]
+            total_discount += price * self.quantity
+        else:
+            sale_line = self.stock_move_id.procurement_id.sale_line_id
+            discounts = self._get_applicable_promotions(sale_line, total_discount)
+            self.supplier_disc_qty = sum([x for x in discounts])
+        if not self.supplier_disc_qty:
+            self.tpr_discount = total_discount
+        self.rest_disc_qty = 0.0

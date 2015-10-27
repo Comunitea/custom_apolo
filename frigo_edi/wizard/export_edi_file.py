@@ -361,6 +361,11 @@ class ExportEdiFile(models.TransientModel):
 
     @api.multi
     def export_file_ven_create(self, date_start, date_end):
+        def check_supplier(product, supplier_id):
+            for supp in product.seller_ids:
+                if supp.name.id == supplier_id:
+                    return True
+            return False
         supplier_id = self[0].service_id.related_partner_id.id
         objs = self.env['account.invoice'].search([('date_invoice', '>=',
                                                     date_start),
@@ -398,10 +403,10 @@ class ExportEdiFile(models.TransientModel):
         tmp = Template(filename=templates_path + tmp_name,
                        lookup=mylookup, default_filters=['decode.utf8'])
         objs = [o for o in objs]
-        doc = tmp.render_unicode(o=objs, datetime=datetime, user=self.env.user,
-                                 supplier_id=supplier_id,
-                                 price_get=self.product_price_get).encode(
-            'utf-8', 'replace')
+        doc = tmp.render_unicode(
+            o=objs, datetime=datetime, user=self.env.user,
+            supplier_id=supplier_id, price_get=self.product_price_get,
+            check_supplier=check_supplier).encode('utf-8', 'replace')
         file_name = self[0].service_id.output_path + os.sep + filename
         f = file(file_name, 'w')
         f.write(doc)
