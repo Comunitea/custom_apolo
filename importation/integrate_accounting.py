@@ -16,7 +16,7 @@ class integrate_accounting(object):
         try:
             self.url_template = "http://%s:%s/xmlrpc/%s"
             self.server = "localhost"
-            self.port = 8069
+            self.port = 9069
             self.dbname = dbname
             self.user_name = user
             self.user_passwd = passwd
@@ -221,7 +221,12 @@ class integrate_accounting(object):
                         partner_ref = False
 
                     if partner_ref:
-                        partner_ids = self.search("res.partner", [("ref", '=', partner_ref),'|',('active','=',True),('active','=',False)])
+                        domain = [("ref", '=', partner_ref),'|',('active','=',True),('active','=',False)]
+                        if row['Cuenta'].startswith('43'):
+                            domain.append(('customer', '=', True))
+                        else:
+                            domain.append(('supplier', '=', True))
+                        partner_ids = self.search("res.partner", domain)
                         if not partner_ids:
                             partner_vals = {
                                 "customer": row['Cuenta'].startswith('43') and True or False,
