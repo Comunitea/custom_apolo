@@ -135,6 +135,7 @@ class stock_pack_operation(models.Model):
 
     @api.multi
     def get_ops_from_task (self, my_args):
+
         task_id = my_args.get ('task_id', 0)
         domain = [
             ('task_id', '=', task_id)
@@ -350,11 +351,21 @@ class stock_pack_operation(models.Model):
                             _('No operation founded to set as visited'))
 
         # Browse with correct uid, an mark as visited
+        #import ipdb; ipdb.set_trace()
         try:
             env2 = op_obj.env(self._cr, user_id, self._context)
             op_obj_uid = op_obj.with_env(env2)
-            op_obj_uid.write(field_values)
-            return True
+            #op_obj_uid.write(field_values)
+            if not 'package_id' in field_values.keys():
+                res = op_obj_uid.write(field_values)
+                res = op_id
+            else:
+                field_values['picking_id']=op_obj_uid.picking_id.id
+                field_values['task_id'] = op_obj_uid.task_id.id
+                op_obj_uid.unlink()
+                new_op = op_obj_uid.create(field_values)
+                res = new_op.id
+            return res
         except Exception:
             return False
     @api.multi

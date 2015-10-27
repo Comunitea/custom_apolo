@@ -72,8 +72,8 @@ class stock_location(models.Model):
         product_ids = self.env['product.product'].search(domain)
         if product_ids:
             for product_ in product_ids:
-                 product.append ({'id': product.id,
-                                  'bcd_name': product.short_name or product.name[20],
+                 product.append ({'id': product_.id,
+                                  'bcd_name': product_.short_name or product_.name[25],
                                   })
         return product
 

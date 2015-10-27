@@ -69,7 +69,8 @@ class stock_picking_wave(models.Model):
                     'op': op.operation_ids[0].id or False,
                     'customer_id': op.customer_id.comercial or op.customer_id.name,
                     'ref': op.customer_id.ref or False,
-                    'qty_available': op.product_id.qty_available or 0.00
+                    'qty_available': op.product_id.qty_available or 0.00,
+                    'name':op.wave_id.name or ''
                     }
 
                 ind += 1

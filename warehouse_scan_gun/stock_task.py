@@ -139,11 +139,12 @@ class StockTask(models.Model):
             route_detail= self.env['route.detail'].search([('id', '=', route_id)])
             date_planned= route_detail.date
             route_id = route_detail.route_id.id
+
         vals = {
             'operator_id': user_id,
             'machine_id': machine_id,
             'location_ids': [],
-            'mandatory_camera': True,
+            'mandatory_camera': False,
             'print_report': False,
             #'date_planned':date_planned,
             'trans_route_id':route_id,
@@ -170,6 +171,8 @@ class StockTask(models.Model):
         elif task_type == 'picking':
             wzd_obj_uid.get_picking_task()
 
+        #import ipdb; ipdb.set_trace()
+
         domain = [
             ('user_id', '=', user_id),
             ('state', '=', 'assigned'),
@@ -182,6 +185,14 @@ class StockTask(models.Model):
             raise except_orm(_("Error"), _("Task not founded after create it"))
         for op in task_obj.operation_ids:
             op.write({'visited': False})
+
+        if task_type=='picking':
+            for wave_report in task_obj.wave_id:
+                for wave in wave_report.wave_report_ids:
+                    for op in wave.operation_ids:
+                        vals={'to_process':False, 'visited':False}
+                        op.write (vals)
+
         print "te doy una creada: Id" +str(task_obj.id)
         return task_obj.id
 

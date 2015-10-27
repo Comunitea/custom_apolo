@@ -29,14 +29,14 @@ class reposition_wizard(models.Model):
 
     @api.multi
     def create_reposition_from_gun(self, my_args):
-
         selected_loc_ids = my_args.get("selected_loc_ids", [])
-        limit = my_args.get("limit", 100)
+        limit = my_args.get("limit", 80)
         user_id = my_args.get('user_id', False)
         values = {
             'specific_locations': True,
             'selected_loc_ids':  [(6, 0, selected_loc_ids)],
             'limit': limit,
+            'capacity': 80,
             'warehouse_id' : 1,
         }
         env2 = self.env(self._cr, 1, self._context)
