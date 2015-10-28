@@ -454,8 +454,8 @@ class OdooDao:
         return op_data
 
     def do_manual_trasfer_from_gun(self, user_id, vals):
-        self.connection.execute('manual.transfer.wzd', 'do_manual_trasfer_from_gun', [], vals)
-        return True
+        res = self.connection.execute('manual.transfer.wzd', 'do_manual_trasfer_from_gun', [], vals)
+        return res
 
     def conv_units_from_gun(self, user_id,  product_id, uom_origen, uom_destino, supplier_id =0):
         my_args = {'product_id': product_id, 'uom_origen': uom_origen, 'uom_destino': uom_destino,'supplier_id': 0}
@@ -512,4 +512,9 @@ class OdooDao:
     def create_multipack_from_gun(self, user_id, package_id):
         my_args = {'user_id': user_id, 'package_id': package_id}
         op_data = self.connection.execute('stock.quant.package', 'create_multipack_from_gun', [], my_args)
+        return op_data
+
+    def print_from_gun(self, user_id, package_ids):
+        my_args = {'user_id': user_id, 'package_ids': package_ids}
+        op_data = self.connection.execute('create.tag.wizard', 'print_from_gun', [], my_args)
         return op_data
