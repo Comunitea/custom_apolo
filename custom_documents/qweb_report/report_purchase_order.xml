@@ -82,7 +82,7 @@
           </tr>
           <tr>
             <td class="text-right">Deposit:</td>
-            <td class="text-center">---</td>
+            <td class="text-center"><span t-esc="o.partner_id.unilever_code"/></td>
           </tr>
         </table>
       </div>
