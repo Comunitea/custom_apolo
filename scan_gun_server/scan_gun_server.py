@@ -694,6 +694,7 @@ class ScanGunProtocol(LineReceiver):
             return
         #Ponemso una tara en pausa, la ponemos en RUN
         if line == KEY_RUN:
+
             if len(self.tasks)==1:
                 self.ops = False
                 try:
@@ -708,7 +709,7 @@ class ScanGunProtocol(LineReceiver):
             self._snd(self.get_str_menu_task(), message)
             return
 
-        if line[1:3] == KEY_RUN:
+        if line[1:] == KEY_RUN:
             self.ops = False
             k = line[0:1]
             if k in self.tasks.keys():
@@ -1354,8 +1355,6 @@ class ScanGunProtocol(LineReceiver):
 
 
         if line == KEY_CONFIRM:
-            #import ipdb; ipdb.set_trace()
-
             # if self.step == 3:
             #     self.step = 10
             #     self._snd(self.get_str_form_repo_ops() + message)
@@ -1927,10 +1926,9 @@ class ScanGunProtocol(LineReceiver):
         return self.get_str(data_, header)
 
     def get_str(self, data_, header =''):
-
         #Saca una lista de operaciones o picks
         #si no hay ninguna ubicación
-        if self.type =="ubication" and not self.ops:
+        if (self.type =="ubication" or self.type == "reposition" ) and not self.ops:
             strg =u'Tarea creada.\nScan Paquete para añadir ops\n'
             keys = u"%s Volver"%KEY_VOLVER
             if self.show_keys:
@@ -2334,25 +2332,24 @@ class ScanGunProtocol(LineReceiver):
             return
 
         if order_line == PRE_LOC and self.step in [0,1,2]:
-            for op_ in self.waves:
-                op = self.waves[op_]
-                if op['origen'] == line or op['origen_id'] == line_int or \
-                                self.factory.odoo_con.get_parent_location_id(self.user_id, self.int_(op['origen'])) == line_int:
-                    #si el origen conincide con este o con el padre también vale.
-                    #es un paquete de la lista de paquetes de esta tarea
-                    self.last_state = "list_waves"
-                    self.active_op = op_
-                    self.wave_id = op['ID']
-                    self.qty_calc = []
-                    self.state = 'form_wave'
-                    if self.step == 1:
-                        self.step=2
-                    self._snd(self.get_str_form_wave(), '')
-                    return
-
-            message = u'\nOrigen no Válido'
-            self._snd(self.get_str_form_wave(), message)
-            return
+            op = self.waves[str(self.active_wave)]
+            if op['origen'] == line or op['origen_id'] == line_int or \
+                            self.factory.odoo_con.get_parent_location_id(self.user_id, self.int_(op['origen'])) == line_int:
+                #si el origen conincide con este o con el padre también vale.
+                #es un paquete de la lista de paquetes de esta tarea
+                self.last_state = "list_waves"
+                self.active_op = op_
+                self.wave_id = op['ID']
+                self.qty_calc = []
+                self.state = 'form_wave'
+                if self.step == 1:
+                    self.step=2
+                self._snd(self.get_str_form_wave(), '')
+                return
+            else:
+                message = u'\nOrigen no Válido'
+                self._snd(self.get_str_form_wave(), message)
+                return
 
         if line in [KEY_CONFIRM, KEY_CANCEL, KEY_NEXT, KEY_PREV, KEY_QTY, KEY_VOLVER, KEY_FINISH]:
 
@@ -4034,7 +4031,6 @@ class ScanGunProtocol(LineReceiver):
 
         if self.step==2:
             if line==KEY_CONFIRM:
-                #import ipdb; ipdb.set_trace()
                 new_repo = self.factory.odoo_con.create_reposition_from_gun(\
                     self.user_id,self.vals['selected_loc_ids'], self.vals['limit'])
 
