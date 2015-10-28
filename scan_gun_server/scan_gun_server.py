@@ -782,10 +782,12 @@ class ScanGunProtocol(LineReceiver):
         if line == KEY_CONFIRM and confirm == True:
 
             res = self.factory.odoo_con.finish_task(self.user_id, self.task_id)
+
             if not res:
                 message = u'\nError:\nRevisa Ubicaciones y/o Cantidades\n%s para volver'%KEY_VOLVER
                 self._snd(message)
             else:
+                self.print_tasks()
                 self.handle_new_task()
             return
 
@@ -1840,7 +1842,7 @@ class ScanGunProtocol(LineReceiver):
                     'product_uom_id' : self.pack['uom_id'],
                     'product_qty': self.new_uom_qty,
                     'packed_qty': self.new_uom_qty,
-                    'result_package_id': True
+                    #'result_package_id': True
                 }
         else:
             #no cambiamos cantidad
@@ -1858,12 +1860,13 @@ class ScanGunProtocol(LineReceiver):
                     'product_uom_id' : self.pack['uom_id'],
                     'product_qty': self.new_uom_qty,
                     'packed_qty': self.new_uom_qty,
-                    'result_package_id': True
+                    #'result_package_id': True
                 }
 
         res = self.factory.odoo_con.change_op_values(self.user_id, self.op_id, values)
 
         if res:
+            #self.print_op_tags(self.op_id)
             #recargamos operaciones para actualizar cambios
             self.ops = self.factory.odoo_con.get_ops(self.user_id, self.task_id, self.type)
             # y buscamos la primera no procesada
@@ -2051,6 +2054,8 @@ class ScanGunProtocol(LineReceiver):
                 #marcamos la tarea como finalizada
                 #llamamos a finish_partial_task de stock_task
                 ok = self.factory.odoo_con.finish_task(self.user_id, self.task_id)
+                if ok:
+                    self.print_tasks()
                 self.step=0
                 self.last_state = "list_waves"
                 self.state ='menu1'
@@ -3641,6 +3646,10 @@ class ScanGunProtocol(LineReceiver):
         if self.step == 10 and line ==KEY_CONFIRM:
             try:
                 res = self.factory.odoo_con.do_manual_trasfer_from_gun(self.user_id, self.move)
+                #import ipdb; ipdb.set_trace()
+                for op in res:
+                    package_to_print = op['result_package_id']
+                    self.print_packs([package_to_print])
             except Exception, e:
                 str_error = u"Error"
                 print (str_error + e.message)
@@ -3952,7 +3961,11 @@ class ScanGunProtocol(LineReceiver):
 
         if self.step == 10 and line ==KEY_CONFIRM:
             try:
-                res = self.factory.odoo_con.do_manual_trasfer_from_gun(self.user_id, self.move)
+                res = self.factory.odoo_con.s(self.user_id, self.move)
+                #import ipdb; ipdb.set_trace()
+                for op in res:
+                    package_to_print = op['result_package_id']
+                    self.print_packs([package_to_print])
             except Exception, e:
                 str_error = u"Error"
                 print (str_error + e.message)
@@ -4573,7 +4586,9 @@ class ScanGunProtocol(LineReceiver):
                     message = u"Scan correcto.\n"
                     finish = self.factory.odoo_con.set_op_visited(self.user_id, self.task_id, self.op_data['ID'], True)  # True to mark as to_process
                     if finish:  # No more operation, Return to back menu
-                        self.factory.odoo_con.finish_task(self.user_id, self.task_id)
+                        res = self.factory.odoo_con.finish_task(self.user_id, self.task_id)
+                        if res:
+                            self.print_tasks()
                         message += "Tarea Finalizada\n"
                         message += self.get_str_menu1()
                         self.state = "menu1"
@@ -4723,6 +4738,7 @@ class ScanGunProtocol(LineReceiver):
                    u"3 >Crear Multipack\n" \
                    u"4 >Info Producto\n" \
                    u"5 >Info Paquete\n" \
+                   u"6 >Imprimir Etiquetas\n"\
                    u"9 >Volver\n"
         # if self.show_keys:
         #     keys = "\n%s Atrás"%KEY_VOLVER
@@ -4732,7 +4748,7 @@ class ScanGunProtocol(LineReceiver):
     def handle_menu_tool(self, line):
 
         print "Menu Tools"
-        if line not in ["1","2", "3", "9"] and line != KEY_VOLVER:
+        if line not in ["1","2", "3", "6", "9"] and line != KEY_VOLVER:
             str_error = u"La opcion %s no es valida.\nReintentar:\n" % line
             self.state='tools'
             self._snd(self.get_menu_tools(), str_error)
@@ -4749,15 +4765,18 @@ class ScanGunProtocol(LineReceiver):
             self.state = 'create_picking_zone'
             self.step=0
             self._snd(self.get_str_create_picking_zone())
-
         elif line == '3':
             self.state = 'create_multipack'
             self.step=0
             self.num_order_list_ops = 1
-            self.state= "create_multipack"
             self.packs = []
             self._snd(self.get_str_create_multipack())
-
+        elif line == '6':
+            self.state = 'print_tags'
+            self.step=0
+            self.num_order_list_ops = 1
+            self.packs = []
+            self._snd(self.get_str_print_tags())
         else:
             str_error = u"La opcion %s no está implementada.\nReintentar:\n" % line
             self.state='tools'
@@ -4930,22 +4949,33 @@ class ScanGunProtocol(LineReceiver):
                     message = u'\nPaquete no encontrado'
             self._snd(self.get_str_print_tags(), message)
             return
-
         if line == KEY_CONFIRM:
-            res = self.print_tags()
+            for tag_ in self.packs:
+                tag=[]
+                tag.append(tag_['id'])
+                res = self.factory.odoo_con.print_from_gun(self.user_id, tag)
+            message ="\nEnviadas a Imprimir"
+            self.step = 0
+            self.packs =[]
+            self._snd(self.get_str_print_tags(), message)
             return
 
+    def print_tasks(self, task_id):
 
+        pack= []
+        task = self.env['stock.task'].search([('id', '=', task_id)])
+        if task.type !='picking':
+            for op in task.operation_ids:
+                if op.result_package_id:
+                    pack.append (op.result_package_id)
+                    res = self.factory.odoo_con.print_from_gun(self.user_id, pack)
 
-    def print_packs(self):
+    def print_packs(self, packs):
 
-        if len(self.packs)<1:
+        if len(packs)<1:
             message = "\nNecesitas un paquete"
             return False, message
-        packs = []
-        for pack in self.packs:
-            packs.append(pack['id'])
-        res = self.factory.odoo_con.print_packs_from_gun(self.user_id, packs)
+        res = self.factory.odoo_con.print_from_gun(self.user_id, packs)
         return res
 
     def handle_create_picking_zone(self, line):

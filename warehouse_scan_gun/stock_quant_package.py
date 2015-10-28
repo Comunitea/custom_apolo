@@ -221,6 +221,7 @@ class manual_transfer_wzd(models.TransientModel):
         dest_location_id= my_args.get('dest_location_id', False)
         do_pack = my_args.get('do_pack', 'no_pack')
         package = my_args.get('package', False)
+
         vals_prod_line_ids ={
             'package_id': package_id,
             'product_id': product_id,
@@ -243,20 +244,20 @@ class manual_transfer_wzd(models.TransientModel):
 
         # CHANGUING USER ID t_wzd.sudo(user_id) no funciona
         wzd_obj = wzd_obj_uid.create({'pack_line_ids': vals_pack_line_ids})
-        if package: #or product_id!=False or lot_id!=False or package_id==False:
+        if product_id or quantity: #or product_id!=False or lot_id!=False or package_id==False:
+            vals = vals_prod_line_ids
+            val_ids = 'prod_line_ids'
+        else:
             vals = vals_pack_line_ids
             val_ids = 'pack_line_ids'
 
-        else:
-            vals = vals_prod_line_ids
-            val_ids = 'prod_line_ids'
+
+        wzd_obj.write({val_ids: [(0,0, vals)]})
+
+        res = wzd_obj.do_manual_transfer()
 
 
-        res = wzd_obj.write({val_ids: [(0,0, vals)]})
-
-        wzd_obj.do_manual_transfer()
-
-        return True
+        return res
 
 
         #
