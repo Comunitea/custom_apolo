@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+        <!-- Set sequence Readonly -->
+        <record id="form_view_location_sequence_readonly" model="ir.ui.view">
+            <field name="name">form.view.location.sequence.readonly</field>
+            <field name="model">stock.location</field>
+            <field name="inherit_id" ref="midban_depot_stock.view_location_form_depot"/>
+            <field name="arch" type="xml">
+                <field name="sequence" position="attributes">
+                    <attribute name="readonly">True</attribute>
+                </field>
+            </field>
+        </record>
+
+        <!-- Set sequence Invisible -->
+        <record id="tree_view_location_sequence_readonly" model="ir.ui.view">
+            <field name="name">tree.view.location.sequence.readonly</field>
+            <field name="model">stock.location</field>
+            <field name="inherit_id" ref="midban_depot_stock.view_location_tree2_add_filled_percent"/>
+            <field name="arch" type="xml">
+              <field name="sequence" position="attributes">
+                  <attribute name="invisible">True</attribute>
+              </field>
+
+            </field>
+        </record>
+
+    </data>
+</openerp>
