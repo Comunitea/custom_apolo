@@ -213,6 +213,7 @@ class manual_transfer_wzd(models.TransientModel):
         Get a task for a user and type defined in my args.
         """
         user_id = my_args.get('user_id', False)
+        my_args = my_args.get('vals', {})
         package_id= my_args.get('package_id', False)
         product_id= my_args.get('product_id', False)
         quantity = my_args.get('quantity', 1)
@@ -244,20 +245,12 @@ class manual_transfer_wzd(models.TransientModel):
 
         # CHANGUING USER ID t_wzd.sudo(user_id) no funciona
         wzd_obj = wzd_obj_uid.create({'pack_line_ids': vals_pack_line_ids})
-        if product_id or quantity: #or product_id!=False or lot_id!=False or package_id==False:
+        if product_id: #or product_id!=False or lot_id!=False or package_id==False:
             vals = vals_prod_line_ids
             val_ids = 'prod_line_ids'
         else:
             vals = vals_pack_line_ids
             val_ids = 'pack_line_ids'
-
-
         wzd_obj.write({val_ids: [(0,0, vals)]})
-
         res = wzd_obj.do_manual_transfer()
-
-
         return res
-
-
-        #

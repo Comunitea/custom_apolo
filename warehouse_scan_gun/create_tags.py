@@ -29,7 +29,6 @@ class create_tag_wizard(models.TransientModel):
 
     @api.multi
     def print_from_gun(self, my_args):
-
         package_ids= my_args.get("package_ids", [])
         user_id = my_args.get("user_id", False)
         vals={
@@ -43,12 +42,11 @@ class create_tag_wizard(models.TransientModel):
         res = False
         for package_id in package_ids:
             package = self.env['stock.quant.package'].search([('id','=',package_id)])
-            if package.product_id:
+            if package:
                 val = {'package_id' : package.id,
-                       'product_id':package.product_id.id,
-                       'default_code':package.product_id.default_code,
-                       'lot_id': package.quant_ids and \
-                        package.quant_ids[0].lot_id and \
+                       'product_id':package.product_id.id or package.quant_ids[0].product_id.id,
+                       'default_code':package.product_id.default_code or package.quant_ids[0].product_id.default_code,
+                       'lot_id': package.packed_lot_id.id and \
                         package.quant_ids[0].lot_id.id,
                        'wizard_id': new_wzd.id,
                        'removal_date': package.quant_ids[0].lot_id.removal_date,

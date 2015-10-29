@@ -116,6 +116,7 @@ class ScanGunProtocol(LineReceiver):
         self.reset_self_task()
         self.reset_self_op()
         self.show_op_processed = False
+        self.print_tag_option = True
     def reset_self_task(self):
 
         self.camera_id = [] # Lista de Camaras activa, por la que se busca
@@ -243,21 +244,8 @@ class ScanGunProtocol(LineReceiver):
                     line = self.check_package(line) or line
 
 
-
-            if line == KEY_DEBUG:
-                if self.debug == True:
-                    self.debug = False
-                else:
-                    self.debug = True
-                return
-
             if line == "F3":
                 self.show_op_processed = not self.show_op_processed
-                #self.lineReceived(line=KEY_VOLVER)
-                return
-
-            if line == "F9":
-                self.show_keys= not self.show_keys
                 #self.lineReceived(line=KEY_VOLVER)
                 return
 
@@ -323,6 +311,8 @@ class ScanGunProtocol(LineReceiver):
                 self.handle_quantity(line)
             elif self.state == 'tools':
                 self.handle_menu_tool(line)
+            elif self.state == 'parametros':
+                self.handle_menu_parametros(line)
             elif self.state == 'set_picking_zone':
                 self.handle_set_picking_zone(line)
             elif self.state == 'create_picking_zone':
@@ -867,7 +857,9 @@ class ScanGunProtocol(LineReceiver):
         self.last = "get_str_list_repo_ops"
         if not self.ops:
             self.ops = self.factory.odoo_con.get_ops(self.user_id, self.task_id, self.type)
-        header = "Ops en %s\n"%str(self.tasks[self.active_task]['ref'])
+        header = "Ops en %s"%str(self.tasks[self.active_task]['ref'])
+        res = "x" if self.show_op_processed else " "
+        header +=" [%s] Todas\n"%res
         return self.get_str(self.ops, header)
 
     def handle_list_repo_ops(self, line, confirm=False):
@@ -1964,8 +1956,7 @@ class ScanGunProtocol(LineReceiver):
             k_ = str(k)
             if k_ in data_:
                 op_processed = data_[k_]['PROCESADO']
-                if self.show_op_processed:
-                    if op_processed:
+                if self.show_op_processed and op_processed:
                         continue
                 if k <= len(data_):
                     k_ = str(k)
@@ -3624,7 +3615,7 @@ class ScanGunProtocol(LineReceiver):
                 package_=False
                 if self.vals['packed_qty']==self.new_uom_qty or self.new_uom_qty==0:
                     package_ = True
-
+                #import ipdb; ipdb.set_trace()
                 self.move = {
                     'product_id': self.vals['product_id'],
                     'package_id': self.vals['package_id'],
@@ -3636,6 +3627,7 @@ class ScanGunProtocol(LineReceiver):
                     'user_id': self.user_id,
                     'package': package_#self.vals['packed_qty']==self.new_uom_qty,
                 }
+
                 if do_key:
                     self.handle_manual_transfer_packet(line=KEY_CONFIRM)
                     return
@@ -3645,8 +3637,10 @@ class ScanGunProtocol(LineReceiver):
 
         if self.step == 10 and line ==KEY_CONFIRM:
             try:
+                if not self.new_uom_qty or self.new_uom_qty == self.vals['packed_qty']:
+                    #Si la cantidad es la misma que el paquete, entonces product_id=False
+                    self.move['product_id'] = False
                 res = self.factory.odoo_con.do_manual_trasfer_from_gun(self.user_id, self.move)
-                #import ipdb; ipdb.set_trace()
                 for op in res:
                     package_to_print = op['result_package_id']
                     self.print_packs([package_to_print])
@@ -4731,6 +4725,45 @@ class ScanGunProtocol(LineReceiver):
             res =0.00
         return res
 
+    def get_menu_parametros(self):
+
+        res = "x" if self.print_tag_option else " "
+        menu_str = u"1 [%s] Imprimir etiquetas\n"%res
+        res = "x" if self.debug else " "
+        menu_str += u"2 [%s] Debug\n"%res
+        res = "x" if self.show_keys else " "
+        menu_str += u"3 [%s] Ayuda Teclas\n"%res
+        menu_str += u"9 >Volver\n"
+        return menu_str
+
+    def handle_menu_parametros(self, line):
+
+        if line not in ["1", "2", "3", "9"] and line != KEY_VOLVER:
+            str_error = u"La opcion %s no es valida.\nReintentar:\n" % line
+            self.state='tools'
+            self._snd(self.get_menu_parametros(), str_error)
+            return
+        if line == "1":
+            self.print_tag_option = not self.print_tag_option
+            self._snd(self.get_menu_parametros())
+            return
+        if line == "2":
+            self.debug = not self.debug
+            self._snd(self.get_menu_parametros())
+            return
+        if line == "3":
+            self.show_keys = not self.show_keys
+            self._snd(self.get_menu_parametros())
+            return
+        if line == "9" or line == KEY_VOLVER:
+            self.state ="tools"
+            self._snd(self.get_menu_tools())
+            return
+
+        str_error = u"La opcion %s no es valida.\nReintentar:\n" %line
+        self._snd(self.get_menu_parametros(), str_error)
+        return
+
     def get_menu_tools(self):
 
         menu_str = u"1 >Asignar Zona Picking\n" \
@@ -4739,6 +4772,7 @@ class ScanGunProtocol(LineReceiver):
                    u"4 >Info Producto\n" \
                    u"5 >Info Paquete\n" \
                    u"6 >Imprimir Etiquetas\n"\
+                   u"8 >Parámetros\n"\
                    u"9 >Volver\n"
         # if self.show_keys:
         #     keys = "\n%s Atrás"%KEY_VOLVER
@@ -4748,7 +4782,7 @@ class ScanGunProtocol(LineReceiver):
     def handle_menu_tool(self, line):
 
         print "Menu Tools"
-        if line not in ["1","2", "3", "6", "9"] and line != KEY_VOLVER:
+        if line not in ["1","2", "3", "6", "8", "9"] and line != KEY_VOLVER:
             str_error = u"La opcion %s no es valida.\nReintentar:\n" % line
             self.state='tools'
             self._snd(self.get_menu_tools(), str_error)
@@ -4777,6 +4811,12 @@ class ScanGunProtocol(LineReceiver):
             self.num_order_list_ops = 1
             self.packs = []
             self._snd(self.get_str_print_tags())
+        elif line == '8':
+            self.state = 'parametros'
+            self.step=0
+            self.num_order_list_ops = 1
+            self.packs = []
+            self._snd(self.get_menu_parametros())
         else:
             str_error = u"La opcion %s no está implementada.\nReintentar:\n" % line
             self.state='tools'
@@ -4962,6 +5002,8 @@ class ScanGunProtocol(LineReceiver):
 
     def print_tasks(self, task_id):
 
+        if not self.print_tag_option:
+            return
         pack= []
         task = self.env['stock.task'].search([('id', '=', task_id)])
         if task.type !='picking':
@@ -4971,12 +5013,15 @@ class ScanGunProtocol(LineReceiver):
                     res = self.factory.odoo_con.print_from_gun(self.user_id, pack)
 
     def print_packs(self, packs):
-
+        print "Imprimiendo: %s"%packs[0]
+        if not self.print_tag_option:
+            return
         if len(packs)<1:
             message = "\nNecesitas un paquete"
             return False, message
         res = self.factory.odoo_con.print_from_gun(self.user_id, packs)
         return res
+
 
     def handle_create_picking_zone(self, line):
 
