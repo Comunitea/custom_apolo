@@ -10,13 +10,23 @@
                 <field name="sequence" position="attributes">
                     <attribute name="readonly">True</attribute>
                 </field>
-                <field name="sequence" position="after">
-                    <group string="Coordinates">
-                        <field name="xy_camera"/>
-                        <field name="xy_aisle"/>
-                        <field name="xy_column"/>
-                        <field name="xy_height"/>
-                    </group>
+
+                <group name="localization" position="before">
+                  <group string="Coordinates">
+                    <field name="xy_camera"/>
+                    <field name="xy_aisle"/>
+                    <field name="xy_column"/>
+                    <field name="xy_height"/>
+                  </group>
+                </group>
+
+                <group name="localization" position="attributes">
+                    <attribute name="invisible">False</attribute>
+                    <attribute name="string">Ordenation numbers</attribute>
+                </group>
+
+                <field name="posx" position="before">
+                    <field name="posc"/>
                 </field>
             </field>
         </record>

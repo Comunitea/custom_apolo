@@ -28,11 +28,12 @@ class StockLocation(models.Model):
     xy_camera = fields.Char(compute='_get_coordinates_names', string="Camera",
                             readonly=True, store=True)
     xy_aisle = fields.Char(compute='_get_coordinates_names', string="Aisle",
-                          readonly=True, store=True)
+                           readonly=True, store=True)
     xy_column = fields.Char(compute='_get_coordinates_names', string="Column",
                             readonly=True, store=True)
     xy_height = fields.Char(compute='_get_coordinates_names', string="Height",
                             readonly=True, store=True)
+    posc = fields.Integer('Pos (C)')
 
     @api.multi
     @api.depends('bcd_name')

@@ -18,5 +18,27 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-import stock_location
-import stock_location_order
+from openerp import models, fields, api
+
+
+# class StockCameraOrder(models.Model):
+#
+#     _name = "stock.camera.order"
+#     _description = "Sets order of Cameras"
+#
+#     xy_camera = fields.Char("Camera")
+#     aisle_order_ids = fields.One2many('stock.aisle.order', 'ord_cam_id',
+#                                       "Aisle Order")
+#     sequence = fields.Integer("Order")
+#
+#
+# class StockAisleOrder(models.Model):
+#
+#     _name = "stock.aisle.order"
+#     _description = "Sets order of Cameras"
+#
+#     ord_cam_id = fields.many2one('stock.camera.order', 'Order Camera')
+#     xy_aisle = fields.Char("Camera")
+#     orientation = fields.Selection([('pos', 'Positive'), ('neg', 'Negative')],
+#                                    'Orentation')
+#     sequence = fields.Integer("Order")

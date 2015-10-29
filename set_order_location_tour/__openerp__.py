@@ -37,6 +37,7 @@
     ],
     "data": [
         'views/stock_location_view.xml',
+        'wizard/wizard_order_locations_view.xml',
     ],
     "demo": [],
     "test": [],
