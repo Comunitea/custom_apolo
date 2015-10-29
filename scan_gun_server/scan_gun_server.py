@@ -4952,6 +4952,14 @@ class ScanGunProtocol(LineReceiver):
             order_line = False
         line_int = self.int_(line)
 
+        if line == KEY_VOLVER:
+            self.packs = []
+            self.step=0
+            self.state='tools'
+            self._snd(self.get_menu_tools())
+            return
+
+
         if line == KEY_NEXT:
             if self.num_order_list_ops + MAX_NUM_ONE <=len(self.packs):
                 self.num_order_list_ops += MAX_NUM_ONE
@@ -4976,7 +4984,7 @@ class ScanGunProtocol(LineReceiver):
             if add_pack:
                 self.step=1
                 new_pack = self.factory.odoo_con.get_pack_gun_info(self.user_id, line_int)
-                if new_pack['exist']:
+                if new_pack['exist'] and new_pack['packed_qty']>0:
                     self.packs.append({
                         'id': new_pack['package_id'],
                         'name': new_pack['package']
@@ -4986,7 +4994,7 @@ class ScanGunProtocol(LineReceiver):
                         new_pack['package'], new_pack['lot'],
                         new_pack['packed_qty'], new_pack['uom'])
                 else:
-                    message = u'\nPaquete no encontrado'
+                    message = u'\nPaquete no encontrado\n o vacio'
             self._snd(self.get_str_print_tags(), message)
             return
         if line == KEY_CONFIRM:
