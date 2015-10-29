@@ -47,7 +47,7 @@
                       <t t-call="custom_documents.invoice_top_part"/>
 
                       <div class="row middle_part">
-                          <div t-if="o.partner_id.inv_print_op == 'give_deliver'">
+                          <div t-if="not o.partner_id.inv_print_op or o.partner_id.inv_print_op == 'give_deliver'">
                             <t t-call="custom_documents.op_give_deliver"/>
                           </div>
                           <div t-if="o.partner_id.inv_print_op == 'group_pick'">
@@ -418,9 +418,9 @@
                               <td>
                               </td>
                               <td class="text-right text-bold">
-                                <t t-set="sum_picks" t-value="0"/>
+                                <t t-set="sum_picks" t-value="int(0)"/>
                                 <t t-foreach="lines_ga[o.id][partner]" t-as="pick">
-                                    <t t-set="sum_picks" t-value="sum_picks + pick.amount_total_acc"/>
+                                    <t t-set="sum_picks" t-value="sum_picks + pick.amount_untaxed"/>
                                 </t>
                                 <span t-esc="'{0:.2f}'.format(sum_picks)"/>
                               </td>
@@ -435,7 +435,7 @@
                               <span t-esc="pick.date.split(' ')[0].split('-')[2] + '/' + pick.date.split(' ')[0].split('-')[1] + '/' + pick.date.split(' ')[0].split('-')[0]"/>
                             </td>
                             <td class="text-right">
-                              <span t-esc="'{0:.2f}'.format(pick.amount_total_acc)"/>
+                              <span t-esc="'{0:.2f}'.format(pick.amount_untaxed)"/>
                             </td>
                               <td>
                               </td>
@@ -523,11 +523,18 @@
                           <td>
                           </td>
                           <td class="text-right">
-                            <t t-set="sum_picks" t-value="0"/>
+                            <t t-set="amount_base" t-value="0"/>
+                              <t t-foreach="lines_ga[o.id][partner]" t-as="pick">
+                                <t t-foreach="pick.move_lines" t-as="move">
+                                  <t t-set="amount_base" t-value="amount_base + move.price_subtotal"/>
+                                </t>
+                              </t>
+                            <strong><span t-esc="'{0:.2f}'.format(amount_base)"/></strong>
+                            <!-- <t t-set="sum_picks" t-value="0"/>
                             <t t-foreach="lines_ga[o.id][partner]" t-as="pick">
-                                <t t-set="sum_picks" t-value="sum_picks + pick.amount_total_acc"/>
+                                <t t-set="sum_picks" t-value="sum_picks + pick.amount_untaxed"/>
                             </t>
-                            <strong><span t-esc="'{0:.2f}'.format(sum_picks)"/></strong>
+                            <strong><span t-esc="'{0:.2f}'.format(sum_picks)"/></strong> -->
                           </td>
                       </tr>
                       <t t-foreach="lines_ga[o.id][partner]" t-as="pick">
@@ -539,7 +546,11 @@
                              <strong>Pick Date: </strong> <span t-esc="pick.date.split(' ')[0].split('-')[2] + '/' + pick.date.split(' ')[0].split('-')[1] + '/' + pick.date.split(' ')[0].split('-')[0]"/>
                             </td>
                             <td colspan="3" class="text-center">
-                              <strong>Pick Import: </strong> <span t-esc="'{0:.2f}'.format(pick.amount_total_acc)"/>
+                              <t t-set="amount_pick" t-value="0"/>
+                              <t t-foreach="pick.move_lines" t-as="move">
+                                <t t-set="amount_pick" t-value="amount_pick + move.price_subtotal"/>
+                              </t>
+                              <strong>Pick Import: </strong> <span t-esc="'{0:.2f}'.format(amount_pick)"/>
                             </td>
                           </tr>
                           <tr t-foreach="pick.move_lines" t-as="move">
@@ -642,7 +653,16 @@
                     <t t-foreach="o.tax_line" t-as="tax">
                         <tr>
                           <td class="col-xs-4 no-padd-left no-padd-right text-right">
-                            <span t-esc="'{0:.2f}'.format(tax.base)"/>
+                            <!-- <span t-esc="'{0:.2f}'.format(tax.base)"/> -->
+                            <t t-set="amount_base" t-value="0"/>
+                            <t t-foreach="lines_ga[o.id].keys()" t-as="partner">
+                              <t t-foreach="lines_ga[o.id][partner]" t-as="pick">
+                                <t t-foreach="pick.move_lines" t-as="move">
+                                  <t t-set="amount_base" t-value="amount_base + move.price_subtotal"/>
+                                </t>
+                              </t>
+                            </t>
+                            <span t-esc="'{0:.2f}'.format(amount_base)"/>
                           </td>
                           <td class="col-xs-4 no-padd-left no-padd-right text-right">
                             <span t-esc="tax.name"/>

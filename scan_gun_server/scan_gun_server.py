@@ -116,6 +116,7 @@ class ScanGunProtocol(LineReceiver):
         self.reset_self_task()
         self.reset_self_op()
         self.show_op_processed = False
+        self.print_tag_option = True
     def reset_self_task(self):
 
         self.camera_id = [] # Lista de Camaras activa, por la que se busca
@@ -202,145 +203,134 @@ class ScanGunProtocol(LineReceiver):
         """
         Método del framework. LLamado cada vez que se recibe una linea
         """
-        try:
-            if line == '' or not line:
-                return
-            key = False
-            line = line.upper()
-            print u"[%s] Estado: %s Anterior: %s "%(self.step, self.state, self.last_state)
-            izq = line.encode('hex')[0:2]
-            print u"Codificación Tecla: %s > %s"%(line, line.encode('hex'))
-            if izq == "8f" or izq == "9b" or izq=="1b":
-                #son teclas de fucnion
-                line = self.function_keys(line.encode('hex'))
-                key == True
-            print u"Entrada: " + str(line)
-            if line[0:1]=="F":
-                key=True
-            line= str(line)
-            if not key:
-                if len(line)==9:
-                    line_, child = self.check_ubi(line)
-                    if line_:
-                        line = line_
-                        if child:
-                            self.last_read = line
-                            self.subzones = False
-                            self.selected_subzone = False
-                            self.last_state = self.state
-
-                            self._snd(self.get_str_select_picking_subzone(line))
-                            self.state = 'select_subzone'#self.handle_select_picking_subzone(line)
-                            return
-                        else:
-                            line = PRE_LOC + str(line)
-                    else:
-
-                        self._snd(u"%s no encontrada\n %s Volver" %(line, KEY_VOLVER))
-                        return
-
-                if len (line) == 6:
-                    line = self.check_package(line) or line
-
-
-
-            if line == KEY_DEBUG:
-                if self.debug == True:
-                    self.debug = False
-                else:
-                    self.debug = True
-                return
-
-            if line == "F3":
-                self.show_op_processed = not self.show_op_processed
-                #self.lineReceived(line=KEY_VOLVER)
-                return
-
-            if line == "F9":
-                self.show_keys= not self.show_keys
-                #self.lineReceived(line=KEY_VOLVER)
-                return
-
-
-            if line == "quit":
-                sys.exit(0)
-            elif self.state=="message":
-                self.handle_message(line)
-            elif self.state=="error":
-                self.handle_error(line)
-            elif self.state =="yes_no":
-                self.handle_yes_no(line)
-            elif self.state == "register":
-                self.handle_register(line)
-            elif self.state == "menu1":
-                self.handle_menu1(line)
-            elif self.state == "tasks":
-                self.handle_tasks(line, confirm = confirm)
-            elif self.state =="routes":
-                self.handle_route_selected(line)
-            elif self.state =="machines":
-                self.handle_machine_selected(line)
-            elif self.state =="manual_transfer_product":
-                self.handle_manual_transfer_product(line)
-            elif self.state =="manual_transfer_packet":
-                self.handle_manual_transfer_packet(line)
-
-            elif self.state =="products_by_zone":
-                self.handle_products_by_zone(line)
-
-            elif self.state =="manual_picking_reposition":
-                self.handle_manual_picking_reposition(line)
-            elif self.state == "form_repo_ops":
-                self.handle_form_repo_ops(line, confirm=confirm)
-            elif self.state == "list_ops":
-                self.handle_list_ubi_ops(line, confirm=confirm)
-            elif self.state == "list_waves":
-                self.handle_list_waves(line, confirm=confirm)
-            elif self.state == "form_wave":
-                self.handle_form_wave(line, confirm=confirm)
-            elif self.state == "list_wave_ops":
-                self.handle_list_wave_ops(line, confirm=confirm)
-            elif self.state == "list_repo_ops":
-                self.handle_list_repo_ops(line, confirm=confirm)
-            elif self.state == "form_ops":
-                self.handle_form_ubi_ops(line, confirm=confirm)
-                #self.handle_ops(line, confirm=confirm)
-            elif self.state in ["ubication", "reposition", "picking"]:
-                self.handle_camera_selected(line)
-            elif self.state =="form_product":
-                self.handle_form_product(line)
-            elif self.state =="list_product":
-                self.handle_list_product(line)
-            elif self.state == "scan_op":
-                self.handle_scan_op(line)
-            elif self.state == "scan_location":
-                self.handle_scan_location(line)
-            elif self.state == 'scan_op_rep':
-                self.handle_scan_op_rep(line)
-            elif self.state == 'scan_location_rep':
-                self.handle_scan_location_rep(line)
-            elif self.state == 'scan_quantity':
-                self.handle_quantity(line)
-            elif self.state == 'tools':
-                self.handle_menu_tool(line)
-            elif self.state == 'set_picking_zone':
-                self.handle_set_picking_zone(line)
-            elif self.state == 'create_picking_zone':
-                self.handle_create_picking_zone(line)
-            elif self.state == 'select_subzone':
-                self.handle_select_picking_subzone(line)
-            elif self.state == 'create_multipack':
-                self.handle_create_multipack(line)
-            elif self.state == 'print_tags':
-                self.handle_print_tags(line)
-
-
-            else:
-                self._snd(u"Introduciste %s, pero paso olimpicamente:" % line)
-        except Exception, e:
-            print Exception, e.message
-            self._snd(self.last_send)
+        #try:
+        if line == '' or not line:
             return
+        key = False
+        line = line.upper()
+        print u"[%s] Estado: %s Anterior: %s "%(self.step, self.state, self.last_state)
+        izq = line.encode('hex')[0:2]
+        print u"Codificación Tecla: %s > %s"%(line, line.encode('hex'))
+        if izq == "8f" or izq == "9b" or izq=="1b":
+            #son teclas de fucnion
+            line = self.function_keys(line.encode('hex'))
+            key == True
+        print u"Entrada: " + str(line)
+        if line[0:1]=="F":
+            key=True
+        line= str(line)
+        if not key:
+            if len(line)==9:
+                line_, child = self.check_ubi(line)
+                if line_:
+                    line = line_
+                    if child:
+                        self.last_read = line
+                        self.subzones = False
+                        self.selected_subzone = False
+                        self.last_state = self.state
+
+                        self._snd(self.get_str_select_picking_subzone(line))
+                        self.state = 'select_subzone'#self.handle_select_picking_subzone(line)
+                        return
+                    else:
+                        line = PRE_LOC + str(line)
+                else:
+
+                    self._snd(u"%s no encontrada\n %s Volver" %(line, KEY_VOLVER))
+                    return
+
+            if len (line) == 6:
+                line = self.check_package(line) or line
+
+
+        if line == "F3":
+            self.show_op_processed = not self.show_op_processed
+            #self.lineReceived(line=KEY_VOLVER)
+            return
+
+
+        if line == "quit":
+            sys.exit(0)
+        elif self.state=="message":
+            self.handle_message(line)
+        elif self.state=="error":
+            self.handle_error(line)
+        elif self.state =="yes_no":
+            self.handle_yes_no(line)
+        elif self.state == "register":
+            self.handle_register(line)
+        elif self.state == "menu1":
+            self.handle_menu1(line)
+        elif self.state == "tasks":
+            self.handle_tasks(line, confirm = confirm)
+        elif self.state =="routes":
+            self.handle_route_selected(line)
+        elif self.state =="machines":
+            self.handle_machine_selected(line)
+        elif self.state =="manual_transfer_product":
+            self.handle_manual_transfer_product(line)
+        elif self.state =="manual_transfer_packet":
+            self.handle_manual_transfer_packet(line)
+
+        elif self.state =="products_by_zone":
+            self.handle_products_by_zone(line)
+
+        elif self.state =="manual_picking_reposition":
+            self.handle_manual_picking_reposition(line)
+        elif self.state == "form_repo_ops":
+            self.handle_form_repo_ops(line, confirm=confirm)
+        elif self.state == "list_ops":
+            self.handle_list_ubi_ops(line, confirm=confirm)
+        elif self.state == "list_waves":
+            self.handle_list_waves(line, confirm=confirm)
+        elif self.state == "form_wave":
+            self.handle_form_wave(line, confirm=confirm)
+        elif self.state == "list_wave_ops":
+            self.handle_list_wave_ops(line, confirm=confirm)
+        elif self.state == "list_repo_ops":
+            self.handle_list_repo_ops(line, confirm=confirm)
+        elif self.state == "form_ops":
+            self.handle_form_ubi_ops(line, confirm=confirm)
+            #self.handle_ops(line, confirm=confirm)
+        elif self.state in ["ubication", "reposition", "picking"]:
+            self.handle_camera_selected(line)
+        elif self.state =="form_product":
+            self.handle_form_product(line)
+        elif self.state =="list_product":
+            self.handle_list_product(line)
+        elif self.state == "scan_op":
+            self.handle_scan_op(line)
+        elif self.state == "scan_location":
+            self.handle_scan_location(line)
+        elif self.state == 'scan_op_rep':
+            self.handle_scan_op_rep(line)
+        elif self.state == 'scan_location_rep':
+            self.handle_scan_location_rep(line)
+        elif self.state == 'scan_quantity':
+            self.handle_quantity(line)
+        elif self.state == 'tools':
+            self.handle_menu_tool(line)
+        elif self.state == 'parametros':
+            self.handle_menu_parametros(line)
+        elif self.state == 'set_picking_zone':
+            self.handle_set_picking_zone(line)
+        elif self.state == 'create_picking_zone':
+            self.handle_create_picking_zone(line)
+        elif self.state == 'select_subzone':
+            self.handle_select_picking_subzone(line)
+        elif self.state == 'create_multipack':
+            self.handle_create_multipack(line)
+        elif self.state == 'print_tags':
+            self.handle_print_tags(line)
+
+
+        #     else:
+        #         self._snd(u"Introduciste %s, pero paso olimpicamente:" % line)
+        # except Exception, e:
+        #     print Exception, e.message
+        #     self._snd(self.last_send)
+        #     return
 
     def handle_error(self, line):
 
@@ -867,7 +857,9 @@ class ScanGunProtocol(LineReceiver):
         self.last = "get_str_list_repo_ops"
         if not self.ops:
             self.ops = self.factory.odoo_con.get_ops(self.user_id, self.task_id, self.type)
-        header = "Ops en %s\n"%str(self.tasks[self.active_task]['ref'])
+        header = "Ops en %s"%str(self.tasks[self.active_task]['ref'])
+        res = "x" if self.show_op_processed else " "
+        header +=" [%s] Todas\n"%res
         return self.get_str(self.ops, header)
 
     def handle_list_repo_ops(self, line, confirm=False):
@@ -1964,8 +1956,7 @@ class ScanGunProtocol(LineReceiver):
             k_ = str(k)
             if k_ in data_:
                 op_processed = data_[k_]['PROCESADO']
-                if self.show_op_processed:
-                    if op_processed:
+                if self.show_op_processed and op_processed:
                         continue
                 if k <= len(data_):
                     k_ = str(k)
@@ -2343,7 +2334,7 @@ class ScanGunProtocol(LineReceiver):
                 #si el origen conincide con este o con el padre también vale.
                 #es un paquete de la lista de paquetes de esta tarea
                 self.last_state = "list_waves"
-                self.active_op = op_
+                #self.active_op =
                 self.wave_id = op['ID']
                 self.qty_calc = []
                 self.state = 'form_wave'
@@ -3624,7 +3615,6 @@ class ScanGunProtocol(LineReceiver):
                 package_=False
                 if self.vals['packed_qty']==self.new_uom_qty or self.new_uom_qty==0:
                     package_ = True
-
                 self.move = {
                     'product_id': self.vals['product_id'],
                     'package_id': self.vals['package_id'],
@@ -3636,6 +3626,7 @@ class ScanGunProtocol(LineReceiver):
                     'user_id': self.user_id,
                     'package': package_#self.vals['packed_qty']==self.new_uom_qty,
                 }
+
                 if do_key:
                     self.handle_manual_transfer_packet(line=KEY_CONFIRM)
                     return
@@ -3645,8 +3636,10 @@ class ScanGunProtocol(LineReceiver):
 
         if self.step == 10 and line ==KEY_CONFIRM:
             try:
+                if not self.new_uom_qty or self.new_uom_qty == self.vals['packed_qty']:
+                    #Si la cantidad es la misma que el paquete, entonces product_id=False
+                    self.move['product_id'] = False
                 res = self.factory.odoo_con.do_manual_trasfer_from_gun(self.user_id, self.move)
-                #import ipdb; ipdb.set_trace()
                 for op in res:
                     package_to_print = op['result_package_id']
                     self.print_packs([package_to_print])
@@ -3962,7 +3955,6 @@ class ScanGunProtocol(LineReceiver):
         if self.step == 10 and line ==KEY_CONFIRM:
             try:
                 res = self.factory.odoo_con.s(self.user_id, self.move)
-                #import ipdb; ipdb.set_trace()
                 for op in res:
                     package_to_print = op['result_package_id']
                     self.print_packs([package_to_print])
@@ -4731,6 +4723,45 @@ class ScanGunProtocol(LineReceiver):
             res =0.00
         return res
 
+    def get_menu_parametros(self):
+
+        res = "x" if self.print_tag_option else " "
+        menu_str = u"1 [%s] Imprimir etiquetas\n"%res
+        res = "x" if self.debug else " "
+        menu_str += u"2 [%s] Debug\n"%res
+        res = "x" if self.show_keys else " "
+        menu_str += u"3 [%s] Ayuda Teclas\n"%res
+        menu_str += u"9 >Volver\n"
+        return menu_str
+
+    def handle_menu_parametros(self, line):
+
+        if line not in ["1", "2", "3", "9"] and line != KEY_VOLVER:
+            str_error = u"La opcion %s no es valida.\nReintentar:\n" % line
+            self.state='tools'
+            self._snd(self.get_menu_parametros(), str_error)
+            return
+        if line == "1":
+            self.print_tag_option = not self.print_tag_option
+            self._snd(self.get_menu_parametros())
+            return
+        if line == "2":
+            self.debug = not self.debug
+            self._snd(self.get_menu_parametros())
+            return
+        if line == "3":
+            self.show_keys = not self.show_keys
+            self._snd(self.get_menu_parametros())
+            return
+        if line == "9" or line == KEY_VOLVER:
+            self.state ="tools"
+            self._snd(self.get_menu_tools())
+            return
+
+        str_error = u"La opcion %s no es valida.\nReintentar:\n" %line
+        self._snd(self.get_menu_parametros(), str_error)
+        return
+
     def get_menu_tools(self):
 
         menu_str = u"1 >Asignar Zona Picking\n" \
@@ -4739,6 +4770,7 @@ class ScanGunProtocol(LineReceiver):
                    u"4 >Info Producto\n" \
                    u"5 >Info Paquete\n" \
                    u"6 >Imprimir Etiquetas\n"\
+                   u"8 >Parámetros\n"\
                    u"9 >Volver\n"
         # if self.show_keys:
         #     keys = "\n%s Atrás"%KEY_VOLVER
@@ -4748,7 +4780,7 @@ class ScanGunProtocol(LineReceiver):
     def handle_menu_tool(self, line):
 
         print "Menu Tools"
-        if line not in ["1","2", "3", "6", "9"] and line != KEY_VOLVER:
+        if line not in ["1","2", "3", "6", "8", "9"] and line != KEY_VOLVER:
             str_error = u"La opcion %s no es valida.\nReintentar:\n" % line
             self.state='tools'
             self._snd(self.get_menu_tools(), str_error)
@@ -4777,6 +4809,12 @@ class ScanGunProtocol(LineReceiver):
             self.num_order_list_ops = 1
             self.packs = []
             self._snd(self.get_str_print_tags())
+        elif line == '8':
+            self.state = 'parametros'
+            self.step=0
+            self.num_order_list_ops = 1
+            self.packs = []
+            self._snd(self.get_menu_parametros())
         else:
             str_error = u"La opcion %s no está implementada.\nReintentar:\n" % line
             self.state='tools'
@@ -4912,6 +4950,14 @@ class ScanGunProtocol(LineReceiver):
             order_line = False
         line_int = self.int_(line)
 
+        if line == KEY_VOLVER:
+            self.packs = []
+            self.step=0
+            self.state='tools'
+            self._snd(self.get_menu_tools())
+            return
+
+
         if line == KEY_NEXT:
             if self.num_order_list_ops + MAX_NUM_ONE <=len(self.packs):
                 self.num_order_list_ops += MAX_NUM_ONE
@@ -4936,7 +4982,7 @@ class ScanGunProtocol(LineReceiver):
             if add_pack:
                 self.step=1
                 new_pack = self.factory.odoo_con.get_pack_gun_info(self.user_id, line_int)
-                if new_pack['exist']:
+                if new_pack['exist'] and new_pack['packed_qty']>0:
                     self.packs.append({
                         'id': new_pack['package_id'],
                         'name': new_pack['package']
@@ -4946,7 +4992,7 @@ class ScanGunProtocol(LineReceiver):
                         new_pack['package'], new_pack['lot'],
                         new_pack['packed_qty'], new_pack['uom'])
                 else:
-                    message = u'\nPaquete no encontrado'
+                    message = u'\nPaquete no encontrado\n o vacio'
             self._snd(self.get_str_print_tags(), message)
             return
         if line == KEY_CONFIRM:
@@ -4962,6 +5008,8 @@ class ScanGunProtocol(LineReceiver):
 
     def print_tasks(self, task_id):
 
+        if not self.print_tag_option:
+            return
         pack= []
         task = self.env['stock.task'].search([('id', '=', task_id)])
         if task.type !='picking':
@@ -4971,12 +5019,15 @@ class ScanGunProtocol(LineReceiver):
                     res = self.factory.odoo_con.print_from_gun(self.user_id, pack)
 
     def print_packs(self, packs):
-
+        print "Imprimiendo: %s"%packs[0]
+        if not self.print_tag_option:
+            return
         if len(packs)<1:
             message = "\nNecesitas un paquete"
             return False, message
         res = self.factory.odoo_con.print_from_gun(self.user_id, packs)
         return res
+
 
     def handle_create_picking_zone(self, line):
 
