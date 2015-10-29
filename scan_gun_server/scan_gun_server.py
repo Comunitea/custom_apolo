@@ -3615,7 +3615,6 @@ class ScanGunProtocol(LineReceiver):
                 package_=False
                 if self.vals['packed_qty']==self.new_uom_qty or self.new_uom_qty==0:
                     package_ = True
-                #import ipdb; ipdb.set_trace()
                 self.move = {
                     'product_id': self.vals['product_id'],
                     'package_id': self.vals['package_id'],
@@ -3956,7 +3955,6 @@ class ScanGunProtocol(LineReceiver):
         if self.step == 10 and line ==KEY_CONFIRM:
             try:
                 res = self.factory.odoo_con.s(self.user_id, self.move)
-                #import ipdb; ipdb.set_trace()
                 for op in res:
                     package_to_print = op['result_package_id']
                     self.print_packs([package_to_print])
