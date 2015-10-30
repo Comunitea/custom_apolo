@@ -547,6 +547,77 @@ class DatabaseImport:
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
+    def import_active_purchase_order(self, cr):
+        cr.execute("select proveedor as supplier_id_map, fecha_pedido as date_order, fecha_recepcion as minimum_planned_date, pedido as name from "
+                   "cabecera_pedidos_compra where situacion = 'V'")
+        purchase_data = cr.fetchall()
+        num_rows = len(purchase_data)
+        cont = 0
+        warehouse_ids = self.search("stock.warehouse", [])
+        warehouse_data = self.read("stock.warehouse", warehouse_ids[0], ["wh_input_stock_loc_id"])
+        for order in purchase_data:
+            if str(int(order.supplier_id_map)) == "101":
+                supp_id = "2"
+            else:
+                supp_id = str(int(order.supplier_id_map))
+            print "Supp: ", supp_id
+            supplier_ids = self.search("res.partner", [('ref', '=', supp_id),('supplier', '=', True),'|',('active', '=', True),('active', '=', False)])
+            if supplier_ids:
+                supplier_vals = self.read("res.partner", supplier_ids[0], ["property_product_pricelist_purchase"])
+                purchase_vals = {
+                    'partner_id': supplier_ids[0],
+                    'name': str(int(order.name)),
+                    'date_order': order.date_order.strftime("%Y-%m-%d"),
+                    'minimum_planned_date': order.minimum_planned_date.strftime("%Y-%m-%d"),
+                    'location_id': warehouse_data["wh_input_stock_loc_id"][0],
+                    'pricelist_id': supplier_vals["property_product_pricelist_purchase"][0]
+                }
+                purchase_id = self.create("purchase.order", purchase_vals)
+
+                cr.execute("select num_ped as order_id_map, ref_art as product_id_map, vta_bas as product_qty, tar_pro as price_unit, por_dto as discount, "
+                           "por_iva as tax_id_map from dbo.adsd_pedi where num_ped = ?", (int(order.name),))
+                lines_data = cr.fetchall()
+                for row in lines_data:
+                    print "Product: ", str(int(row.product_id_map))
+                    product_ids = self.search("product.product", [('default_code', '=', str(int(row.product_id_map))),'|',('active', '=', True),('active', '=', False)])
+                    if not product_ids:
+                        product_id = self.import_products(cr, int(row.product_id_map))
+                        self.import_rel_product_supplier(cr, int(row.product_id_map))
+                    else:
+                        product_id = product_ids[0]
+
+                    product_data = self.read("product.product", product_id, ["product_tmpl_id", "name", "uom_id"])
+                    supp_info_ids = self.search("product.supplierinfo", [('product_tmpl_id', '=', product_data['product_tmpl_id'][0]),('name', '=', supplier_ids[0])])
+                    name = ""
+                    if supp_info_ids:
+                        supp_data = self.read("product.supplierinfo", supp_info_ids[0], ["product_code", "product_name"])
+                        if supp_data["product_code"]:
+                            name += u"[" + supp_data["product_code"] + u"] "
+                        if supp_data["product_name"]:
+                            name += supp_data["product_name"]
+                        else:
+                            name += product_data["name"]
+
+                    if not name:
+                        name += product_data["name"]
+                    line_vals = {
+                        'order_id': purchase_id,
+                        'product_id': product_id,
+                        'name': name,
+                        'date_planned': order.minimum_planned_date.strftime("%Y-%m-%d"),
+                        'product_uoc_qty': float(row.product_qty),
+                        'product_uoc': product_data["uom_id"][0],
+                        'price_udc': float(row.price_unit),
+                        'product_qty': float(row.product_qty),
+                        'product_uom': product_data["uom_id"][0],
+                        'price_unit': float(row.price_unit),
+                        'discount': float(row.discount),
+                        'taxes_id': [(6, 0, self._getTaxes(IVA_MAP[str(int(row.tax_id_map))][1]))],
+                    }
+                    self.create("purchase.order.line", line_vals)
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
     def process_data(self):
         """
         Importa la bbdd
@@ -561,7 +632,8 @@ class DatabaseImport:
 
             #self.import_sale_orders(cr)
             #self.import_sale_order_lines_open(cr)
-            self.import_sale_order_lines_history(cr)
+            #self.import_sale_order_lines_history(cr)
+            self.import_active_purchase_order(cr)
 
         except Exception, ex:
             print u"Error al conectarse a las bbdd: ", repr(ex)

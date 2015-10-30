@@ -123,7 +123,7 @@ class DatabaseImport:
 
         self.url_template = "http://%s:%s/xmlrpc/%s"
         self.server = "localhost"
-        self.port = 8069
+        self.port = 9069
         self.dbname = dbname
         self.user_name = user
         self.user_passwd = passwd
@@ -960,6 +960,30 @@ class DatabaseImport:
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
+    def fix_customer_names(self, cr):
+        cr.execute("select cli_nomb as comercial, cli_razo as name, cli_codi as default_code, codigo_agrupa as parent_id from dbo.adsd_clie")
+        partners_data = cr.fetchall()
+        num_rows = len(partners_data)
+        cont = 0
+        for row in partners_data:
+            partner_ids = self.search("res.partner", [('ref','=',str(int(row.default_code))),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
+            if partner_ids:
+                vals = {'comercial': ustr(row.comercial),
+                        'parent_id': False,
+                        'name': ustr(row.name),
+                        'is_company': True}
+                if int(row.parent_id) != int(row.default_code):
+                    partner_data = self.read("res.partner", partner_ids[0], ['parent_id'])
+                    parent_ids = self.search("res.partner", [('ref','=',str(int(row.parent_id))),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
+                    if parent_ids and (not partner_data['parent_id'] or parent_ids[0] != partner_data['parent_id'][0]):
+                        vals['parent_id'] = parent_ids[0]
+                        vals['is_company'] = False
+
+                self.write("res.partner", [partner_ids[0]], vals)
+
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
     def process_data(self):
         """
         Importa la bbdd
@@ -972,21 +996,23 @@ class DatabaseImport:
             conn = pyodbc.connect("DRIVER={FreeTDS};SERVER=" + self.sql_server_host + ";UID=midban;PWD=midban2015;DATABASE=gest2015;Port=1433;TDS_Version=10.0")
             cr = conn.cursor()
 
-            self.import_product_category(cr)
-            self.import_products(cr)
-            self.import_customers(cr)
-            self.import_suppliers(cr)
-            self.import_indirect_customer(cr)
-            self.import_rel_product_supplier(cr)
+            #self.import_product_category(cr)
+            #self.import_products(cr)
+            #self.import_customers(cr)
+            #self.import_suppliers(cr)
+            #self.import_indirect_customer(cr)
+            #self.import_rel_product_supplier(cr)
             #self.fix_products(cr)
-            self.import_bank_accounts(cr)
-            self.import_master_frigo_data(cr)
-            self.import_product_frigo_data(cr)
-            self.import_other_prices(cr)
-            self.import_customers_other_data(cr)
-            self.import_preferential_agree_data(cr)
-            self.import_tourism_data(cr)
-            self.import_giras(cr)
+            #self.import_bank_accounts(cr)
+            #self.import_master_frigo_data(cr)
+            #self.import_product_frigo_data(cr)
+            #self.import_other_prices(cr)
+            #self.import_customers_other_data(cr)
+            #self.import_preferential_agree_data(cr)
+            #self.import_tourism_data(cr)
+            #self.import_giras(cr)
+            #self.fix_customer_names(cr)
+
 
         except Exception, ex:
             print u"Error al conectarse a las bbdd: ", repr(ex)
