@@ -1,0 +1,224 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* set_order_location_tour
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-10-30 15:31+0000\n"
+"PO-Revision-Date: 2015-10-30 15:31+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: set_order_location_tour
+#: field:stock.location,xy_aisle:0
+msgid "Aisle"
+msgstr "Pasillo"
+
+#. module: set_order_location_tour
+#: field:stock.camera.order,aisle_order_ids:0
+#: view:wizard.order.locations:set_order_location_tour.wizard_order_locations_view_form
+msgid "Aisle Order"
+msgstr "Orden pasillo"
+
+#. module: set_order_location_tour
+#: field:stock.aisle.order,xy_aisle:0
+msgid "Aisle code"
+msgstr "Código pasillo"
+
+#. module: set_order_location_tour
+#: code:addons/set_order_location_tour/models/stock_location.py:72
+#: code:addons/set_order_location_tour/models/stock_location.py:90
+#, python-format
+msgid "BCD Name Format must be \"AA BBB CC DD\" for                                    internal locations and child of a camera"
+msgstr "El formato del nombre BCD debe ser 'AA BBB CC DD' para ubicaciones internas e hijas de una cámara"
+
+#. module: set_order_location_tour
+#: field:stock.location,xy_camera:0
+msgid "Camera"
+msgstr "Cámara"
+
+#. module: set_order_location_tour
+#: field:stock.camera.order,xy_camera:0
+msgid "Camera code"
+msgstr "Código Cámara"
+
+#. module: set_order_location_tour
+#: view:wizard.order.locations:set_order_location_tour.wizard_order_locations_view_form
+#: field:wizard.order.locations,camera_order_ids:0
+msgid "Cameras Order"
+msgstr "Orden Cámaras"
+
+#. module: set_order_location_tour
+#: view:wizard.order.locations:set_order_location_tour.wizard_order_locations_view_form
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: set_order_location_tour
+#: field:stock.location,xy_column:0
+msgid "Column"
+msgstr "Columna"
+
+#. module: set_order_location_tour
+#: view:stock.location:set_order_location_tour.form_view_location_sequence_readonly
+msgid "Coordinates"
+msgstr "Coordenadas"
+
+#. module: set_order_location_tour
+#: field:stock.aisle.order,create_uid:0
+#: field:stock.camera.order,create_uid:0
+#: field:wizard.order.locations,create_uid:0
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: set_order_location_tour
+#: field:stock.aisle.order,create_date:0
+#: field:stock.camera.order,create_date:0
+#: field:wizard.order.locations,create_date:0
+msgid "Created on"
+msgstr "Creado en"
+
+#. module: set_order_location_tour
+#: code:addons/set_order_location_tour/models/stock_location.py:71
+#: code:addons/set_order_location_tour/models/stock_location.py:89
+#: code:addons/set_order_location_tour/wizard/wizard_order_locations.py:39
+#, python-format
+msgid "Error"
+msgstr "Error"
+
+#. module: set_order_location_tour
+#: view:stock.location:set_order_location_tour.form_view_location_sequence_readonly
+msgid "False"
+msgstr "False"
+
+#. module: set_order_location_tour
+#: view:wizard.order.locations:set_order_location_tour.wizard_order_locations_view_form
+msgid "For each aisle you can set a orientation tour order."
+msgstr "Para cada pasillo puedes establecer un sentido del recorrido"
+
+#. module: set_order_location_tour
+#: field:stock.location,xy_height:0
+msgid "Height"
+msgstr "Altura"
+
+#. module: set_order_location_tour
+#: field:stock.aisle.order,id:0
+#: field:stock.camera.order,id:0
+#: field:wizard.order.locations,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: set_order_location_tour
+#: model:ir.model,name:set_order_location_tour.model_stock_location
+msgid "Inventory Locations"
+msgstr "Ubicaciones de inventario"
+
+#. module: set_order_location_tour
+#: field:stock.aisle.order,write_uid:0
+#: field:stock.camera.order,write_uid:0
+#: field:wizard.order.locations,write_uid:0
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: set_order_location_tour
+#: field:stock.aisle.order,write_date:0
+#: field:stock.camera.order,write_date:0
+#: field:wizard.order.locations,write_date:0
+msgid "Last Updated on"
+msgstr "Última actualización en"
+
+#. module: set_order_location_tour
+#: selection:stock.aisle.order,orientation:0
+#: selection:stock.location,orientation:0
+msgid "Negative"
+msgstr "Negativo"
+
+#. module: set_order_location_tour
+#: code:addons/set_order_location_tour/wizard/wizard_order_locations.py:40
+#, python-format
+msgid "Not locations codes founded"
+msgstr "No se encontraron códigos para las ubicaciones"
+
+#. module: set_order_location_tour
+#: view:stock.location:set_order_location_tour.form_view_location_sequence_readonly
+msgid "Ordenation numbers"
+msgstr "Números de ordenación"
+
+#. module: set_order_location_tour
+#: field:stock.aisle.order,sequence:0
+#: field:stock.camera.order,sequence:0
+msgid "Order"
+msgstr "Orden"
+
+#. module: set_order_location_tour
+#: field:stock.aisle.order,ord_cam_id:0
+msgid "Order Camera"
+msgstr "Orden cámaras"
+
+#. module: set_order_location_tour
+#: model:ir.actions.act_window,name:set_order_location_tour.action_wizard_order_locations
+msgid "Order Locations"
+msgstr "Orden ubicaciones"
+
+#. module: set_order_location_tour
+#: field:stock.aisle.order,orientation:0
+msgid "Orentation"
+msgstr "Orientación"
+
+#. module: set_order_location_tour
+#: field:stock.location,orientation:0
+msgid "Orentation Aisle"
+msgstr "Orentation Aisle"
+
+#. module: set_order_location_tour
+#: field:stock.location,posc:0
+msgid "Pos (C)"
+msgstr "Pos (C)"
+
+#. module: set_order_location_tour
+#: selection:stock.aisle.order,orientation:0
+#: selection:stock.location,orientation:0
+msgid "Positive"
+msgstr "Positivo"
+
+#. module: set_order_location_tour
+#: field:stock.location,order_seq:0
+msgid "Sequence order"
+msgstr "Sequencia ordenación"
+
+#. module: set_order_location_tour
+#: view:wizard.order.locations:set_order_location_tour.wizard_order_locations_view_form
+msgid "Set defined order"
+msgstr "Establecer orden definido"
+
+#. module: set_order_location_tour
+#: model:ir.model,name:set_order_location_tour.model_stock_aisle_order
+#: model:ir.model,name:set_order_location_tour.model_stock_camera_order
+msgid "Sets order of Cameras"
+msgstr "Establecer orden de las cámaras"
+
+#. module: set_order_location_tour
+#: view:wizard.order.locations:set_order_location_tour.wizard_order_locations_view_form
+msgid "This wizard will generte a sequence number according to the specific order between cameras and aisles."
+msgstr "Este asistente generará un número de secuencia  de acuerdo al orden específicado entre cámaras y pasillos."
+
+#. module: set_order_location_tour
+#: model:ir.ui.menu,name:set_order_location_tour.wizard_order_locations_menu
+#: view:wizard.order.locations:set_order_location_tour.wizard_order_locations_view_form
+msgid "Wizard Order Locations"
+msgstr "Asistente ordenar ubicaciones"
+
+#. module: set_order_location_tour
+#: field:stock.camera.order,wzd_order_id:0
+msgid "Wzd Order"
+msgstr "Wzd Order"
+
+#. module: set_order_location_tour
+#: view:wizard.order.locations:set_order_location_tour.wizard_order_locations_view_form
+msgid "You can set the order of cameras and inside each camera the aisle order."
+msgstr "Puedes establecer un orden entre cámaras y dentro de cada cámar un orden entre sus pasillos."

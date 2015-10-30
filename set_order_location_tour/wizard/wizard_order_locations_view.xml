@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+
+
+      <record id="action_wizard_order_locations" model="ir.actions.act_window">
+          <field name="name">Order Locations</field>
+          <field name="type">ir.actions.act_window</field>
+          <field name="res_model">wizard.order.locations</field>
+          <field name="view_type">form</field>
+          <field name="view_mode">form</field>
+          <field name="target">new</field>
+      </record>
+
+      <menuitem id="wizard_order_locations_menu" name="Wizard Order Locations" string="Wizard Order Locations"
+                action="action_wizard_order_locations" parent="stock.menu_stock_configuration" sequence="6"/>
+
+      <record id="wizard_order_locations_view_form" model="ir.ui.view">
+            <field name="name">wizard.order.locations.view.form</field>
+            <field name="model">wizard.order.locations</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Wizard Order Locations">
+                    <p>
+                        You can set the order of cameras and inside each camera the aisle order.<br/>
+                        For each aisle you can set a orientation tour order.<br/>
+                        This wizard will generte a sequence number according to the specific order between cameras and aisles.<br/>
+
+                    </p>
+                    <group string="Cameras Order">
+                        <field name="camera_order_ids" nolabel="1">
+                            <tree>
+                                <field name="xy_camera"/>
+                                <field name="sequence"/>
+                            </tree>
+                            <form>
+                                <sheet>
+                                    <group>
+                                      <field name="xy_camera"/>
+                                      <field name="sequence"/>
+                                    </group>
+                                    <group string="Aisle Order">
+                                      <field name="aisle_order_ids" nolabel="1">
+                                          <tree editable="top">
+                                              <field name="xy_aisle"/>
+                                              <field name="orientation"/>
+                                              <field name="sequence"/>
+                                          </tree>
+                                      </field>
+                                    </group>
+                                </sheet>
+                            </form>
+                        </field>
+                    </group>
+                    <button string="Set defined order" name="set_defined_order" type="object" icon="gtk-ok"  class="oe_highlight"/>
+                    <button string="Cancel" special="cancel" icon="gtk-cancel"/>
+                </form>
+            </field>
+        </record>
+
+
+
+
+
+    </data>
+</openerp>

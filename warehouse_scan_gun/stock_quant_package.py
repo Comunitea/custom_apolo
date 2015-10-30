@@ -80,6 +80,19 @@ class stock_quant_package(models.Model):
 
     _inherit = 'stock.quant.package'
 
+
+    @api.multi
+    def create_package_from_gun(self, my_args):
+
+        user_id = my_args.get('user_id', False)
+        pack_wzd = self.env['stock.quant.package']
+        env2 = pack_wzd.env(self._cr, user_id, self._context)
+        wzd_obj_uid = pack_wzd.with_env(env2)
+        wzd_obj = wzd_obj_uid.create()
+
+        return wzd_obj
+
+
     @api.multi
     def create_multipack_from_gun(self, my_args):
 
@@ -213,6 +226,7 @@ class manual_transfer_wzd(models.TransientModel):
         Get a task for a user and type defined in my args.
         """
         user_id = my_args.get('user_id', False)
+        my_args = my_args.get('vals', {})
         package_id= my_args.get('package_id', False)
         product_id= my_args.get('product_id', False)
         quantity = my_args.get('quantity', 1)
@@ -221,6 +235,7 @@ class manual_transfer_wzd(models.TransientModel):
         dest_location_id= my_args.get('dest_location_id', False)
         do_pack = my_args.get('do_pack', 'no_pack')
         package = my_args.get('package', False)
+
         vals_prod_line_ids ={
             'package_id': package_id,
             'product_id': product_id,
@@ -243,20 +258,12 @@ class manual_transfer_wzd(models.TransientModel):
 
         # CHANGUING USER ID t_wzd.sudo(user_id) no funciona
         wzd_obj = wzd_obj_uid.create({'pack_line_ids': vals_pack_line_ids})
-        if package: #or product_id!=False or lot_id!=False or package_id==False:
-            vals = vals_pack_line_ids
-            val_ids = 'pack_line_ids'
-
-        else:
+        if product_id: #or product_id!=False or lot_id!=False or package_id==False:
             vals = vals_prod_line_ids
             val_ids = 'prod_line_ids'
-
-
-        res = wzd_obj.write({val_ids: [(0,0, vals)]})
-
-        wzd_obj.do_manual_transfer()
-
-        return True
-
-
-        #
+        else:
+            vals = vals_pack_line_ids
+            val_ids = 'pack_line_ids'
+        wzd_obj.write({val_ids: [(0,0, vals)]})
+        res = wzd_obj.do_manual_transfer()
+        return res

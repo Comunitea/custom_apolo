@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+        <record id="form_view_location_sequence_readonly" model="ir.ui.view">
+            <field name="name">form.view.location.sequence.readonly</field>
+            <field name="model">stock.location</field>
+            <field name="inherit_id" ref="midban_depot_stock.view_location_form_depot"/>
+            <field name="arch" type="xml">
+
+                <group name="localization" position="before">
+                  <group string="Coordinates">
+                    <field name="xy_camera"/>
+                    <field name="xy_aisle"/>
+                    <field name="xy_column"/>
+                    <field name="xy_height"/>
+                    <field name="orientation"/>
+                    <field name="order_seq"/>
+                  </group>
+                </group>
+
+                <group name="localization" position="attributes">
+                    <attribute name="invisible">False</attribute>
+                    <attribute name="string">Ordenation numbers</attribute>
+                </group>
+
+                <field name="posx" position="before">
+                    <field name="posc"/>
+                </field>
+            </field>
+        </record>
+
+        <!-- Lets search by parts of BCD Code-->
+        <record id="view_location_form_filter_coordinates" model="ir.ui.view">
+            <field name="name">view.location.form.filter.coordinates</field>
+            <field name="model">stock.location</field>
+            <field name="inherit_id" ref="stock.view_location_search"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                  <field name="xy_camera"/>
+                  <field name="xy_aisle"/>
+                  <field name="xy_column"/>
+                  <field name="xy_height"/>
+                </field>
+            </field>
+        </record>
+
+    </data>
+</openerp>

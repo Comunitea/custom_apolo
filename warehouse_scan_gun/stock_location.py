@@ -62,6 +62,7 @@ class stock_location(models.Model):
 
     @api.multi
     def get_product_by_picking_location(self, my_args):
+
         user_id = my_args.get("user_id", False)
         location_id = my_args.get("location_id", False)
         product = []
@@ -73,7 +74,7 @@ class stock_location(models.Model):
         if product_ids:
             for product_ in product_ids:
                  product.append ({'id': product_.id,
-                                  'bcd_name': product_.short_name or product_.name[25],
+                                  'bcd_name': product_.short_name or product.name[25],
                                   })
         return product
 
