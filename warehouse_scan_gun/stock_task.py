@@ -95,12 +95,12 @@ class StockTask(models.Model):
         vals = {}
         ind = 0
         for task in task_obj:
-
             values = {
                 'id': task.id,
                 'type' : task.type,
                 'paused' : task.paused,
-                'ref' : (task.wave_id.name or task.picking_id.name or (task.type[0:4] + '/' +  str(task.id))).capitalize(),
+
+                'ref' : task.wave_id.name or task.picking_id.name or task.operation_ids[0].picking_id.name,
                 #'name': task.name,
                 'ops': len(task.operation_ids) or len(task.wave_id.wave_report_ids),
                 'wave_id': task.wave_id.id or False
@@ -170,8 +170,6 @@ class StockTask(models.Model):
             wzd_obj_uid.get_reposition_task()
         elif task_type == 'picking':
             wzd_obj_uid.get_picking_task()
-
-        #import ipdb; ipdb.set_trace()
 
         domain = [
             ('user_id', '=', user_id),
@@ -314,7 +312,6 @@ class StockTask(models.Model):
 
         task_obj_uid.cancel_task()
         return True
-
 
     @api.multi
     def gun_finish_picking_task(self, my_args):

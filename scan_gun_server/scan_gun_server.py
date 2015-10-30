@@ -476,7 +476,7 @@ class ScanGunProtocol(LineReceiver):
         line = str(line)
 
         res = self.factory.odoo_con.get_package_gun_info(self.user_id, line)
-        check=line
+        check=False
         if res:
             check = PRE_PACK + str(res)
         return check
@@ -777,7 +777,7 @@ class ScanGunProtocol(LineReceiver):
                 message = u'\nError:\nRevisa Ubicaciones y/o Cantidades\n%s para volver'%KEY_VOLVER
                 self._snd(message)
             else:
-                self.print_tasks()
+                self.print_tasks(self.task_id)
                 self.handle_new_task()
             return
 
@@ -1294,6 +1294,10 @@ class ScanGunProtocol(LineReceiver):
                 return
 
             else:
+                message = u"\nNo es el paquete pedido\no no lo encuentro"
+                self.new_package_id = False
+                self._snd(self.get_str_form_repo_ops() + message)
+                return
                 self.pack = self.factory.odoo_con.get_pack_gun_info(self.user_id, line_int)
                 if line_int==self.new_package_id and confirm == False:
                       self.handle_form_repo_ops('%s%s'%(PRE_PACK,line_int), confirm=True)
@@ -1804,58 +1808,71 @@ class ScanGunProtocol(LineReceiver):
         values = {}
         self.op_id=op_['id']
         #cambiamos el paquete
-        if self.pack['package_id'] != op_['pack_id']:
-            #No cambiamos la cantidad del paquete
-            if self.new_uom_qty == self.pack['packed_qty']:
-                values ={
-                    'package_id': self.pack['package_id'],
-                    'location_id': self.pack['src_location_id'],
-                    'location_dest_id': self.pack['picking_location_id'],
-                    'lot_id': self.pack['lot_id'],
-                    #'packed_lot_id': self.pack['lot_id'],
-                    'to_process': True,
-                    'visited': True,
-                    #'product_id' : False,
-                    #'product_uom_id' : False,
-                    'product_qty': 1,
-                    #'packed_qty': self.pack['packed_qty'],
-                }
-            else:
-            #Cambiamos la cantidad del paquete
-                values ={
-                    'package_id': self.pack['package_id'],
-                    'location_id': self.pack['src_location_id'],
-                    'location_dest_id': self.pack['picking_location_id'],
-                    'lot_id': self.pack['lot_id'],
-                    #'packed_lot_id': self.pack['lot_id'],
-                    'to_process': True,
-                    'visited': True,
-                    'product_id' : self.pack['product_id'],
-                    'product_uom_id' : self.pack['uom_id'],
-                    'product_qty': self.new_uom_qty,
-                    'packed_qty': self.new_uom_qty,
-                    #'result_package_id': True
-                }
-        else:
-            #no cambiamos cantidad
-            if self.new_uom_qty == self.pack['packed_qty']:
-                values ={
-                    'to_process': True,
-                    'visited': True,
-                }
-            else:
-            #Cambiamos la cantidad del paquete
-                values ={
-                    'to_process': True,
-                    'visited': True,
-                    'product_id' : self.pack['product_id'],
-                    'product_uom_id' : self.pack['uom_id'],
-                    'product_qty': self.new_uom_qty,
-                    'packed_qty': self.new_uom_qty,
-                    #'result_package_id': True
-                }
+        # if self.pack['package_id'] != op_['pack_id']:
+        #     #No cambiamos la cantidad del paquete
+        #     if self.new_uom_qty == self.pack['packed_qty']:
+        #         values ={
+        #             'package_id': self.pack['package_id'],
+        #             'location_id': self.pack['src_location_id'],
+        #             'location_dest_id': self.pack['picking_location_id'],
+        #             'lot_id': self.pack['lot_id'],
+        #             #'packed_lot_id': self.pack['lot_id'],
+        #             'to_process': True,
+        #             'visited': True,
+        #             #'product_id' : False,
+        #             #'product_uom_id' : False,
+        #             'product_qty': 1,
+        #             #'packed_qty': self.pack['packed_qty'],
+        #         }
+        #     else:
+        #     #Cambiamos la cantidad del paquete
+        #
+        #         values ={
+        #             'package_id': self.pack['package_id'],
+        #             'location_id': self.pack['src_location_id'],
+        #             'location_dest_id': self.pack['picking_location_id'],
+        #             'lot_id': self.pack['lot_id'],
+        #             #'packed_lot_id': self.pack['lot_id'],
+        #             'to_process': True,
+        #             'visited': True,
+        #             'product_id' : self.pack['product_id'],
+        #             'product_uom_id' : self.pack['uom_id'],
+        #             'product_qty': self.new_uom_qty,
+        #             'packed_qty': self.new_uom_qty,
+        #             #'result_package_id': True
+        #         }
+        # else:
+        #es producto y no cambiamos cantidad o es paquete y no cambiamos cantidad
 
-        res = self.factory.odoo_con.change_op_values(self.user_id, self.op_id, values)
+        if self.new_uom_qty == 0:
+             values ={
+                'to_process': True,
+                'visited': True,
+           }
+        # es producto y cambiamos cantidad
+        elif op_['product_id'] and self.new_uom_qty > 0:
+             values ={
+                'product_qty': self.new_uom_qty,
+                'to_process': True,
+                'visited': True,
+            }
+        #no es producto y cambiamos cantidad
+        elif op_['product_id'] and self.new_uom_qty != self.pack['packed_qty']:
+            new_package = self.factory.odoo_con.create_package_from_gun(self.user_id)
+            #Cambiamos la cantidad del paquete
+            values ={
+                'to_process': True,
+                'visited': True,
+                'product_id' : self.pack['product_id'],
+                'product_uom_id' : self.pack['uom_id'],
+                'product_qty': self.new_uom_qty,
+                #'packed_qty': self.new_uom_qty,
+                'result_package_id': new_package.id
+            }
+
+        if values:
+
+            res = self.factory.odoo_con.change_op_values(self.user_id, self.op_id, values)
 
         if res:
             #self.print_op_tags(self.op_id)
@@ -1863,7 +1880,6 @@ class ScanGunProtocol(LineReceiver):
             self.ops = self.factory.odoo_con.get_ops(self.user_id, self.task_id, self.type)
             # y buscamos la primera no procesada
             active_op = False
-
             for op in self.ops:
                 if self.ops[op]['to_process']:
                     continue
@@ -1887,9 +1903,7 @@ class ScanGunProtocol(LineReceiver):
                 self.state = "list_repo_ops"
                 message =u"\nTodas las OPs OK"
         else:
-
             message =u"Error. Revisa cantidades"
-
         self._snd(self.get_str_list_repo_ops() + message)
         return
 
@@ -2046,7 +2060,7 @@ class ScanGunProtocol(LineReceiver):
                 #llamamos a finish_partial_task de stock_task
                 ok = self.factory.odoo_con.finish_task(self.user_id, self.task_id)
                 if ok:
-                    self.print_tasks()
+                    self.print_tasks(self.task_id)
                 self.step=0
                 self.last_state = "list_waves"
                 self.state ='menu1'
@@ -4580,7 +4594,7 @@ class ScanGunProtocol(LineReceiver):
                     if finish:  # No more operation, Return to back menu
                         res = self.factory.odoo_con.finish_task(self.user_id, self.task_id)
                         if res:
-                            self.print_tasks()
+                            self.print_tasks(self.task_id)
                         message += "Tarea Finalizada\n"
                         message += self.get_str_menu1()
                         self.state = "menu1"
@@ -5000,16 +5014,22 @@ class ScanGunProtocol(LineReceiver):
                 tag=[]
                 tag.append(tag_['id'])
                 res = self.factory.odoo_con.print_from_gun(self.user_id, tag)
-            message ="\nEnviadas a Imprimir"
+            message =u"\nEnviadas a Imprimir"
             self.step = 0
             self.packs =[]
             self._snd(self.get_str_print_tags(), message)
             return
+        message =u"\nNo te entiendo"
+        self._snd(self.get_str_print_tags(), message)
+        return
 
     def print_tasks(self, task_id):
 
         if not self.print_tag_option:
             return
+        res = self.factory.odoo_con.print_tasks(self.user_id, task_id)
+        return
+
         pack= []
         task = self.env['stock.task'].search([('id', '=', task_id)])
         if task.type !='picking':

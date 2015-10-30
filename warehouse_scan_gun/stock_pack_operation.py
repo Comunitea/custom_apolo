@@ -180,20 +180,23 @@ class stock_pack_operation(models.Model):
                 'to_process': op.to_process,
                 'qty_available':op.packed_lot_id.product_id.qty_available or 0.00
                 }
-
                 #revisar para palet_multiproducto
                 if not op.product_id:
                     domain_package = [('id', '=', op.package_id.id)]
-                    package_pool= self.env['stock.quant.package'].search(domain_package)[0]
-                    if len(package_pool)==1:
-                        values['lot']=package_pool.packed_lot_id.name
-                        values['lot_id'] = package_pool.packed_lot_id.id
-                        values['product'] = package_pool.packed_lot_id.product_id.short_name or ''
-                        values['product_id'] = package_pool.packed_lot_id.product_id.id or False
-                        values['uom']=package_pool.packed_lot_id.product_id.uom_id.name
-                        values['qty_available'] = package_pool.packed_lot_id.product_id.qty_available or 0.00
-                ind += 1
-                vals[str(ind)] = values
+                    package_pool_= self.env['stock.quant.package'].search(domain_package)
+                    if package_pool_:
+                        package_pool=package_pool_[0]
+                        if len(package_pool)==1:
+                            values['lot']=package_pool.packed_lot_id.name
+                            values['lot_id'] = package_pool.packed_lot_id.id
+                            values['product'] = package_pool.packed_lot_id.product_id.short_name or ''
+                            values['product_id'] = package_pool.packed_lot_id.product_id.id or False
+                            values['uom']=package_pool.packed_lot_id.product_id.uom_id.name
+                            values['qty_available'] = package_pool.packed_lot_id.product_id.qty_available or 0.00
+
+                if values['product_id']:
+                    ind += 1
+                    vals[str(ind)] = values
             return vals
         else:
             return False
@@ -351,7 +354,6 @@ class stock_pack_operation(models.Model):
                             _('No operation founded to set as visited'))
 
         # Browse with correct uid, an mark as visited
-        #import ipdb; ipdb.set_trace()
         try:
             env2 = op_obj.env(self._cr, user_id, self._context)
             op_obj_uid = op_obj.with_env(env2)

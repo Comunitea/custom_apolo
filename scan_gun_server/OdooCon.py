@@ -515,7 +515,17 @@ class OdooDao:
         op_data = self.connection.execute('stock.quant.package', 'create_multipack_from_gun', [], my_args)
         return op_data
 
+    def create_package_from_gun(self, user_id):
+        my_args = {'user_id': user_id}
+        op_data = self.connection.execute('stock.quant.package', 'create_package_from_gun', [], my_args)
+        return op_data
+
     def print_from_gun(self, user_id, package_ids):
         my_args = {'user_id': user_id, 'package_ids': package_ids}
         op_data = self.connection.execute('create.tag.wizard', 'print_from_gun', [], my_args)
+        return op_data
+
+    def print_task(self, user_id, task_id):
+        my_args = {'user_id': user_id, 'task_id': task_id}
+        op_data = self.connection.execute('create.tag.wizard', 'print_task_from_gun', [], my_args)
         return op_data

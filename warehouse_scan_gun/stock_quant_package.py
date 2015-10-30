@@ -80,6 +80,19 @@ class stock_quant_package(models.Model):
 
     _inherit = 'stock.quant.package'
 
+
+    @api.multi
+    def create_package_from_gun(self, my_args):
+
+        user_id = my_args.get('user_id', False)
+        pack_wzd = self.env['stock.quant.package']
+        env2 = pack_wzd.env(self._cr, user_id, self._context)
+        wzd_obj_uid = pack_wzd.with_env(env2)
+        wzd_obj = wzd_obj_uid.create()
+
+        return wzd_obj
+
+
     @api.multi
     def create_multipack_from_gun(self, my_args):
 
