@@ -112,10 +112,9 @@ class WizardOrderLocations(models.TransientModel):
                         'posx': posx,
                         'posy': posy,
                         'posz': posz,
-                        'sequence': int(my_sequence),
+                        'order_seq': my_sequence,
                         'orientation': aisle.orientation
                     }
-                    print(vals)
                     l.write(vals)
 
 

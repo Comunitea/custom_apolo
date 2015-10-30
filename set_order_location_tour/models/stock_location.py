@@ -38,6 +38,7 @@ class StockLocation(models.Model):
     posc = fields.Integer('Pos (C)')
     orientation = fields.Selection([('pos', 'Positive'), ('neg', 'Negative')],
                                    'Orentation Aisle', default='pos')
+    order_seq = fields.Char("Sequence order")
 
     @api.multi
     @api.depends('bcd_name')
@@ -61,7 +62,7 @@ class StockLocation(models.Model):
         """
         Get a sequence number very hight to know you must order that location
         """
-        vals.update({'sequence': 999999999})
+        vals.update({'order_seq': '999999999999999999'})
         res = super(StockLocation, self).create(vals)
 
         if res.get_camera() and res.usage == 'internal':

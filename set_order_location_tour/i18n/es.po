@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-30 12:28+0000\n"
-"PO-Revision-Date: 2015-10-30 12:28+0000\n"
+"POT-Creation-Date: 2015-10-30 15:31+0000\n"
+"PO-Revision-Date: 2015-10-30 15:31+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -30,6 +30,13 @@ msgstr "Orden pasillo"
 #: field:stock.aisle.order,xy_aisle:0
 msgid "Aisle code"
 msgstr "Código pasillo"
+
+#. module: set_order_location_tour
+#: code:addons/set_order_location_tour/models/stock_location.py:72
+#: code:addons/set_order_location_tour/models/stock_location.py:90
+#, python-format
+msgid "BCD Name Format must be \"AA BBB CC DD\" for                                    internal locations and child of a camera"
+msgstr "El formato del nombre BCD debe ser 'AA BBB CC DD' para ubicaciones internas e hijas de una cámara"
 
 #. module: set_order_location_tour
 #: field:stock.location,xy_camera:0
@@ -77,6 +84,8 @@ msgid "Created on"
 msgstr "Creado en"
 
 #. module: set_order_location_tour
+#: code:addons/set_order_location_tour/models/stock_location.py:71
+#: code:addons/set_order_location_tour/models/stock_location.py:89
 #: code:addons/set_order_location_tour/wizard/wizard_order_locations.py:39
 #, python-format
 msgid "Error"
@@ -125,6 +134,7 @@ msgstr "Última actualización en"
 
 #. module: set_order_location_tour
 #: selection:stock.aisle.order,orientation:0
+#: selection:stock.location,orientation:0
 msgid "Negative"
 msgstr "Negativo"
 
@@ -161,14 +171,25 @@ msgid "Orentation"
 msgstr "Orientación"
 
 #. module: set_order_location_tour
+#: field:stock.location,orientation:0
+msgid "Orentation Aisle"
+msgstr "Orentation Aisle"
+
+#. module: set_order_location_tour
 #: field:stock.location,posc:0
 msgid "Pos (C)"
 msgstr "Pos (C)"
 
 #. module: set_order_location_tour
 #: selection:stock.aisle.order,orientation:0
+#: selection:stock.location,orientation:0
 msgid "Positive"
 msgstr "Positivo"
+
+#. module: set_order_location_tour
+#: field:stock.location,order_seq:0
+msgid "Sequence order"
+msgstr "Sequencia ordenación"
 
 #. module: set_order_location_tour
 #: view:wizard.order.locations:set_order_location_tour.wizard_order_locations_view_form
@@ -187,16 +208,10 @@ msgid "This wizard will generte a sequence number according to the specific orde
 msgstr "Este asistente generará un número de secuencia  de acuerdo al orden específicado entre cámaras y pasillos."
 
 #. module: set_order_location_tour
-#: view:stock.location:set_order_location_tour.form_view_location_sequence_readonly
-#: view:stock.location:set_order_location_tour.tree_view_location_sequence_readonly
-msgid "True"
-msgstr "True"
-
-#. module: set_order_location_tour
 #: model:ir.ui.menu,name:set_order_location_tour.wizard_order_locations_menu
 #: view:wizard.order.locations:set_order_location_tour.wizard_order_locations_view_form
 msgid "Wizard Order Locations"
-msgstr "Ordenar ubicaciones"
+msgstr "Asistente ordenar ubicaciones"
 
 #. module: set_order_location_tour
 #: field:stock.camera.order,wzd_order_id:0
