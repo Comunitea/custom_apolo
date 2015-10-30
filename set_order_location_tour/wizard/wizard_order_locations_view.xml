@@ -23,9 +23,9 @@
             <field name="arch" type="xml">
                 <form string="Wizard Order Locations">
                     <p>
-                        You can set the order of cameras and inside eazh camera the aisle order.<br/>
+                        You can set the order of cameras and inside each camera the aisle order.<br/>
                         For each aisle you can set a orientation tour order.<br/>
-                        This wizard will generte a sequence number according to the specific order betwen cameras and aisles.<br/>
+                        This wizard will generte a sequence number according to the specific order between cameras and aisles.<br/>
 
                     </p>
                     <group string="Cameras Order">

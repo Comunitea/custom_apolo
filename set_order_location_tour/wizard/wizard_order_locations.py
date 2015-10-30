@@ -58,8 +58,10 @@ class WizardOrderLocations(models.TransientModel):
                                           limit=1)
                         if loc:
                             seq_cam = loc.posc
+                            seq_aisle = loc.posx
                         vals = {
                             'xy_aisle': aisle_code,
+                            'orientation': 'pos',
                             'sequence': seq_aisle
                         }
                         list_aisle_vals.append((0, 0, vals))
@@ -78,10 +80,42 @@ class WizardOrderLocations(models.TransientModel):
     def set_defined_order(self):
         print "Entro al set_defined_order"
         t_sl = self.env['stock.location']
-        # import ipdb; ipdb.set_trace()
         for cam in self.camera_order_ids:
-            locs = t_sl.search([('xy_camera', '=', cam.xy_camera)])
-            locs.write({'posc': cam.sequence})
+            posc = cam.sequence
+            my_sequence = ""
+            for aisle in cam.aisle_order_ids:
+                posx = aisle.sequence
+                my_sequence = str(posc).zfill(3) + str(posx).zfill(3)
+                domain = [('xy_camera', '=', cam.xy_camera),
+                          ('xy_aisle', '=', aisle.xy_aisle)]
+                domain_pick = domain + [('zone', '=', 'picking')]
+                domain_sto = domain + [('zone', '=', 'storage')]
+                order = 'xy_column asc, xy_height asc'
+                if aisle.orientation == 'neg':
+                    order = 'xy_column desc, xy_height asc'
+                locs_picks = t_sl.search(domain_pick, order=order)
+                locs_sto = t_sl.search(domain_sto, order=order)
+                posy = 0
+                posz = 0
+                xy_column = ""
+                for l in locs_picks + locs_sto:
+                    if xy_column != l.xy_column:
+                        xy_column = l.xy_column
+                        posy += 1
+                        posz = 0
+                    posz += 1
+
+                    my_sequence = str(posc).zfill(3) + str(posx).zfill(3) + \
+                        str(posy).zfill(3) + str(posz).zfill(3)
+                    vals = {
+                        'posc': posc,
+                        'posx': posx,
+                        'posy': posy,
+                        'posz': posz,
+                        'sequence': int(my_sequence)
+                    }
+                    print(vals)
+                    l.write(vals)
 
 
 class StockCameraOrder(models.TransientModel):
