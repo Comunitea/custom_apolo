@@ -473,13 +473,13 @@
               width: 10%;
             }
             .table-bp .col-bp-desc{
-              width: 35%;
+              width: 33%;
             }
             .table-bp .col-bp-qty{
-              width: 10%;
+              width: 11%;
             }
             .table-bp .col-bp-unit{
-              width: 10%;
+              width: 11%;
             }
             .table-bp .col-bp-price{
               width: 10%;
@@ -561,7 +561,7 @@
                               <span t-esc="move.product_id.name"/>
                             </td>
                             <td class="text-right">
-                              <span t-esc="'{0:.2f}'.format(move.product_uos_qty)"/>
+                              <span t-esc="'{0:.4f}'.format(move.product_uos_qty)"/>
                             </td>
                             <td>
                                 <span t-esc="move.product_uos.name"/>
@@ -654,15 +654,17 @@
                         <tr>
                           <td class="col-xs-4 no-padd-left no-padd-right text-right">
                             <!-- <span t-esc="'{0:.2f}'.format(tax.base)"/> -->
-                            <t t-set="amount_base" t-value="0"/>
+                            <!-- <t t-set="amount_base" t-value="0"/>
                             <t t-foreach="lines_ga[o.id].keys()" t-as="partner">
                               <t t-foreach="lines_ga[o.id][partner]" t-as="pick">
                                 <t t-foreach="pick.move_lines" t-as="move">
                                   <t t-set="amount_base" t-value="amount_base + move.price_subtotal"/>
                                 </t>
                               </t>
-                            </t>
-                            <span t-esc="'{0:.2f}'.format(amount_base)"/>
+                            </t> -->
+                            <!-- <span t-esc="'{0:.2f}'.format(amount_base)"/> -->
+
+                            <span t-esc="'{0:.2f}'.format(tax.base)"/>
                           </td>
                           <td class="col-xs-4 no-padd-left no-padd-right text-right">
                             <span t-esc="tax.name"/>

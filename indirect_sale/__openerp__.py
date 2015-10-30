@@ -25,7 +25,8 @@
     "category": "EDI",
     "website": "www.comunitea.com",
     "description": """Allow to create indirect sales without invoice""",
-    "depends": ["sale_stock"],
+    "depends": ["sale_stock",
+                "midban_depot_stock"], # Because onchange_partner_id
     "data": ["sale_view.xml",
              "respartner_view.xml",
              "stock_view.xml"],

@@ -35,6 +35,20 @@ class SaleOrder(models.Model):
                                 #    default=False) #checked:is indirect customer
                                    related="partner_id.indirect_customer") #checked:is indirect customer
 
+    def onchange_partner_id(self, cr, uid, ids, part, context=None):
+        """
+        If indirect customer get the supplier to the order
+        """
+        res = super(SaleOrder, self).onchange_partner_id(cr,
+                                                         uid,
+                                                         ids,
+                                                         part,
+                                                         context=context)
+        partner_t = self.pool.get('res.partner')
+        part = partner_t.browse(cr, uid, part, context=context)
+        if part and part.indirect_customer and part.supplier_ids:
+            res['value']['supplier_id'] = part.supplier_ids[0]
+        return res
 
     @api.onchange('supplier_id')
     def onchange_supplier_id(self):
