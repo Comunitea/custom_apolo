@@ -19,6 +19,8 @@
 #
 ##############################################################################
 from openerp import models, fields, api
+from openerp.exceptions import except_orm
+from openerp.tools.translate import _
 
 
 class StockLocation(models.Model):
@@ -34,6 +36,8 @@ class StockLocation(models.Model):
     xy_height = fields.Char(compute='_get_coordinates_names', string="Height",
                             readonly=True, store=True)
     posc = fields.Integer('Pos (C)')
+    orientation = fields.Selection([('pos', 'Positive'), ('neg', 'Negative')],
+                                   'Orentation Aisle', default='pos')
 
     @api.multi
     @api.depends('bcd_name')
@@ -51,3 +55,39 @@ class StockLocation(models.Model):
                 loc.xy_aisle = bcd_name_parts[1]
                 loc.xy_column = bcd_name_parts[2]
                 loc.xy_height = bcd_name_parts[3]
+
+    @api.model
+    def create(self, vals):
+        """
+        Get a sequence number very hight to know you must order that location
+        """
+        vals.update({'sequence': 999999999})
+        res = super(StockLocation, self).create(vals)
+
+        if res.get_camera() and res.usage == 'internal':
+            parts = res.bcd_name.split(" ")
+            if len(parts) != 4:
+                raise except_orm(_('Error'),
+                                 _('BCD Name Format must be "AA BBB CC DD" for \
+                                   internal locations and child of a camera'))
+            res.name = parts[1] + "/" + parts[2] + "/" + parts[3]
+        return res
+
+    @api.multi
+    def write(self, vals):
+
+        """
+        Get a sequence number very hight to know you must order that location
+        """
+        name = vals.get('name', False) or self.name
+        bcd_name = vals.get('bcd_name', False) or self.bcd_name
+        if (vals.get('name', False) or vals.get('bcd_name', False))\
+                and self.get_camera() and self.usage == 'internal':
+            parts = bcd_name.split(" ")
+            if len(parts) != 4:
+                raise except_orm(_('Error'),
+                                 _('BCD Name Format must be "AA BBB CC DD" for \
+                                   internal locations and child of a camera'))
+            vals['name'] = parts[1] + "/" + parts[2] + "/" + parts[3]
+        res = super(StockLocation, self).write(vals)
+        return res

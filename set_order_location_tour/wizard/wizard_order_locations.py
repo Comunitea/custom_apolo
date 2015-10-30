@@ -61,7 +61,7 @@ class WizardOrderLocations(models.TransientModel):
                             seq_aisle = loc.posx
                         vals = {
                             'xy_aisle': aisle_code,
-                            'orientation': 'pos',
+                            'orientation': loc.orientation,
                             'sequence': seq_aisle
                         }
                         list_aisle_vals.append((0, 0, vals))
@@ -112,7 +112,8 @@ class WizardOrderLocations(models.TransientModel):
                         'posx': posx,
                         'posy': posy,
                         'posz': posz,
-                        'sequence': int(my_sequence)
+                        'sequence': int(my_sequence),
+                        'orientation': aisle.orientation
                     }
                     print(vals)
                     l.write(vals)
@@ -125,7 +126,7 @@ class StockCameraOrder(models.TransientModel):
     _rec_name = 'xy_camera'
 
     wzd_order_id = fields.Many2one('wizard.order.locations', 'Wzd Order')
-    xy_camera = fields.Char("Camera code")
+    xy_camera = fields.Char("Camera code", readonly=True)
     aisle_order_ids = fields.One2many('stock.aisle.order', 'ord_cam_id',
                                       "Aisle Order")
     sequence = fields.Integer("Order")
@@ -138,7 +139,7 @@ class StockAisleOrder(models.TransientModel):
     _rec_name = 'xy_aisle'
 
     ord_cam_id = fields.Many2one('stock.camera.order', 'Order Camera')
-    xy_aisle = fields.Char("Aisle code")
+    xy_aisle = fields.Char("Aisle code", readonly=True)
     orientation = fields.Selection([('pos', 'Positive'), ('neg', 'Negative')],
                                    'Orentation', default='pos')
     sequence = fields.Integer("Order")

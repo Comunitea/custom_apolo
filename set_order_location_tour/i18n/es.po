@@ -196,7 +196,7 @@ msgstr "True"
 #: model:ir.ui.menu,name:set_order_location_tour.wizard_order_locations_menu
 #: view:wizard.order.locations:set_order_location_tour.wizard_order_locations_view_form
 msgid "Wizard Order Locations"
-msgstr "Asistente ordenar ubicaciones"
+msgstr "Ordenar ubicaciones"
 
 #. module: set_order_location_tour
 #: field:stock.camera.order,wzd_order_id:0

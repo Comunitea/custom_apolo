@@ -17,6 +17,7 @@
                     <field name="xy_aisle"/>
                     <field name="xy_column"/>
                     <field name="xy_height"/>
+                    <field name="orientation"/>
                   </group>
                 </group>
 
