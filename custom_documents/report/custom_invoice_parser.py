@@ -67,7 +67,7 @@ class custom_invoice_parser(models.AbstractModel):
                     'ref': line.product_id.default_code,
                     'des': line.product_id.name,
                     'iva': iva,
-                    'qty': '{0:.2f}'.format(line.quantity),
+                    'qty': '{0:.4f}'.format(line.quantity),
                     'unit': line.uos_id.name,
                     'pric_price': '{0:.2f}'.format(line.price_unit),
                     'app_price': '{0:.2f}'.format(line.price_unit),

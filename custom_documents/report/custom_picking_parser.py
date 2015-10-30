@@ -65,9 +65,9 @@ class custom_picking_parser(models.AbstractModel):
                 op_info = {
                     'lot_name': '',
                     'lot_date': '',
-                    'uos_qty': '{0:.2f}'.format(op.uos_qty),
+                    'uos_qty': '{0:.4f}'.format(op.uos_qty),
                     'uos_name': op.uos_id and op.uos_id.name or '',
-                    'uom_qty': '{0:.2f}'.format(op.product_qty),
+                    'uom_qty': '{0:.4f}'.format(op.product_qty),
                     'uom_name': op.product_uom_id and
                     op.product_uom_id.name or ''
                 }
@@ -88,7 +88,7 @@ class custom_picking_parser(models.AbstractModel):
                 'ref': move.product_id.default_code,
                 'des': move.product_id.name,
                 'iva': iva,
-                'qty': '{0:.2f}'.format(move.product_uos_qty),
+                'qty': '{0:.4f}'.format(move.product_uos_qty),
                 'unit': move.product_uos.name,
                 'pric_price': '{0:.2f}'.format(pu),
                 'app_price': '{0:.2f}'.format(pu),
@@ -140,7 +140,7 @@ class custom_picking_parser(models.AbstractModel):
                     new_qty_sc = ind_total_units[unit][1] + qty_sc
                     ind_total_units[unit] = (new_qty, new_qty_sc)
 
-        tfoot['sum_qty'] = '{0:.2f}'.format(move_qty)
+        tfoot['sum_qty'] = '{0:.4f}'.format(move_qty)
         tfoot['sum_net'] = '{0:.2f}'.format(move_net)
         # Calc indirect totals
         rem_num_units = len(ind_total_units.keys())
