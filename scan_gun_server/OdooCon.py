@@ -221,6 +221,17 @@ class OdooDao:
         ops_data = self.connection.execute('stock.picking', 'get_routes_menu', [], my_args)
         return ops_data
 
+    def get_packs_in_same_picking(self, user_id = 1, package_id = False):
+        my_args = {'user_id': user_id, 'package_id': package_id}
+        ops_data = self.connection.execute('stock.picking', 'get_packs_in_same_picking', [], my_args)
+        return ops_data
+
+    def create_multipack_from_pick(self, user_id = 1, pick_id = False, ops = []):
+        my_args = {'user_id': user_id, 'pick' : pick_id, 'ops': ops}
+        ops_data = self.connection.execute('stock.picking', 'create_multipack_from_pick', [], my_args)
+        return ops_data
+
+
     def get_machines_menu(self, type):
 
         res = {}
@@ -393,7 +404,7 @@ class OdooDao:
         op_data = self.connection.execute('stock.quant.package', 'get_package_gun_info', [], my_args)
         return op_data
 
-    def create_package_from_gun(self, user_id, values):
+    def create_package_from_gun(self, user_id, values = {}):
         my_args = {'user_id': user_id, 'values': values}
         package_data = self.connection.execute('stock.quant.package', 'create_package_from_gun', [], my_args)
         return package_data
@@ -448,6 +459,12 @@ class OdooDao:
         op_data = self.connection.execute('stock.location', 'get_product_by_picking_location', [], my_args)
         return op_data
 
+
+    def get_package_of_lot_from_gun(self, user_id, location_id=False, lot_id = False):
+        my_args = {'user_id': user_id, 'location_id': location_id, 'lot_id':lot_id}
+        op_data = self.connection.execute('stock.location', 'get_package_of_lot_from_gun', [], my_args)
+        return op_data
+
     def get_lot_gun_info(self, user_id, lot_id):
         my_args = {'user_id': user_id, 'lot_id': lot_id}
         op_data = self.connection.execute('stock.production.lot', 'get_lot_gun_info', [], my_args)
@@ -493,12 +510,12 @@ class OdooDao:
         res = self.connection.execute('wave.report', 'change_wave_op_values_packed_change', [], my_args)
         return res
 
-    def create_reposition_from_gun(self, user_id, selected_loc_ids, limit):
-        my_args = {'user_id': user_id, 'selected_loc_ids' : selected_loc_ids, 'limit' : limit}
-        res = self.connection.execute('reposition.wizard', 'create_reposition_from_gun', [], my_args)
+    def create_reposition_from_gun(self, user_id, selected_loc_ids, limit, capacity):
+        my_args = {'user_id': user_id, 'selected_loc_ids' : selected_loc_ids, 'limit' : limit, 'capacity':capacity}
+        res, error = self.connection.execute('reposition.wizard', 'create_reposition_from_gun', [], my_args)
         # my_args = {'user_id': user_id, 'picks': res}
         # res = self.connection.execute('stock.pack.operation', 'add_task_to_created_rep', [], my_args)
-        return res
+        return res, error
 
     def check_picking_zone(self, user_id, product_id, picking_location_id, write = True):
         my_args = {'user_id': user_id, 'picking_location_id' : picking_location_id, 'product_id' : product_id, 'write': write}
@@ -513,11 +530,6 @@ class OdooDao:
     def create_multipack_from_gun(self, user_id, package_id):
         my_args = {'user_id': user_id, 'package_id': package_id}
         op_data = self.connection.execute('stock.quant.package', 'create_multipack_from_gun', [], my_args)
-        return op_data
-
-    def create_package_from_gun(self, user_id):
-        my_args = {'user_id': user_id}
-        op_data = self.connection.execute('stock.quant.package', 'create_package_from_gun', [], my_args)
         return op_data
 
     def print_from_gun(self, user_id, package_ids):

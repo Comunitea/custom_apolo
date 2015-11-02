@@ -279,3 +279,16 @@ class stock_location(models.Model):
 
 
         return new_loc_ids
+
+    @api.multi
+    def get_package_of_lot_from_gun(self, my_args):
+        location_id = my_args.get("location_id", False)
+        lot_id= my_args.get("lot_id", False)
+        user_id = my_args.get('user_id', False)
+
+
+        location_dest = self.browse(location_id)
+        pack = location_dest.get_package_of_lot(lot_id)
+        res =pack.id if pack else False
+
+        return res

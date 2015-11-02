@@ -94,13 +94,16 @@ class StockTask(models.Model):
         task_obj = self.search(domain)
         vals = {}
         ind = 0
+        ref =''
         for task in task_obj:
+            if task.operation_ids:
+                ref = task.operation_ids[0].picking_id.name
             values = {
                 'id': task.id,
                 'type' : task.type,
                 'paused' : task.paused,
 
-                'ref' : task.wave_id.name or task.picking_id.name or task.operation_ids[0].picking_id.name,
+                'ref' : task.wave_id.name or task.picking_id.name or ref or '',
                 #'name': task.name,
                 'ops': len(task.operation_ids) or len(task.wave_id.wave_report_ids),
                 'wave_id': task.wave_id.id or False
@@ -130,7 +133,9 @@ class StockTask(models.Model):
             ('state', '=', 'assigned'),
             ('paused', '=', False),
         ]
-        task_obj = self.search(domain)
+        ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': user_id}
+        self_ = self.env['stock.task'].with_context(ctx)
+        task_obj = self.search(domain).with_context(ctx)
         if task_obj:
             print "Te doy la que tenias"
             return task_obj.id
@@ -148,17 +153,17 @@ class StockTask(models.Model):
             'print_report': False,
             #'date_planned':date_planned,
             'trans_route_id':route_id,
-            'date_planned': date_planned
-            # 'max_loc_ops':
-            # 'min_loc_replenish':
+            'date_planned': date_planned,
+            'max_loc_ops': 12,
+            'min_loc_replenish': 5
             # 'warehouse_id':
             # 'trans_route_id':
             # 'date_planned':
         }
-        t_wzd = self.env['assign.task.wzd']
+        t_wzd = self.env['assign.task.wzd'].with_context(ctx)
         # CHANGUING USER ID t_wzd.sudo(user_id) no funciona
 
-        env2 = t_wzd.env(self._cr, user_id, self._context)
+        env2 = t_wzd.env(self._cr, user_id, ctx)
         wzd_obj= t_wzd.with_env(env2)
         wzd_obj_uid= wzd_obj.create(vals)
         for camera in camera_id:
@@ -302,7 +307,6 @@ class StockTask(models.Model):
 
     @api.multi
     def gun_cancel_task(self, my_args):
-
         task_id = my_args.get('task_id', False)
         user_id = my_args.get('user_id', False)
 

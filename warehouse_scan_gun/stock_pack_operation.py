@@ -85,11 +85,13 @@ class stock_pack_operation(models.Model):
     def get_ops_from_wave (self, my_args):
         wave_id = my_args.get ('wave_id', 0)
         type = my_args.get('type', 'ubication')
+        user_id = my_args('user_id', False)
 
         domain = [
             ('id', '=', wave_id)
         ]
-        wave_reports= self.env['wave.report'].search(domain)
+        ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': user_id}
+        wave_reports= self.env['wave.report'].search(domain).with_context(ctx)
         ops = wave_reports.operation_ids
         vals = {}
         ind = 0
@@ -97,9 +99,9 @@ class stock_pack_operation(models.Model):
             for op in ops:
                 values = {
                 'ID': op.id,
-                'product': op.product_id and op.product_id.short_name or "",
+                'product': op.product_id.short_name or "",
                 'CANTIDAD': op.product_qty,
-                'lot': op.packed_lot_id and op.packed_lot_id.name or "",
+                'lot': op.packed_lot_id.name or "",
                 'PAQUETE': op.package_id.id and op.package_id.name or "",
                 'ORIGEN': op.location_id.bcd_name,
                 'DESTINO': op.location_dest_id.bcd_name,
@@ -112,16 +114,16 @@ class stock_pack_operation(models.Model):
                 'paquete_dest_id' : op.result_package_id.id or False,
                 'uom' :op.product_uom_id and op.product_uom_id.name or '',
                 'origen' : op.location_id.get_short_name(),
-                'origen_bcd' : op.location_id.bcd_name or op.location_id.get_short_name(),
-                'destino' : op.location_dest_id.get_short_name(),
-                'destino_bcd' : op.location_dest_id.bcd_name or op.location_dest_id.get_short_name(),
+                'origen_bcd' : op.location_id.bcd_name or op.location_id.name,
+                'destino' : op.location_dest_id.bcd_name or op.location_dest_id.name,
+                'destino_bcd' : op.location_dest_id.bcd_name or op.location_dest_id.name,
                 'product_id': op.product_id.id or False,
                 'lot_id': op.packed_lot_id.id,
                 'qty_available':op.packed_lot_id.product_id.qty_available or 0.00
                  }
                 if not op.product_id:
                     domain_package = [('id', '=', op.package_id.id)]
-                    package_pool= self.env['stock.quant.package'].search(domain_package)[0]
+                    package_pool= self.env['stock.quant.package'].search(domain_package)[0].with_context(ctx)
                     values['lot']=package_pool.packed_lot_id.name
                     values['lot_id'] = package_pool.packed_lot_id.id
                     values['product'] = package_pool.packed_lot_id.product_id.short_name or ""
@@ -135,12 +137,13 @@ class stock_pack_operation(models.Model):
 
     @api.multi
     def get_ops_from_task (self, my_args):
-
         task_id = my_args.get ('task_id', 0)
+        user_id = my_args.get('user_id', 1)
         domain = [
             ('task_id', '=', task_id)
         ]
-        op_obj = self.search(domain)
+        ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': user_id}
+        op_obj = self.search(domain).with_context(ctx)
         if op_obj:
             vals = {}
             ind = 0
@@ -149,6 +152,7 @@ class stock_pack_operation(models.Model):
                 'ID': op.id,
                 'id': op.id,
                 'product': op.product_id.short_name or op.packed_lot_id.product_id.short_name or op.packed_lot_id.product_id.name,
+                'op_product_id': op.product_id.id or False,
                 'CANTIDAD': op.product_qty,
                 'lot': op.packed_lot_id and op.packed_lot_id.name or "",
                 'PAQUETE': op.package_id.id and op.package_id.name or "",
@@ -164,8 +168,8 @@ class stock_pack_operation(models.Model):
                 'uom' :op.product_uom_id and op.product_uom_id.name or "",
                 'origen' : op.location_id.bcd_name,
                 'destino' : op.location_dest_id.bcd_name,
-                'origen_bcd' : op.location_id.bcd_name or op.location_id.get_short_name(),
-                'destino_bcd' : op.location_dest_id.bcd_name or op.location_dest_id.get_short_name(),
+                'origen_bcd' : op.location_id.bcd_name or op.location_id.name,
+                'destino_bcd' : op.location_dest_id.bcd_name or op.location_dest_id.name,
                 'product_id': op.product_id.id or op.packed_lot_id.product_id.id or False,
                 'lot_id': op.packed_lot_id.id,
                 'packed_qty': op.packed_qty or 0,
@@ -183,7 +187,7 @@ class stock_pack_operation(models.Model):
                 #revisar para palet_multiproducto
                 if not op.product_id:
                     domain_package = [('id', '=', op.package_id.id)]
-                    package_pool_= self.env['stock.quant.package'].search(domain_package)
+                    package_pool_= self.env['stock.quant.package'].search(domain_package).with_context(ctx)
                     if package_pool_:
                         package_pool=package_pool_[0]
                         if len(package_pool)==1:

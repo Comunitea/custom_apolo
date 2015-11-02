@@ -83,14 +83,24 @@ class stock_quant_package(models.Model):
 
     @api.multi
     def create_package_from_gun(self, my_args):
-
-        user_id = my_args.get('user_id', False)
+        user_id= my_args.get("user_id", False)
+        values = my_args.get('values', {})
         pack_wzd = self.env['stock.quant.package']
         env2 = pack_wzd.env(self._cr, user_id, self._context)
         wzd_obj_uid = pack_wzd.with_env(env2)
-        wzd_obj = wzd_obj_uid.create()
+        wzd_obj = wzd_obj_uid.create(values)
+        return wzd_obj.id
 
-        return wzd_obj
+    # @api.multi
+    # def create_package_from_gun(self, my_args):
+    #
+    #     user_id = my_args.get('user_id', False)
+    #     pack_wzd = self.env['stock.quant.package']
+    #     env2 = pack_wzd.env(self._cr, user_id, self._context)
+    #     wzd_obj_uid = pack_wzd.with_env(env2)
+    #     wzd_obj = wzd_obj_uid.create()
+    #
+    #     return wzd_obj
 
 
     @api.multi
@@ -185,16 +195,6 @@ class stock_quant_package(models.Model):
             }
         return vals
 
-    @api.multi
-    def create_package_from_gun(self, my_args):
-        user_id= my_args.get("user_id", False)
-        values = my_args.get('values', {})
-        pack_wzd = self.env['stock.quant.package']
-        env2 = pack_wzd.env(self._cr, user_id, self._context)
-        wzd_obj_uid = pack_wzd.with_env(env2)
-        wzd_obj = wzd_obj_uid.create(values)
-        return wzd_obj
-
 class stock_production_lot(models.Model):
 
     _inherit = "stock.production.lot"
@@ -225,6 +225,8 @@ class manual_transfer_wzd(models.TransientModel):
         """
         Get a task for a user and type defined in my args.
         """
+
+
         user_id = my_args.get('user_id', False)
         my_args = my_args.get('vals', {})
         package_id= my_args.get('package_id', False)
@@ -235,6 +237,10 @@ class manual_transfer_wzd(models.TransientModel):
         dest_location_id= my_args.get('dest_location_id', False)
         do_pack = my_args.get('do_pack', 'no_pack')
         package = my_args.get('package', False)
+
+        #miramos paquete en destino
+        # location_dest = self.env['stock.location'].browse(dest_location_id)
+        # pack = location_dest.get_package_of_lot(lot_id)
 
         vals_prod_line_ids ={
             'package_id': package_id,

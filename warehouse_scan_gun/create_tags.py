@@ -40,19 +40,19 @@ class create_tag_wizard(models.TransientModel):
         if task.type !='picking':
             for op in task.operation_ids:
                 if op.result_package_id:
-                    pack.append (op.result_package_id)
+                    pack.append (op.result_package_id.id)
                     my_args ={
                         'package_ids': pack,
                         'user_id':user_id
                     }
-                    res = self.print_from_gun(my_args)
 
+        res = self.print_from_gun(my_args)
+        return res
 
 
 
     @api.multi
     def print_from_gun(self, my_args):
-
         package_ids= my_args.get("package_ids", [])
         user_id = my_args.get("user_id", False)
         vals={
@@ -61,29 +61,29 @@ class create_tag_wizard(models.TransientModel):
             'tag_exist': True
         }
         context = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': user_id, 'params': {'action': 439}}
-        t_wzd = self.env['create.tag.wizard'].with_context(context)
-        new_wzd = t_wzd.create(vals)
+        t_wzd = self.env['tag'].with_context(context)
         res = False
         ids = []
+
         for package_id in package_ids:
-            package = self.env['stock.quant.package'].search([('id','=',package_id)])
-            if package:
-                val = {'package_id' : package.id,
-                       'product_id':package.product_id.id or package.quant_ids[0].product_id.id,
-                       'default_code':package.product_id.default_code or package.quant_ids[0].product_id.default_code,
-                       'lot_id': package.packed_lot_id.id and \
-                        package.quant_ids[0].lot_id.id,
-                       'wizard_id': new_wzd.id,
-                       'removal_date': package.quant_ids[0].lot_id.removal_date,
-                       }
-                res = new_wzd.write({'tag_ids': [(0,0, val)]})
+            item = self.env['stock.quant.package'].search([('id','=',package_id)])
+            if item:
+                vals = {
+                    'product_id': item.product_id.id or False,
+                    'default_code': item.product_id.default_code or "",
+                    'lot_id': item.packed_lot_id.id or False,
+                    'removal_date': item.packed_lot_id.removal_date,
+                    'package_id': item.id or False,
+                    'company_id':  self.env['res.partner'].browse([1]).id,
 
+
+                }
+                res=True
+                ids.append(t_wzd.create(vals).id)
         if res:
-
             ctx = dict(context)
-
             report = self.pool.get('report')
-            report.print_document(self._cr, user_id, [12], 'midban_depot_stock.report_stock_tag')
+            report.print_document(self._cr, user_id, ids, 'midban_depot_stock.report_stock_tag')
 
         #
         #     report.with_context(ctx).print_document(self.env['stock.location'].browse([9419]), 'stock.report_location_barcode')

@@ -31,21 +31,23 @@ class reposition_wizard(models.Model):
     def create_reposition_from_gun(self, my_args):
         selected_loc_ids = my_args.get("selected_loc_ids", [])
         limit = my_args.get("limit", 80)
+        capacity = my_args.get("capacity", 50)
         user_id = my_args.get('user_id', False)
         values = {
             'specific_locations': True,
             'selected_loc_ids':  [(6, 0, selected_loc_ids)],
             'limit': limit,
-            'capacity': 80,
+            'capacity': capacity,
             'warehouse_id' : 1,
         }
         env2 = self.env(self._cr, 1, self._context)
         wzd_obj= self.with_env(env2)
         wzd_obj_uid= wzd_obj.create(values)
-
+        error =''
         try:
             res = wzd_obj_uid.get_reposition_list()
         except:
+            error =u'\nNo hay reposiciones'
             res = False
         if res:
             picks= res['res_id']
@@ -63,4 +65,5 @@ class reposition_wizard(models.Model):
             res = t_ops_pool.write({'task_id': task_id.id, 'to_process': False})
             if res:
                 res=task_id.id
-        return res
+
+        return res, error
