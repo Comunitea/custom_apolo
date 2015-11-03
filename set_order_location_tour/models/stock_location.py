@@ -35,7 +35,14 @@ class StockLocation(models.Model):
                             readonly=True, store=True)
     xy_height = fields.Char(compute='_get_coordinates_names', string="Height",
                             readonly=True, store=True)
-    posc = fields.Integer('Pos (C)')
+    posc = fields.Integer('Camera Priority', help="Camera priority among all")
+
+    posx = fields.Integer('Aisle Priority', help="For the current camera, \
+                           priority of the aisle")
+    posy = fields.Integer('Column Priority', help="For the current aisle, \
+                           priority of the column")
+    posz = fields.Integer('Height Priority', help="For the current column, \
+                           priority of the height")
     orientation = fields.Selection([('pos', 'Positive'), ('neg', 'Negative')],
                                    'Orentation Aisle', default='pos')
     order_seq = fields.Char("Sequence order")
