@@ -103,6 +103,7 @@ class stock_pack_operation(models.Model):
                 'CANTIDAD': op.product_qty,
                 'lot': op.packed_lot_id.name or "",
                 'PAQUETE': op.package_id.id and op.package_id.name or "",
+                'package': op.package_id.id and op.package_id.name or "",
                 'ORIGEN': op.location_id.bcd_name,
                 'DESTINO': op.location_dest_id.bcd_name,
                 'PROCESADO': op.to_process,
@@ -148,14 +149,23 @@ class stock_pack_operation(models.Model):
             vals = {}
             ind = 0
             for op in op_obj:
+                if op.package_id.is_multiproduct:
+                    children_ids_product_id = op.package_id.children_ids[0].product_id
+                    lot = 'MultiPack'
+                    product_name = "Multiproducto"
+                else:
+                    children_ids_product_id=False
+                    lot = False
+                    product_name=''
                 values = {
                 'ID': op.id,
                 'id': op.id,
-                'product': op.product_id.short_name or op.packed_lot_id.product_id.short_name or op.packed_lot_id.product_id.name,
+                'product': op.product_id.short_name or op.packed_lot_id.product_id.short_name or product_name,
                 'op_product_id': op.product_id.id or False,
                 'CANTIDAD': op.product_qty,
                 'lot': op.packed_lot_id and op.packed_lot_id.name or "",
                 'PAQUETE': op.package_id.id and op.package_id.name or "",
+                'package': op.package_id.id and op.package_id.name or "",
                 'ORIGEN': op.location_id.bcd_name,
                 'DESTINO': op.location_dest_id.bcd_name,
                 'PROCESADO': op.to_process,
@@ -170,7 +180,7 @@ class stock_pack_operation(models.Model):
                 'destino' : op.location_dest_id.bcd_name,
                 'origen_bcd' : op.location_id.bcd_name or op.location_id.name,
                 'destino_bcd' : op.location_dest_id.bcd_name or op.location_dest_id.name,
-                'product_id': op.product_id.id or op.packed_lot_id.product_id.id or False,
+                'product_id': op.product_id.id or op.packed_lot_id.product_id.id or children_ids_product_id.id or False,
                 'lot_id': op.packed_lot_id.id,
                 'packed_qty': op.packed_qty or 0,
                 'uom_id':op.product_uom_id.id or op.packed_lot_id.product_id.uom_id.id or False,
@@ -179,13 +189,13 @@ class stock_pack_operation(models.Model):
                 'uos_qty': op.uos_qty or 0,
                 'changed': False,
                 'paquete': op.package_id.id and op.package_id.name or "",
-                'lot': op.packed_lot_id and op.packed_lot_id.name or "",
-                'producto': op.product_id.short_name or op.packed_lot_id.product_id.short_name or op.packed_lot_id.product_id.name,
+                'lot': op.packed_lot_id and op.packed_lot_id.name or lot,
+                'producto': op.product_id.short_name or op.packed_lot_id.product_id.short_name or product_name,
                 'to_process': op.to_process,
                 'qty_available':op.packed_lot_id.product_id.qty_available or 0.00
                 }
                 #revisar para palet_multiproducto
-                if not op.product_id:
+                if not op.product_id and not op.package_id.is_multiproduct:
                     domain_package = [('id', '=', op.package_id.id)]
                     package_pool_= self.env['stock.quant.package'].search(domain_package).with_context(ctx)
                     if package_pool_:
@@ -198,7 +208,7 @@ class stock_pack_operation(models.Model):
                             values['uom']=package_pool.packed_lot_id.product_id.uom_id.name
                             values['qty_available'] = package_pool.packed_lot_id.product_id.qty_available or 0.00
 
-                if values['product_id']:
+                if values['product_id'] and values['package']:
                     ind += 1
                     vals[str(ind)] = values
             return vals

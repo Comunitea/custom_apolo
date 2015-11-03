@@ -31,6 +31,7 @@ class OdooConnector:
         self.user_passwd = passwd
         self.user_id = 0
 
+
         #
         # Conectamos con OpenERP
         #
@@ -191,10 +192,10 @@ class OdooDao:
         camera_ids = self.connection.search('stock.location', domain, order ='name asc')
         if not camera_ids:
             raise Exception("No hay ubicaciones marcadas como cámaras")
-        res_read = self.connection.read('stock.location', camera_ids, ['bcd_name'])
+        res_read = self.connection.read('stock.location', camera_ids, ['bcd_name', 'temp_type_id'] )
         indx = 1
         for x in res_read:
-            res[indx] = (x['id'], x['bcd_name'])
+            res[indx] = (x['id'], x['bcd_name'], x['temp_type_id'][0])
             indx += 1
         return res
 

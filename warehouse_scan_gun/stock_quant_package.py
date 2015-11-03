@@ -142,7 +142,7 @@ class stock_quant_package(models.Model):
         domain = [('id', '=', package_id)]
         package = self.search(domain)
         vals = {'exist':False}
-
+        
         if package:# and package.quant_ids:
             qty = 0
             if package.quant_ids:
@@ -177,8 +177,7 @@ class stock_quant_package(models.Model):
                 'lot': package.packed_lot_id.name or "",
                 'product_id' : package.packed_lot_id.product_id.id,
                 'product' : package.packed_lot_id.product_id.short_name
-                            or package.packed_lot_id.product_id.name or 'Vacío'
-                ,
+                            or package.packed_lot_id.product_id.name or 'Vacío',
                 'packed_qty': package.packed_qty or 0,
                 'uom' : package.uom_id.name or '',
                 'uom_id': package.uom_id.id or package.packed_lot_id.product_id.uom_id.id or False,
@@ -193,6 +192,36 @@ class stock_quant_package(models.Model):
                 'src_location_bcd': package.location_id.bcd_name or package.location_id.name or False,
                 'dest_location_bcd': False,
             }
+            if package.is_multiproduct:
+                picking_zone_id = package.children_ids[0].product_id.picking_location_id.id
+                picking_zone = 'Zona de Multipalets'
+                vals = {
+                    'exist' : True,
+                    'package' : package.name,
+                    'package_id' :package.id,
+                    'src_location_id' : package.location_id.id,
+                    'src_location': package.location_id.bcd_name or package.location_id.name or False,
+                    'dest_location_id' : False,
+                    'dest_location': False,
+                    'lot_id': False,
+                    'lot': "MultiPack",
+                    'product_id' : package.children_ids[0].product_id.id or False,
+                    'product' : 'MultiProducto',
+                    'packed_qty': package.packed_qty or 0,
+                    'uom' : package.children_ids[0].product_id.uom_id.name or '',
+                    'uom_id': package.children_ids[0].product_id.uom_id.id or False,
+                    'is_multiproduct':package.is_multiproduct,
+                    'qty':qty,
+                    'uos_id':package.uos_id.id or False,
+                    'uos':package.uos_id.name or package.uom_id.name,
+                    'uos_qty': package.uos_qty or package.packed_qty,
+                    'change': False,
+                    'picking_location_id':picking_zone_id,
+                    'picking_location':picking_zone,
+                    'src_location_bcd': package.location_id.bcd_name or package.location_id.name or False,
+                    'dest_location_bcd': False,
+                }
+
         return vals
 
 class stock_production_lot(models.Model):

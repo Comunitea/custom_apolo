@@ -111,7 +111,7 @@ class ScanGunProtocol(LineReceiver):
         self.show_keys = False
         self.views = 0 # ver pendientes, 1# ver no vistas, 2 ver todoas
         self.confirm_last_step = False
-        self.debug = False
+
         self.last = False
         self.reset_self_task()
         self.reset_self_op()
@@ -168,7 +168,7 @@ class ScanGunProtocol(LineReceiver):
         """
         Método del framework. Mensaje al establecer la conexión
         """
-        self.debug= False
+        self.factory.debug= False
         self._snd(u"Codigo de operador:")
 
     def connectionLost(self, reason = u"Se perdio la conexión"):
@@ -198,12 +198,25 @@ class ScanGunProtocol(LineReceiver):
             res = False
         return res
 
-
     def lineReceived(self, line, confirm= False):
+
+        if self.factory.debug:
+            self.lineReceived2(line = line, confirm = confirm)
+            return
+        else:
+            try:
+                self.lineReceived2(line = line, confirm = confirm)
+            except Exception, e:
+                print Exception, e.message
+                self._snd(self.last_send)
+                return
+
+    def lineReceived2(self, line, confirm= False):
         """
         Método del framework. LLamado cada vez que se recibe una linea
         """
         #try:
+        line_received = line
         if line == '' or not line:
             return
         key = False
@@ -331,8 +344,10 @@ class ScanGunProtocol(LineReceiver):
             self.handle_print_tags(line)
 
 
-        #     else:
-        #         self._snd(u"Introduciste %s, pero paso olimpicamente:" % line)
+        else:
+            message = u"Introduciste %s\n, pero no te entiendo:" %line_received
+            self._snd(self.last_send, message)
+            return
         # except Exception, e:
         #     print Exception, e.message
         #     self._snd(self.last_send)
@@ -365,13 +380,13 @@ class ScanGunProtocol(LineReceiver):
                 u'\nStep:    ' + str(self.step) + \
                 u'\nTask id: ' + str(self.task_id) + \
                 u'\nOp id:   ' + str(self.op_id)+\
-                u'\nDeb.(%s): %s'%(KEY_DEBUG, str(self.debug))+\
+                u'\nDeb.(%s): %s'%(KEY_DEBUG, str(self.factory.debug))+\
                 u'\nFiltrar : %s'%self.show_op_processed+\
                 u'\n' * 25
 
-        clean = u'\n' * 25
+
         self.last = '-'
-        if not self.show_id:
+        if not self.factory.debug:
             clean = u'\n' * 25
 
         if self.user_id:
@@ -440,7 +455,8 @@ class ScanGunProtocol(LineReceiver):
         Manejador del estado de register. Si hace read del código de usuario
         nos damos por logeados. Solo se usa la conexión central en el factory.
         """
-        if code in self.factory.users_codes:
+
+        if code in self.factory.users_codes and not self.factory.debug:
             self._snd(u"Codigo Ya Registrado\nIntroduzca codigo")
             return
 
@@ -931,7 +947,7 @@ class ScanGunProtocol(LineReceiver):
             #Es un paquete
             for op_ in self.ops:
                 op = self.ops[op_]
-                if op['PAQUETE'] == line or op['pack_id'] == self.int_(line):
+                if op['package'] == line or op['pack_id'] == self.int_(line):
                     self.last_state = "list_repo_ops"
                     self.active_op = self.int_(op_)
                     self.op_id = op['ID']
@@ -1972,7 +1988,7 @@ class ScanGunProtocol(LineReceiver):
                     if not op_processed:
                         op = self.inverse(op)
                     #op +=data_[k_]['PAQUETE'] + ' ' + data_[k_][after_PAQUETE] + '\n'
-                    op +=u'%s \n >%s\n'%(data_[k_]['PAQUETE'], data_[k_][after_PAQUETE])
+                    op +=u'%s \n >%s\n'%(data_[k_]['package'], data_[k_][after_PAQUETE])
                     strg += op
 
         keys =u'\n'
@@ -2084,7 +2100,7 @@ class ScanGunProtocol(LineReceiver):
         if order_line == PRE_PACK:
             for op_ in self.waves:
                 op = self.waves[op_]
-                if op['PAQUETE'] == line or op['pack_id'] == self.int_(line):
+                if op['package'] == line or op['pack_id'] == self.int_(line):
                     #es un paquete de la lista de paquetes de esta tarea
                     self.last_state = "list_waves"
                     self.num_order_list_ops=1
@@ -2276,7 +2292,7 @@ class ScanGunProtocol(LineReceiver):
             #miramos si está en la lista de paquetes de las operación
             for op_ in self.waves:
                 op = self.waves[op_]
-                if op['PAQUETE'] == line or op['pack_id'] == line_int:
+                if op['package'] == line or op['pack_id'] == line_int:
                     #es un paquete de la lista de paquetes de esta tarea
                     self.active_wave = op_
                     self.last_state = "list_waves"
@@ -2661,7 +2677,7 @@ class ScanGunProtocol(LineReceiver):
         menu_str = ''
         if wave_['customer_id']:
             menu_str = u"[%s] %s\n"%(wave_['ref'], wave_['customer_id'])
-        str_ = (u'%s - ')%(wave_['PAQUETE'])
+        str_ = (u'%s - ')%(wave_['package'])
         if self.step in [0] and not wave_['PROCESADO']:
             menu_str+= self.inverse(str_)
         else:
@@ -2911,7 +2927,6 @@ class ScanGunProtocol(LineReceiver):
             return
 
     def get_str_form_ops(self):
-
         self.last = "get_str_form_ops"
         if not self.ops:
             self.ops = self.factory.odoo_con.get_ops(self.user_id, self.task_id, self.type)
@@ -2934,7 +2949,7 @@ class ScanGunProtocol(LineReceiver):
 
 
         if op_['PROCESADO']:
-            self.vals["paquete"]=op_['PAQUETE']
+            self.vals["paquete"]=op_['package']
             self.vals["destino"]=op_['DESTINO']
 
         if not op_:
@@ -2954,7 +2969,7 @@ class ScanGunProtocol(LineReceiver):
         strg = header
         strg += u"%s\n"%op_['product']
 
-        strg_ = u'%s %s:%s\n'%(op_['PAQUETE'], self.show_id*str(op_['pack_id']), op_['lot'])
+        strg_ = u'%s %s:%s\n'%(op_['package'], self.show_id*str(op_['pack_id']), op_['lot'])
         if (self.step == 0 or self.step ==1) and not op_['PROCESADO']:
             strg +=self.inverse(strg_)
         else:
@@ -3197,7 +3212,7 @@ class ScanGunProtocol(LineReceiver):
         #paso 0 solo permito introducit Paquete
         if self.step == 0 or self.step==2:
             if order_line == PRE_PACK:
-                if line == self.ops[active_op]['PAQUETE'] or\
+                if line == self.ops[active_op]['package'] or\
                     self.int_(line) == self.ops[active_op]['pack_id']:
                     self.vals ['paquete'] = self.ops[active_op]['pack_id']
                     self.step = 2
@@ -4261,6 +4276,15 @@ class ScanGunProtocol(LineReceiver):
         if line in str_keys:
             if line not in self.camera_ids:
                 self.camera_ids.append (line)
+                temp_type_id = self.factory.menu_cameras[self.int_(line)][2]
+                inc=1
+                for item_ in self.factory.menu_cameras:
+                    item = self.factory.menu_cameras[item_]
+                    if item[2] == temp_type_id:
+                        if not str(inc) in self.camera_ids:
+                            self.camera_ids.append(str(inc))
+                    inc+=1
+
             else:
                 self.camera_ids.remove (line)
             self._snd(self.get_cameras_menu())
@@ -4791,7 +4815,7 @@ class ScanGunProtocol(LineReceiver):
 
         res = "x" if self.print_tag_option else " "
         menu_str = u"1 [%s] Imprimir etiquetas\n"%res
-        res = "x" if self.debug else " "
+        res = "x" if self.factory.debug else " "
         menu_str += u"2 [%s] Debug\n"%res
         res = "x" if self.show_keys else " "
         menu_str += u"3 [%s] Ayuda Teclas\n"%res
@@ -4810,7 +4834,11 @@ class ScanGunProtocol(LineReceiver):
             self._snd(self.get_menu_parametros())
             return
         if line == "2":
-            self.debug = not self.debug
+            self.factory.debug = not self.factory.debug
+            if self.factory.debug:
+                self.factory.users_codes.remove(self.code)
+            else:
+                self.factory.users_codes.append(self.code)
             self._snd(self.get_menu_parametros())
             return
         if line == "3":
@@ -4844,7 +4872,7 @@ class ScanGunProtocol(LineReceiver):
     def handle_menu_tool(self, line):
 
         print "Menu Tools"
-        if line not in ["1","2", "3", "6", "8", "9"] and line != KEY_VOLVER:
+        if line not in ["1", "3", "6", "8", "9"] and line != KEY_VOLVER:
             str_error = u"La opcion %s no es valida.\nReintentar:\n" % line
             self.state='tools'
             self._snd(self.get_menu_tools(), str_error)
@@ -5531,6 +5559,8 @@ class ScanGunFactory(Factory):
         # Códigos telnet de usuarios registrados
         self.users_codes = []
 
+
+
         server, port, db, user, password = get_connection_params(
             ['odoo_host', 'odoo_port', 'odoo_db', 'odoo_user',
              'odoo_password'])
@@ -5538,7 +5568,6 @@ class ScanGunFactory(Factory):
             # Conexión general con odoo
             self.odoo_con = OdooDao(server, port, db, user, password)
             # Obtener menu de camaras
-
             self.menu_cameras = self.odoo_con.get_cameras_menu()
         except:
             print u"Ocurrió un error al intentar conectarse con odoo"
