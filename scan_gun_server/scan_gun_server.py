@@ -253,7 +253,7 @@ class ScanGunProtocol(LineReceiver):
                     self._snd(u"%s no encontrada\n %s Volver" %(line, KEY_VOLVER))
                     return
 
-            elif len (line) == 6:
+            elif len (line) == 6 and line[0:2]!="PK":
                 line = self.check_package(line)
                 if not line:
                     message = "\nPaquete No Encontrado"

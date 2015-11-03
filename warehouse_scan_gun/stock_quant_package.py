@@ -142,7 +142,6 @@ class stock_quant_package(models.Model):
         domain = [('id', '=', package_id)]
         package = self.search(domain)
         vals = {'exist':False}
-        
         if package:# and package.quant_ids:
             qty = 0
             if package.quant_ids:
@@ -177,7 +176,8 @@ class stock_quant_package(models.Model):
                 'lot': package.packed_lot_id.name or "",
                 'product_id' : package.packed_lot_id.product_id.id,
                 'product' : package.packed_lot_id.product_id.short_name
-                            or package.packed_lot_id.product_id.name or 'Vacío',
+                            or package.packed_lot_id.product_id.name or 'Vacío'
+            ,
                 'packed_qty': package.packed_qty or 0,
                 'uom' : package.uom_id.name or '',
                 'uom_id': package.uom_id.id or package.packed_lot_id.product_id.uom_id.id or False,

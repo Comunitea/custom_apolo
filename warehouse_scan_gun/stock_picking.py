@@ -101,10 +101,8 @@ class stock_picking(models.Model):
     @api.multi
     def do_transfer(self):
         """
-        Overwrited to add update the uos_qty of package_id and
-        result_package_id
+        Overwrited print tags
         """
-
         # Se imprmen todos los que result_package_id y distinto de pack en destino
         package_ids=[]
         for pick in self:
