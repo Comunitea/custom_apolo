@@ -227,6 +227,7 @@ class ScanGunProtocol(LineReceiver):
         key = False
         if izq == "8f" or izq == "9b" or izq=="1b":
             #son teclas de fucnion
+
             line = self.function_keys(line.encode('hex'))
             if line:
                 key = True
@@ -262,10 +263,10 @@ class ScanGunProtocol(LineReceiver):
                     return
 
 
-        if line == "F3":
-            self.show_op_processed = not self.show_op_processed
-            #self.lineReceived(line=KEY_VOLVER)
-            return
+        # if line == "F3":
+        #     self.show_op_processed = not self.show_op_processed
+        #     #self.lineReceived(line=KEY_VOLVER)
+        #     return
 
 
         if line == "quit":
@@ -401,7 +402,6 @@ class ScanGunProtocol(LineReceiver):
             message = '\n' + message
         if not line:
             line = "\n"
-
         line = line.encode("UTF-8")
         message = message.encode("UTF-8")
         cabecera = cabecera.encode("UTF-8")
@@ -1958,6 +1958,7 @@ class ScanGunProtocol(LineReceiver):
         # En vez de operaciones, sacamos wave_reports
         self.active_wave = 1
         self.waves = self.factory.odoo_con.get_wave_reports_from_task(self.user_id, self.task_id, self.type)
+
         header = u"Picks %s %s\n" %(self.task_id, self.route)
         if self.waves:
             header = u"%s\n"%self.waves['1']['name']
@@ -1966,6 +1967,8 @@ class ScanGunProtocol(LineReceiver):
     def get_str_list_wave_ops(self):
         self.last = "get_str_list_wave_ops"
         data_ = self.factory.odoo_con.get_ops(self.user_id, self.wave_id, self.type)
+        if not self.wave_id:
+            self.wave_id =  self.tasks[self.active_task]['wave_id']
         header =u"Operaciones en %s\n"%str(self.tasks[self.active_task]['wave_id'])
         return self.get_str(data_, header)
 
@@ -2042,7 +2045,6 @@ class ScanGunProtocol(LineReceiver):
             line = line [2:]
         else:
             order_line = False
-
         if not order_line:
             if line == KEY_PAUSE:
                 aux = self.task_id
@@ -2262,6 +2264,7 @@ class ScanGunProtocol(LineReceiver):
                 self.factory.odoo_con.change_op_values(self.user_id, op_id, values)
             else:
                 self.factory.odoo_con.set_wave_ops_values(self.user_id , self.wave_id, op_id, values)
+            message= u'Falta Producto para OP'
 
 
         elif (wave_['uos_qty']== self.new_uos_qty and wave_['qty'] == self.new_uom_qty)\
