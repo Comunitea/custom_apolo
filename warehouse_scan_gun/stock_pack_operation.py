@@ -83,7 +83,6 @@ class stock_pack_operation(models.Model):
 
     @api.multi
     def get_ops_from_wave (self, my_args):
-        import ipdb; ipdb.set_trace()
         wave_id = my_args.get ('wave_id', 0)
         type = my_args.get('type', 'ubication')
         user_id = my_args.get('user_id', False)
