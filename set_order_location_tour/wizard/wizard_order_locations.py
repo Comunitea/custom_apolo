@@ -66,13 +66,15 @@ class WizardOrderLocations(models.TransientModel):
                         }
                         list_aisle_vals.append((0, 0, vals))
                 # Creating order cameras model
+                list_aisle_vals.sort(key=lambda x: x[2]['sequence'])
                 vals = {
                     'xy_camera': cam_code,
+                    'aisle_order_ids': list_aisle_vals,
                     'sequence': seq_cam,
-                    'aisle_order_ids': list_aisle_vals
 
                 }
                 list_camera_vals.append((0, 0, vals))
+        list_camera_vals.sort(key=lambda x: x[2]['sequence'])
         res.update({'camera_order_ids': list_camera_vals})
         return res
 
