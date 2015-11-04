@@ -44,6 +44,7 @@ class stock_picking_wave(models.Model):
                     'CANTIDAD': op.product_qty or 0.00,
                     'lot': op.lot_id and op.lot_id.name or "",
                     'PAQUETE': op.pack_id and op.pack_id.name or "",
+                    'package': op.pack_id.id and op.pack_id.name or "",
                     'ORIGEN': op.location_id.bcd_name,
                     'DESTINO': 'Salida', #; op.location_dest_id.bcd_name,
                     'PROCESADO': op.to_process or False,

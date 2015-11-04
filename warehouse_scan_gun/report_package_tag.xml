@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+    <record id="view_wave_report_tree_revised" model="ir.ui.view">
+         <field name="name">wave.report.tree</field>
+         <field name="model">wave.report</field>
+         <field name="inherit_id" ref="midban_depot_stock.view_wave_report_tree"/>
+         <field name="arch" type="xml">
+                 <field name="sequence"  position="before">
+                     <field name="to_revised"/>
+                     <field name="to_process"/>
+                 </field>
+                 <field name="sequence" position="attributes">
+                     <attribute name="invisible">True</attribute>
+                 </field>
+                 <field name="customer_id" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                 </field>
+         </field>
+    </record>
+
+    <record id="view_wave_report_form_revised" model="ir.ui.view">
+         <field name="name">wave.report.form</field>
+         <field name="model">wave.report</field>
+         <field name="inherit_id" ref="midban_depot_stock.view_wave_report_form"/>
+         <field name="arch" type="xml">
+              <field name="customer_id"  position="after">
+                  <group>
+                      <field name="to_process"/>
+                      <field name="visited"/>
+                  </group>
+                  <group>
+                      <field name="to_revised"/>
+                      <field name="wave_report_revised_id"/>
+                  </group>
+              </field>
+         </field>
+    </record>
+
+</data>
+</openerp>

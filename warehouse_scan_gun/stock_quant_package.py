@@ -83,14 +83,24 @@ class stock_quant_package(models.Model):
 
     @api.multi
     def create_package_from_gun(self, my_args):
-
-        user_id = my_args.get('user_id', False)
+        user_id= my_args.get("user_id", False)
+        values = my_args.get('values', {})
         pack_wzd = self.env['stock.quant.package']
         env2 = pack_wzd.env(self._cr, user_id, self._context)
         wzd_obj_uid = pack_wzd.with_env(env2)
-        wzd_obj = wzd_obj_uid.create()
+        wzd_obj = wzd_obj_uid.create(values)
+        return wzd_obj.id
 
-        return wzd_obj
+    # @api.multi
+    # def create_package_from_gun(self, my_args):
+    #
+    #     user_id = my_args.get('user_id', False)
+    #     pack_wzd = self.env['stock.quant.package']
+    #     env2 = pack_wzd.env(self._cr, user_id, self._context)
+    #     wzd_obj_uid = pack_wzd.with_env(env2)
+    #     wzd_obj = wzd_obj_uid.create()
+    #
+    #     return wzd_obj
 
 
     @api.multi
@@ -132,7 +142,6 @@ class stock_quant_package(models.Model):
         domain = [('id', '=', package_id)]
         package = self.search(domain)
         vals = {'exist':False}
-
         if package:# and package.quant_ids:
             qty = 0
             if package.quant_ids:
@@ -168,7 +177,7 @@ class stock_quant_package(models.Model):
                 'product_id' : package.packed_lot_id.product_id.id,
                 'product' : package.packed_lot_id.product_id.short_name
                             or package.packed_lot_id.product_id.name or 'Vacío'
-                ,
+            ,
                 'packed_qty': package.packed_qty or 0,
                 'uom' : package.uom_id.name or '',
                 'uom_id': package.uom_id.id or package.packed_lot_id.product_id.uom_id.id or False,
@@ -183,17 +192,37 @@ class stock_quant_package(models.Model):
                 'src_location_bcd': package.location_id.bcd_name or package.location_id.name or False,
                 'dest_location_bcd': False,
             }
-        return vals
+            if package.is_multiproduct:
+                picking_zone_id = package.children_ids[0].product_id.picking_location_id.id
+                picking_zone = 'Zona de Multipalets'
+                vals = {
+                    'exist' : True,
+                    'package' : package.name,
+                    'package_id' :package.id,
+                    'src_location_id' : package.location_id.id,
+                    'src_location': package.location_id.bcd_name or package.location_id.name or False,
+                    'dest_location_id' : False,
+                    'dest_location': False,
+                    'lot_id': False,
+                    'lot': "MultiPack",
+                    'product_id' : package.children_ids[0].product_id.id or False,
+                    'product' : 'MultiProducto',
+                    'packed_qty': package.packed_qty or 0,
+                    'uom' : package.children_ids[0].product_id.uom_id.name or '',
+                    'uom_id': package.children_ids[0].product_id.uom_id.id or False,
+                    'is_multiproduct':package.is_multiproduct,
+                    'qty':qty,
+                    'uos_id':package.uos_id.id or False,
+                    'uos':package.uos_id.name or package.uom_id.name,
+                    'uos_qty': package.uos_qty or package.packed_qty,
+                    'change': False,
+                    'picking_location_id':picking_zone_id,
+                    'picking_location':picking_zone,
+                    'src_location_bcd': package.location_id.bcd_name or package.location_id.name or False,
+                    'dest_location_bcd': False,
+                }
 
-    @api.multi
-    def create_package_from_gun(self, my_args):
-        user_id= my_args.get("user_id", False)
-        values = my_args.get('values', {})
-        pack_wzd = self.env['stock.quant.package']
-        env2 = pack_wzd.env(self._cr, user_id, self._context)
-        wzd_obj_uid = pack_wzd.with_env(env2)
-        wzd_obj = wzd_obj_uid.create(values)
-        return wzd_obj
+        return vals
 
 class stock_production_lot(models.Model):
 
@@ -225,6 +254,8 @@ class manual_transfer_wzd(models.TransientModel):
         """
         Get a task for a user and type defined in my args.
         """
+
+
         user_id = my_args.get('user_id', False)
         my_args = my_args.get('vals', {})
         package_id= my_args.get('package_id', False)
@@ -235,6 +266,10 @@ class manual_transfer_wzd(models.TransientModel):
         dest_location_id= my_args.get('dest_location_id', False)
         do_pack = my_args.get('do_pack', 'no_pack')
         package = my_args.get('package', False)
+
+        #miramos paquete en destino
+        # location_dest = self.env['stock.location'].browse(dest_location_id)
+        # pack = location_dest.get_package_of_lot(lot_id)
 
         vals_prod_line_ids ={
             'package_id': package_id,

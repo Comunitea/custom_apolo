@@ -7,8 +7,8 @@ import socket
 import traceback
 import psycopg2
 
-class fix_stock_location(object):
-    def __init__(self, dbname, user, passwd, loc_name):
+class fix_package_locations(object):
+    def __init__(self, dbname, user, passwd):
         """método incial"""
 
         try:
@@ -18,8 +18,6 @@ class fix_stock_location(object):
             self.dbname = dbname
             self.user_name = user
             self.user_passwd = passwd
-            self.loc_name = loc_name
-
             #
             # Conectamos con OpenERP
             #
@@ -27,7 +25,7 @@ class fix_stock_location(object):
             self.user_id = login_facade.login(self.dbname, self.user_name, self.user_passwd)
             self.object_facade = xmlrpclib.ServerProxy(self.url_template % (self.server, self.port, 'object'))
 
-            res = self.fix_stock_location()
+            res = self.fix_package_locations()
             #con exito
             if res:
                 print ("All created")
@@ -147,77 +145,11 @@ class fix_stock_location(object):
         except xmlrpclib.Fault, err:
             raise Exception(u'Error %s en exec_workflow: %s' % (err.faultCode, err.faultString))
 
-    def fix_stock_location(self):
-        def get_ids(code):
-            max_id = False
-            min_id = False
-            pool = self.search('stock.location', [('bcd_code', 'ilike', code)], order = 'id desc')
-            if len(pool) == 2:
-                max_id = pool[0]
-                min_id = pool[1]
-            return max_id, min_id
+    def fix_package_locations(self):
 
-
-
-        picking_loc_ids = self.search('stock.location', [('bcd_code', 'ilike', self.loc_name +'%')], order = 'id ASC')
-
-        for loc_ in picking_loc_ids:
-            #import ipdb; ipdb.set_trace()
-            loc = self.read('stock.location', loc_, ['bcd_code'])
-            print loc['bcd_code']
-            max_id, min_id = get_ids(loc['bcd_code'])
-            if min_id:
-                print "Operacion: %s Se cambia de %s a %s"%(loc, min_id, max_id)
-                #cambiamos en stock_pack_operation
-
-
-                op_pool = self.search('stock.pack.operation', [('location_dest_id', '=', min_id)])
-                val ={'location_dest_id': max_id}
-                for op in op_pool:
-                    self.write('stock.pack.operation', op, val)
-
-                op_pool = self.search('stock.pack.operation', [('location_id', '=', min_id)])
-                val ={'location_id': max_id}
-                for op in op_pool:
-                    self.write('stock.pack.operation', op, val)
-
-                op_pool = self.search('stock.quant', [('location_id', '=', min_id)])
-                val ={'location_id': max_id}
-                for op in op_pool:
-                    self.write('stock.quant', op, val)
-                #
-                # op_pool = self.search('stock.move', [('location_id', '=', min_id)])
-                # val ={'location_id': max_id}
-                #
-                # conn_string = "dbname='TEST_odoo_apolo' user='admin' password='AdminApolo15'"
-                # conn = psycopg2.connect(conn_string)
-                # cursor = conn.cursor()
-                # sql = "update from %s set %s=%s where %s = %s"%('stock_move', 'location_id', max_id, 'location_id', min_id )
-                # cursor.execute(sql)
-                # conn.cursor
-                #
-                # for op in op_pool:
-                #     self.write('stock.move', op, val)
-                #
-                # op_pool = self.search('stock.move', [('location_dest_id', '=', min_id)])
-                # val ={'location_dest_id': max_id}
-                # for op in op_pool:
-                #     self.write('stock.move', op, val)
-
-                op_pool = self.search('stock.location', [('location_id', '=', min_id)])
-                val ={'location_id': max_id}
-                for op in op_pool:
-                    self.write('stock.location', op, val)
-
-                op_pool = self.search('product.product', [('picking_location_id', '=', min_id)])
-                val ={'picking_location_id': max_id}
-                for op in op_pool:
-                    self.write('product.product', op, val)
-
-                op_pool = self.search('stock.location', [('id', '=', min_id)])
-                val ={'active': False}
-                for op in op_pool:
-                     self.write('stock.location', op, val)
+        sql = "update stock_quant_package set location_id = " \
+              "(select min(location_id) from stock_quant where " \
+              "stock_quant.package_id = stock_quant_package.id group by package_id, location_id)"
 
         return True
 
@@ -226,4 +158,4 @@ if __name__ == "__main__":
     if len(sys.argv) < 4:
         print u"Uso: %s <dbname> <user> <password> <location to fix>" % sys.argv[0]
     else:
-        fix_stock_location(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+        fix_package_locations(sys.argv[1], sys.argv[2], sys.argv[3])
