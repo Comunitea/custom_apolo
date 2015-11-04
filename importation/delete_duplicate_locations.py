@@ -5,7 +5,6 @@ import sys
 import xmlrpclib
 import socket
 import traceback
-import psycopg2
 
 class fix_stock_location(object):
     def __init__(self, dbname, user, passwd, loc_name):

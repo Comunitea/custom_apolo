@@ -23,7 +23,6 @@ from openerp import models, fields, api
 from openerp.exceptions import except_orm
 from openerp.tools.translate import _
 
-
 class stock_picking(models.Model):
     _inherit ='stock.picking'
 
