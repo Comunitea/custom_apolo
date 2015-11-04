@@ -85,7 +85,7 @@ class stock_pack_operation(models.Model):
     def get_ops_from_wave (self, my_args):
         wave_id = my_args.get ('wave_id', 0)
         type = my_args.get('type', 'ubication')
-        user_id = my_args('user_id', False)
+        user_id = my_args.get('user_id', False)
 
         domain = [
             ('id', '=', wave_id)
