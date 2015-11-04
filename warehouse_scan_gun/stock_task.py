@@ -75,11 +75,16 @@ class StockTask(models.Model):
         user_id = my_args.get('user_id', False)
         pause_state = my_args.get ('pause_state', False)
 
-        task_obj = self.browse(task_id)
+        task_obj = self.search([('user_id', '=', user_id), ('paused', '=', False)])
         env2 = task_obj.env(self._cr, user_id, self._context)
         task_obj_uid = task_obj.with_env(env2)
-        task_obj_uid.paused = pause_state
+        task_obj_uid.write ({'paused':True})
 
+        if not pause_state:
+            task_obj = self.browse(task_id)
+            env2 = task_obj.env(self._cr, user_id, self._context)
+            task_obj_uid = task_obj.with_env(env2)
+            task_obj_uid.paused = pause_state
 
         return True
 

@@ -34,15 +34,15 @@ class stock_picking(models.Model):
         route_ids = self.search(domain, order ='name asc')
         if not route_ids:
             res = False
-        #routes_pool = self.env['']
         indx = 1
-        before = False
+        name_pool = []
         for x in route_ids:
-            if before == x.route_detail_id.detail_name_str:
-                continue
-            res[str(indx)] = (x.route_detail_id.id, x.route_detail_id.detail_name_str)
-            before = x.route_detail_id.detail_name_str
-            indx += 1
+            name = x.route_detail_id.detail_name_str
+            id = x.route_detail_id.id
+            if not name in name_pool:
+                res[str(indx)] = (id, name)
+                name_pool.append(name)
+                indx += 1
         return res
 
 

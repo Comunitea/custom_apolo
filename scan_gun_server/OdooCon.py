@@ -311,8 +311,8 @@ class OdooDao:
         done = self.connection.execute('stock.pack.operation', 'set_processed_val', [], my_args)
         return done
 
-    def set_wave_ops_values(self, user_id, wave_id, op_id, field, value):
-        my_args= {'user_id' :user_id, 'wave_id' : wave_id, 'op_id' : op_id, 'field': field, 'value' :value}
+    def set_wave_ops_values(self, user_id, wave_id, op_id, fields):
+        my_args= {'user_id' :user_id, 'wave_id' : wave_id, 'op_id' : op_id, 'fields': fields}
         done = self.connection.execute('stock.pack.operation', 'set_wave_ops_values', [], my_args)
         return done
 
