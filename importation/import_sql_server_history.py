@@ -398,6 +398,9 @@ class DatabaseImport:
                    "select numero_pedido as name, cliente as partner_id_map, fecha_carga as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
                    "'' as customer_comment, '' as note, '' as client_order_ref, 'history' as state, serie_factura + CONVERT(varchar, numero_factura) as invoice_info, "
                    "numero_carga as picking_info from dbo.cabecera_pedido_copia")
+        #~ cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
+                   #~ "observacion_pedido as customer_comment, observacion_reparto as note, pedido_sam as client_order_ref, 'draft' as state, '' as invoice_info, "
+                   #~ "'' as picking_info from dbo.cabecera_pedido_ventas")
         data = cr.fetchall()
         num_rows = len(data)
         cont = 0
@@ -427,7 +430,7 @@ class DatabaseImport:
                 'date_planned': row.date_planned and row.date_planned.strftime("%Y-%m-%d %H:%M:%S") or False,
                 'supplier_id': row.supplier_id_map and supplier_ids[0] or False,
                 'customer_comment': ((row.customer_comment and row.customer_comment.strip() != "") and ustr(row.customer_comment) or ""),
-                'note': ((row.note and row.note.strip() != "") and ustr(row.note) or "") + ((row.invoice_info and row.invoice_info.strip() != "") and "\nFACTURA: " + row.invoice_info or "") + ((row.picking_info and row.picking_info != -1 and str(int(row.picking_info)).strip() != "") and "\nALBARAN: " + str(int(row.picking_info)) or ""),
+                'note': ((row.note and row.note.strip() != "") and ustr(row.note) or "") + ((row.invoice_info and row.invoice_info.strip() != "") and "\nFACTURA: " + row.invoice_info or "") + ((row.picking_info and row.picking_info != " " and row.picking_info != -1 and str(int(row.picking_info)).strip() != "") and "\nALBARAN: " + str(int(row.picking_info)) or ""),
                 'client_order_ref': row.client_order_ref or False,
                 'state': row.state
             }
@@ -630,9 +633,9 @@ class DatabaseImport:
             conn = pyodbc.connect("DRIVER={FreeTDS};SERVER=" + self.sql_server_host + ";UID=midban;PWD=midban2015;DATABASE=" + self.sql_server_dbname + ";Port=1433;TDS_Version=10.0")
             cr = conn.cursor()
 
-            #self.import_sale_orders(cr)
-            #self.import_sale_order_lines_open(cr)
-            #self.import_sale_order_lines_history(cr)
+            self.import_sale_orders(cr)
+            self.import_sale_order_lines_open(cr)
+            self.import_sale_order_lines_history(cr)
             self.import_active_purchase_order(cr)
 
         except Exception, ex:
