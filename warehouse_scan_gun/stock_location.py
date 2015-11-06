@@ -289,6 +289,6 @@ class stock_location(models.Model):
 
         location_dest = self.browse(location_id)
         pack = location_dest.get_package_of_lot(lot_id)
-        res =pack.id if pack else False
+        res = pack.id if pack else False
 
         return res

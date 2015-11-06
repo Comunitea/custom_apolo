@@ -471,9 +471,9 @@ class OdooDao:
         op_data = self.connection.execute('stock.production.lot', 'get_lot_gun_info', [], my_args)
         return op_data
 
-    def do_manual_trasfer_from_gun(self, user_id, vals):
+    def do_manual_transfer_from_gun(self, user_id, vals):
         my_args= {'user_id': user_id, 'vals': vals}
-        res = self.connection.execute('manual.transfer.wzd', 'do_manual_trasfer_from_gun', [], my_args)
+        res = self.connection.execute('manual.transfer.wzd', 'do_manual_transfer_from_gun', [], my_args)
         return res
 
     def conv_units_from_gun(self, user_id,  product_id, uom_origen, uom_destino, supplier_id =0):

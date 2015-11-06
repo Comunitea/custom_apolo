@@ -250,12 +250,10 @@ class manual_transfer_wzd(models.TransientModel):
     _inherit = 'manual.transfer.wzd'
 
     @api.multi
-    def do_manual_trasfer_from_gun(self, my_args):
+    def do_manual_transfer_from_gun(self, my_args):
         """
         Get a task for a user and type defined in my args.
         """
-
-
         user_id = my_args.get('user_id', False)
         my_args = my_args.get('vals', {})
         package_id= my_args.get('package_id', False)
