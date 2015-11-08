@@ -718,9 +718,10 @@ class DatabaseImport:
             customer_ids = self.search("res.partner", [('customer', '=', True),('ref', '=', str(int(row.partner_id_map))),'|',('active', '=', True),('active', '=', False)])
             if customer_ids:
                 cust_data = self.read("res.partner", customer_ids[0], ["property_account_receivable"])
+
                 invoice_vals = {
-                    "number": str(int(row.number_pref)) + "/" + str(int(row.number)),
-                    "invoice_number": str(int(row.number_pref)) + "/" + str(int(row.number)),
+                    "number": ustr(row.number_pref) + "/" + str(int(row.number)),
+                    "invoice_number": ustr(row.number_pref) + "/" + str(int(row.number)),
                     "account_id": cust_data["property_account_receivable"][0],
                     "partner_id": customer_ids[0],
                     "date_invoice": row.invoice_date.strftime("%Y-%m-%d"),
@@ -732,7 +733,7 @@ class DatabaseImport:
                 invoice_id = self.create("account.invoice", invoice_vals)
                 cr.execute("select producto as product_id_map, base as uom_qty, composicion as base_qty, "
                            "precio as price_unit, descuento as discount, iva as tax_id_map, descripcion as name from "
-                           "dbo.lineas_mensual where serie = ? and numero = ?", (int(row.number_pref),int(row.number),))
+                           "dbo.lineas_mensual where serie = ? and numero = ?", (row.number_pref,int(row.number),))
                 lines_data = cr.fetchall()
                 for line in lines_data:
                     if line.product_id_map:
