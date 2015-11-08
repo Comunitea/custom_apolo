@@ -5,7 +5,6 @@ import sys
 import xmlrpclib
 import socket
 import traceback
-import psycopg2
 
 class fix_stock_location(object):
     def __init__(self, dbname, user, passwd, loc_name):
@@ -162,7 +161,6 @@ class fix_stock_location(object):
         picking_loc_ids = self.search('stock.location', [('bcd_code', 'ilike', self.loc_name +'%')], order = 'id ASC')
 
         for loc_ in picking_loc_ids:
-            #import ipdb; ipdb.set_trace()
             loc = self.read('stock.location', loc_, ['bcd_code'])
             print loc['bcd_code']
             max_id, min_id = get_ids(loc['bcd_code'])

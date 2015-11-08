@@ -26,7 +26,8 @@
     'author': 'Comunitea',
     'website': '',
     "depends": ['base',
-                'midban_depot_stock'],
+                'midban_depot_stock',
+                'base_report_to_printer'],
 
     "data": [
         "res_users_view.xml",

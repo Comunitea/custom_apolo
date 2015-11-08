@@ -190,9 +190,9 @@
                   <th class="col-iva text-right"><strong>% IVA</strong></th>
                   <th class="col-qty text-right"><strong>Qty.</strong></th>
                   <th class="col-unit"><strong>Unit</strong></th>
-                  <th class="col-pp text-right"><strong t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">Pricelist Price</strong></th>
-                  <th class="col-ap text-right"><strong t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">Applied Price</strong></th>
-                  <th class="col-net text-right"><strong t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">Net import</strong></th>
+                  <th class="col-pp text-right"><strong t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing' and o.partner_id.pick_print_op">Pricelist Price</strong></th>
+                  <th class="col-ap text-right"><strong t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing' and o.partner_id.pick_print_op">Applied Price</strong></th>
+                  <th class="col-net text-right"><strong t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing' and o.partner_id.pick_print_op">Net import</strong></th>
               </tr>
 
             </thead>
@@ -215,17 +215,17 @@
                       <span t-esc="l['unit']"/>
                   </td>
                   <td class="text-right">
-                    <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">
+                    <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing' and o.partner_id.pick_print_op">
                       <span t-esc="l['pric_price']"/>
                     </div>
                   </td>
                   <td class="text-right">
-                    <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">
+                    <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing' and o.partner_id.pick_print_op">
                       <span t-esc="l['app_price']"/>
                     </div>
                   </td>
                   <td class="text-right">
-                    <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">
+                    <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing' and o.partner_id.pick_print_op">
                       <span t-esc="l['net']"/>
                     </div>
                   </td>
@@ -271,7 +271,7 @@
 
               </td>
               <td class="text-right">
-                <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">
+                <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing' and o.partner_id.pick_print_op">
                   <span t-esc="tfoot[o.id]['sum_net']"/>
                 </div>
               </td>
@@ -492,7 +492,7 @@
         </template>
 
         <template id="picking_bottom_part">
-          <div class="row my_footer_direct" t-if="not o.indirect">
+          <div class="row my_footer_direct" t-if="not o.indirect and o.partner_id.pick_print_op">
               <table class="table3" t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">
               <thead>
                   <tr>

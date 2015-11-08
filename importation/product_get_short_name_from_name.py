@@ -162,7 +162,6 @@ class fix_stock_location(object):
         product_pool = self.search('product.product', [('short_name', 'like','')])
 
         for product in product_pool:
-            #import ipdb; ipdb.set_trace()
             loc = self.read('stock.location', loc_, ['bcd_code'])
             print loc['bcd_code']
             max_id, min_id = get_ids(loc['bcd_code'])

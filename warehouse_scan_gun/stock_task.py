@@ -75,11 +75,16 @@ class StockTask(models.Model):
         user_id = my_args.get('user_id', False)
         pause_state = my_args.get ('pause_state', False)
 
-        task_obj = self.browse(task_id)
+        task_obj = self.search([('user_id', '=', user_id), ('paused', '=', False)])
         env2 = task_obj.env(self._cr, user_id, self._context)
         task_obj_uid = task_obj.with_env(env2)
-        task_obj_uid.paused = pause_state
+        task_obj_uid.write ({'paused':True})
 
+        if not pause_state:
+            task_obj = self.browse(task_id)
+            env2 = task_obj.env(self._cr, user_id, self._context)
+            task_obj_uid = task_obj.with_env(env2)
+            task_obj_uid.paused = pause_state
 
         return True
 
@@ -294,16 +299,10 @@ class StockTask(models.Model):
 
         task_id = my_args.get('task_id', False)
         user_id = my_args.get('user_id', False)
-
         task_obj = self.browse(task_id)
         env2 = task_obj.env(self._cr, user_id, self._context)
         task_obj_uid = task_obj.with_env(env2)
         try:
-            if task_obj_uid.type == 'picking':
-                stock_picking_wave = self.env['stock.picking.wave'].browse(task_obj_uid.wave_id.id)
-                stock_picking_wave.confirm_picking()
-                stock_picking_wave.done()
-
             res = task_obj_uid.finish_partial_task()
         except:
             res = False

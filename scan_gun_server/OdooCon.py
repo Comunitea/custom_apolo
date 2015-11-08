@@ -311,8 +311,8 @@ class OdooDao:
         done = self.connection.execute('stock.pack.operation', 'set_processed_val', [], my_args)
         return done
 
-    def set_wave_ops_values(self, user_id, wave_id, op_id, field, value):
-        my_args= {'user_id' :user_id, 'wave_id' : wave_id, 'op_id' : op_id, 'field': field, 'value' :value}
+    def set_wave_ops_values(self, user_id, wave_id, op_id, fields):
+        my_args= {'user_id' :user_id, 'wave_id' : wave_id, 'op_id' : op_id, 'fields': fields}
         done = self.connection.execute('stock.pack.operation', 'set_wave_ops_values', [], my_args)
         return done
 
@@ -471,9 +471,9 @@ class OdooDao:
         op_data = self.connection.execute('stock.production.lot', 'get_lot_gun_info', [], my_args)
         return op_data
 
-    def do_manual_trasfer_from_gun(self, user_id, vals):
+    def do_manual_transfer_from_gun(self, user_id, vals):
         my_args= {'user_id': user_id, 'vals': vals}
-        res = self.connection.execute('manual.transfer.wzd', 'do_manual_trasfer_from_gun', [], my_args)
+        res = self.connection.execute('manual.transfer.wzd', 'do_manual_transfer_from_gun', [], my_args)
         return res
 
     def conv_units_from_gun(self, user_id,  product_id, uom_origen, uom_destino, supplier_id =0):

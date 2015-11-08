@@ -29,8 +29,9 @@ class stock_pack_operation(models.Model):
 
     visited = fields.Boolean('Visited', default=False)
     state= fields.Char()
-    wave_ok = fields.Boolean('Wave Ok', default = True)
+    #wave_ok = fields.Boolean('Wave Ok', default = True)
     op_package_id = fields.Many2one('stock.quant.package', 'Original Pack',  default = False)
+    wrong_qty = fields.Boolean('Wrong Qty', default=False)
 
     @api.multi
     def get_user_packet_busy(self, my_args):
@@ -68,24 +69,21 @@ class stock_pack_operation(models.Model):
         wave_id = my_args.get ('wave_id', 0)
         op_id = my_args.get('op_id',0)
         user_id = my_args.get('user_id', 0)
-        field = my_args.get('field', '')
-        value = my_args.get ('value', False)
+        fields = my_args.get('fields', '')
         domain = [('id', '=', wave_id)]
-
-        vals= {field : value}
         wave_reports= self.env['wave.report'].search(domain)
         env2 = wave_reports.env(self._cr, user_id, self._context)
         wave_reports_uid = wave_reports.with_env(env2)
         ops = wave_reports_uid.operation_ids
+        ops.write (fields)
 
-        ops.write (vals)
         return True
 
     @api.multi
     def get_ops_from_wave (self, my_args):
         wave_id = my_args.get ('wave_id', 0)
         type = my_args.get('type', 'ubication')
-        user_id = my_args('user_id', False)
+        user_id = my_args.get('user_id', False)
 
         domain = [
             ('id', '=', wave_id)

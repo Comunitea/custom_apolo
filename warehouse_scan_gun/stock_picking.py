@@ -23,7 +23,6 @@ from openerp import models, fields, api
 from openerp.exceptions import except_orm
 from openerp.tools.translate import _
 
-
 class stock_picking(models.Model):
     _inherit ='stock.picking'
 
@@ -35,15 +34,15 @@ class stock_picking(models.Model):
         route_ids = self.search(domain, order ='name asc')
         if not route_ids:
             res = False
-        #routes_pool = self.env['']
         indx = 1
-        before = False
+        name_pool = []
         for x in route_ids:
-            if before == x.route_detail_id.detail_name_str:
-                continue
-            res[str(indx)] = (x.route_detail_id.id, x.route_detail_id.detail_name_str)
-            before = x.route_detail_id.detail_name_str
-            indx += 1
+            name = x.route_detail_id.detail_name_str
+            id = x.route_detail_id.id
+            if not name in name_pool:
+                res[str(indx)] = (id, name)
+                name_pool.append(name)
+                indx += 1
         return res
 
 
@@ -98,24 +97,24 @@ class stock_picking(models.Model):
 
         return new_package_id.name
 
-    @api.multi
-    def do_transfer(self):
-        """
-        Overwrited print tags
-        """
-        # Se imprmen todos los que result_package_id y distinto de pack en destino
-        package_ids=[]
-        for pick in self:
-            for op in pick.pack_operation_ids:
-                #miramos paquete en destino
-                location_dest = self.env['stock.location'].browse(op.location_dest_id.id)
-                pack = location_dest.get_package_of_lot(op.lot_id.id or op.package_id.packed_lot_id.id)
-                if not pack and op.result_package_id.id:
-                        package_ids.append (op.result_package_id.id)
-
-        print_wzd = self.env['create.tag.wizard']
-        my_args = {'user_id': 1,'package_ids':package_ids}
-
-        res = super(stock_picking, self).do_transfer()
-
-        print_wzd.print_from_gun(my_args)
+    # @api.multi
+    # def do_transfer(self):
+    #     """
+    #     Overwrited print tags
+    #     """
+    #     # Se impr4men todos los que result_package_id y distinto de pack en destino
+    #     package_ids=[]
+    #     for pick in self:
+    #         for op in pick.pack_operation_ids:
+    #             #miramos paquete en destino
+    #             location_dest = self.env['stock.location'].browse(op.location_dest_id.id)
+    #             pack = location_dest.get_package_of_lot(op.lot_id.id or op.package_id.packed_lot_id.id)
+    #             if not pack and op.result_package_id.id:
+    #                     package_ids.append (op.result_package_id.id)
+    #
+    #     print_wzd = self.env['create.tag.wizard']
+    #     my_args = {'user_id': 1,'package_ids':package_ids}
+    #
+    #     res = super(stock_picking, self).do_transfer()
+    #
+    #     print_wzd.print_from_gun(my_args)
