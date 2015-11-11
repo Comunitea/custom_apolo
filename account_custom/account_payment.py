@@ -26,3 +26,10 @@ class account_payment_term(models.Model):
     _inherit = 'account.payment.term'
 
     cash_rigorous  = fields.Boolean('Cash rigorous')
+
+
+class AccoutInvoice(models.Model):
+
+    _inherit = "account.invoice"
+
+    state = fields.Selection(selection_add=[("history", "History")])

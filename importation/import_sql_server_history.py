@@ -23,6 +23,13 @@ IVA_MAP = {
     "4": ["S_IVA0", "P_IVA0_BC"]
 }
 
+IVAA_MAP = {
+    "10": ["S_IVA10B", "P_IVA10_BC"],
+    "4": ["S_IVA4B", "P_IVA4_BC"],
+    "21": ["S_IVA21B", "P_IVA21_BC"],
+    "0": ["S_IVA0", "P_IVA0_BC"]
+}
+
 TEMP_TYPE_MAP = {
     "D": "Seco",
     "N": "Refrigerado",
@@ -621,6 +628,158 @@ class DatabaseImport:
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
+    def import_purchase_invoice(self, cr):
+        account_id = self.search("account.account", [('code', '=', "600000000")])[0]
+        journal_id = self.search("account.journal", [('name', '=', "Diario de compras")])[0]
+        cr.execute("select dic_prov as supplier_id_map, dic_nume as inv_number, dic_femi as invoice_date, "
+                   "descuento_pp as ep_discount, fecha_vencimiento as due_date from dbo.adsd_dic")
+        purchase_invoice_data = cr.fetchall()
+        num_rows = len(purchase_invoice_data)
+        cont = 0
+        for row in purchase_invoice_data:
+            supplier_ids = self.search("res.partner", [('supplier', '=', True),('ref', '=', str(int(row.supplier_id_map))),'|',('active', '=', True),('active', '=', False)])
+            if supplier_ids:
+                sup_data = self.read("res.partner", supplier_ids[0], ["property_account_payable"])
+                invoice_vals = {
+                    "number": str(int(row.inv_number)) + " " + str(cont+1),
+                    "invoice_number": str(int(row.inv_number)) + " " + str(cont+1),
+                    "reference": str(int(row.inv_number)),
+                    "supplier_invoice_number": str(int(row.inv_number)),
+                    "account_id": sup_data["property_account_payable"][0],
+                    "partner_id": supplier_ids[0],
+                    "date_invoice": row.invoice_date.strftime("%Y-%m-%d"),
+                    "date_due": row.due_date.strftime("%Y-%m-%d"),
+                    "state": "history",
+                    "journal_id": journal_id,
+                    "type": "in_invoice"
+                }
+                invoice_id = self.create("account.invoice", invoice_vals)
+                cr.execute("select producto as product_id_map, base as uom_qty, composicion as base_qty, "
+                           "tarifa as gross_price_unit, descuento as discount, iva as tax_id_map from "
+                           "dbo.lineas_factura_compra where factura = ? and proveedor = ?", (int(row.inv_number),int(row.supplier_id_map),))
+                lines_data = cr.fetchall()
+                for line in lines_data:
+                    product_ids = self.search("product.product", [('default_code', '=', str(int(line.product_id_map))),'|',('active','=',True),('active','=',False)])
+                    if product_ids:
+                        product_data = self.read("product.product", product_ids[0], ["name"])
+                        product_id = product_ids[0]
+                        line_name = product_data["name"]
+                    else:
+                        product_id = self.import_products(cr, int(line.product_id_map))
+                        product_data = self.read("product.product", product_id, ["name"])
+                        line_name = product_data["name"]
+
+                    product_data = self.read("product.product", product_id, ["uom_id", "log_unit_id", "log_base_id", "log_box_id"])
+                    uom_id = product_data["uom_id"][0]
+                    loc_qty = line.uom_qty
+                    if line.base_qty:
+                        if product_data["log_unit_id"]:
+                            unit = product_data["log_unit_id"][0]
+                        elif product_data["log_base_id"]:
+                            unit = product_data["log_base_id"][0]
+                        else:
+                            unit = product_data["log_box_id"][0]
+                        if unit:
+                            print "initial loc_qty: ", loc_qty
+                            loc_qty += self.execute("product.product", "uos_qty_to_uom_qty", [product_id, line.base_qty, unit])
+                            print "end loc_qty: ", loc_qty
+
+                    if line.discount:
+                        discount = float(line.discount) / 100.0
+                        price_unit = float(line.gross_price_unit) * (1 - discount / 100.0)
+                    else:
+                        price_unit = float(line.gross_price_unit)
+                    line_vals = {
+                        "product_id": product_id,
+                        "name": line_name,
+                        "account_id": account_id,
+                        "quantity": loc_qty,
+                        "uos_id": uom_id,
+                        "price_unit": price_unit,
+                        "discount": row.ep_discount and float(row.ep_discount) or 0.0,
+                        "invoice_line_tax_id": [(6, 0, self._getTaxes(IVAA_MAP[str(int(line.tax_id_map))][1]))],
+                        "invoice_id": invoice_id
+                    }
+                    self.create("account.invoice.line", line_vals)
+            self.execute("account.invoice", "button_reset_taxes", [[invoice_id]])
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+    def import_sale_invoice(self, cr):
+        account_id = self.search("account.account", [('code', '=', "700000000")])[0]
+        journal_id = self.search("account.journal", [('name', '=', "Diario de ventas")])[0]
+        cr.execute("select serie as number_pref, documento as number, fecha_contabilizacion as invoice_date, "
+                   "cli_codi as partner_id_map, vencimiento as due_date from dbo.diario_ventas inner join "
+                   "dbo.adsd_clie on dbo.adsd_clie.id_cliente = dbo.diario_ventas.cliente_id")
+        invoice_data = cr.fetchall()
+        num_rows = len(invoice_data)
+        cont = 0
+        for row in invoice_data:
+            customer_ids = self.search("res.partner", [('customer', '=', True),('ref', '=', str(int(row.partner_id_map))),'|',('active', '=', True),('active', '=', False)])
+            if customer_ids:
+                cust_data = self.read("res.partner", customer_ids[0], ["property_account_receivable"])
+
+                invoice_vals = {
+                    "number": ustr(row.number_pref) + "/" + str(int(row.number)),
+                    "invoice_number": ustr(row.number_pref) + "/" + str(int(row.number)),
+                    "account_id": cust_data["property_account_receivable"][0],
+                    "partner_id": customer_ids[0],
+                    "date_invoice": row.invoice_date.strftime("%Y-%m-%d"),
+                    "date_due": row.due_date and row.due_date.strftime("%Y-%m-%d") or False,
+                    "state": "history",
+                    "journal_id": journal_id,
+                    "type": "out_invoice"
+                }
+                invoice_id = self.create("account.invoice", invoice_vals)
+                cr.execute("select producto as product_id_map, base as uom_qty, composicion as base_qty, "
+                           "precio as price_unit, descuento as discount, iva as tax_id_map, descripcion as name from "
+                           "dbo.lineas_mensual where serie = ? and numero = ?", (row.number_pref,int(row.number),))
+                lines_data = cr.fetchall()
+                for line in lines_data:
+                    if line.product_id_map:
+                        product_ids = self.search("product.product", [('default_code', '=', str(int(line.product_id_map))),'|',('active','=',True),('active','=',False)])
+                        if product_ids:
+                            product_id = product_ids[0]
+                        else:
+                            product_id = self.import_products(cr, int(line.product_id_map))
+                    else:
+                        product_id = False
+
+                    if product_id:
+                        product_data = self.read("product.product", product_id, ["uom_id", "log_unit_id", "log_base_id", "log_box_id"])
+                        uom_id = product_data["uom_id"][0]
+                        loc_qty = line.uom_qty
+                        if line.base_qty:
+                            if product_data["log_unit_id"]:
+                                unit = product_data["log_unit_id"][0]
+                            elif product_data["log_base_id"]:
+                                unit = product_data["log_base_id"][0]
+                            else:
+                                unit = product_data["log_box_id"][0]
+                            if unit:
+                                print "initial loc_qty: ", loc_qty
+                                loc_qty += self.execute("product.product", "uos_qty_to_uom_qty", [product_id, line.base_qty, unit])
+                                print "end loc_qty: ", loc_qty
+                    else:
+                        loc_qty = line.uom_qty
+                        uom_id = 1
+
+                    line_vals = {
+                        "product_id": product_id,
+                        "name": ustr(line.name),
+                        "account_id": account_id,
+                        "quantity": loc_qty,
+                        "uos_id": uom_id,
+                        "price_unit": float(line.price_unit),
+                        "discount": line.discount and float(line.discount) or 0.0,
+                        "invoice_line_tax_id": [(6, 0, self._getTaxes(IVAA_MAP[str(int(line.tax_id_map))][0]))],
+                        "invoice_id": invoice_id
+                    }
+                    self.create("account.invoice.line", line_vals)
+                self.execute("account.invoice", "button_reset_taxes", [[invoice_id]])
+                cont += 1
+                print "%s de %s" % (str(cont), str(num_rows))
+
     def process_data(self):
         """
         Importa la bbdd
@@ -633,10 +792,12 @@ class DatabaseImport:
             conn = pyodbc.connect("DRIVER={FreeTDS};SERVER=" + self.sql_server_host + ";UID=midban;PWD=midban2015;DATABASE=" + self.sql_server_dbname + ";Port=1433;TDS_Version=10.0")
             cr = conn.cursor()
 
-            self.import_sale_orders(cr)
-            self.import_sale_order_lines_open(cr)
-            self.import_sale_order_lines_history(cr)
-            self.import_active_purchase_order(cr)
+            #self.import_sale_orders(cr)
+            #self.import_sale_order_lines_open(cr)
+            #self.import_sale_order_lines_history(cr)
+            #self.import_active_purchase_order(cr)
+            self.import_purchase_invoice(cr)
+            self.import_sale_invoice(cr)
 
         except Exception, ex:
             print u"Error al conectarse a las bbdd: ", repr(ex)
