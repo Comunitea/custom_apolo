@@ -28,20 +28,23 @@
                                  <field name="to_revised"/>
                                  <!--<field name="wave_report_id"/>-->
                                  <field name="product_id"/>
+
                              </group>
                              <group>
                                  <field name="pack_id"/>
                                  <field name="new_uom_qty"/>
+                                 <field name="picked_qty"/>
                                  <!--<field name="new_uos_qty"/>-->
                                  <field name="stock"/>
                              </group>
                          </group>
                          <separator/>
+                         <group>
                                  <button name="set_wave_revised" string="Revisado" type="object" class="oe_highlight" attrs="{'invisible': [('to_revised','=',False)]}"/>
                                  <button name="set_wave_to_revised" string="Para Revisar" type="object" class="oe_highlight" attrs="{'invisible': [('to_revised','=',True)]}"/>
                                  <button name="finish_revised_task" string="Finalizar Tarea" type="object" class="oe_highlight" attrs="{'invisible': [('to_revised','=',True)]}"/>
 
-
+                         </group>
                          <separator string="Operations" colspan="4"/>
                              <field name="operation_ids" colspan="4" nolabel="1">
                                 <tree editable="top">
