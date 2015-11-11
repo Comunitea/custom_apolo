@@ -27,11 +27,25 @@ import time
 class stock_pack_operation(models.Model):
     _inherit = 'stock.pack.operation'
 
+    @api.one
+    @api.depends('product_id')
+    def _get_sale_qty(self):
+        for move_line in self.picking_id.move_lines:
+                if self.product_id.id == move_line.product_id.id and \
+                    self.uos_id.id == move_line.product_uos.id:
+                    self.product_uos_qty = move_line.product_uos_qty
+        return
+
+
+
     visited = fields.Boolean('Visited', default=False)
     state= fields.Char()
-    #wave_ok = fields.Boolean('Wave Ok', default = True)
     op_package_id = fields.Many2one('stock.quant.package', 'Original Pack',  default = False)
+    to_revised = fields.Boolean('To Revised')
     wrong_qty = fields.Boolean('Wrong Qty', default=False)
+    wave_revised_id = fields.Many2one('wave.revised')
+    partner_id = fields.Many2one(related = 'picking_id.partner_id', readonly = True)
+    product_uos_qty = fields.Float('product_uos_qty', compute = '_get_sale_qty', readonly=True)
 
     @api.multi
     def get_user_packet_busy(self, my_args):

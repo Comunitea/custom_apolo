@@ -199,7 +199,8 @@ class StockTask(models.Model):
             for wave_report in task_obj.wave_id:
                 for wave in wave_report.wave_report_ids:
                     for op in wave.operation_ids:
-                        vals={'to_process':False, 'visited':False}
+                        #vals={'to_process':False, 'visited':False}
+                        vals={'visited':False}
                         op.write (vals)
 
 
@@ -288,8 +289,8 @@ class StockTask(models.Model):
 
         for op_ in task_obj_uid.operation_ids:
             #si se mueve pause a run no se pone a false to_process
-            if not run:
-                op_.to_process = False
+            #if not run:
+                #op_.to_process = False
             op_.visited = False
 
         return True
@@ -311,6 +312,7 @@ class StockTask(models.Model):
 
     @api.multi
     def gun_cancel_task(self, my_args):
+
         task_id = my_args.get('task_id', False)
         user_id = my_args.get('user_id', False)
 

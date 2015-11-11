@@ -34,22 +34,20 @@ class wave_report(models.Model):
         wave_to_revised = wave_to_revised_pool.search ([('wave_report_id', '=', self.id)])
         if wave_to_revised:
             res = wave_to_revised[0].id
-
         else:
             res = False
         self.wave_report_revised_id = res
         return res
 
     @api.one
-    @api.depends('wave_report_revised_id')
+    @api.depends('operation_ids')
     def _get_wrtrevised(self):
 
-        wave_to_revised_pool = self.env["wave.report.revised"]
-        wave_to_revised = wave_to_revised_pool.search ([('wave_report_id', '=', self.id)])
-        if wave_to_revised:
-            res = wave_to_revised[0].to_revised
-        else:
-            res = False
+        res = False
+        for op in self.operation_ids:
+            if op.to_revised:
+                res=True
+
         self.to_revised = res
         return res
 
@@ -96,54 +94,169 @@ class wave_report_revised(models.Model):
     _name = 'wave.report.revised'
     _rec_name='wave_report_id'
 
-    to_revised = fields.Boolean('To Revised')
-    new_uos_qty = fields.Float('Qty effective (uos)')
+    @api.one
+    @api.depends('operation_ids')
+    def _get_to_revised(self):
+
+        to_revised= False
+        for op in self.operation_ids:
+            if op.to_revised:
+                to_revised=True
+
+        self.to_revised = to_revised
+        return to_revised
+
+    @api.multi
+    def set_to_revised(self, value = False):
+        ops = self.operation_ids
+        if ops:
+            ops.write({'to_revised': value})
+        return value
+
+    # @api.one
+    # @api.depends('product_id')
+    # def _get_operation_ids(self, cr, uid):
+    #     import ipdb; ipdb.set_trace()
+    #     res = {}
+    #     waves = self
+    #
+    #     #waves.write = {'operation_ids': [(5)]}
+    #     wave_id = waves.wave
+    #     item_res = []
+    #     for wave_report in wave_id.wave_report_ids:
+    #         for op in wave_report.operation_ids:
+    #             if op.product_id.id == wave_id.product_id.id:
+    #                 #waves.write = {'operation_ids': [(4, op.id)]}
+    #                 item_res.append(op.id)
+    #         res['operation_ids'] = list(set(item_res))
+    #     return res['operation_ids']
+
+
+    to_revised = fields.Boolean(string = 'To Revised', compute='_get_to_revised')
+    new_uos_qty = fields.Float('Qty effective (uos)', compute='refresh_qtys')
     new_uom_qty = fields.Float('Qty effective (uom)')
     pack_id = fields.Many2one(related = 'wave_report_id.pack_id')
+    #product_id = fields.Many2one('product.product', 'Product')
     product_id = fields.Many2one(related = 'wave_report_id.product_id')
     lot_id = fields.Many2one(related = 'wave_report_id.lot_id')
     product_qty= fields.Float(related='wave_report_id.product_qty', readonly=True)
     uos_qty= fields.Float(related='wave_report_id.uos_qty', readonly=True)
     uom_id= fields.Many2one(related='wave_report_id.uom_id', readonly=True)
     uos_id= fields.Many2one(related='wave_report_id.uos_id', readonly=True)
-
-    wave_report_id = fields.Many2one('wave.report', 'Wave', readonly = True)
-    operation_ids = fields.One2many (related='wave_report_id.operation_ids')
+    wave = fields.Many2one(related = 'wave_report_id.wave_id', readonly = True)
+    wave_report_id = fields.Many2one('wave.report', 'Ref', readonly = True)
+    #operation_ids = fields.One2many(related='wave_report_id.operation_ids')
+    #operation_ids = fields.One2many (string="Operation", compute = '_get_operation_ids')
+    operation_ids = fields.One2many ('stock.pack.operation', 'wave_revised_id', string = "Operation")
+    stock = fields.Float(related = 'wave_report_id.product_id.qty_available')
     #wave_id = fields.Many2one('wave.report', 'Wave Report', readonly = True)
 
-    @api.one
-    def _get_operation_ids(self):
-        wave_id = self.wave_report_id
-        wave_repor = self.env['wave.report'].search([('id','=', wave_id)])
-        res = []
-        if wave_repor:
-            res = wave_repor.operation_ids
-        return res
+
+
+    # @api.one
+    # def _get_operation_ids(self):
+    #     wave_id = self.wave_report_id
+    #     wave_repor = self.env['wave.report'].search([('id','=', wave_id)])
+    #     res = []
+    #     if wave_repor:
+    #         res = wave_repor.operation_ids
+    #     return res
 
     @api.multi
     def new_wave_to_revised(self, my_args):
 
         new_uos_qty = my_args.get('new_uos_qty', 0)
         new_uom_qty = my_args.get('new_uom_qty', 0)
-        wave_report_id = my_args.get('id', 0)
+        wave_report_id = my_args.get('id', False)
+        task_id = my_args.get('task_id', False)
         vals ={}
+        wave_report = self.env['wave.report'].browse(wave_report_id)
+        product_id = wave_report.product_id
         wave_to_revised = self.env['wave.report.revised']
         vals = {
             'to_revised' : True,
             'new_uos_qty' : new_uos_qty,
             'new_uom_qty' : new_uom_qty,
-            'wave_report_id': wave_report_id
+            'wave_report_id': wave_report_id,
+            'product_id': product_id.id
         }
-        wave_ = wave_to_revised.search([('wave_repoort_id','=',wave_report_id)])
+        wave_ = wave_to_revised.search([('wave_report_id','=',wave_report_id)])
         if wave_:
-            wave = wave_.write(vals)
+            wave_.write(vals)
         else:
-            wave = wave_to_revised.create(vals)
-        #actualizamos wave_report
-        wave_report = self.env["wave.report"].search([('id', '=', wave_report_id)])
-        wave_report.write({'to_revised' : True,'wave_report_revised_id' : wave.id})
-        #ponemos en pausa la tarea correspondiente
-        #wave_id = wave_report.wave_id.id
-        #stock_task_pool = self.env["stock.task"].search([('wave_id', '=', wave_id)])
-        #stock_task_pool.write ({'paused' : True})
+            wave_ = wave_to_revised.create(vals)
+        product_id = wave_.product_id
+
+        new_uos_qty=0
+        new_uom_qty=0
+
+        wave_report = self.env['wave.report'].browse(wave_report_id)
+        wave_report.operation_ids.write({'to_process': True})
+        picking_wave = self.env['stock.picking.wave'].browse(wave_report.wave_id.id)
+        for wave_report in picking_wave.wave_report_ids:
+            for op in wave_report.operation_ids:
+                if op.product_id.id == product_id.id:
+                    op.write({'to_revised' : True, 'wave_revised_id' : wave_.id})
+                new_uos_qty += op.uos_qty
+                new_uom_qty += op.product_qty
+            wave_report.write({'wave_report_revised_id' : wave_.id})
+
+        vals = {
+            'new_uos_qty' : new_uos_qty,
+            'new_uom_qty' : new_uom_qty,
+        }
+        wave_.write(vals)
+
         return wave_report_id
+
+    @api.one
+    @api.depends('operation_ids')
+    def refresh_qtys(self):
+
+        new_uom_qty =0
+        new_uos_qty =0
+        for op in self.operation_ids:
+            new_uom_qty += op.product_qty
+            new_uos_qty += op.uos_qty
+
+        vals = {
+            'new_uom_qty': new_uom_qty,
+            'new_uos_qty': new_uos_qty
+        }
+        self.write(vals)
+
+
+
+
+    @api.multi
+    def set_wave_to_revised(self, ctx, to_revised = True):
+        self.set_wave_revised(ctx, to_revised)
+
+    @api.multi
+    def set_wave_revised(self, ctx, to_revised = False):
+        for wave in self:
+            revised = to_revised
+            values = ({'to_revised': revised})
+            wave.operation_ids.write(values)
+        self.refresh_qtys()
+
+    @api.multi
+    def finish_revised_task(self):
+        wave_id = self.wave_report_id
+        task = self.env['stock.task'].search([('wave_id', '=', wave_id.id)])
+
+        if task:
+            if task.state == "to_revised":
+                task.finish_partial_task()
+            else:
+                 return {
+                    'warning': {'title': _("Error"),
+                                'message': _("This wave is not marked as to_revised")},
+                    }
+
+
+
+
+
+
+

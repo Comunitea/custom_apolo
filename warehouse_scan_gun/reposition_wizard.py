@@ -62,7 +62,8 @@ class reposition_wizard(models.Model):
             #asignamos las operaciones a la tarea
             t_ops = self.env["stock.pack.operation"].with_env(env2)
             t_ops_pool = t_ops.search([('picking_id','=',picks)])
-            res = t_ops_pool.write({'task_id': task_id.id, 'to_process': False})
+            #res = t_ops_pool.write({'task_id': task_id.id, 'to_process': False})
+            res = t_ops_pool.write({'task_id': task_id.id})
             if res:
                 res=task_id.id
 
