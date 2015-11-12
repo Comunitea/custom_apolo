@@ -170,6 +170,11 @@ class stock_pack_operation(models.Model):
                     children_ids_product_id=False
                     lot = False
                     product_name=''
+
+                if not op.product_id:
+                    is_package=True
+                else:
+                    is_package=False
                 values = {
                 'ID': op.id,
                 'id': op.id,
@@ -205,7 +210,9 @@ class stock_pack_operation(models.Model):
                 'lot': op.packed_lot_id and op.packed_lot_id.name or lot,
                 'producto': op.product_id.short_name or op.packed_lot_id.product_id.short_name or product_name,
                 'to_process': op.to_process,
-                'qty_available':op.packed_lot_id.product_id.qty_available or 0.00
+                'qty_available':op.packed_lot_id.product_id.qty_available or 0.00,
+                'is_package': is_package or False
+
                 }
                 #revisar para palet_multiproducto
                 if not op.product_id and not op.package_id.is_multiproduct:

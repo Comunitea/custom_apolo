@@ -460,7 +460,7 @@ class ScanGunProtocol(LineReceiver):
         nos damos por logeados. Solo se usa la conexión central en el factory.
         """
 
-        if code in self.factory.users_codes and not self.factory.debug:
+        if code in self.factory.users_codes and not self.factory.debug and False:
             self._snd(u"Codigo Ya Registrado\nIntroduzca codigo")
             return
 
@@ -2131,15 +2131,30 @@ class ScanGunProtocol(LineReceiver):
             return
 
         if order_line == PRE_PACK:
+
+            one_package = 0
+            order = False
+            active_wave ='1'
             for op_ in self.waves:
                 op = self.waves[op_]
-                if op['package'] == line or op['pack_id'] == self.int_(line):
-                    #es un paquete de la lista de paquetes de esta tarea
-                    self.last_state = "list_waves"
-                    self.num_order_list_ops=1
-                    self.step=0
-                    self.handle_form_wave(order_line + line)
-                    return
+                if op['pack_id'] == self.int_(line):
+                    one_package+=1
+                    active_wave=op_
+                    order = order_line + line
+            if one_package==1:
+            #es un paquete de la lista de paquetes de esta tarea
+                self.last_state = "list_waves"
+                self.num_order_list_ops=1
+                self.step=0
+                self.active_wave = active_wave
+                self.state = 'form_wave'
+                self.handle_form_wave(order)
+                return
+            elif one_package>1:
+                message = u'Usa teclado (%s)'%self.waves[op_]['package']
+                self._snd(self.get_str_list_waves(), message)
+                return
+
 
         # if order_line == PRE_LOC:
         #     for op_ in self.waves:
@@ -2349,13 +2364,11 @@ class ScanGunProtocol(LineReceiver):
                 for op_ in self.waves:
                     if self.waves[op_]['pack_id'] == package_id:
                         op = self.waves[op_]
+                        self.active_wave=op_
                         continue
                         #es un paquete de la lista de paquetes de esta tarea
             if op:
-                self.active_wave = op_
                 self.last_state = "list_waves"
-                self.active_op = op_
-                self.wave_id = op['ID']
                 self.state = 'form_wave'
                 self.qty_calc = []
                 self.new_uos_qty=0.00
@@ -2364,6 +2377,9 @@ class ScanGunProtocol(LineReceiver):
                 self.pack = self.factory.odoo_con.get_pack_gun_info(self.user_id, package_id )
                 self.product = self.factory.odoo_con.get_product_gun_complete_info(self.user_id, op['product_id'])
                 self.fc = self.factory.odoo_con.conv_units_from_gun(self.user_id, op['product_id'], op['uom_id'], op['uos_id'])
+                self.active_wave = op_
+                self.active_op = op_
+                self.wave_id = op['ID']
                 self.step = 2
                 self._snd(self.get_str_form_wave(), '')
             return
@@ -2707,6 +2723,9 @@ class ScanGunProtocol(LineReceiver):
         menu_str += u"(%s)\n%s\n"%(wave_['lot'], wave_['product'])
         menu_str += u"Stock: %s %s\n"%(wave_['qty_available'], wave_['uom'])
         menu_str += u"Mover: %s %s\n"%(wave_['uos_qty'],wave_['uos'])
+
+        if wave_['is_package']:
+            menu_str+=u"       (Paquete Completo)\n"
         #FIN CABECERA
 
         cantidad=''
@@ -3032,6 +3051,9 @@ class ScanGunProtocol(LineReceiver):
 
         #aqui pongo cantidades informativas
         strg+=u"Mover: %s %s\n"%(op_['packed_qty'], op_['uom'])
+
+        if op_['is_package']:
+            strg+=u"       (Paquete Completo)\n"
 
         if op_['uom_id']!=op_['uos_id']:
             strg+="%s%s %s\n"%(' ' * 7, op_['uos_qty'], op_['uos'])

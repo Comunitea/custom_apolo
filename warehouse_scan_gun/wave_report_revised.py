@@ -150,7 +150,7 @@ class wave_report_revised(models.Model):
     operation_ids = fields.One2many ('stock.pack.operation', 'wave_revised_id', string = "Operation")
     stock = fields.Float(related = 'wave_report_id.product_id.qty_available')
     #wave_id = fields.Many2one('wave.report', 'Wave Report', readonly = True)
-
+    picked_qty = fields.Float('Picked Qty', readonly = True)
 
 
     # @api.one
@@ -178,7 +178,8 @@ class wave_report_revised(models.Model):
             'new_uos_qty' : new_uos_qty,
             'new_uom_qty' : new_uom_qty,
             'wave_report_id': wave_report_id,
-            'product_id': product_id.id
+            'product_id': product_id.id,
+            'picked_qty': new_uom_qty
         }
         wave_ = wave_to_revised.search([('wave_report_id','=',wave_report_id)])
         if wave_:
@@ -189,7 +190,6 @@ class wave_report_revised(models.Model):
 
         new_uos_qty=0
         new_uom_qty=0
-
         wave_report = self.env['wave.report'].browse(wave_report_id)
         wave_report.operation_ids.write({'to_process': True})
         picking_wave = self.env['stock.picking.wave'].browse(wave_report.wave_id.id)
@@ -242,11 +242,13 @@ class wave_report_revised(models.Model):
 
     @api.multi
     def finish_revised_task(self):
-        wave_id = self.wave_report_id
-        task = self.env['stock.task'].search([('wave_id', '=', wave_id.id)])
+
+
+        wave_report = self.wave_report_id
+        task = self.env['stock.task'].search([('wave_id', '=', wave_report.wave_id.id)])
 
         if task:
-            if task.state == "to_revised":
+            if task.state == "to_revised" or task.state == "assigned":
                 task.finish_partial_task()
             else:
                  return {
