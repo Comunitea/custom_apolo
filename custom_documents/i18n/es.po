@@ -167,12 +167,12 @@ msgstr "Entrega en reparto"
 #. module: custom_documents
 #: selection:res.partner,inv_print_op:0
 msgid "Group parent partner, breakdown picks"
-msgstr "Agrupar empresa padre, desglose de albaranes"
+msgstr "Desglose de albaranes"
 
 #. module: custom_documents
 #: selection:res.partner,inv_print_op:0
 msgid "Group parent partner, summary picks"
-msgstr "Agrupar empresa padre, resumen de albaranes"
+msgstr "Resumen de albaranes"
 
 #. module: custom_documents
 #: field:report.custom_documents.report_custom_invoice,id:0
@@ -526,4 +526,3 @@ msgstr "Albarán valorado"
 #: view:website:custom_documents.invoice_top_part
 msgid "Way To Pay:"
 msgstr "Forma de pago:"
-
