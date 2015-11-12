@@ -37,8 +37,8 @@ KEY_PAUSE = "F6"
 KEY_MANUAL ="F3"
 
 KEY_PRINT = "F7"
-KEY_RUN = "F10" #"F5"
-KEY_FINISH = "F10" #"F5"
+KEY_RUN = "F7" #"F5"
+KEY_FINISH = "F7" #"F5"
 
 KEY_ORIGEN = "F6"
 KEY_WAVE_OPS = "F6"
@@ -72,7 +72,7 @@ PRE_LOC = 'LC'
 PRE_PROD = 'PR'
 PRE_LOT = 'LT'
 MAX_NUM = 4
-MAX_NUM_ONE = 6
+MAX_NUM_ONE = 4
 ERROR_TAREA_EN_PAUSA = u'\n[x] Tarea en pausa'
 # Para leer el archivo de configuración y guardarlo en params
 
@@ -616,7 +616,15 @@ class ScanGunProtocol(LineReceiver):
         return res
     def check_task(self):
         #buscamos tareas asignadas al self.user_id
+
+
+        aux = self.task_id
         self.task_id, self.tasks = self.factory.odoo_con.get_task_assigned(self.user_id)
+        if not self.task_id:
+            self.task_id = aux
+        for task in self.tasks.keys():
+            if self.tasks[task]['id'] == self.task_id:
+                self.active_task = task
 
         self.step=0
         if self.tasks:
@@ -1949,7 +1957,7 @@ class ScanGunProtocol(LineReceiver):
         self.last = "get_str_list_waves"
 
         # En vez de operaciones, sacamos wave_reports
-        self.active_wave = 1
+
         self.waves = self.factory.odoo_con.get_wave_reports_from_task(self.user_id, self.task_id, self.type)
 
         header = u"Picks %s %s\n" %(self.task_id, self.route)
@@ -1970,7 +1978,10 @@ class ScanGunProtocol(LineReceiver):
         #si no hay ninguna ubicación
 
         keys =u''
-        total = len(data_)
+        if data_:
+            total = len(data_)
+        else:
+            total=0
 
         if (self.type =="ubication" or self.type == "reposition" ) and not self.ops:
             strg =u'Tarea creada.\nScan Paquete para añadir ops\n'
@@ -1986,7 +1997,7 @@ class ScanGunProtocol(LineReceiver):
                         not_vis += 1
                     if not op__['PROCESADO']:
                         not_proc += 1
-                header1 += u"Faltan %s de %s\n"%(not_proc, len(data_))
+                header1 += u"Faltan %s de %s\n"%(not_proc, total)
 
             delimiter = "*" * 25 + u"\n"
             strg = header + header1 #+ delimiter
@@ -2002,17 +2013,19 @@ class ScanGunProtocol(LineReceiver):
                 k_ = str(k)
                 if k_ in data_:
                     op_processed = data_[k_]['PROCESADO']
-                    if k <= len(data_):
+                    if k <= total:
                         k_ = str(k)
                         op = k_ + '>'
 
                         if not op_processed:
                             op = self.inverse(op)
-                        op +=u'%s \n >%s\n'%(data_[k_]['package'], data_[k_][after_PAQUETE])
+
+
+                        op +=u'%s > %s\n  %s\n'%(data_[k_]['package'], data_[k_][after_PAQUETE], data_[k_]['product'])
                     if self.show_op_processed or not op_processed:
                         strg += op
                         inc+=1
-                    if inc>MAX_NUM:
+                    if inc>=MAX_NUM:
                         break
 
             if self.tasks[self.active_task]['type']=="reposition":
@@ -2029,7 +2042,8 @@ class ScanGunProtocol(LineReceiver):
             opc = u'Run'
         else:
             opc = u'Pause'
-        keys += u"\n%s %s %s Cancelar Tarea"%(KEY_PAUSE, opc, KEY_CANCEL)
+        #keys += u"\n%s %s %s Cancelar Tarea"%(KEY_PAUSE, opc, KEY_CANCEL)
+        keys += u"\n%s %s"%(KEY_PAUSE, opc)
         if self.show_keys:
             strg += keys
         return strg
@@ -2043,15 +2057,15 @@ class ScanGunProtocol(LineReceiver):
             order_line = False
         if not order_line:
             if line == KEY_PAUSE:
+
                 aux = self.task_id
+                aux2 = self.active_task
                 pause = not self.tasks[self.active_task]['paused']
                 res = self.factory.odoo_con.set_task_pause_state(self.user_id,
                                                                 self.tasks[self.active_task]['id'],
                                                                 pause)
                 self.check_task()
-                self.task_id = aux
-                self.active_task = self.get_active_task()
-                self._snd(self.get_str_list_ops())
+                self._snd(self.get_str_list_waves())
                 return
 
             if line == KEY_VOLVER and self.step!=5:
@@ -2151,7 +2165,7 @@ class ScanGunProtocol(LineReceiver):
                 self.handle_form_wave(order)
                 return
             elif one_package>1:
-                message = u'Usa teclado (%s)'%self.waves[op_]['package']
+                message = u'Usa teclado (%s)'%self.waves[active_wave]['package']
                 self._snd(self.get_str_list_waves(), message)
                 return
 
@@ -2353,6 +2367,7 @@ class ScanGunProtocol(LineReceiver):
         op_id = wave_['op']
         if order_line == PRE_PACK and self.step in [0,1,2]:
 
+
             op={}
             package_id = self.int_(line)
             #Es un paquete
@@ -2382,11 +2397,11 @@ class ScanGunProtocol(LineReceiver):
                 self.wave_id = op['ID']
                 self.step = 2
                 self._snd(self.get_str_form_wave(), '')
-            return
+                return
 
             # Se confirma cambio de packete
             if package_id == self.new_package_id and self.new_package_id:
-                values = {'op_package_id' : op['pack_id'],
+                values = {'op_package_id' :wave_['pack_id'],
                           'package_id':self.new_package_id,
                           'packed_lot_id' : self.pack['lot_id'],
                           'location_id' : self.pack['src_location_id']
@@ -2403,6 +2418,7 @@ class ScanGunProtocol(LineReceiver):
 
 
             # si no está en la lista de paquetes mitaos si existe y es válido
+
             self.pack = self.factory.odoo_con.get_pack_gun_info(self.user_id,package_id)
             if self.pack['exist']:
                 if wave_['product_id'] == self.pack['product_id'] and self.pack['packed_qty']:
@@ -2872,6 +2888,8 @@ class ScanGunProtocol(LineReceiver):
         menu_str = header + menu_str + keys
         return menu_str
 
+
+
     def handle_list_ubi_ops(self, line, confirm=False):
         # Manejador de lista de operaciones de ubicacion
         line = line or '0'
@@ -2882,7 +2900,7 @@ class ScanGunProtocol(LineReceiver):
             order_line = False
 
 
-        if line == KEY_CANCEL:
+        if line == KEY_CANCEL and False:
             res = self.factory.odoo_con.gun_cancel_task(self.user_id, self.task_id)
             self.check_task()
             self.active_task = self.get_active_task()
