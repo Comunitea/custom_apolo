@@ -460,7 +460,7 @@ class ScanGunProtocol(LineReceiver):
         nos damos por logeados. Solo se usa la conexión central en el factory.
         """
 
-        if code in self.factory.users_codes and not self.factory.debug:
+        if code in self.factory.users_codes and not self.factory.debug and False:
             self._snd(u"Codigo Ya Registrado\nIntroduzca codigo")
             return
 
