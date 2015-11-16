@@ -65,14 +65,15 @@ class SaleOrderLine(models.Model):
                       ('tourism_id.id', 'in', product.tourism_ids._ids),
                       ('tourism_id.state', '=', 'approved')],
             context=context)
-        tourism = self.pool.get('tourism.customer').browse(cr, uid,
-                                                           tourism_ids,
-                                                           context)
-        if tourism and unit_price != tourism.get_box_price(product):
+        if tourism_ids:
+            tourism = self.pool.get('tourism.customer').browse(cr, uid,
+                                                               tourism_ids[0],
+                                                               context)
+            if tourism and unit_price != tourism.get_box_price(product):
 
-            res['value']['price_unit'] = tourism.get_box_price(product)
-            res['value']['discount'] = 0
-            res['value']['tourism'] = tourism
+                res['value']['price_unit'] = tourism.get_box_price(product)
+                res['value']['discount'] = 0
+                res['value']['tourism'] = tourism
         return res
 
     @api.model
