@@ -73,7 +73,7 @@ class SaleOrderLine(models.Model):
 
                 res['value']['price_unit'] = tourism.get_box_price(product)
                 res['value']['discount'] = 0
-                res['value']['tourism'] = tourism
+                res['value']['tourism'] = tourism.id
         return res
 
     @api.model
