@@ -4470,7 +4470,8 @@ class ScanGunProtocol(LineReceiver):
             for key in self.routes:
                 key_ = int(key)
                 if key_>= self.num_order_list_ops and key_<= self.num_order_list_ops + MAX_NUM_ONE:
-                    str_menu += str(key) + " -> " + self.routes[key][1] + "\n"
+                    if self.routes[key][1]:
+                        str_menu += str(key) + " -> " + self.routes[key][1] + "\n"
         else:
             str_menu +=u"\nNo hay rutas validadas\n"
         keys = u"%s Volver"%KEY_VOLVER
