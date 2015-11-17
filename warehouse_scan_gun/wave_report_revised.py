@@ -64,11 +64,28 @@ class wave_report(models.Model):
         wave_obj = self.browse(id)
         env2 = wave_obj.env(self._cr, user_id, self._context)
         wave = wave_obj.with_env(env2)
-        res = True
+        res = False
+        product_id = vals.get('product_id', False)
+        product = self.env['product.product'].browse(product_id)
         if wave:
             for op in wave.operation_ids:
+                #trato todos las operaciones como productos:
+                #escribo producto y product_qty en todas las ops de esta ola
+                #si el paquete queda vacío mala suerte...
+                if op['product_id']:
+                    qty = op['product_qty']
+                else:
+                    qty = op['packed_qty']
+                    vals['product_qty'] = op['packed_qty']
+                    uos_id = op['uos_id']
+                    vals['uos_qty'] = product.uom_qty_to_uos_qty(qty, uos_id.id)
                 #op.write(vals)
-                res = op.write(vals) and res
+                #no sobreescribe la uos_id
+                #entonces:
+                res = op.write(vals)
+
+
+
         return res
 
 
@@ -116,7 +133,6 @@ class wave_report_revised(models.Model):
     # @api.one
     # @api.depends('product_id')
     # def _get_operation_ids(self, cr, uid):
-    #     import ipdb; ipdb.set_trace()
     #     res = {}
     #     waves = self
     #

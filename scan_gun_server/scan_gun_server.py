@@ -493,8 +493,14 @@ class ScanGunProtocol(LineReceiver):
         if self.show_keys:
             keys = u"%s Atrás"%KEY_VOLVER
         menu_str += delimiter + keys
-
         return menu_str
+
+
+
+
+
+
+
 
     def check_package(self, line):
 
@@ -619,26 +625,28 @@ class ScanGunProtocol(LineReceiver):
 
 
         aux = self.task_id
+        active_task = '1'
         self.task_id, self.tasks = self.factory.odoo_con.get_task_assigned(self.user_id)
+
         if not self.task_id:
             self.task_id = aux
+
+
         for task in self.tasks.keys():
             if self.tasks[task]['id'] == self.task_id:
-                self.active_task = task
+                active_task = task
 
+        self.active_task = active_task
         self.step=0
-        if self.tasks:
-            if self.task_id != False:
-                self.type = self.tasks['0']['type']
-                if self.vals != True:
-                    self.reset_vals()
 
+        if self.tasks:
+            if self.vals != True:
+                self.reset_vals()
+            if self.task_id:
+                self.type = self.tasks[active_task]['type']
                 return 1
             else:
-                if self.vals != True:
-                    self.reset_vals()
                 return -1
-
         else:
             return 0
 
@@ -2064,9 +2072,18 @@ class ScanGunProtocol(LineReceiver):
                 res = self.factory.odoo_con.set_task_pause_state(self.user_id,
                                                                 self.tasks[self.active_task]['id'],
                                                                 pause)
-                self.check_task()
-                self._snd(self.get_str_list_waves())
-                return
+                if pause:
+                    self.last_state = self.state
+                    self.state = "tasks"
+                    self.check_task()
+                    self.reset_vals()
+                    message =u"\nTarea Pausada"
+                    self._snd(self.get_str_menu_task(), message)
+                    return
+                else:
+                    self.check_task()
+                    self._snd(self.get_str_list_waves())
+                    return
 
             if line == KEY_VOLVER and self.step!=5:
                 self.last_state = self.state
@@ -2367,7 +2384,6 @@ class ScanGunProtocol(LineReceiver):
         op_id = wave_['op']
         if order_line == PRE_PACK and self.step in [0,1,2]:
 
-
             op={}
             package_id = self.int_(line)
             #Es un paquete
@@ -2375,12 +2391,12 @@ class ScanGunProtocol(LineReceiver):
             if self.waves[str(self.active_wave)]['pack_id'] == package_id:
                 op_= str(self.active_wave)
                 op = self.waves[str(self.active_wave)]
-            else:
-                for op_ in self.waves:
-                    if self.waves[op_]['pack_id'] == package_id:
-                        op = self.waves[op_]
-                        self.active_wave=op_
-                        continue
+            # else:
+            #     for op_ in self.waves:
+            #         if self.waves[op_]['pack_id'] == package_id and False:
+            #             op = self.waves[op_]
+            #             self.active_wave=op_
+            #             continue
                         #es un paquete de la lista de paquetes de esta tarea
             if op:
                 self.last_state = "list_waves"
@@ -2398,23 +2414,43 @@ class ScanGunProtocol(LineReceiver):
                 self.step = 2
                 self._snd(self.get_str_form_wave(), '')
                 return
-
             # Se confirma cambio de packete
             if package_id == self.new_package_id and self.new_package_id:
-                values = {'op_package_id' :wave_['pack_id'],
-                          'package_id':self.new_package_id,
-                          'packed_lot_id' : self.pack['lot_id'],
-                          'location_id' : self.pack['src_location_id']
-                          }
-                res = self.factory.odoo_con.change_wave_op_values_packed_change(self.user_id, op_id, values)
-                act = self.active_wave
-                self.waves = self.factory.odoo_con.get_wave_reports_from_task(self.user_id, self.task_id, self.type)
-                self.active_wave = act
-                self.new_package_id = False
-                self.qty_calc = []
-                self.handle_form_wave(PRE_PACK + line)
-                return
+                #aqui tenemos que mirar si es cambio de paquete entero o una parte.
+                #comprobamos cantidad sin reservar y que el producto sea el que pide
+                #miro si es paquete ocmpleto. .
+                product_id = wave_['product_id']
+                qty_to_move = wave_['qty']
+                ok_package = self.factory.odoo_con.check_package_for_picking_change(self.user_id,product_id,package_id,qty_to_move)
 
+                if ok_package:
+                    values = {'op_package_id' :wave_['pack_id'],
+                              'package_id':self.new_package_id,
+                              'packed_lot_id' : self.pack['lot_id'],
+                              'lot_id' : self.pack['lot_id'],
+                              'location_id' : self.pack['src_location_id'],
+                              'product_id':self.pack['product_id'],
+                              'product_uom_id': self.pack['uom_id']
+                              }
+                    res = self.factory.odoo_con.change_wave_op_values_packed_change(self.user_id, op_id, values)
+                    act = self.active_wave
+                    self.waves = self.factory.odoo_con.get_wave_reports_from_task(self.user_id, self.task_id, self.type)
+                    for op_ in self.waves:
+                        if self.waves[op_]['pack_id'] == package_id:
+                            self.active_wave= op_
+                            self.wave_id = self.waves[op_]['ID']
+
+
+                    self.new_package_id = False
+                    self.qty_calc = []
+                    self.handle_form_wave(PRE_PACK + line)
+                    return
+                else:
+                    self.handle_form_wave(PRE_PACK + str(wave_['pack_id']))
+                    self.new_package_id = False
+                    message = u'Quants reservados\n o insuficientes'
+                    self._snd(self.get_str_form_wave(), message)
+                    return
 
 
             # si no está en la lista de paquetes mitaos si existe y es válido
@@ -2425,7 +2461,7 @@ class ScanGunProtocol(LineReceiver):
                     message =''
                     message += u"\nCambio Pack: %s\nScan para confirmarlo"%self.pack['package']
                     if self.pack['packed_qty'] < wave_['uom_qty']:
-                        message +="Comprueba cantidades"
+                        message +="\nComprueba cantidades"
                     self.new_package_id = package_id
                     self.qty_calc = []
                     self.step = 1

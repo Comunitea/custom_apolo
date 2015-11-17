@@ -125,6 +125,30 @@ class stock_quant_package(models.Model):
         new_package.write({'location_id':location_id})
         return new_package.name
 
+
+    @api.multi
+    def check_package_for_picking_change(self, my_args):
+        user_id = my_args.get('user_id', False)
+        product_id = my_args.get ('product_id', False)
+        package_id = my_args.get ('package_id', False)
+        qty_to_move = my_args.get ('qty_to_move', False)
+        res = False
+        qty = 0
+        domain = ([
+            ('product_id', '=', product_id),
+            ('package_id', '=', package_id),
+            ('reservation_id', '=', False)])
+
+        quants = self.env['stock.quant'].search(domain)
+        if quants:
+            for quant in quants:
+                qty+= quant['qty']
+
+            if qty>=qty_to_move:
+                res = True
+        return res
+
+
     @api.multi
     def get_package_gun_info(self, my_args):
         name = my_args.get('name', False)

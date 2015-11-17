@@ -395,6 +395,11 @@ class OdooDao:
         res = self.connection.execute('stock.pack.operation', 'change_op_values', [], my_args)
         return res
 
+    def check_package_for_picking_change(self, user_id, product_id, package_id, qty_to_move):
+        my_args = {'user_id': user_id, 'package_id': package_id, 'product_id': product_id, 'qty_to_move': qty_to_move}
+        op_data = self.connection.execute('stock.quant.package', 'check_package_for_picking_change', [], my_args)
+        return op_data
+
     def get_pack_gun_info(self, user_id, package_id):
         my_args = {'user_id': user_id, 'package_id': package_id}
         op_data = self.connection.execute('stock.quant.package', 'get_pack_gun_info', [], my_args)
