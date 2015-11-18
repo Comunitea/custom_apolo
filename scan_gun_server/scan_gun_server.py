@@ -2448,7 +2448,7 @@ class ScanGunProtocol(LineReceiver):
                 else:
                     self.handle_form_wave(PRE_PACK + str(wave_['pack_id']))
                     self.new_package_id = False
-                    message = u'Quants reservados\n o insuficientes'
+                    message = u'Cantidad reservados\n o insuficientes'
                     self._snd(self.get_str_form_wave(), message)
                     return
 
@@ -2774,7 +2774,15 @@ class ScanGunProtocol(LineReceiver):
 
         menu_str += u"(%s)\n%s\n"%(wave_['lot'], wave_['product'])
         menu_str += u"Stock: %s %s\n"%(wave_['qty_available'], wave_['uom'])
-        menu_str += u"Mover: %s %s\n"%(wave_['uos_qty'],wave_['uos'])
+        #menu_str += u"Mover: %s %s\n"%(wave_['uos_qty'],wave_['uos'])
+        unit_str=''
+        mover = "Mover:"
+        for unit in wave_['units']:
+            if unit[1]:
+                unit_str += u"%s %s %s\n"%(mover, unit[1], unit[0])
+                mover = "      "
+        menu_str += unit_str
+
 
         if wave_['is_package']:
             menu_str+=u"       (Paquete Completo)\n"

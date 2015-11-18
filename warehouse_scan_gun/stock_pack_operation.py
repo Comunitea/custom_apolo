@@ -133,8 +133,10 @@ class stock_pack_operation(models.Model):
                 'destino_bcd' : op.location_dest_id.bcd_name or op.location_dest_id.name,
                 'product_id': op.product_id.id or False,
                 'lot_id': op.packed_lot_id.id,
-                'qty_available':op.packed_lot_id.product_id.qty_available or 0.00
+                'qty_available':op.packed_lot_id.product_id.qty_available or 0.00,
+                'packed_qty': op.packed_qty or 0.00
                  }
+
                 if not op.product_id:
                     domain_package = [('id', '=', op.package_id.id)]
                     package_pool= self.env['stock.quant.package'].search(domain_package)[0].with_context(ctx)
@@ -143,7 +145,17 @@ class stock_pack_operation(models.Model):
                     values['product'] = package_pool.packed_lot_id.product_id.short_name or ""
                     values['product_id'] = package_pool.packed_lot_id.product_id.id or False
                     values['qty_available'] = package_pool.packed_lot_id.product_id.qty_available or 0.00
+
+                #si pide Jaume que la cantidad mostrada sea la cantidad restante del paquete
+                values['qty_available'] = op.package_id.packed_qty or 0.00
+
+                product = op.product_id or op.package_id.product_id
+                uom_id = product.uom_id.id
+                uom_qty = op.product_qtys
+                if product:
+                    values['units'] = product.get_uom_conversions(uom_qty)
                 ind += 1
+
                 vals[str(ind)] = values
             return vals
         else:
