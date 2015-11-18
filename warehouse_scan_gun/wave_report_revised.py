@@ -64,11 +64,70 @@ class wave_report(models.Model):
         wave_obj = self.browse(id)
         env2 = wave_obj.env(self._cr, user_id, self._context)
         wave = wave_obj.with_env(env2)
-        res = True
+        res = False
+        product_id = vals.get('product_id', False)
+        if vals:
+            package_id = vals['package_id']
+            op_package_id = vals['op_package_id']
+        product = self.env['product.product'].browse(product_id)
+        new_package_id = self.env['stock.quant.package'].browse(package_id)
+        new_quant_objs = [x for x in new_package_id.quant_ids]
+        old_package_id = self.env['stock.quant.package'].browse(op_package_id)
+        old_quant_ids = [x.id for x in old_package_id.quant_ids]
+        #domain =
+        #1º ir desde op al movimiento
+        #linked_move_operation_ids
+
+        #2ª
+        force_quants =[]
+        qty_to_reassign = 0.0
+        #quants_reserved = self.env['stock.quant'].search()
         if wave:
             for op in wave.operation_ids:
+                if op.package_id.id != old_package_id.id:
+                    continue
+
+                moves2recalc = list(set([x.move_id for x in op.linked_move_operation_ids]))
+                for move in moves2recalc:
+                    for quant_id in move.reserved_quant_ids:
+
+                        quant = self.env['stock.quant'].sudo().browse(quant_id.id)#quant.sudo(user_id=1)
+                        if quant.id in old_quant_ids:
+                            quant.reservation_id = False
+                            qty_to_reassign += quant.qty
+                        else:
+                            force_quants.append((quant, quant.qty))
+
+                    for quant in new_quant_objs:
+                        if qty_to_reassign >= quant.qty:
+                            force_quants.append((quant, quant.qty))
+                            qty_to_reassign -= quant.qty
+                        else:
+                            force_quants.append((quant, qty_to_reassign))
+                            break
+                    #Anulamos la reserva
+                    move.do_unreserve()
+
+                    ctx = self._context.copy()
+                    ctx.update({'force_quants_location': force_quants})
+                    move = self.env['stock.move'].with_context(ctx).browse(move.id)
+                    move.action_assign()
+
+                #trato todos las operaciones como productos:
+                #escribo producto y product_qty en todas las ops de esta ola
+                #si el paquete queda vacío mala suerte...
+                if op.product_id:
+                    qty = op.product_qty
+                else:
+                    qty = op.packed_qty
+                    vals['product_qty'] = qty
+                    vals['uos_qty'] = product.uom_qty_to_uos_qty(qty, op.uos_id.id)
                 #op.write(vals)
-                res = op.write(vals) and res
+                #no sobreescribe la uos_id
+                #entonces:
+
+                res = op.write(vals)
+
         return res
 
 
@@ -116,7 +175,6 @@ class wave_report_revised(models.Model):
     # @api.one
     # @api.depends('product_id')
     # def _get_operation_ids(self, cr, uid):
-    #     import ipdb; ipdb.set_trace()
     #     res = {}
     #     waves = self
     #

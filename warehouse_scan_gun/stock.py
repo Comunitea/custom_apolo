@@ -74,7 +74,13 @@ class stock_picking_wave(models.Model):
                     'name':op.wave_id.name or '',
                     'is_package': op.is_package
                     }
+                values['qty_available'] = op.pack_id.packed_qty or 0.00
 
+                product = op.product_id or op.pack_id.product_id
+                uom_id = product.uom_id.id
+                uom_qty = op.product_qty
+                if product:
+                    values['units'] = product.get_uom_conversions(uom_qty)
                 ind += 1
                 vals[str(ind)] = values
 

@@ -13,9 +13,9 @@
                  <field name="order_seq" position="attributes">
                      <attribute name="invisible">True</attribute>
                  </field>
-                 <field name="customer_id" position="attributes">
-                    <attribute name="invisible">True</attribute>
-                 </field>
+                 <!--<field name="customer_id" position="attributes">-->
+                    <!--<attribute name="invisible">True</attribute>-->
+                 <!--</field>-->
          </field>
     </record>
 
