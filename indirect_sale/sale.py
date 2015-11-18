@@ -56,10 +56,11 @@ class SaleOrder(models.Model):
 
     @api.multi
     def action_wait(self):
-        res = super(SaleOrder, self).action_wait()
         for order in self:
-            if order.supplier_id:
+            if order.supplier_id \
+                    and order.order_policy != "picking":
                 order.order_policy = "picking"
+        res = super(SaleOrder, self).action_wait()
         return res
 
     @api.model
@@ -73,9 +74,9 @@ class SaleOrder(models.Model):
     @api.multi
     def action_ship_create(self):
         res = super(SaleOrder, self).action_ship_create()
-        pick_obj = self.env["stock.picking"]
         for order in self:
             if order.procurement_group_id and order.supplier_id:
+                pick_obj = self.env["stock.picking"]
                 pick_ids = pick_obj.search([('group_id', '=',
                                              order.procurement_group_id.id)])
                 if pick_ids:

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+        <!-- Editing behavior of sale order lines -->
+        <record id="midban_sale_view_order_form" model="ir.ui.view">
+            <field name="name">midban_sale_view_order_form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale_stock.view_order_form_inherit"/>
+            <field name="arch" type="xml">
+                <!-- ####################################FORM VIEW MODIFICATIONS#################################### -->
+
+                 <xpath expr="//field[@name='order_line']/form/group/group/field[@name='product_id']" position="before">
+                        <field name="product_code"/>
+                </xpath>
+                <!-- Add field price of the unit of measure -->
+                <xpath expr="//field[@name='order_line']/form/group/group/field[@name='price_unit']" position="before">
+                        <field name="price_udv"/>
+                </xpath>
+                <!-- Avoid onchanges in product_uom_qty and product_uom -->
+                <xpath expr="//field[@name='order_line']/form/group/group/div/field[@name='product_uom_qty']" position="replace">
+                   <field name="product_uom_qty" class="oe_inline" readonly="True"/>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/form/group/group/div/field[@name='product_uom']" position="replace">
+                    <field name="product_uom" class="oe_inline oe_no_button" readonly="True"/>
+                </xpath>
+                <!-- Avoid onchanges in product_uos_qty and make it required ad context in product_uos to get only the domain units names-->
+                <xpath expr="//field[@name='order_line']/form//field[@name='product_uos_qty']" position="replace">
+                       <field name="product_uos_qty" class="oe_inline" required="1"/>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/form//field[@name='product_uos']" position="replace">
+                       <field name="product_uos" class="oe_inline" required="1" context="{'product_id': product_id}"/>
+                </xpath>
+                <!-- Avoid onchange in price unit -->
+                <xpath expr="//field[@name='order_line']/form/group/group/field[@name='price_unit']" position="replace">
+                    <field name="price_unit"/>
+                    <field name="price_udv"/>
+                    <field name="do_onchange" invisible="1"/>  <!-- To control bidireccional onchanges -->
+                </xpath>
+
+
+                <!-- ####################################TREE VIEW MODIFICATIONS#################################### -->
+                <!-- To control bidireccional onchanges -->
+                 <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="before">
+                        <field name="do_onchange" invisible="1"/>
+                 </xpath>
+                 <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="before">
+                        <field name="product_code"/>
+                </xpath>
+                 <!-- Replace it in order to move product it after name field, because they are invisible in default view -->
+                 <xpath expr="//field[@name='order_line']/tree/field[@name='product_uos_qty']" position="replace">
+                 </xpath>
+                 <xpath expr="//field[@name='order_line']/tree/field[@name='product_uos']" position="replace">
+                 </xpath>
+
+                 <!-- Movin help UoS fields and price UdV before of uom fields -->
+                 <xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="after">
+                      <field name="product_uos_qty" required="1"/>
+                      <field name="product_uos" context="{'product_id': product_id}" required="1"/>
+                      <field name="price_udv"/>
+                 </xpath>
+
+                <!-- Avoid onchanges in product_uom_qty and product_uom -->
+                <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom_qty']" position="replace">
+                      <field name="product_uom_qty" readonly="True"/>
+                 </xpath>
+                 <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom']" position="replace">
+                      <field name="product_uom" readonly="True"/>
+                 </xpath>
+                <!--xpath expr="//field[@name='order_line']/tree/field[@name='tax_id']" position='attributes'>
+                    <attribute name="invisible">True</attribute>
+                </xpath-->
+
+            </field>
+        </record>
+
+         <record id="midban_sale_view_order_line_filter_history" model="ir.ui.view">
+            <field name="name">midban_sale_view_order_filte_historyr</field>
+            <field name="model">sale.order.line</field>
+            <field name="inherit_id" ref="sale.view_sales_order_line_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='confirmed']" position='replace'>
+                    <filter string="Confirmed" domain="[('state', 'in', ['confirmed', 'done', 'history'])]" name="confirmed"/>
+                </xpath>
+            </field>
+        </record>
+
+
+
+        <record id="view_order_form_add_customer_comment" model="ir.ui.view">
+           <field name="name">sale.order.form.customer_comment</field>
+           <field name="model">sale.order</field>
+           <field name="inherit_id" ref="sale.view_order_form"/>
+           <field name="arch" type="xml">
+               <field name='partner_id' position="after">
+                   <field name="customer_comment"/>
+                   <!-- <field name="route_detail_id" domain="[('route_type', '=', 'delivery')]"
+                          attrs="{'readonly': [('state', 'in', [('progress,' 'manual', 'shipping_except', 'invoice_except', 'done')])]}"/> -->
+               </field>
+               <!-- <field name='date_order' position="after">
+                   <field name="date_planned" attrs="{'readonly': [('route_detail_id', '!=', False)]}"/>
+               </field> -->
+            </field>
+        </record>
+
+
+
+
+
+
+
+
+
+
+
+
+        <record id="sale_view_order_form_ultra_fresh" model="ir.ui.view">
+            <field name="name">sale.view.order.form.ultra.fresh</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <!-- Add qualitative note to line  -->
+                <xpath expr="//field[@name='order_line']/form/group/group/field[@name='th_weight']" position="after">
+                    <field name="q_note"/>
+                    <field name="detail_note"/>
+                </xpath>
+            </field>
+        </record>
+
+
+        <!-- Qualitative note tree view  -->
+        <record id="qualitative_note_view_tree" model="ir.ui.view">
+            <field name="name">qualitative.note.view.tree</field>
+            <field name="model">qualitative.note</field>
+            <field name="arch" type="xml">
+                <tree string="Qualitative Note">
+                    <field name="code"/>
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Qualitative note form view  -->
+        <record id="qualitative_note_view_form" model="ir.ui.view">
+            <field name="name">qualitative.note.view.form</field>
+            <field name="model">qualitative.note</field>
+            <field name="arch" type="xml">
+                <form string="Qualitative Note">
+                    <sheet>
+                        <group>
+                            <field name="code"/>
+                            <field name="name"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Action Qualitative note -->
+        <record id="action_qualitative_note" model="ir.actions.act_window">
+            <field name="name">action.qualitative.note</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">qualitative.note</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click here to create a new qualitative comment
+                </p><p>
+                    We use it to pass information between sales and purchases
+                </p>
+
+            </field>
+        </record>
+
+        <!-- Menu Qualitative note -->
+        <menuitem id="menu_qualitative_comment" action="action_qualitative_note" name="Qualitative Comments" parent="base.menu_base_config" sequence="10"/>
+
+    </data>
+</openerp>
