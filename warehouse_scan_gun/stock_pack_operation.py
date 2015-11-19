@@ -81,6 +81,7 @@ class stock_pack_operation(models.Model):
     @api.multi
     def set_wave_ops_values(self, my_args):
 
+
         wave_id = my_args.get ('wave_id', 0)
         op_id = my_args.get('op_id',0)
         user_id = my_args.get('user_id', 0)
@@ -391,7 +392,6 @@ class stock_pack_operation(models.Model):
         """
         user_id = my_args.get('user_id', False)
         op_id = my_args.get('op_id', False)
-
         field_values = my_args.get ('field_values', False)
         domain = ['|', ('id', '=', op_id), ('old_id', '=', op_id)]
         op_obj = self.search(domain, limit=1)
@@ -400,6 +400,7 @@ class stock_pack_operation(models.Model):
                             _('No operation founded to set as visited'))
 
         # Browse with correct uid, an mark as visited
+
         try:
             env2 = op_obj.env(self._cr, user_id, self._context)
             op_obj_uid = op_obj.with_env(env2)
@@ -416,6 +417,7 @@ class stock_pack_operation(models.Model):
             return res
         except Exception:
             return False
+
     @api.multi
     def change_op_value(self, my_args):
         """
