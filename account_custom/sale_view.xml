@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+         <record id="midban_sale_view_order_line_filter_history" model="ir.ui.view">
+            <field name="name">midban_sale_view_order_filte_historyr</field>
+            <field name="model">sale.order.line</field>
+            <field name="inherit_id" ref="sale.view_sales_order_line_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='confirmed']" position='replace'>
+                    <filter string="Confirmed" domain="[('state', 'in', ['confirmed', 'done', 'history'])]" name="confirmed"/>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</openerp>
