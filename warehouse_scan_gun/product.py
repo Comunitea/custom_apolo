@@ -254,11 +254,33 @@ class product_product (models.Model):
             uom_qty = units[2]
             uom_qty += float_round(units[0] / (product.kg_un * product.un_ca), 2)#product.log_base_id.rounding)
             uom_qty += float_round(units[1] / (product.un_ca), 2)#product.log_base_id.rounding)
-
-
         return uom_qty
 
+    @api.multi
+    def get_pack_candidates(self, product_id, min_qty=False):
+        res = []
+        # product_id = my_args.get('product_id', False)
+        # min_qty = my_args('min_qty', False)
+        if product_id:
+            t_pack = self.env['stock.quant.package']
+            domain = [('product_id', '=', product_id),
+                      ('quant_ids', '!=', False)]
+            pack_objs = t_pack.search(domain)
 
+            for p in pack_objs:
+                if min_qty and p.unreserved_qty < min_qty \
+                        or not p.unreserved_qty:
+                    continue
+                dic = {
+                    'package_id': p.id,
+                    'package': p.name,
+                    'unreserved_qty': p.unreserved_qty,
+                    'bcd_name': p.location_id.bcd_name,
+                }
+                res.append(dic)
+        if res:
+            res = sorted(res, key=lambda d: d['unreserved_qty'], reverse=True)
+        return res
 
     @api.multi
     def conv_units_from_gun(self, my_args):
@@ -295,4 +317,3 @@ class product_product (models.Model):
             if picking_location and write:
                 res = product.write ({'picking_location_id': picking_location_id})
         return res
-
