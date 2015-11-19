@@ -81,6 +81,7 @@ class stock_pack_operation(models.Model):
     @api.multi
     def set_wave_ops_values(self, my_args):
 
+
         wave_id = my_args.get ('wave_id', 0)
         op_id = my_args.get('op_id',0)
         user_id = my_args.get('user_id', 0)
@@ -133,8 +134,10 @@ class stock_pack_operation(models.Model):
                 'destino_bcd' : op.location_dest_id.bcd_name or op.location_dest_id.name,
                 'product_id': op.product_id.id or False,
                 'lot_id': op.packed_lot_id.id,
-                'qty_available':op.packed_lot_id.product_id.qty_available or 0.00
+                'qty_available':op.packed_lot_id.product_id.qty_available or 0.00,
+                'packed_qty': op.packed_qty or 0.00
                  }
+
                 if not op.product_id:
                     domain_package = [('id', '=', op.package_id.id)]
                     package_pool= self.env['stock.quant.package'].search(domain_package)[0].with_context(ctx)
@@ -143,7 +146,17 @@ class stock_pack_operation(models.Model):
                     values['product'] = package_pool.packed_lot_id.product_id.short_name or ""
                     values['product_id'] = package_pool.packed_lot_id.product_id.id or False
                     values['qty_available'] = package_pool.packed_lot_id.product_id.qty_available or 0.00
+
+                #si pide Jaume que la cantidad mostrada sea la cantidad restante del paquete
+                values['qty_available'] = op.package_id.packed_qty or 0.00
+
+                product = op.product_id or op.package_id.product_id
+                uom_id = product.uom_id.id
+                uom_qty = op.product_qtys
+                if product:
+                    values['units'] = product.get_uom_conversions(uom_qty)
                 ind += 1
+
                 vals[str(ind)] = values
             return vals
         else:
@@ -379,7 +392,6 @@ class stock_pack_operation(models.Model):
         """
         user_id = my_args.get('user_id', False)
         op_id = my_args.get('op_id', False)
-
         field_values = my_args.get ('field_values', False)
         domain = ['|', ('id', '=', op_id), ('old_id', '=', op_id)]
         op_obj = self.search(domain, limit=1)
@@ -388,6 +400,7 @@ class stock_pack_operation(models.Model):
                             _('No operation founded to set as visited'))
 
         # Browse with correct uid, an mark as visited
+
         try:
             env2 = op_obj.env(self._cr, user_id, self._context)
             op_obj_uid = op_obj.with_env(env2)
@@ -404,6 +417,7 @@ class stock_pack_operation(models.Model):
             return res
         except Exception:
             return False
+
     @api.multi
     def change_op_value(self, my_args):
         """

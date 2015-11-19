@@ -22,6 +22,8 @@
 ##############################################################################
 from openerp import models, fields, api, _, exceptions
 #from openerp.exceptions import except_orm
+from openerp.tools.float_utils import float_round
+
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
@@ -138,6 +140,125 @@ class product_product (models.Model):
             res[str(inc)]=vals
 
         return res
+
+    @api.multi
+    def get_uom_conversions(self, uom_qty, product_id = False):
+        # product_id = my_args.get("product_id", False)
+        # uom_id = my_args.get("uom_id", False)
+        # uom_qty = my_args.get("uom_qty", 0.00)
+        #import ipdb; ipdb.set_trace()
+        ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': 1}
+        #import ipdb; ipdb.set_trace()
+        if product_id:
+            domain = [('id', '=', product_id)]
+            product = self.search(domain)
+        else:
+            product = self.ensure_one()
+        product= self.env['product.product'].browse(product.id).with_context(ctx)
+        rounding = 0
+        base_qty = 0.00
+        uom_id = product.uom_id
+        if product.log_base_id.id == uom_id.id:
+            base_qty = uom_qty
+            rounding = product.log_base_id.rounding
+            #si tiene log_box
+
+        elif product.log_unit_id.id == uom_id.id:
+            base_qty = uom_qty * product.kg_un
+            rounding = product.log_unit_id.rounding
+
+        elif product.log_box_id.id ==uom_id.id:
+            base_qty = uom_qty * product.kg_un * product.un_ca
+            rounding = product.log_box_id.rounding or 0.00
+
+        base_qty = base_qty#float_round(base_qty, rounding)
+        conv =[]
+        rest = base_qty
+        rounding = 2
+        if product.log_box_id:
+            box_id = product.log_box_id.name
+
+            if product.log_base_id or product.log_unit_id:
+                #Hay más unidades
+                box_qty = int(rest / (product.kg_un * product.un_ca))
+                rest = rest - (box_qty * (product.kg_un * product.un_ca))
+            else:
+                #no hay más unidades, redondeo
+                box_qty = float_round(rest / (product.kg_un * product.un_ca),  2)#product.log_box_id.rounding)
+                rest = 0
+            conv.append((box_id, box_qty, product.log_box_id.id))
+        else:
+            box_id = False
+            box_qty = 0
+            conv.append((box_id, box_qty, False))
+        if product.log_unit_id:
+            unit_id = product.log_unit_id.name
+
+            if product.log_base_id:
+                unit_qty = int(rest /product.kg_un)
+                rest = rest - (unit_qty * product.kg_un)
+            else:
+                unit_qty = float_round(rest /product.kg_un, 2)#product.log_unit_id.rounding)
+                rest =0
+            conv.append((unit_id, unit_qty, product.log_unit_id.id))
+        else:
+            unit_id = False
+            unit_qty = 0
+            conv.append((unit_id, unit_qty, False))
+
+        if product.log_base_id:
+            base_id = product.log_base_id.name
+            base_qty = float_round (rest, 2) #product.log_base_id.rounding)
+            conv.append((base_id, base_qty,product.log_base_id.id ))
+        else:
+            base_id = False
+            base_qty = 0
+            conv.append((base_id, base_qty, False))
+
+        return conv
+
+
+    @api.multi
+    def get_uom_from_conversions_from_gun(self,my_args):
+        units = my_args.get('units', [])
+        product_id = my_args.get ('product_id', False)
+        return self.get_uom_from_conversions(units, product_id)
+
+    @api.multi
+    def get_uom_from_conversions(self, units, product_id = False):
+
+
+        ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': 1}
+        if product_id:
+            domain = [('id', '=', product_id)]
+            product = self.search(domain)
+        else:
+            product = self.ensure_one()
+
+        product= self.env['product.product'].browse(product.id).with_context(ctx)
+        uom_qty = 0.00
+        uom_id = product.uom_id
+        c_ = 1
+
+        if product.log_base_id.id == uom_id.id:
+            uom_qty = units[0]
+            uom_qty += float_round(units[1]* product.kg_un, 2)#product.log_base_id.rounding)
+            uom_qty += float_round(units[2]* (product.un_ca * product.kg_un),2)# product.log_base_id.rounding)
+
+        elif product.log_unit_id.id == uom_id.id:
+            uom_qty = units[1]
+            uom_qty += float_round(units[0] / product.kg_un,2)# product.log_unit_id.rounding)
+            uom_qty += float_round(units[2] * product.un_ca,2)# product.log_base_id.rounding)
+
+        elif product.log_box_id.id ==uom_id.id:
+            uom_qty = units[2]
+            uom_qty += float_round(units[0] / (product.kg_un * product.un_ca), 2)#product.log_base_id.rounding)
+            uom_qty += float_round(units[1] / (product.un_ca), 2)#product.log_base_id.rounding)
+
+
+        return uom_qty
+
+
 
     @api.multi
     def conv_units_from_gun(self, my_args):

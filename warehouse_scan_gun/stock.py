@@ -33,6 +33,7 @@ class stock_picking_wave(models.Model):
         wave_id = self.env['stock.task'].search(domain).wave_id.id
         domain=[('id','=',wave_id)]
         wave = self.search(domain)
+
         if wave:
             vals = {}
             ind = 0
@@ -67,14 +68,21 @@ class stock_picking_wave(models.Model):
                     'to_revised':op.to_revised or False,
                     'is_var_coeff': op.product_id.is_var_coeff or False,
                     'num_ops':len(op.operation_ids) or 1,
-                    'op': op.operation_ids[0].id or False,
+
                     'customer_id': op.customer_id.comercial or op.customer_id.name,
                     'ref': op.customer_id.ref or False,
                     'qty_available': op.product_id.qty_available or 0.00,
                     'name':op.wave_id.name or '',
                     'is_package': op.is_package
                     }
-
+                values['qty_available'] = op.pack_id.packed_qty or 0.00
+                if op.operation_ids:
+                    values['op'] =  op.operation_ids[0].id or False
+                product = op.product_id or op.pack_id.product_id
+                uom_id = product.uom_id.id
+                uom_qty = op.product_qty
+                if product:
+                    values['units'] = product.get_uom_conversions(uom_qty)
                 ind += 1
                 vals[str(ind)] = values
 
