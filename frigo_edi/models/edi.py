@@ -511,7 +511,7 @@ class Edi(models.Model):
                 customer_vals[customer.id] = [(4, product.id)]
             else:
                 customer_vals[customer.id].append((4, product.id))
-        import ipdb; ipdb.set_trace()
+        # import ipdb; ipdb.set_trace()
         for customer in self.env['res.partner'].browse(customer_vals.keys()):
             customer.write({'exclusive_ids': customer_vals[customer.id]})
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
