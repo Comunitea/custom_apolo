@@ -422,7 +422,7 @@ class ExportEdiFile(models.TransientModel):
             return
         for obj in objs:
             self.export_file_ven_create(obj.period_start, obj.period_end)
-        objs.state = 'send'
+        objs.write({'state': 'send'})
 
     @api.model
     def export_file_col(self, active_model, objs, type):

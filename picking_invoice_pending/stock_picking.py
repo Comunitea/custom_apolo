@@ -120,11 +120,11 @@ class StockPicking(models.Model):
         res = super(StockPicking, self).write(vals)
         if vals.get('date_done', False):
             for pick in self:
-                pick.refresh()
                 if (pick.picking_type_id.code == "incoming" and pick.move_lines
                         and pick.move_lines[0].purchase_line_id and
                         pick.invoice_state in ['invoiced', '2binvoiced'] and
                         pick.company_id.required_invoice_pending_move):
+                    pick.refresh()
                     if not pick.company_id.\
                             property_pending_supplier_invoice_account:
                         raise Warning(_("You need to configure an account "

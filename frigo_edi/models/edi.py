@@ -121,7 +121,6 @@ class Edi(models.Model):
             group.write({'product_ids': [(4, product.id)]})
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
         self.make_backup(file_path, doc.file_name)
-        os.remove(file_path)
 
     @api.model
     def parse_products_file(self, file_path, doc):
@@ -271,7 +270,6 @@ class Edi(models.Model):
         unlink_supp_ids.unlink()
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
         self.make_backup(file_path, doc.file_name)
-        os.remove(file_path)
         return
 
     @api.model
@@ -356,7 +354,6 @@ class Edi(models.Model):
             part.signal_workflow("active")
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
         self.make_backup(file_path, doc.file_name)
-        os.remove(file_path)
         return
 
     @api.model
@@ -452,7 +449,6 @@ class Edi(models.Model):
             doc.write({'state': 'imported',
                        'date_process': fields.Datetime.now()})
             self.make_backup(file_path, doc.file_name)
-            os.remove(file_path)
 
     @api.model
     def parse_exclusive(self, file_path, doc):
@@ -469,8 +465,10 @@ class Edi(models.Model):
             [('customer', '=', True),
              ('exclusive_ids', '!=', False)]).write({'exclusive_ids':
                                                      delete_links})
+        customer_vals = {}
+        end_line = '0' * 36
         for line in f:
-            if '0' * 36 in line:
+            if end_line in line:
                 continue
             customer_code = line[:10].lstrip('0')
             customer = self.env['res.partner'].search([('unilever_code', '=',
@@ -479,6 +477,9 @@ class Edi(models.Model):
                 log.error('Customer with unilever code %s not found' %
                           customer_code)
                 continue
+            elif len(customer) != 1:
+                log.error('Varios clientes con el mismo codigo de proveedor %s' % customer_code)
+                continue
             product_code = line[10:20][2:8]
             product_info = self.env['product.supplierinfo'].search(
                 [('product_code', 'ilike', product_code)])
@@ -486,11 +487,19 @@ class Edi(models.Model):
                 log.error('product with supplier code %s not found' %
                           product_code)
                 continue
+            elif len(product_info) != 1:
+                log.error('Varios productos con el mismo codigo de proveedor %s' % product_code)
+                continue
             product = product_info.product_tmpl_id
-            customer.write({'exclusive_ids': [(4, product.id)]})
+            if customer.id not in customer_vals.keys():
+                customer_vals[customer.id] = [(4, product.id)]
+            else:
+                customer_vals[customer.id].append((4, product.id))
+        # import ipdb; ipdb.set_trace()
+        for customer in self.env['res.partner'].browse(customer_vals.keys()):
+            customer.write({'exclusive_ids': customer_vals[customer.id]})
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
         self.make_backup(file_path, doc.file_name)
-        os.remove(file_path)
 
     @api.model
     def parse_payment_invoice(self, file_path, doc):
@@ -541,7 +550,6 @@ class Edi(models.Model):
             })
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
         self.make_backup(file_path, doc.file_name)
-        os.remove(file_path)
 
     @api.model
     def process_files(self, path):
