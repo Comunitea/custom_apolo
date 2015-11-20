@@ -123,7 +123,7 @@ class DatabaseImport:
 
         self.url_template = "http://%s:%s/xmlrpc/%s"
         self.server = "localhost"
-        self.port = 5969
+        self.port = 5069
         self.dbname = dbname
         self.user_name = user
         self.user_passwd = passwd
@@ -413,6 +413,12 @@ class DatabaseImport:
 
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
+
+    def import_list_price(self, cr, product_code, product_id):
+        cr.execute("select top 1 tari_prec as lst_price from dbo.adsd_tari where tari_arti = ? order by tari_desd desc", (product_code,))
+        row2 = cr.fetchone()
+        if row2 and row2.lst_price:
+            self.write("product.product", [product_id], {"lst_price": row2.lst_price})
 
     def _create_or_update_partner(self, row, unregister_id,parent_id=False):
         partner_ids = self.search("res.partner", [('ref', '=', str(row[0])),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
@@ -1043,6 +1049,22 @@ class DatabaseImport:
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
+    def update_product_sale_price(self, cr):
+        cr.execute("select distinct tari_arti as default_code from dbo.adsd_tari")
+        products_data = cr.fetchall()
+        cont = 0
+        num_rows = len(products_data)
+        for row in products_data:
+            product_ids = self.search('product.product', [('default_code', '=', str(int(row.default_code))),'|',('active','=',True),('active','=',False)])
+            if product_ids:
+                cr.execute("select top 1 tari_prec as lst_price from dbo.adsd_tari where tari_arti = ? order by tari_desd desc", (int(row.default_code),))
+                row2 = cr.fetchone()
+                if row2 and row2.lst_price:
+                    self.write("product.product", [product_ids[0]], {"lst_price": row2.lst_price})
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+
     def process_data(self):
         """
         Importa la bbdd
@@ -1065,14 +1087,15 @@ class DatabaseImport:
             #self.import_bank_accounts(cr)
             #self.import_master_frigo_data(cr)
             #self.import_product_frigo_data(cr)
-            #self.import_other_prices(cr)
+            self.update_product_sale_price(cr)
+            self.import_other_prices(cr)
             #self.import_customers_other_data(cr)
             #self.import_preferential_agree_data(cr)
             #self.import_tourism_data(cr)
             #self.import_giras(cr)
             #self.fix_customer_names(cr)
             #self.fix_product_weight(cr)
-            self.import_partner_contacts(cr)
+            #self.import_partner_contacts(cr)
 
 
         except Exception, ex:
