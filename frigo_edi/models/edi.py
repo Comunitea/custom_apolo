@@ -121,10 +121,6 @@ class Edi(models.Model):
             group.write({'product_ids': [(4, product.id)]})
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
         self.make_backup(file_path, doc.file_name)
-        try:
-            os.remove(file_path)
-        except OSError:
-            log.info('not have permission to delete %s' % file_path)
 
     @api.model
     def parse_products_file(self, file_path, doc):
@@ -274,10 +270,6 @@ class Edi(models.Model):
         unlink_supp_ids.unlink()
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
         self.make_backup(file_path, doc.file_name)
-        try:
-            os.remove(file_path)
-        except OSError:
-            log.info('not have permission to delete %s' % file_path)
         return
 
     @api.model
@@ -362,10 +354,6 @@ class Edi(models.Model):
             part.signal_workflow("active")
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
         self.make_backup(file_path, doc.file_name)
-        try:
-            os.remove(file_path)
-        except OSError:
-            log.info('not have permission to delete %s' % file_path)
         return
 
     @api.model
@@ -461,10 +449,6 @@ class Edi(models.Model):
             doc.write({'state': 'imported',
                        'date_process': fields.Datetime.now()})
             self.make_backup(file_path, doc.file_name)
-            try:
-                os.remove(file_path)
-            except OSError:
-                log.info('not have permission to delete %s' % file_path)
 
     @api.model
     def parse_exclusive(self, file_path, doc):
@@ -511,15 +495,11 @@ class Edi(models.Model):
                 customer_vals[customer.id] = [(4, product.id)]
             else:
                 customer_vals[customer.id].append((4, product.id))
-        import ipdb; ipdb.set_trace()
+        # import ipdb; ipdb.set_trace()
         for customer in self.env['res.partner'].browse(customer_vals.keys()):
             customer.write({'exclusive_ids': customer_vals[customer.id]})
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
         self.make_backup(file_path, doc.file_name)
-        try:
-            os.remove(file_path)
-        except OSError:
-            log.info('not have permission to delete %s' % file_path)
 
     @api.model
     def parse_payment_invoice(self, file_path, doc):
@@ -570,10 +550,6 @@ class Edi(models.Model):
             })
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
         self.make_backup(file_path, doc.file_name)
-        try:
-            os.remove(file_path)
-        except OSError:
-            log.info('not have permission to delete %s' % file_path)
 
     @api.model
     def process_files(self, path):
