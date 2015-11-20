@@ -191,6 +191,8 @@ class StockTask(models.Model):
         if not task_obj:
             return False
             raise except_orm(_("Error"), _("Task not founded after create it"))
+
+
         for op in task_obj.operation_ids:
             op.write({'visited': False})
 
