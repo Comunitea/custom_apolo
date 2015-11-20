@@ -116,8 +116,9 @@ class ScanGunProtocol(LineReceiver):
         self.last = False
         self.reset_self_task()
         self.reset_self_op()
-        self.show_op_processed = False
+        self.show_op_processed = True
         self.print_tag_option = True
+
     def reset_self_task(self):
 
         self.camera_id = [] # Lista de Camaras activa, por la que se busca
@@ -142,7 +143,7 @@ class ScanGunProtocol(LineReceiver):
         self.new_package_id= False
         self.pack_type = 'do_pack'
         self.do_pack = True
-
+        self.reset_log_units()
 
     def reset_self_op(self):
         self.op_id = False
@@ -171,7 +172,7 @@ class ScanGunProtocol(LineReceiver):
         """
         Método del framework. Mensaje al establecer la conexión
         """
-        self.factory.debug= False
+        self.factory.debug= True
         self._snd(u"Codigo de operador:")
 
     def connectionLost(self, reason = u"Se perdio la conexión"):
@@ -2378,7 +2379,7 @@ class ScanGunProtocol(LineReceiver):
         self._snd(self.get_str_list_waves(), message)
         return
 
-    def get_step_from_unit(self, uom_id, units):
+    def get_step_from_unit(self, uom_id, units, var = False):
             res =2
             if units[0][2]==uom_id:
                 res = 21
@@ -2386,6 +2387,8 @@ class ScanGunProtocol(LineReceiver):
                 res = 22
             if units[2][2]==uom_id:
                 res = 23
+            if var:
+                res = res+10
             return res
 
     def handle_form_wave(self, line, confirm=False):
@@ -2394,6 +2397,7 @@ class ScanGunProtocol(LineReceiver):
         #step = 0: Espera localizacióny pasa a step 1
         #step 1, espera pack , si ok pasa a step9
         #if self.step>=3:
+
 
 
 
@@ -2661,6 +2665,12 @@ class ScanGunProtocol(LineReceiver):
                 self._snd(self.get_str_form_wave(), '')
                 return
 
+            if self.step ==0:
+                #si llega aqui y self.step =0
+                message =u"Necesito un paquete"
+                self._snd(self.get_str_form_wave(), message)
+                return
+
             if line == KEY_FINISH and self.step==10:
                 self.finish_picking(force=True)
                 return
@@ -2683,16 +2693,19 @@ class ScanGunProtocol(LineReceiver):
                     self._snd(self.get_str_list_waves(), 'Op Finalizada. Para Revisión')
                     return
 
+            if line == KEY_QTY and self.product['is_var_coeff'] and self.step ==2:
+                self.step=3
+
 
             if line == KEY_QTY and not self.product['is_var_coeff'] and self.step in [2, 21,22,23]:
+
                 if self.step == 2:
-                    self.step = self.get_step_from_unit(wave_['uom_id'], wave_['units'])
+                    self.step = self.get_step_from_unit(wave_['uom_id'], wave_['units'], self.product['is_var_coeff'])
                     self._snd(self.get_str_form_wave(), '')
                     return
 
                 if self.step ==21:
                     self.step=22
-
                     if self.waves[str(self.active_wave)]['units'][1][2]:
                         self._snd(self.get_str_form_wave(), '')
                         return
@@ -2702,6 +2715,7 @@ class ScanGunProtocol(LineReceiver):
                     if self.waves[str(self.active_wave)]['units'][2][2]:
                         self._snd(self.get_str_form_wave(), '')
                         return
+
                 if self.step == 23:
                     self.step =21
                     if self.waves[str(self.active_wave)]['units'][0][2]:
@@ -2710,6 +2724,35 @@ class ScanGunProtocol(LineReceiver):
 
                 self.handle_form_wave(line=KEY_QTY)
                 return
+
+            if line == KEY_QTY and self.product['is_var_coeff'] and self.step in [3, 31,32,33]:
+                #import ipdb; ipdb.set_trace()
+                if self.step == 3:
+                    self.step = self.get_step_from_unit(wave_['uom_id'], wave_['units'], self.product['is_var_coeff'])
+                    self._snd(self.get_str_form_wave(), '')
+                    return
+
+                if self.step ==31:
+                    self.step=32
+                    if self.waves[str(self.active_wave)]['units'][1][2]:
+                        self._snd(self.get_str_form_wave(), '')
+                        return
+
+                if self.step == 32:
+                    self.step =33
+                    if self.waves[str(self.active_wave)]['units'][2][2]:
+                        self._snd(self.get_str_form_wave(), '')
+                        return
+
+                if self.step == 33:
+                    self.step =31
+                    if self.waves[str(self.active_wave)]['units'][0][2]:
+                        self._snd(self.get_str_form_wave(), '')
+                        return
+
+                self.handle_form_wave(line=KEY_QTY)
+                return
+
 
 
             if line == KEY_QTY and self.step in [2,3,4]:
@@ -2756,24 +2799,28 @@ class ScanGunProtocol(LineReceiver):
                         self._snd(self.get_str_form_wave(), '')
                         return
 
+
         if wave_['PROCESADO']:
             message = u'\nYa está procesada'
             self._snd(self.get_str_form_wave(), message)
             return
 
+        if self.step ==0:
+            #si llega aqui y self.step =0
+            message =u"Necesito un paquete"
+            self._snd(self.get_str_form_wave(), message)
+            return
 
-        if line_float or line_float== 0:
-            line_=line_float
+        if line_float and line_float > 0:
             print u"Step: %s, Coef Var: %s"%(self.step, self.product['is_var_coeff'])
 
             one_unit =  (wave_['uom_id'] == wave_['uos_id'])
 
-            if self.step==2:
-                if not self.product['is_var_coeff']:
-                    self.step = self.get_step_from_unit(wave_['uom_id'], wave_['units'])
+            if self.step==2 or self.step == 3:
+                self.reset_log_units()
+                self.step = self.get_step_from_unit(wave_['uom_id'], wave_['units'],self.product['is_var_coeff'] )
 
-                else:
-                    self.step = 3
+
 
             if self.step in [3,4]:
 
@@ -2827,13 +2874,12 @@ class ScanGunProtocol(LineReceiver):
                 return
 
             if self.step == 9:
-
                 self.new_uos_qty = line_float
                 self.new_uom_qty = round(line_float / self.fc, 2)
                 self._snd(self.get_str_form_wave(), '')
                 return
 
-
+            #import ipdb; ipdb.set_trace()
             if self.step == 21:
                 #metemos unidad en log_box
                 self.log_base = line_float
@@ -2853,11 +2899,70 @@ class ScanGunProtocol(LineReceiver):
                 #metemos unidad en log_base
 
 
+            if self.step == 31:
+                #metemos uni3dad en log_box
+                self.log_base_qtys.append(line_float)
+                self.log_base_qty = 0.00
+
+                for q in self.log_base_qtys:
+                    self.log_base_qty += q
+
+                self.total_qtys = self.log_base_qty + self.log_unit_qty + self.log_box_qty
+
+                self._snd(self.get_str_form_wave(), '')
+                return
+
+            if self.step == 32:
+                self.log_base_qtys.append(line_float)
+                self.log_unit_qty = 0.00
+
+                for q in self.log_unit_qtys:
+                    self.log_unit_qty += q
+
+                self.log_unit = len(self.log_unit_qtys)
+                self.total_qtys = self.log_base_qty + self.log_unit_qty + self.log_box_qty
+
+                self._snd(self.get_str_form_wave(), '')
+                return
+
+            if self.step == 33:
+                self.log_box_qtys.append(line_float)
+                self.log_box_qty = 0.00
+
+                for q in self.log_box_qtys:
+                    self.log_box_qty += q
+
+                self.log_box = len(self.log_box_qtys)
+                self.total_qtys = self.log_base_qty + self.log_unit_qty + self.log_box_qty
+
+                self._snd(self.get_str_form_wave(), '')
+                return
+
+
+
+
+
+
 
         #si llega aqui, vuelve-.
-        message ="\nNo te entiendo"
+        message ="No te entiendo"
         self._snd(self.get_str_form_wave(), message)
         return
+
+    def reset_log_units(self):
+        self.log_base_qtys = []
+        self.log_unit_qtys = []
+        self.log_box_qtys = []
+
+        self.log_base_qty = 0
+        self.log_unit_qty = 0
+        self.log_box_qty = 0
+
+        self.log_unit = 0
+        self.log_box = 0
+        self.log_unit = 0
+
+        self.total_qtys = 0
 
     def get_str_form_wave(self):
 
@@ -3006,7 +3111,7 @@ class ScanGunProtocol(LineReceiver):
             else:
                 menu_str += cantidad + cantidad_uos
 
-        if self.step >20:
+        if self.step in [20, 21, 22]:
 
             unit_str=''
             mover = "Actual:"
@@ -3038,6 +3143,58 @@ class ScanGunProtocol(LineReceiver):
         if self.step == 25:
             message =u"%s Confirmar Operación\n"%KEY_CONFIRM
             message = self.inverse(message)
+
+
+
+        if self.step in [31, 32, 33]:
+            #import ipdb; ipdb.set_trace()
+            unit_str=''
+            mover = "Actual:"
+
+            left_str = u"%s "%mover
+
+            unit_str = u"%s %s\n"%(self.total_qtys, wave_['units'][2][0])
+            menu_str += left_str + unit_str
+            mover = "       "
+            str_qtys = []
+
+            if wave_['units'][2][2]:
+                left_str = u"%s "%mover
+                unit_str = u"%s %s\n"%(self.log_box_qty, wave_['units'][0] [0])
+                if self.step == 33:
+                    unit_str= self.inverse(unit_str)
+                mover = "       "
+                menu_str += left_str + unit_str
+                str_qtys = self.split_qtys(self.log_box_qtys)
+
+            if wave_['units'][1][2]:
+                left_str = u"%s "%mover
+                unit_str = u"%s %s\n"%(self.log_unit_qty, wave_['units'][1] [0])
+                if self.step == 32:
+                    unit_str= self.inverse(unit_str)
+                mover = "       "
+                menu_str += left_str + unit_str
+                str_qtys = self.split_qtys(self.log_unit_qtys)
+
+            if wave_['units'][0][2]:
+                left_str = u"%s "%mover
+                unit_str = u"%s %s\n"%(self.log_base_qty, wave_['units'][2] [0])
+                if self.step == 31:
+                    unit_str= self.inverse(unit_str)
+                mover = "       "
+                menu_str += left_str + unit_str
+                str_qtys = self.split_qtys(self.log_base_qtys)
+
+
+
+            menu_str += str_qtys
+
+        if self.step == 35:
+            message =u"%s Confirmar Operación\n"%KEY_CONFIRM
+            message = self.inverse(message)
+
+
+
 
         str_ = u'De %s\n'%(wave_['origen_bcd'])
         # com oe s picking no hay destino str_ = 'A %s\n'%wave_['DESTINO']
@@ -3073,6 +3230,17 @@ class ScanGunProtocol(LineReceiver):
         #keys += KEY_VOLVER + u' Atrás '  + KEY_WAVE_OPS + u' Ops'
         menu_str = header + menu_str + keys
         return menu_str
+
+
+    def split_qtys(self, qtys):
+        cont = 1
+        str =''
+        for qty in qtys:
+            if cont % 3:
+                str += '\n'
+            str += u'[%s]'%qty
+        str +='\n'
+        return str
 
 
     def handle_list_ubi_ops(self, line, confirm=False):

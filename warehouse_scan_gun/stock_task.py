@@ -184,29 +184,6 @@ class StockTask(models.Model):
         elif task_type == 'picking':
             task_id = wzd_obj_uid.with_context(gun=True).get_picking_task()
 
-        # domain = [
-        #     ('user_id', '=', user_id),
-        #     ('state', '=', 'assigned'),
-        #     ('type', '=', task_type),
-        #     ('paused', '=', False),
-        # ]
-        # task_obj = self.search(domain)
-        if not task_id:
-            return False
-            raise except_orm(_("Error"), _("Task not founded after create it"))
-        # for op in task_obj.operation_ids:
-        #     op.write({'visited': False})
-        #
-        #
-        # if task_type=='picking':
-        #     for wave_report in task_obj.wave_id:
-        #         for wave in wave_report.wave_report_ids:
-        #             for op in wave.operation_ids:
-        #                 #vals={'to_process':False, 'visited':False}
-        #                 vals={'visited':False}
-        #                 op.write (vals)
-
-
         print "te doy una creada: Id" +str(task_id)
         return task_id
 
