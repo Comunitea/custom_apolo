@@ -23,15 +23,32 @@ from openerp import models, fields, api
 from openerp.exceptions import except_orm
 from openerp.tools.translate import _
 import time
+import logging
+_logger = logging.getLogger(__name__)
 
 class stock_pack_operation(models.Model):
     _inherit = 'stock.pack.operation'
 
+    @api.one
+    @api.depends('product_id')
+    def _get_sale_qty(self):
+        for move_line in self.picking_id.sale_id.order_line:
+        #for move_line in self.picking_id.move_lines:
+                if self.product_id.id == move_line.product_id.id and \
+                    self.uos_id.id == move_line.product_uos.id:
+                    self.product_uos_qty = move_line.product_uos_qty
+        return
+
+
+
     visited = fields.Boolean('Visited', default=False)
     state= fields.Char()
-    #wave_ok = fields.Boolean('Wave Ok', default = True)
     op_package_id = fields.Many2one('stock.quant.package', 'Original Pack',  default = False)
+    to_revised = fields.Boolean('To Revised')
     wrong_qty = fields.Boolean('Wrong Qty', default=False)
+    wave_revised_id = fields.Many2one('wave.revised')
+    partner_id = fields.Many2one(related = 'picking_id.partner_id', readonly = True)
+    product_uos_qty = fields.Float('product_uos_qty', compute = '_get_sale_qty', readonly=True)
 
     @api.multi
     def get_user_packet_busy(self, my_args):
@@ -65,6 +82,7 @@ class stock_pack_operation(models.Model):
 
     @api.multi
     def set_wave_ops_values(self, my_args):
+
 
         wave_id = my_args.get ('wave_id', 0)
         op_id = my_args.get('op_id',0)
@@ -118,8 +136,10 @@ class stock_pack_operation(models.Model):
                 'destino_bcd' : op.location_dest_id.bcd_name or op.location_dest_id.name,
                 'product_id': op.product_id.id or False,
                 'lot_id': op.packed_lot_id.id,
-                'qty_available':op.packed_lot_id.product_id.qty_available or 0.00
+                'qty_available':op.packed_lot_id.product_id.qty_available or 0.00,
+                'packed_qty': op.packed_qty or 0.00
                  }
+
                 if not op.product_id:
                     domain_package = [('id', '=', op.package_id.id)]
                     package_pool= self.env['stock.quant.package'].search(domain_package)[0].with_context(ctx)
@@ -128,7 +148,17 @@ class stock_pack_operation(models.Model):
                     values['product'] = package_pool.packed_lot_id.product_id.short_name or ""
                     values['product_id'] = package_pool.packed_lot_id.product_id.id or False
                     values['qty_available'] = package_pool.packed_lot_id.product_id.qty_available or 0.00
+
+                #si pide Jaume que la cantidad mostrada sea la cantidad restante del paquete
+                values['qty_available'] = op.package_id.packed_qty or 0.00
+
+                product = op.product_id or op.package_id.product_id
+                uom_id = product.uom_id.id
+                uom_qty = op.product_qtys
+                if product:
+                    values['units'] = product.get_uom_conversions(uom_qty)
                 ind += 1
+
                 vals[str(ind)] = values
             return vals
         else:
@@ -155,6 +185,11 @@ class stock_pack_operation(models.Model):
                     children_ids_product_id=False
                     lot = False
                     product_name=''
+
+                if not op.product_id:
+                    is_package=True
+                else:
+                    is_package=False
                 values = {
                 'ID': op.id,
                 'id': op.id,
@@ -190,7 +225,9 @@ class stock_pack_operation(models.Model):
                 'lot': op.packed_lot_id and op.packed_lot_id.name or lot,
                 'producto': op.product_id.short_name or op.packed_lot_id.product_id.short_name or product_name,
                 'to_process': op.to_process,
-                'qty_available':op.packed_lot_id.product_id.qty_available or 0.00
+                'qty_available':op.packed_lot_id.product_id.qty_available or 0.00,
+                'is_package': is_package or False
+
                 }
                 #revisar para palet_multiproducto
                 if not op.product_id and not op.package_id.is_multiproduct:
@@ -357,7 +394,6 @@ class stock_pack_operation(models.Model):
         """
         user_id = my_args.get('user_id', False)
         op_id = my_args.get('op_id', False)
-
         field_values = my_args.get ('field_values', False)
         domain = ['|', ('id', '=', op_id), ('old_id', '=', op_id)]
         op_obj = self.search(domain, limit=1)
@@ -366,6 +402,7 @@ class stock_pack_operation(models.Model):
                             _('No operation founded to set as visited'))
 
         # Browse with correct uid, an mark as visited
+
         try:
             env2 = op_obj.env(self._cr, user_id, self._context)
             op_obj_uid = op_obj.with_env(env2)
@@ -382,6 +419,7 @@ class stock_pack_operation(models.Model):
             return res
         except Exception:
             return False
+
     @api.multi
     def change_op_value(self, my_args):
         """

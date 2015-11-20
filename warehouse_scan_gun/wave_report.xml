@@ -6,16 +6,16 @@
          <field name="model">wave.report</field>
          <field name="inherit_id" ref="midban_depot_stock.view_wave_report_tree"/>
          <field name="arch" type="xml">
-                 <field name="sequence"  position="before">
+                 <field name="order_seq"  position="before">
                      <field name="to_revised"/>
                      <field name="to_process"/>
                  </field>
-                 <field name="sequence" position="attributes">
+                 <field name="order_seq" position="attributes">
                      <attribute name="invisible">True</attribute>
                  </field>
-                 <field name="customer_id" position="attributes">
-                    <attribute name="invisible">True</attribute>
-                 </field>
+                 <!--<field name="customer_id" position="attributes">-->
+                    <!--<attribute name="invisible">True</attribute>-->
+                 <!--</field>-->
          </field>
     </record>
 

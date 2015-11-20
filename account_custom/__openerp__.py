@@ -33,6 +33,7 @@
                 'nan_partner_risk'],
     "data": ["account_payment_view.xml",
              "account_voucher_view.xml",
+             'sale_view.xml',
              "res_users_view.xml",
              'views/report_invoice.xml'],
     "installable": True
