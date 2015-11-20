@@ -23,6 +23,8 @@ from openerp import models, fields, api
 from openerp.exceptions import except_orm
 from openerp.tools.translate import _
 import time
+import logging
+_logger = logging.getLogger(__name__)
 
 class stock_pack_operation(models.Model):
     _inherit = 'stock.pack.operation'

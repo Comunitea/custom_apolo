@@ -179,35 +179,10 @@ class StockTask(models.Model):
         elif task_type == 'reposition':
             wzd_obj_uid.get_reposition_task()
         elif task_type == 'picking':
-            wzd_obj_uid.get_picking_task()
+            task_id = wzd_obj_uid.with_context(gun=True).get_picking_task()
 
-        domain = [
-            ('user_id', '=', user_id),
-            ('state', '=', 'assigned'),
-            ('type', '=', task_type),
-            ('paused', '=', False),
-        ]
-        task_obj = self.search(domain)
-        if not task_obj:
-            return False
-            raise except_orm(_("Error"), _("Task not founded after create it"))
-
-
-        for op in task_obj.operation_ids:
-            op.write({'visited': False})
-
-
-        if task_type=='picking':
-            for wave_report in task_obj.wave_id:
-                for wave in wave_report.wave_report_ids:
-                    for op in wave.operation_ids:
-                        #vals={'to_process':False, 'visited':False}
-                        vals={'visited':False}
-                        op.write (vals)
-
-
-        print "te doy una creada: Id" +str(task_obj.id)
-        return task_obj.id
+        print "te doy una creada: Id" +str(task_id)
+        return task_id
 
     @api.multi
     def check_task_ops_finished(self, my_args):
