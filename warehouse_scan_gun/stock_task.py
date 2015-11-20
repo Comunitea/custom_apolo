@@ -21,11 +21,14 @@
 from openerp import fields, models, api
 from openerp.exceptions import except_orm
 from openerp.tools.translate import _
+from openerp import sql_db
+import threading
+import time
+import logging
+_logger = logging.getLogger(__name__)
 
 class StockTask(models.Model):
     _inherit = 'stock.task'
-
-
 
     @api.multi
     def create_task_from_gun(self, my_args):
@@ -274,18 +277,34 @@ class StockTask(models.Model):
 
     @api.multi
     def gun_finish_task(self, my_args):
-
+        #new_cr = sql_db.db_connect(self.env.cr.dbname).cursor()
         task_id = my_args.get('task_id', False)
-        user_id = my_args.get('user_id', False)
         task_obj = self.browse(task_id)
-        env2 = task_obj.env(self._cr, user_id, self._context)
-        task_obj_uid = task_obj.with_env(env2)
-        try:
-            res = task_obj_uid.finish_partial_task()
-        except:
-            res = False
+        task_obj.write({'state':'process'})
+        uid, context = self.env.uid, self.env.context
+        thread = threading.Thread(
+            target=self._gun_finish_task, args=(my_args,))
+        thread.start()
+        return True
 
-        return res
+    @api.model
+    def _gun_finish_task(self, my_args):
+        with api.Environment.manage():  # class function
+            _logger.debug( "ENTRA EN EL HILO!!!!!!!!! args %s",
+                       my_args)
+            new_cr = sql_db.db_connect(self.env.cr.dbname).cursor()
+            uid, context = self.env.uid, self.env.context
+            env = api.Environment(new_cr, uid, context)
+            self.env = env
+            task_id = my_args.get('task_id', False)
+            user_id = my_args.get('user_id', False)
+            task_obj = self.browse(task_id)
+            env2 = task_obj.env(self._cr, user_id, self._context)
+            task_obj_uid = task_obj.with_env(env2)
+            res = task_obj_uid.finish_partial_task()
+            new_cr.commit()
+            new_cr.close()
+            return {}
 
     @api.multi
     def gun_cancel_task(self, my_args):
