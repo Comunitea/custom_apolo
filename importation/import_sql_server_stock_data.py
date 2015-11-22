@@ -29,7 +29,7 @@ class DatabaseImport:
 
         self.url_template = "http://%s:%s/xmlrpc/%s"
         self.server = "localhost"
-        self.port = 9069
+        self.port = 5069
         self.dbname = dbname
         self.user_name = user
         self.user_passwd = passwd
@@ -210,10 +210,10 @@ class DatabaseImport:
                 product_data = self.read("product.product", product_ids[0], ["uom_id", "log_unit_id", "log_base_id", "log_box_id"])
                 loc_qty = row.box_qty
                 if row.unit_qty:
-                    if product_data["log_unit_id"]:
-                        unit = product_data["log_unit_id"][0]
-                    elif product_data["log_base_id"]:
+                    if product_data["log_base_id"]:
                         unit = product_data["log_base_id"][0]
+                    elif product_data["log_unit_id"]:
+                        unit = product_data["log_unit_id"][0]
                     else:
                         unit = product_data["log_box_id"][0]
                     if unit:
@@ -245,14 +245,15 @@ class DatabaseImport:
                     if not location_ids:
                         raise Exception("No se ha podido encontrar una ubicación especial")
 
-                inv_line_vals = {'inventory_id': inv_id,
-                                 'product_id': product_ids[0],
-                                 'product_qty': loc_qty,
-                                 'product_uom_id': product_data["uom_id"][0],
-                                 'location_id': location_ids[0],
-                                 'prod_lot_id': lots_ids and lots_ids[0] or False,
-                                 'package_id': package_ids and package_ids[0] or False}
-                self.create("stock.inventory.line", inv_line_vals)
+                if loc_qty > 0:
+                    inv_line_vals = {'inventory_id': inv_id,
+                                     'product_id': product_ids[0],
+                                     'product_qty': loc_qty,
+                                     'product_uom_id': product_data["uom_id"][0],
+                                     'location_id': location_ids[0],
+                                     'prod_lot_id': lots_ids and lots_ids[0] or False,
+                                     'package_id': package_ids and package_ids[0] or False}
+                    self.create("stock.inventory.line", inv_line_vals)
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
         self.execute("stock.inventory", "prepare_inventory", [[inv_id]])

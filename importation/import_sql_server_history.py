@@ -58,7 +58,7 @@ class DatabaseImport:
 
         self.url_template = "http://%s:%s/xmlrpc/%s"
         self.server = "localhost"
-        self.port = 9069
+        self.port = 5069
         self.dbname = dbname
         self.user_name = user
         self.user_passwd = passwd
@@ -205,7 +205,7 @@ class DatabaseImport:
                    "v.medida_base as uom_id_map, v.medida_composicion as uomb_map, v.cantidad_composicion as kg_un, m.pr1_tcom as var_coeff_un, "
                    "v.cajas_por_rellano as ca_ma, v.cajas_por_pale / nullif(v.cajas_por_rellano, 0) as ma_pa, v.control_stock as type_map, "
                    "v.codigo_iva as tax_map, v.ean_base as ean14, v.precio_ultima_compra as standard_price, v.bloqueado as active, "
-                   "m.medida_peso as weight, m.observaciones_articulo as description, v.tipo_composicion as base_use_sale, v.id as internal_code "
+                   "m.pr1_capl as weight, m.observaciones_articulo as description, v.tipo_composicion as base_use_sale, v.id as internal_code "
                    "from dbo.articulos v inner join dbo.adsd_art m on m.pr1_codi = v.articulo where v.articulo = ?", (product_code,))
         row = cr.fetchone()
         prod_id = False
@@ -218,14 +218,17 @@ class DatabaseImport:
                 "categ_id": 2,
                 "uom_id": uom_id,
                 "uom_po_id": uom_id,
+                "log_unit_id": uom_id,
                 "ca_ma": row.ca_ma or 0,
                 "ma_pa": row.ma_pa or 0,
                 "standard_price": row.standard_price,
-                "weight": row.weight,
+                "weight": row.weight and row.weight / 1000.0 or 0.0,
                 "description": (row.description and ustr(row.description) or "") + (row.active != "N" and "\nBLOQUEADO" or ""),
+                "unit_use_sale": True,
                 "type": TYPE_MAP[row.type_map],
                 "purchase_ok": True,
                 "sale_ok": True,
+                "log_box_id": False,
                 "log_base_id": False,
                 "cost_method": "average",
                 "taxes_id": [(6, 0, self._getTaxes(IVA_MAP[str(int(row.tax_map))][0]))],
@@ -236,30 +239,10 @@ class DatabaseImport:
                 "internal_code": str(int(row.internal_code)),
                 "track_all": True
             }
-            if row.uom_id_map.strip() == "C":
-                product_vals["log_box_id"] = uom_id
-                product_vals["box_use_sale"] = True
-                if row.uomb_map.strip() not in ["L", "K"]:
-                    product_vals["un_ca"] = row.kg_un
-                    product_vals["kg_un"] = 1
-                else:
-                    product_vals["kg_un"] = row.kg_un
-                    product_vals["un_ca"] = 1
-            elif row.uom_id_map.strip() == "U":
-                product_vals["log_unit_id"] = uom_id
-                product_vals["unit_use_sale"] = True
-                product_vals["kg_un"] = row.kg_un
-            else:
-                product_vals["log_base_id"] = uom_id
-                product_vals["base_use_sale"] = True
-                product_vals["kg_un"] = 1
             if uom_id != uob_id:
-                if row.uomb_map.strip() == "U":
-                    product_vals["log_unit_id"] = uob_id
-                    product_vals["unit_use_sale"] = row.base_use_sale == "S" and True or False
-                else:
-                    product_vals["log_base_id"] = uob_id
-                    product_vals["base_use_sale"] = row.base_use_sale == "S" and True or False
+                product_vals["log_base_id"] = uob_id
+                product_vals["base_use_sale"] = row.base_use_sale == "S" and True or False
+
 
             res = self.search("product.product", [('default_code', '=', product_vals['default_code']),'|',('active', '=', False),('active', '=', True)])
             if not res:
@@ -370,44 +353,39 @@ class DatabaseImport:
                     vals = {"product_tmpl_id": product_data['product_tmpl_id'][0],
                             "name": supplier_ids[0],
                             "product_code": str(row.supplier_code),
+                            "log_unit_id": uom_id,
+                            "unit_use_purchase": True,
+                            "log_box_id": False,
+                            "log_base_id": False,
+                            "base_use_purchase": False,
                             "supp_ca_ma": row.supp_ca_ma or 0,
                             "supp_ma_pa": row.supp_ma_pa or 0,
                             "var_coeff_un": row.var_coeff_un == "V" and True or False}
 
-                    if row.uom_id_map.strip() == "C":
-                        vals["log_box_id"] = uom_id
-                        vals["box_use_purchase"] = True
-                        if row.uomb_map.strip() not in ["L", "K"]:
-                            vals["supp_un_ca"] = row.supp_kg_un
-                            vals["supp_kg_un"] = 1
-                        else:
-                            vals["supp_kg_un"] = row.supp_kg_un
-                            vals["supp_un_ca"] = 1
-                    elif row.uom_id_map.strip() == "U":
-                        vals["log_unit_id"] = uom_id
-                        vals["unit_use_purchase"] = True
-                        vals["supp_kg_un"] = row.supp_kg_un
-                    else:
-                        vals["log_base_id"] = uom_id
-                        vals["base_use_purchase"] = True
-                        vals["supp_kg_un"] = 1
                     if uom_id != uob_id:
-                        if row.uomb_map.strip() == "U":
-                            vals["log_unit_id"] = uob_id
-                        else:
-                            vals["log_base_id"] = uob_id
+                        vals["log_base_id"] = uob_id
                     self.create("product.supplierinfo", vals)
 
     def import_sale_orders(self, cr):
-        cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
-                   "observacion_pedido as customer_comment, observacion_reparto as note, pedido_sam as client_order_ref, 'draft' as state, '' as invoice_info, "
-                   "'' as picking_info from dbo.cabecera_pedido_ventas union "
-                   "select numero_pedido as name, cliente as partner_id_map, fecha_carga as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
+        ###################################################################
+        ## Se importan cabeceras vivas e históricas desde el 17-8-2015
+        #cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
+        #           "observacion_pedido as customer_comment, observacion_reparto as note, pedido_sam as client_order_ref, 'draft' as state, '' as invoice_info, "
+        #           "'' as picking_info from dbo.cabecera_pedido_ventas union "
+        #           "select numero_pedido as name, cliente as partner_id_map, fecha_carga as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
+        #           "'' as customer_comment, '' as note, '' as client_order_ref, 'history' as state, serie_factura + CONVERT(varchar, numero_factura) as invoice_info, "
+        #           "numero_carga as picking_info from dbo.cabecera_pedido_copia where cast(fecha_carga as date) >= '2015-08-17 00:00:00'")
+        ###################################################################
+        ## Se importan sólo pedidos vivos
+        # cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
+        #            "observacion_pedido as customer_comment, observacion_reparto as note, pedido_sam as client_order_ref, 'draft' as state, '' as invoice_info, "
+        #            "'' as picking_info from dbo.cabecera_pedido_ventas")
+        ###################################################################
+        ## Se importan sólo pedidos históricos
+        cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha_carga as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
                    "'' as customer_comment, '' as note, '' as client_order_ref, 'history' as state, serie_factura + CONVERT(varchar, numero_factura) as invoice_info, "
                    "numero_carga as picking_info from dbo.cabecera_pedido_copia")
-        #~ cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
-                   #~ "observacion_pedido as customer_comment, observacion_reparto as note, pedido_sam as client_order_ref, 'draft' as state, '' as invoice_info, "
-                   #~ "'' as picking_info from dbo.cabecera_pedido_ventas")
+        ###################################################################
         data = cr.fetchall()
         num_rows = len(data)
         cont = 0
@@ -472,10 +450,10 @@ class DatabaseImport:
             product_data = self.read("product.product", product_id, ["uom_id", "log_unit_id", "log_base_id", "log_box_id"])
             loc_qty = row.box_qty
             if row.unit_qty:
-                if product_data["log_unit_id"]:
-                    unit = product_data["log_unit_id"][0]
-                elif product_data["log_base_id"]:
+                if product_data["log_base_id"]:
                     unit = product_data["log_base_id"][0]
+                elif product_data["log_unit_id"]:
+                    unit = product_data["log_unit_id"][0]
                 else:
                     unit = product_data["log_box_id"][0]
                 if unit:
@@ -502,12 +480,19 @@ class DatabaseImport:
 
     def import_sale_order_lines_history(self, cr):
         #Lineas históricas
-        cr.execute("select numero_pedido as order_id_map, numero_linea as sequence, producto as product_id_map, descripcion as name, cajas as box_qty, composicion as unit_qty, "
+        ###################################################################
+        ## Se importan lineas históricas desde el 17-8-2015
+        #cr.execute("select dbo.lineas_pedido_copia.numero_pedido as order_id_map, numero_linea as sequence, producto as product_id_map, descripcion as name, cajas as box_qty, composicion as unit_qty, "
+        #           "importe as price_subtotal, tipo_iva as tax_id_map, 'history' as state from dbo.lineas_pedido_copia"
+        #           " inner join dbo.cabecera_pedido_copia on dbo.cabecera_pedido_copia.numero_pedido = dbo.lineas_pedido_copia.numero_pedido where cast(fecha_carga as date) >= '2015-08-17 00:00:00'")
+        ###################################################################
+        ## Se importan todas las lineas históricas
+        cr.execute("select dbo.lineas_pedido_copia.numero_pedido as order_id_map, numero_linea as sequence, producto as product_id_map, descripcion as name, cajas as box_qty, composicion as unit_qty, "
                    "importe as price_subtotal, tipo_iva as tax_id_map, 'history' as state from dbo.lineas_pedido_copia")
         data = cr.fetchall()
         num_rows = len(data)
         cont = 0
-        print "no. lineas abiertas: ", num_rows
+        print "no. lineas historicas: ", num_rows
         for row in data:
             sale_ids = self.search("sale.order", [('name', '=', str(int(row.order_id_map)))])
             if not sale_ids:
@@ -527,10 +512,10 @@ class DatabaseImport:
                 uom_id = product_data["uom_id"][0]
                 loc_qty = row.box_qty
                 if row.unit_qty:
-                    if product_data["log_unit_id"]:
-                        unit = product_data["log_unit_id"][0]
-                    elif product_data["log_base_id"]:
+                    if product_data["log_base_id"]:
                         unit = product_data["log_base_id"][0]
+                    elif product_data["log_unit_id"]:
+                        unit = product_data["log_unit_id"][0]
                     else:
                         unit = product_data["log_box_id"][0]
                     if unit:
@@ -673,10 +658,10 @@ class DatabaseImport:
                     uom_id = product_data["uom_id"][0]
                     loc_qty = line.uom_qty
                     if line.base_qty:
-                        if product_data["log_unit_id"]:
-                            unit = product_data["log_unit_id"][0]
-                        elif product_data["log_base_id"]:
+                        if product_data["log_base_id"]:
                             unit = product_data["log_base_id"][0]
+                        elif product_data["log_unit_id"]:
+                            unit = product_data["log_unit_id"][0]
                         else:
                             unit = product_data["log_box_id"][0]
                         if unit:
@@ -750,10 +735,10 @@ class DatabaseImport:
                         uom_id = product_data["uom_id"][0]
                         loc_qty = line.uom_qty
                         if line.base_qty:
-                            if product_data["log_unit_id"]:
-                                unit = product_data["log_unit_id"][0]
-                            elif product_data["log_base_id"]:
+                            if product_data["log_base_id"]:
                                 unit = product_data["log_base_id"][0]
+                            elif product_data["log_unit_id"]:
+                                unit = product_data["log_unit_id"][0]
                             else:
                                 unit = product_data["log_box_id"][0]
                             if unit:
@@ -792,12 +777,12 @@ class DatabaseImport:
             conn = pyodbc.connect("DRIVER={FreeTDS};SERVER=" + self.sql_server_host + ";UID=midban;PWD=midban2015;DATABASE=" + self.sql_server_dbname + ";Port=1433;TDS_Version=10.0")
             cr = conn.cursor()
 
-            #self.import_sale_orders(cr)
+            self.import_sale_orders(cr)
             #self.import_sale_order_lines_open(cr)
-            #self.import_sale_order_lines_history(cr)
+            self.import_sale_order_lines_history(cr)
             #self.import_active_purchase_order(cr)
-            self.import_purchase_invoice(cr)
-            self.import_sale_invoice(cr)
+            #self.import_purchase_invoice(cr)
+            #self.import_sale_invoice(cr)
 
         except Exception, ex:
             print u"Error al conectarse a las bbdd: ", repr(ex)
