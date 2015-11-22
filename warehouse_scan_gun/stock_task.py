@@ -21,11 +21,14 @@
 from openerp import fields, models, api
 from openerp.exceptions import except_orm
 from openerp.tools.translate import _
+from openerp import sql_db
+import threading
+import time
+import logging
+_logger = logging.getLogger(__name__)
 
 class StockTask(models.Model):
     _inherit = 'stock.task'
-
-
 
     @api.multi
     def create_task_from_gun(self, my_args):
@@ -160,7 +163,8 @@ class StockTask(models.Model):
             'trans_route_id':route_id,
             'date_planned': date_planned,
             'max_loc_ops': 12,
-            'min_loc_replenish': 5
+            'min_loc_replenish': 5,
+            'location_ids': [(6, 0, camera_id)]
             # 'warehouse_id':
             # 'trans_route_id':
             # 'date_planned':
@@ -171,8 +175,8 @@ class StockTask(models.Model):
         env2 = t_wzd.env(self._cr, user_id, ctx)
         wzd_obj= t_wzd.with_env(env2)
         wzd_obj_uid= wzd_obj.create(vals)
-        for camera in camera_id:
-            wzd_obj_uid.location_ids =[(4, camera, 0)]
+        #for camera in camera_id:
+        #    wzd_obj_uid.location_ids =[(4, camera, 0)]
 
         if task_type == 'ubication':
             wzd_obj_uid.get_location_task()
@@ -274,18 +278,34 @@ class StockTask(models.Model):
 
     @api.multi
     def gun_finish_task(self, my_args):
-
+        #new_cr = sql_db.db_connect(self.env.cr.dbname).cursor()
         task_id = my_args.get('task_id', False)
-        user_id = my_args.get('user_id', False)
         task_obj = self.browse(task_id)
-        env2 = task_obj.env(self._cr, user_id, self._context)
-        task_obj_uid = task_obj.with_env(env2)
-        try:
-            res = task_obj_uid.finish_partial_task()
-        except:
-            res = False
+        task_obj.write({'state':'process'})
+        uid, context = self.env.uid, self.env.context
+        thread = threading.Thread(
+            target=self._gun_finish_task, args=(my_args,))
+        thread.start()
+        return True
 
-        return res
+    @api.model
+    def _gun_finish_task(self, my_args):
+        with api.Environment.manage():  # class function
+            _logger.debug( "ENTRA EN EL HILO!!!!!!!!! args %s",
+                       my_args)
+            new_cr = sql_db.db_connect(self.env.cr.dbname).cursor()
+            uid, context = self.env.uid, self.env.context
+            env = api.Environment(new_cr, uid, context)
+            self.env = env
+            task_id = my_args.get('task_id', False)
+            user_id = my_args.get('user_id', False)
+            task_obj = self.browse(task_id)
+            env2 = task_obj.env(self._cr, user_id, self._context)
+            task_obj_uid = task_obj.with_env(env2)
+            res = task_obj_uid.finish_partial_task()
+            new_cr.commit()
+            new_cr.close()
+            return {}
 
     @api.multi
     def gun_cancel_task(self, my_args):
