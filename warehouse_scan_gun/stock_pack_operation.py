@@ -30,13 +30,13 @@ class stock_pack_operation(models.Model):
     _inherit = 'stock.pack.operation'
 
     @api.one
-    @api.depends('product_id')
+    #@api.depends('product_id')
     def _get_sale_qty(self):
         for move_line in self.picking_id.sale_id.order_line:
         #for move_line in self.picking_id.move_lines:
-                if self.product_id.id == move_line.product_id.id and \
-                    self.uos_id.id == move_line.product_uos.id:
-                    self.product_uos_qty = move_line.product_uos_qty
+            if self.product_id.id == move_line.product_id.id and \
+                self.uos_id.id == move_line.product_uos.id:
+                self.product_uos_qty = move_line.product_uos_qty
         return
 
 

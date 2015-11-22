@@ -28,7 +28,7 @@ class wave_report(models.Model):
     _inherit ='wave.report'
 
     @api.one
-    @api.depends('operation_ids')
+    #@api.depends('operation_ids')
     def _get_revised_id(self):
         wave_to_revised_pool = self.env["wave.report.revised"]
         wave_to_revised = wave_to_revised_pool.search ([('wave_report_id', '=', self.id)])
@@ -40,7 +40,7 @@ class wave_report(models.Model):
         return res
 
     @api.one
-    @api.depends('operation_ids')
+    #@api.depends('operation_ids')
     def _get_wrtrevised(self):
 
         res = False
@@ -154,7 +154,7 @@ class wave_report_revised(models.Model):
     _rec_name='wave_report_id'
 
     @api.one
-    @api.depends('operation_ids')
+    #@api.depends('operation_ids')
     def _get_to_revised(self):
 
         to_revised= False
@@ -268,7 +268,7 @@ class wave_report_revised(models.Model):
         return wave_report_id
 
     @api.one
-    @api.depends('operation_ids')
+    #@api.depends('operation_ids')
     def refresh_qtys(self):
 
         new_uom_qty =0
