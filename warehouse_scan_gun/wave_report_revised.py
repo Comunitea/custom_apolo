@@ -222,12 +222,11 @@ class wave_report_revised(models.Model):
 
     @api.multi
     def new_wave_to_revised(self, my_args):
-        import ipdb; ipdb.set_trace()
         # new_uos_qty = my_args.get('new_uos_qty', 0)
         # new_uom_qty = my_args.get('new_uom_qty', 0)
         # qty = my_args.get('qty', 0)
         # uos_qty = my_args('uos_qty', 0)
-        wave_report_id = my_args.get('id', False)
+        wave_report_id = my_args.get('wave_id', False)
         task_id = my_args.get('task_id', False)
         wave_report = self.env['wave.report'].browse(wave_report_id)
         product_id = wave_report.product_id

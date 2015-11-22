@@ -2319,7 +2319,7 @@ class ScanGunProtocol(LineReceiver):
         wave_ = self.waves[str(self.active_wave)]
         # op_id = wave_['ID']
         self.wave_id = wave_['wave_report_id']
-
+        res = False
         #Tengo que comprobar si
         if not force:
 
@@ -2416,6 +2416,8 @@ class ScanGunProtocol(LineReceiver):
             self.reset_log_units()
             self.state = "list_waves"
             message = u'A revisar ...'
+            if wave_to_revised:
+                res = True
 
 
 

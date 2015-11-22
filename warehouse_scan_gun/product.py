@@ -223,10 +223,6 @@ class product_product (models.Model):
 
         return conv
 
-
-
-
-
     @api.multi
     def get_uom_from_conversions_from_gun(self,my_args):
         units = my_args.get('units', [])
@@ -236,8 +232,6 @@ class product_product (models.Model):
 
     @api.multi
     def get_uom_from_conversions(self, units, product_id = False, uos_id = False):
-
-
         ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': 1}
         if product_id:
             domain = [('id', '=', product_id)]
