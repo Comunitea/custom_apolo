@@ -263,8 +263,11 @@ class product_product (models.Model):
         # min_qty = my_args('min_qty', False)
         if product_id:
             t_pack = self.env['stock.quant.package']
+            wh = self.env['stock.warehouse'].search([])[0]
+            stock_loc = wh.lot_stock_id
             domain = [('product_id', '=', product_id),
-                      ('quant_ids', '!=', False)]
+                      ('quant_ids', '!=', False),
+                      ('location_id', 'child_of', [stock_loc.id])]
             pack_objs = t_pack.search(domain)
 
             for p in pack_objs:
