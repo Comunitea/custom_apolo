@@ -57,7 +57,7 @@ class wave_report(models.Model):
 
     @api.multi
     def change_wave_op_values_packed_change(self, my_args):
-
+        #se usa cuando ca,biamos el paquete de una operación dentro de un wave_report
         id = my_args.get('id', False)
         user_id = my_args.get('user_id', False)
         vals = my_args.get('values', False)
@@ -89,6 +89,7 @@ class wave_report(models.Model):
 
                 moves2recalc = list(set([x.move_id for x in op.linked_move_operation_ids]))
                 for move in moves2recalc:
+                    force_quants =[]
                     for quant_id in move.reserved_quant_ids:
 
                         quant = self.env['stock.quant'].sudo().browse(quant_id.id)#quant.sudo(user_id=1)
@@ -133,17 +134,16 @@ class wave_report(models.Model):
 
     @api.multi
     def change_wave_op_values(self, my_args):
+
         id = my_args.get('id', 0)
         user_id = my_args.get('user_id', False)
+        values = my_args.get('values', {})
         wave_obj = self.browse(id)
         env2 = wave_obj.env(self._cr, user_id, self._context)
         wave = wave_obj.with_env(env2)
-        res = True
+        res = False
         if wave:
-            for op in wave.operation_ids:
-                vals = {'to_process': True,
-                        'visited': True}
-                res = op.write(vals) and res
+            res = wave.operation_ids.write(values)
         return res
 
 
@@ -222,64 +222,64 @@ class wave_report_revised(models.Model):
 
     @api.multi
     def new_wave_to_revised(self, my_args):
-
-        new_uos_qty = my_args.get('new_uos_qty', 0)
-        new_uom_qty = my_args.get('new_uom_qty', 0)
+        import ipdb; ipdb.set_trace()
+        # new_uos_qty = my_args.get('new_uos_qty', 0)
+        # new_uom_qty = my_args.get('new_uom_qty', 0)
+        # qty = my_args.get('qty', 0)
+        # uos_qty = my_args('uos_qty', 0)
         wave_report_id = my_args.get('id', False)
         task_id = my_args.get('task_id', False)
-        vals ={}
         wave_report = self.env['wave.report'].browse(wave_report_id)
         product_id = wave_report.product_id
         wave_to_revised = self.env['wave.report.revised']
         vals = {
             'to_revised' : True,
-            'new_uos_qty' : new_uos_qty,
-            'new_uom_qty' : new_uom_qty,
+            'new_uos_qty' : 0,
+            'new_uom_qty' : 0,
             'wave_report_id': wave_report_id,
             'product_id': product_id.id,
-            'picked_qty': new_uom_qty
+            'picked_qty': 0,
         }
         wave_ = wave_to_revised.search([('wave_report_id','=',wave_report_id)])
         if wave_:
             wave_.write(vals)
         else:
             wave_ = wave_to_revised.create(vals)
-        product_id = wave_.product_id
 
-        new_uos_qty=0
-        new_uom_qty=0
         wave_report = self.env['wave.report'].browse(wave_report_id)
         wave_report.operation_ids.write({'to_process': True})
         picking_wave = self.env['stock.picking.wave'].browse(wave_report.wave_id.id)
         for wave_report in picking_wave.wave_report_ids:
-            for op in wave_report.operation_ids:
-                if op.product_id.id == product_id.id:
-                    op.write({'to_revised' : True, 'wave_revised_id' : wave_.id})
-                new_uos_qty += op.uos_qty
-                new_uom_qty += op.product_qty
-            wave_report.write({'wave_report_revised_id' : wave_.id})
+            if wave_report.product_id.id == product_id.id:
+                wave_report.operation_ids.write({'to_revised' : True, 'wave_revised_id' : wave_.id})
+                wave_report.write({'wave_report_revised_id' : wave_.id})
 
-        vals = {
-            'new_uos_qty' : new_uos_qty,
-            'new_uom_qty' : new_uom_qty,
-        }
-        wave_.write(vals)
-
-        return wave_report_id
+        wave_.refresh_qtys()
+        return wave_to_revised.id
 
     @api.one
     @api.depends('operation_ids')
     def refresh_qtys(self):
 
-        new_uom_qty =0
-        new_uos_qty =0
+        picked_qty = 0
+        new_uos_qty = 0
+        new_uom_qty = 0
         for op in self.operation_ids:
-            new_uom_qty += op.product_qty
             new_uos_qty += op.uos_qty
+            if op.product_id:
+                new_uom_qty += op.product_qty
+                if op.to_process:
+                    picked_qty +=  op.product_qty
+            else:
+                new_uom_qty += op.package_id.packed_qty
+                if op.to_process:
+                    picked_qty +=  op.package_id.packed_qty
+
 
         vals = {
-            'new_uom_qty': new_uom_qty,
-            'new_uos_qty': new_uos_qty
+            'new_uos_qty' : new_uos_qty,
+            'new_uom_qty' : new_uom_qty,
+            'picked_qty': picked_qty
         }
         self.write(vals)
 
