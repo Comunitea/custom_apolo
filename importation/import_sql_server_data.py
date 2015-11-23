@@ -5,6 +5,7 @@ import xmlrpclib
 import socket
 import pyodbc
 import time
+import datetime
 
 UOM_MAP = {"K": "kg",
            "U": "Unit(s)",
@@ -123,7 +124,7 @@ class DatabaseImport:
 
         self.url_template = "http://%s:%s/xmlrpc/%s"
         self.server = "localhost"
-        self.port = 5069
+        self.port = 8069
         self.dbname = dbname
         self.user_name = user
         self.user_passwd = passwd
@@ -581,32 +582,19 @@ class DatabaseImport:
                     vals = {"product_tmpl_id": product_data['product_tmpl_id'][0],
                             "name": supplier_ids[0],
                             "product_code": str(row.supplier_code),
+                            "log_unit_id": uom_id,
+                            "unit_use_purchase": True,
+                            "log_box_id": False,
+                            "log_base_id": False,
+                            "base_use_purchase": False,
+                            "supp_kg_un": row.supp_kg_un,
                             "supp_ca_ma": row.supp_ca_ma or 0,
                             "supp_ma_pa": row.supp_ma_pa or 0,
                             "var_coeff_un": row.var_coeff_un == "V" and True or False}
 
-                    if row.uom_id_map.strip() == "C":
-                        vals["log_box_id"] = uom_id
-                        vals["box_use_purchase"] = True
-                        if row.uomb_map.strip() not in ["L", "K"]:
-                            vals["supp_un_ca"] = row.supp_kg_un
-                            vals["supp_kg_un"] = 1
-                        else:
-                            vals["supp_kg_un"] = row.supp_kg_un
-                            vals["supp_un_ca"] = 1
-                    elif row.uom_id_map.strip() == "U":
-                        vals["log_unit_id"] = uom_id
-                        vals["unit_use_purchase"] = True
-                        vals["supp_kg_un"] = row.supp_kg_un
-                    else:
-                        vals["log_base_id"] = uom_id
-                        vals["base_use_purchase"] = True
-                        vals["supp_kg_un"] = 1
                     if uom_id != uob_id:
-                        if row.uomb_map.strip() == "U":
-                            vals["log_unit_id"] = uob_id
-                        else:
-                            vals["log_base_id"] = uob_id
+                        vals["log_base_id"] = uob_id
+
                     self.create("product.supplierinfo", vals)
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
@@ -813,14 +801,15 @@ class DatabaseImport:
                         vals["pick_print_op"] = "valued"
 
                 if row.add_summary == "A":
-                    vals["add_sumary"] = True
+                    vals["add_summary"] = True
                     vals["inv_print_op"] = "group_by_partner"
+                    vals["invoice_method"] = "c"
                 else:
                     if int(row.payment_type_map) in (11,13,18,20):
                         vals["inv_print_op"] = "give_deliver"
-                        vals["invoice_method"] = "a"
                     else:
                         vals["inv_print_op"] = "group_pick"
+                    vals["invoice_method"] = "a"
                 self.write("res.partner", [partner_ids[0]], vals)
 
             cont +=1
@@ -1064,6 +1053,80 @@ class DatabaseImport:
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
+    def import_customer_unilever_families(self, cr):
+        cr.execute("SELECT cliente, familia FROM dbo.envio_clientes group by cliente, familia")
+        data = cr.fetchall()
+        cont = 0
+        num_rows = len(data)
+        for row in data:
+            partner_ids = self.search("res.partner", [('ref', '=', str(int(row[0]))),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
+            if partner_ids:
+                unilever_family_ids = self.search("res.partner.unilever.family", [('code', '=', str(int(row[1])))])
+                if unilever_family_ids:
+                    self.write("res.partner", partner_ids, {'unilever_family_id': unilever_family_ids[0]})
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+    def import_items_data(self, cr):
+        # Tipos de medios
+        cr.execute("SELECT med_me01 as type_name FROM dbo.adsd_med")
+        type_data = cr.fetchall()
+        cont = 0
+        num_rows = len(type_data)
+        for row in type_data:
+            vals = {'name': ustr(row.type_name)}
+            rec_ids = self.search("item.management.item.type", [('name', '=', vals["name"])])
+            if not rec_ids:
+                self.create("item.management.item.type", vals)
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+        #Medios
+        cr.execute("SELECT matricula as license_plate,nombre_medio as name, nombre_medio as type_id_map, fco_nano as purchase_date_year, "
+                   "codigo_cliente as partner_id_map, fco_capa as capacity, fco_fent as location_date, fecha_recuento as last_recount_date, "
+                   "case when codigo_cliente = 0 then null else fco_cont end as contract_name, "
+                   "case when fco_situ = 'T' then 'transfer' else 'customer' end as contract_type "
+                   "FROM dbo.VW_medios_no_etiqueta inner join dbo.adsd_fco on fco_marc = matricula")
+        items_data = cr.fetchall()
+        cont = 0
+        num_rows = len(items_data)
+        for row in items_data:
+            type_ids = self.search("item.management.item.type", [('name', '=', ustr(row.type_id_map))])
+            item_vals = {'name': ustr(row.name),
+                         'license_plate': ustr(row.license_plate),
+                         'type_id': type_ids and type_ids[0] or False,
+                         'purchase_date': datetime.date(int(row.purchase_date_year),1,1).strftime("%Y-%m-%d"),
+                         'to_sync': False,
+                         'capacity': row.capacity and float(str(row.capacity).replace(".","")) or 0.0,
+                         'location_date': row.location_date.strftime("%Y-%m-%d %H:%M:%S"),
+                         'location_id': not row.partner_id_map and 12 or False, #Stock
+                         'partner_id': 1,
+                         'situation': row.contract_type == 'transfer' and row.contract_type or (not row.partner_id_map and 'warehouse' or row.contract_type)}
+            if row.partner_id_map:
+                partner_ids = self.search("res.partner", [('ref', '=', str(int(row.partner_id_map))),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
+                if partner_ids:
+                    contract_vals = {
+                        'name': str(int(row.contract_name)),
+                        'description': str(int(row.contract_name)),
+                        'partner_id': partner_ids[0],
+                        'contract_type': row.contract_type,
+                        'start_date': row.location_date.strftime("%Y-%m-%d %H:%M:%S"),
+                    }
+                    contract_id = self.create("item.management.contract", contract_vals)
+                    self.execute("item.management.contract", "action_active", [contract_id])
+                    item_vals.update({'contract_id': contract_id,
+                                      'customer_id': partner_ids[0]})
+
+            item_id = self.create("item.management.item", item_vals)
+            if row.last_recount_date and row.last_recount_date >= datetime.datetime(2015,1,1,0,0,0):
+                recount_ids = self.search("item.management.recount", [("state", '=', "open")])
+                if recount_ids:
+                    self.create("item.management.item.count", {'recount_id': recount_ids[0],
+                                                               'recount_date': row.last_recount_date.strftime("%Y-%m-%d %H:%M:%S"),
+                                                               'item_id': item_id})
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
 
     def process_data(self):
         """
@@ -1087,8 +1150,8 @@ class DatabaseImport:
             #self.import_bank_accounts(cr)
             #self.import_master_frigo_data(cr)
             #self.import_product_frigo_data(cr)
-            self.update_product_sale_price(cr)
-            self.import_other_prices(cr)
+            #self.update_product_sale_price(cr)
+            #self.import_other_prices(cr)
             #self.import_customers_other_data(cr)
             #self.import_preferential_agree_data(cr)
             #self.import_tourism_data(cr)
@@ -1096,6 +1159,8 @@ class DatabaseImport:
             #self.fix_customer_names(cr)
             #self.fix_product_weight(cr)
             #self.import_partner_contacts(cr)
+            #self.import_customer_unilever_families(cr)
+            self.import_items_data(cr)
 
 
         except Exception, ex:
