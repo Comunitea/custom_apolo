@@ -24,6 +24,9 @@ from openerp.exceptions import except_orm
 from openerp.tools.translate import _
 import time
 import logging
+import openerp.addons.decimal_precision as dp
+
+
 _logger = logging.getLogger(__name__)
 
 class stock_pack_operation(models.Model):

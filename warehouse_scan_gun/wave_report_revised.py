@@ -22,6 +22,8 @@
 from openerp import models, fields, api
 from openerp.exceptions import except_orm
 from openerp.tools.translate import _
+import openerp.addons.decimal_precision as dp
+
 
 class wave_report(models.Model):
 
