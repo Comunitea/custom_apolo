@@ -163,7 +163,8 @@ class StockTask(models.Model):
             'trans_route_id':route_id,
             'date_planned': date_planned,
             'max_loc_ops': 12,
-            'min_loc_replenish': 5
+            'min_loc_replenish': 5,
+            'location_ids': [(6, 0, camera_id)]
             # 'warehouse_id':
             # 'trans_route_id':
             # 'date_planned':
@@ -174,8 +175,8 @@ class StockTask(models.Model):
         env2 = t_wzd.env(self._cr, user_id, ctx)
         wzd_obj= t_wzd.with_env(env2)
         wzd_obj_uid= wzd_obj.create(vals)
-        for camera in camera_id:
-            wzd_obj_uid.location_ids =[(4, camera, 0)]
+        #for camera in camera_id:
+        #    wzd_obj_uid.location_ids =[(4, camera, 0)]
 
         if task_type == 'ubication':
             wzd_obj_uid.get_location_task()

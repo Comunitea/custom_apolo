@@ -30,13 +30,13 @@ class stock_pack_operation(models.Model):
     _inherit = 'stock.pack.operation'
 
     @api.one
-    @api.depends('product_id')
+    #@api.depends('product_id')
     def _get_sale_qty(self):
         for move_line in self.picking_id.sale_id.order_line:
         #for move_line in self.picking_id.move_lines:
-                if self.product_id.id == move_line.product_id.id and \
-                    self.uos_id.id == move_line.product_uos.id:
-                    self.product_uos_qty = move_line.product_uos_qty
+            if self.product_id.id == move_line.product_id.id and \
+                self.uos_id.id == move_line.product_uos.id:
+                self.product_uos_qty = move_line.product_uos_qty
         return
 
 
@@ -82,20 +82,19 @@ class stock_pack_operation(models.Model):
 
     @api.multi
     def set_wave_ops_values(self, my_args):
-
-
         wave_id = my_args.get ('wave_id', 0)
         op_id = my_args.get('op_id',0)
         user_id = my_args.get('user_id', 0)
         fields = my_args.get('fields', '')
         domain = [('id', '=', wave_id)]
+
         wave_reports= self.env['wave.report'].search(domain)
         env2 = wave_reports.env(self._cr, user_id, self._context)
         wave_reports_uid = wave_reports.with_env(env2)
-        ops = wave_reports_uid.operation_ids
-        ops.write (fields)
-
-        return True
+        res = False
+        if wave_reports_uid:
+            res = wave_reports_uid.operation_ids.write (fields)
+        return res
 
     @api.multi
     def get_ops_from_wave (self, my_args):
@@ -154,9 +153,14 @@ class stock_pack_operation(models.Model):
 
                 product = op.product_id or op.package_id.product_id
                 uom_id = product.uom_id.id
-                uom_qty = op.product_qtys
+                uom_qty = op.product_qty
+
                 if product:
-                    values['units'] = product.get_uom_conversions(uom_qty)
+                    if product.is_var_coeff:
+                        qty = op.uos_qty
+                    else:
+                        qty = uom_qty
+                values['units'] = product.get_uom_conversions(qty, uom_id = op.uos_id.id)
                 ind += 1
 
                 vals[str(ind)] = values

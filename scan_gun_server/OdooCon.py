@@ -381,6 +381,12 @@ class OdooDao:
         res = self.connection.execute('wave.report', 'set_wave_op_values', [], my_args)
         return res
 
+    def create_operations_on_the_fly(self, user_id, wave_report_id, needed_qty, pack_id):
+        my_args = {'user_id': user_id, 'wave_report_id': wave_report_id, 'needed_qty': needed_qty, 'pack_id': pack_id}
+
+        res = self.connection.execute('wave.report', 'create_operations_on_the_fly_from_gun', [], my_args)
+        return res
+
     def set_wave_reports_values(self, user_id, wave_id, field, value):
         my_args = {'user_id': user_id, 'wave_id': wave_id, 'field': field, 'value': value}
         res = self.connection.execute('wave.reports', 'set_wave_reports_values', [], my_args)
@@ -430,9 +436,14 @@ class OdooDao:
         op_data = self.connection.execute('product.product', 'get_product_gun_info', [], my_args)
         return op_data
 
-    def get_uom_from_conversions_from_gun(self, units, product_id):
-        my_args = {'units': units, 'product_id': product_id}
+    def get_uom_from_conversions_from_gun(self, units, product_id, uos_id = False):
+        my_args = {'units': units, 'product_id': product_id, 'uos_id': uos_id}
         op_data = self.connection.execute('product.product', 'get_uom_from_conversions_from_gun', [], my_args)
+        return op_data
+
+    def get_pack_candidates(self, product_id, min_qty):
+        my_args = {'min_qty': min_qty, 'product_id': product_id}
+        op_data = self.connection.execute('product.product', 'get_pack_candidates_from_gun', [], my_args)
         return op_data
 
     def get_parent_location_id(self, user_id, location_id):
@@ -506,8 +517,10 @@ class OdooDao:
         res = self.connection.execute('stock.pack.operation', 'get_user_packet_busy', [], my_args)
         return res
 
-    def new_wave_to_revised(self, user_id, new_uom_qty, new_uos_qty, id, task_id):
-        my_args = {'user_id': user_id, 'new_uom_qty' : new_uom_qty, 'new_uos_qty' : new_uos_qty, 'id' : id, 'task_id': task_id}
+    def new_wave_to_revised(self, user_id, task_id, wave_id, new_uom_qty = 0, new_uos_qty = 0, qty = 0, uos_qty = 0):
+        my_args = {'user_id': user_id, 'new_uom_qty' : new_uom_qty, 'wave_id': wave_id,
+                   'new_uos_qty' : new_uos_qty, 'task_id': task_id,
+                   'qty': qty, 'uos_qty': uos_qty }
         res = self.connection.execute('wave.report.revised', 'new_wave_to_revised', [], my_args)
         return res
 
@@ -519,6 +532,11 @@ class OdooDao:
     def change_wave_op_values_packed_change(self, user_id, id, values):
         my_args = {'user_id': user_id, 'id' : id, 'values' : values }
         res = self.connection.execute('wave.report', 'change_wave_op_values_packed_change', [], my_args)
+        return res
+
+    def change_wave_op_values(self, user_id, id, values):
+        my_args = {'user_id': user_id, 'id' : id, 'values' : values }
+        res = self.connection.execute('wave.report', 'change_wave_op_values', [], my_args)
         return res
 
     def create_reposition_from_gun(self, user_id, selected_loc_ids, limit, capacity):

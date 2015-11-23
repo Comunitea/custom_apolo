@@ -40,6 +40,7 @@ class stock_picking_wave(models.Model):
             for op in wave.wave_report_ids:
                 values = {
                     'ID': op.id,
+                    'wave_report_id': op.id,
                     'product': op.product_id.name and op.product_id.short_name or "",
                     'EAN' :op.ean13,
                     'CANTIDAD': op.product_qty or 0.00,
@@ -67,8 +68,9 @@ class stock_picking_wave(models.Model):
                     'product_id': op.product_id.id or False,
                     'to_revised':op.to_revised or False,
                     'is_var_coeff': op.product_id.is_var_coeff or False,
+                    'var_coeff_ca':op.product_id.var_coeff_ca or False,
                     'num_ops':len(op.operation_ids) or 1,
-
+                    'packed_qty': op.pack_id.packed_qty or False,
                     'customer_id': op.customer_id.comercial or op.customer_id.name,
                     'ref': op.customer_id.ref or False,
                     'qty_available': op.product_id.qty_available or 0.00,
@@ -76,13 +78,24 @@ class stock_picking_wave(models.Model):
                     'is_package': op.is_package
                     }
                 values['qty_available'] = op.pack_id.packed_qty or 0.00
-                if op.operation_ids:
-                    values['op'] =  op.operation_ids[0].id or False
+                # if op.operation_ids:
+                #     values['op'] =  op.id
                 product = op.product_id or op.pack_id.product_id
                 uom_id = product.uom_id.id
                 uom_qty = op.product_qty
                 if product:
-                    values['units'] = product.get_uom_conversions(uom_qty)
+                    if product.is_var_coeff:
+                        qty = op.uos_qty
+                    else:
+                        qty = uom_qty
+                values['units'] = product.get_uom_conversions(qty, uom_id = op.uos_id.id)
+
+
+                uom_destino = product.log_box_id.id or product.log_unit_id.id or product.log_base_id.id
+                uom_origen = op.uos_id.id or op.uom_id.id
+                values['big_unit'] = product._get_unit_ratios(uom_destino, False) / \
+                    product._get_unit_ratios(uom_origen, False)
+
                 ind += 1
                 vals[str(ind)] = values
 
