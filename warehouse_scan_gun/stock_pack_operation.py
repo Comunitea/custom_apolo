@@ -154,8 +154,13 @@ class stock_pack_operation(models.Model):
                 product = op.product_id or op.package_id.product_id
                 uom_id = product.uom_id.id
                 uom_qty = op.product_qtys
+
                 if product:
-                    values['units'] = product.get_uom_conversions(uom_qty)
+                    if product.is_var_coeff:
+                        qty = op.uos_qty
+                    else:
+                        qty = uom_qty
+                values['units'] = product.get_uom_conversions(qty, uom_id = op.uos_id.id)
                 ind += 1
 
                 vals[str(ind)] = values
