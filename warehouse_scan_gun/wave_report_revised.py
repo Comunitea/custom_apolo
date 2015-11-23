@@ -22,6 +22,8 @@
 from openerp import models, fields, api
 from openerp.exceptions import except_orm
 from openerp.tools.translate import _
+import openerp.addons.decimal_precision as dp
+
 
 class wave_report(models.Model):
 
@@ -191,8 +193,12 @@ class wave_report_revised(models.Model):
 
 
     to_revised = fields.Boolean(string = 'To Revised', compute='_get_to_revised')
-    new_uos_qty = fields.Float('Qty effective (uos)', compute='refresh_qtys')
-    new_uom_qty = fields.Float('Qty effective (uom)')
+    new_uos_qty = fields.Float('Qty effective (uos)', compute='refresh_qtys',
+                               digits_compute=
+                               dp.get_precision('Product Unit of Measure'))
+    new_uom_qty = fields.Float('Qty effective (uom)',
+                               digits_compute=
+                               dp.get_precision('Product Unit of Measure'))
     pack_id = fields.Many2one(related = 'wave_report_id.pack_id')
     #product_id = fields.Many2one('product.product', 'Product')
     product_id = fields.Many2one(related = 'wave_report_id.product_id')
@@ -312,10 +318,3 @@ class wave_report_revised(models.Model):
                     'warning': {'title': _("Error"),
                                 'message': _("This wave is not marked as to_revised")},
                     }
-
-
-
-
-
-
-
