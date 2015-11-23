@@ -2347,6 +2347,11 @@ class ScanGunProtocol(LineReceiver):
                     return -1
                 #Si quiero que siga con cantidades menores debo tener to_revised= True
 
+        if ((self.new_uom_qty  > uom_pedida +0.01) and not var_coeff):
+            message = u"Max: %s (%s) %s"%(wave_['qty'], self.new_uom_qty, wave_['uom'])
+            self._snd(self.get_str_form_wave(), message)
+            return
+
 
 
         #Si llega aquí cantidades bien o cantidades a revisar.
@@ -2523,40 +2528,12 @@ class ScanGunProtocol(LineReceiver):
                 return
 
         if line == KEY_CONFIRM and self.package_selected:
-            #operations on the fly
-            print u'operations on the fly'
 
-            package_id =self.list_packages[self.package_selected-1]['package_id']
-            wave_ = self.waves[str(self.active_wave)]
-
-            wave_report_id = wave_['wave_report_id']
-            if wave_['is_var_coeff']:
-                qty = wave_['uos_qty']
-                qty = self.new_uos_qty
+            if self.new_op_qty == 0:
+                q_ = 0
             else:
-                qty = wave_['qty']
-                qty = self.new_uom_qty
-
-            new= self.factory.odoo_con.create_operations_on_the_fly(self.user_id, wave_report_id, qty, package_id)
-            if new:
-                self.state= self.last_state
-                self.list_packages = []
-                self.package_selected = False
-                message ="\nSe ha modificado las agrupaciones"
-                act = self.active_wave
-                self.waves = self.factory.odoo_con.get_wave_reports_from_task(self.user_id, self.task_id, self.type)
-                self.active_wave
-                self.state = 'list_wave_ops'
-                self._snd(self.get_str_list_wave_ops(), message)
-                return
-            else:
-                self.state= self.last_state
-                message =u"Cancelado"
-                self.list_packages = []
-                self.package_selected = False
-                self._snd(self.get_str_form_wave(), message)
-                return
-
+                self.create_operations_on_the_fly(self.new_op_qty)
+            return
 
         if line == KEY_CANCEL:
             #volvemos a mostrar form_wave
@@ -2566,6 +2543,55 @@ class ScanGunProtocol(LineReceiver):
             self.package_selected = False
             self._snd(self.get_str_form_wave(), message)
             return
+
+    def create_operations_on_the_fly(self, last_qty = 0.00):
+        print u'operations on the fly'
+
+        package_id =self.list_packages[self.package_selected-1]['package_id']
+        wave_ = self.waves[str(self.active_wave)]
+        wave_report_id = wave_['wave_report_id']
+        if last_qty == 0.00:
+            if wave_['is_var_coeff']:
+                qty = wave_['uos_qty']
+                qty = self.new_uos_qty
+            else:
+                qty = wave_['qty']
+                qty = self.new_uom_qty
+            self.new_op_qty = qty
+        else:
+            self.new_op_qty -= last_qty
+
+        new = self.factory.odoo_con.create_operations_on_the_fly(self.user_id, wave_report_id, self.new_op_qty, package_id)
+
+        if new:
+            if new >= self.new_op_qty:
+                self.state= self.last_state
+                self.list_packages = []
+                self.package_selected = False
+                message ="\nSe ha modificado las agrupaciones"
+                act = self.active_wave
+                self.waves = self.factory.odoo_con.get_wave_reports_from_task(self.user_id, self.task_id, self.type)
+                self.active_wave
+                self.state = 'list_wave_ops'
+                self._snd(self.get_str_form_wave(), message)
+                return
+            else:
+
+                message = u"\nNecesito otro paquete"
+                self._snd(self.get_str_form_wave(), message)
+                return
+
+
+
+        else:
+            self.state= self.last_state
+            message =u"Cancelado"
+            self.list_packages = []
+            self.package_selected = False
+
+            self._snd(self.get_str_form_wave(), message)
+            return
+
 
 
     def get_str_list_packages(self, product_id = False, available_qty = 0.0):
@@ -3440,19 +3466,24 @@ class ScanGunProtocol(LineReceiver):
                 menu_str += left_str + unit_str
 
             if wave_['units'][1][2]:
-                left_str = u"%s "%mover
+
                 unit_str = u"%s %s\n"%(self.log_unit, wave_['units'][1] [0])
                 if self.step == 22:
                     unit_str= self.inverse(unit_str)
-                mover = "       "
+
+                mover = u' R/%s'%wave_['units'][1][3]
+                mover = mover + " " * (7-len(mover))
+                left_str = u"%s "%mover
                 menu_str += left_str + unit_str
 
             if wave_['units'][0][2]:
-                left_str = u"%s "%mover
+
                 unit_str = u"%s %s\n"%(self.log_base, wave_['units'][0] [0])
                 if self.step == 21:
                     unit_str= self.inverse(unit_str)
-                mover = "       "
+                mover = u' R/%s'%wave_['units'][0][3]
+                mover = mover + " " * (7-len(mover))
+                left_str = u"%s "%mover
                 menu_str += left_str + unit_str
 
 
@@ -3504,7 +3535,9 @@ class ScanGunProtocol(LineReceiver):
                         unit_str= self.inverse(uni1 + uni2)
                     str_qtys = self.split_qtys(self.log_unit_qtys)
 
-                mover = "       "
+                mover = u' R/%s'%wave_['units'][1][3]
+                mover = mover + " " * (7-len(mover))
+                left_str = u"%s "%mover
                 menu_str += left_str + unit_str
 
             if wave_['units'][0][2]:
@@ -3518,7 +3551,9 @@ class ScanGunProtocol(LineReceiver):
                     else:
                         unit_str= self.inverse(uni1 + uni2)
                     str_qtys = self.split_qtys(self.log_base_qtys)
-                mover = "       "
+                mover = u' R/%s'%wave_['units'][0][3]
+                mover = mover + " " * (7-len(mover))
+                left_str = u"%s "%mover
                 menu_str += left_str + unit_str
 
             menu_str += str_qtys
