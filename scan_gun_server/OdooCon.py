@@ -381,6 +381,12 @@ class OdooDao:
         res = self.connection.execute('wave.report', 'set_wave_op_values', [], my_args)
         return res
 
+    def create_operations_on_the_fly(self, user_id, wave_report_id, needed_qty, pack_id):
+        my_args = {'user_id': user_id, 'wave_report_id': wave_report_id, 'needed_qty': needed_qty, 'pack_id': pack_id}
+
+        res = self.connection.execute('wave.report', 'create_operations_on_the_fly_from_gun', [], my_args)
+        return res
+
     def set_wave_reports_values(self, user_id, wave_id, field, value):
         my_args = {'user_id': user_id, 'wave_id': wave_id, 'field': field, 'value': value}
         res = self.connection.execute('wave.reports', 'set_wave_reports_values', [], my_args)
