@@ -2526,10 +2526,37 @@ class ScanGunProtocol(LineReceiver):
             #operations on the fly
             print u'operations on the fly'
 
+            package_id =self.list_packages[self.package_selected-1]['package_id']
+            wave_ = self.waves[str(self.active_wave)]
 
+            wave_report_id = wave_['wave_report_id']
+            if wave_['is_var_coeff']:
+                qty = wave_['uos_qty']
+                qty = self.new_uos_qty
+            else:
+                qty = wave_['qty']
+                qty = self.new_uom_qty
 
-            package_id =self.list_packages[self.package_selected-1]
-            return True
+            new= self.factory.odoo_con.create_operations_on_the_fly(self.user_id, wave_report_id, qty, package_id)
+            if new:
+                self.state= self.last_state
+                self.list_packages = []
+                self.package_selected = False
+                message ="\nSe ha modificado las agrupaciones"
+                act = self.active_wave
+                self.waves = self.factory.odoo_con.get_wave_reports_from_task(self.user_id, self.task_id, self.type)
+                self.active_wave
+                self.state = 'list_wave_ops'
+                self._snd(self.get_str_list_wave_ops(), message)
+                return
+            else:
+                self.state= self.last_state
+                message =u"Cancelado"
+                self.list_packages = []
+                self.package_selected = False
+                self._snd(self.get_str_form_wave(), message)
+                return
+
 
         if line == KEY_CANCEL:
             #volvemos a mostrar form_wave
@@ -3279,7 +3306,7 @@ class ScanGunProtocol(LineReceiver):
 
         mover = "Pedido: %s %s\n"%(wave_['uos_qty'], wave_['uos'])
         menu_str += mover
-        mover = "Mover : "
+        mover = "Mover :"
         for unit in reversed(wave_['units']):
             if unit[2] and unit[1]>0:
                 unit_str += u"%s %s %s\n"%(mover, unit[1], unit[0])

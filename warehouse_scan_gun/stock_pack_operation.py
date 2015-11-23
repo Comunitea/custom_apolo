@@ -153,7 +153,7 @@ class stock_pack_operation(models.Model):
 
                 product = op.product_id or op.package_id.product_id
                 uom_id = product.uom_id.id
-                uom_qty = op.product_qtys
+                uom_qty = op.product_qty
 
                 if product:
                     if product.is_var_coeff:
