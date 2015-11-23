@@ -48,7 +48,9 @@ class stock_pack_operation(models.Model):
     wrong_qty = fields.Boolean('Wrong Qty', default=False)
     wave_revised_id = fields.Many2one('wave.revised')
     partner_id = fields.Many2one(related = 'picking_id.partner_id', readonly = True)
-    product_uos_qty = fields.Float('product_uos_qty', compute = '_get_sale_qty', readonly=True)
+    product_uos_qty = fields.Float('product_uos_qty', compute = '_get_sale_qty', readonly=True,
+                                   digits_compute=
+                                   dp.get_precision('Product Unit of Measure'))
 
     @api.multi
     def get_user_packet_busy(self, my_args):
@@ -450,5 +452,3 @@ class stock_pack_operation(models.Model):
             return True
         except Exception:
             return False
-
-
