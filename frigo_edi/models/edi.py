@@ -27,6 +27,9 @@ from datetime import datetime, date, timedelta
 
 log = logger("frigo_edi")
 
+class ParseException(Exception):
+    pass
+
 
 class EdiDoc(models.Model):
 
@@ -73,6 +76,7 @@ class Edi(models.Model):
     @api.model
     def parse_tourism(self, file_path, doc):
         f = codecs.open(file_path, "r", "ISO-8859-1", 'ignore')
+        errors = False
         for line in f:
             """En los ficheros de ejemplo se marca el final del archivo con una
                linea de 0"""
@@ -90,6 +94,7 @@ class Edi(models.Model):
                 [('product_code', 'ilike', product_code), ('name', '=', self.related_partner_id.id)])
             if not supplierinfo:
                 log.error("Product with code %s not found." % product_code)
+                errors = True
                 continue
             supplierinfo = supplierinfo[0]
             if not group:
@@ -119,6 +124,8 @@ class Edi(models.Model):
                     group.supplier_id = supplierinfo.name
             product = supplierinfo.product_tmpl_id
             group.write({'product_ids': [(4, product.id)]})
+        if errors:
+            raise ParseException('', '')
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
         self.make_backup(file_path, doc.file_name)
 
@@ -141,6 +148,7 @@ class Edi(models.Model):
         purchase_uom = purchase_uom[0]
 
         visited_supp_ids = []
+        errors = False
         for line in f:
             product_code = line[:10][2:8]
             product_ids = supp_obj.search([('id', 'in', supplier_product_ids),
@@ -154,6 +162,8 @@ class Edi(models.Model):
             else:
                 log.error("Rappel subgroup invalid %s for line %s" %
                           (rappel_group_code, line))
+                errors = True
+                continue
                 rappel_subgroup = self.env['product.rappel.subgroup']
             family = prod_uf.search([("code", '=', line[12:18])])
             if family:
@@ -234,6 +244,9 @@ class Edi(models.Model):
                                'rappel_group_id': rappel_subgroup.group_id.id,
                                'standard_price': int(line[80:90]) / 100.0,
                                'volume': volume,
+                               'log_base_id': self.env.ref('product.product_uom_unit').id,
+                               'log_unit_id': self.env.ref('midban_product.product_uom_box').id,
+                               'uom_id': self.env.ref('midban_product.product_uom_box').id,
                                'weight': weight,
                                'temp_type': self.env.ref('midban_product.tt1').id,
                                'ean14': ean14.rjust(14, "0"),
@@ -242,6 +255,8 @@ class Edi(models.Model):
                                'uom_po_id': purchase_uom.id}
                 if not ean13_valid:
                     log.error("Ean13 invalid %s for line %s" % (ean13, line))
+                    errors = True
+                    continue
                 if stax:
                     create_vals['taxes_id'] = [(6, 0, [stax.id])]
                 if ptax:
@@ -257,13 +272,16 @@ class Edi(models.Model):
                                        'supp_ca_ma': un_ma,
                                        'supp_ma_pa': ma_pa,
                                        'supp_un_ca': int(line[98:106]),
+                                       'log_base_id': self.env.ref('product.product_uom_unit').id,
+                                       'log_unit_id': self.env.ref('midban_product.product_uom_box').id,
                                     })
                 plst_sup.create({"suppinfo_id": sup.id,
                                  "min_quantity": 1,
                                  "price": int(line[80:90]) / 100.0,
                                  "from_date": date.today(),
                                  "to_date": date.today() + timedelta(365)})
-
+        if errors:
+            raise ParseException('', '')
         unlink_supp_ids = list(set(supplier_product_ids) -
                                set(visited_supp_ids))
         unlink_supp_ids = supp_obj.browse(unlink_supp_ids)
@@ -277,6 +295,7 @@ class Edi(models.Model):
         f = codecs.open(file_path, "r", "ISO-8859-1", 'ignore')
         partner_obj = self.env["res.partner"]
         partners_to_activate = []
+        errors = False
         for line in f:
             parts = partner_obj.search([('indirect_customer', '=', True),
                                         ('ref', '=', str(int(line[9:19]))),
@@ -288,6 +307,8 @@ class Edi(models.Model):
                 valid = partner_obj.simple_vat_check("es", vat)
                 if not valid:
                     log.error("Invalid vat %s for line %s" % (vat, line))
+                    errors = True
+                    continue
             date = datetime.strftime(datetime.strptime(line[1:9], "%Y%m%d"),
                                      "%Y-%m-%d")
 
@@ -352,6 +373,8 @@ class Edi(models.Model):
             part.signal_workflow("logic_validated")
             part.signal_workflow("commercial_validated")
             part.signal_workflow("active")
+        if errors:
+            raise ParseException('', '')
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
         self.make_backup(file_path, doc.file_name)
         return
@@ -444,7 +467,7 @@ class Edi(models.Model):
                     self.env['stock.pack.operation'].create(vals)
 
         if errors:
-            doc.write({'state': 'error'})
+            raise ParseException('', '')
         else:
             doc.write({'state': 'imported',
                        'date_process': fields.Datetime.now()})
@@ -467,6 +490,7 @@ class Edi(models.Model):
                                                      delete_links})
         customer_vals = {}
         end_line = '0' * 36
+        errors = False
         for line in f:
             if end_line in line:
                 continue
@@ -476,9 +500,11 @@ class Edi(models.Model):
             if not customer:
                 log.error('Customer with unilever code %s not found' %
                           customer_code)
+                errors = True
                 continue
             elif len(customer) != 1:
                 log.error('Varios clientes con el mismo codigo de proveedor %s' % customer_code)
+                raise ParseException('', '')
                 continue
             product_code = line[10:20][2:8]
             product_info = self.env['product.supplierinfo'].search(
@@ -486,9 +512,10 @@ class Edi(models.Model):
             if not product_info:
                 log.error('product with supplier code %s not found' %
                           product_code)
-                continue
+                errors = True
             elif len(product_info) != 1:
                 log.error('Varios productos con el mismo codigo de proveedor %s' % product_code)
+                errors = True
                 continue
             product = product_info.product_tmpl_id
             if customer.id not in customer_vals.keys():
@@ -498,12 +525,15 @@ class Edi(models.Model):
         # import ipdb; ipdb.set_trace()
         for customer in self.env['res.partner'].browse(customer_vals.keys()):
             customer.write({'exclusive_ids': customer_vals[customer.id]})
+        if errors:
+            raise ParseException('', '')
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
         self.make_backup(file_path, doc.file_name)
 
     @api.model
     def parse_payment_invoice(self, file_path, doc):
         f = codecs.open(file_path, "r", "ISO-8859-1", 'ignore')
+        errors = False
         for line in f:
             invoice = self.env['account.invoice'].search([('name', '=',
                                                            line[7:17])])
@@ -532,6 +562,7 @@ class Edi(models.Model):
             if not product_info:
                 log.error('product with supplier code %s not found' %
                           product_code)
+                errors = True
                 continue
             product = product_info.product_tmpl_id
             qty = float(line[28:33])
@@ -548,6 +579,8 @@ class Edi(models.Model):
                                         product.taxes_id],
                 'quantity': qty,
             })
+        if errors:
+            raise ParseException('', '')
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
         self.make_backup(file_path, doc.file_name)
 
@@ -570,23 +603,27 @@ class Edi(models.Model):
                 log.set_errors("")
                 process = False
                 file_path = path + os.sep + doc.file_name
-                if doc.doc_type.code == 'pro':
-                    service.parse_products_file(file_path, doc)
-                    process = True
-                elif doc.doc_type.code == 'clp':
-                    service.parse_indirect_customers_file(file_path, doc)
-                    process = True
-                elif doc.doc_type.code == 'alc':
-                    service.parse_purchase_picking_file(file_path, doc)
-                elif doc.doc_type.code == 'lpr':
-                    service.parse_exclusive(file_path, doc)
-                    process = True
-                elif doc.doc_type.code == 'abo':
-                    service.parse_payment_invoice(file_path, doc)
-                    process = True
-                elif doc.doc_type.code == 'tur':
-                    service.parse_tourism(file_path, doc)
-                    process = True
+                try:
+                    if doc.doc_type.code == 'pro':
+                        service.parse_products_file(file_path, doc)
+                        process = True
+                    elif doc.doc_type.code == 'clp':
+                        service.parse_indirect_customers_file(file_path, doc)
+                        process = True
+                    elif doc.doc_type.code == 'alc':
+                        service.parse_purchase_picking_file(file_path, doc)
+                    elif doc.doc_type.code == 'lpr':
+                        service.parse_exclusive(file_path, doc)
+                        process = True
+                    elif doc.doc_type.code == 'abo':
+                        service.parse_payment_invoice(file_path, doc)
+                        process = True
+                    elif doc.doc_type.code == 'tur':
+                        service.parse_tourism(file_path, doc)
+                        process = True
+                except ParseException:
+                    process = False
+                    doc.write({'state': 'error', 'errors': log.get_errors()})
                 # No es necesario hacer este desarrollo para el fichero TOR,
                 # ya que no lo estan usando. Se hara en otra fase
                 # cuando se haya implantado el ERP.
