@@ -35,9 +35,11 @@ class stock_picking_wave(models.Model):
         wave = self.search(domain)
 
         if wave:
+
             vals = {}
             ind = 0
             for op in wave.wave_report_ids:
+
                 values = {
                     'ID': op.id,
                     'wave_report_id': op.id,

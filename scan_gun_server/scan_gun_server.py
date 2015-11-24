@@ -8,7 +8,7 @@ from OdooCon import OdooDao
 import sys
 import datetime
 import string
-import scan_gun_picking
+
 params = {}  # se guardará la configuración del archivo aquí
 
 KEY_F1 = '8f50' #'\x8fP'
@@ -116,7 +116,7 @@ class ScanGunProtocol(LineReceiver):
         self.last = False
         self.reset_self_task()
         self.reset_self_op()
-        self.show_op_processed = True
+        self.show_op_processed = False
         self.print_tag_option = True
 
     def reset_self_task(self):
@@ -201,6 +201,7 @@ class ScanGunProtocol(LineReceiver):
 
     def lineReceived(self, line, confirm= False):
 
+        self.sendLine('...')
         if self.factory.debug:
             self.lineReceived2(line = line, confirm = confirm)
             return
@@ -217,6 +218,7 @@ class ScanGunProtocol(LineReceiver):
         Método del framework. LLamado cada vez que se recibe una linea
         """
         #try:
+        #import ipdb; ipdb.set_trace()
         line_received = line
         if line == '' or not line:
             return
@@ -1994,7 +1996,14 @@ class ScanGunProtocol(LineReceiver):
 
         header = u"Picks %s %s\n" %(self.task_id, self.route)
         if self.waves:
-            header = u"%s\n"%self.waves['1']['name']
+            num_ops = len(self.waves)
+            op_pendientes = num_ops
+            for wave in self.waves:
+                if self.waves[wave]['PROCESADO']:
+                    op_pendientes -= 1
+
+            header = u"%s (%s de %s)\n"%(self.waves['1']['name'], op_pendientes, num_ops)
+
         return self.get_str(self.waves , header)
 
     def get_str_list_wave_ops(self):
@@ -2082,7 +2091,7 @@ class ScanGunProtocol(LineReceiver):
         return strg
 
     def handle_list_waves(self, line, confirm=False):
-
+        #import ipdb; ipdb.set_trace()
         order_line = line[0:2]
         if order_line in (PRE_LOC, PRE_LOT, PRE_PACK, PRE_PROD):
             line = line [2:]
@@ -2520,6 +2529,7 @@ class ScanGunProtocol(LineReceiver):
         return res
 
     def handle_list_packages(self, line):
+
         line_int = self.int_(line)
         if self.list_packages:
             if line_int in [1, len(self.list_packages)]:
@@ -2597,6 +2607,7 @@ class ScanGunProtocol(LineReceiver):
     def get_str_list_packages(self, product_id = False, available_qty = 0.0):
 
         str_list_packages= u''
+        self.new_op_qty = 0
         if not self.list_packages:
             self.list_packages = self.factory.odoo_con.get_pack_candidates(product_id, available_qty)
 
@@ -2682,6 +2693,7 @@ class ScanGunProtocol(LineReceiver):
                 #aqui tenemos que mirar si es cambio de paquete entero o una parte.
                 #comprobamos cantidad sin reservar y que el producto sea el que pide
                 #miro si es paquete ocmpleto. .
+
                 product_id = wave_['product_id']
                 qty_to_move = wave_['qty']
                 ok_package = self.factory.odoo_con.check_package_for_picking_change(self.user_id,product_id,package_id,qty_to_move)
@@ -3312,12 +3324,23 @@ class ScanGunProtocol(LineReceiver):
             #No puedo poner visited ya que es al vuelo. no puedo modificarlo en la db
         self.last = "get_str_form_wave"
         wave_=self.waves[str(self.active_wave)]
+        header = ''
         #self.product = self.factory.odoo_con.get_product_gun_complete_info(self.user_id, wave_['product_id'])
         #Esta cabecera es común a rdos los estados
-        header = u"%s\n"%wave_['name']
-        menu_str = ''
-        if wave_['customer_id']:
+        if not wave_['customer_id']:
+            num_ops = len(self.waves)
+            op_pendientes = num_ops
+            for wave in self.waves:
+                if self.waves[wave]['PROCESADO']:
+                    op_pendientes -= 1
+
+            menu_str = u"%s (%s de %s)\n"%(wave_['name'], op_pendientes, num_ops)
+
+        else:
             menu_str = u"[%s] %s\n"%(wave_['ref'], wave_['customer_id'])
+
+
+
         str_ = (u'%s - ')%(wave_['package'])
         if self.step in [0] and not wave_['PROCESADO']:
             menu_str+= self.inverse(str_)
