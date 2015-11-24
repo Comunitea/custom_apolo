@@ -75,7 +75,10 @@ class ItemManagementRecountPhase(models.Model):
                                               self.recount_id.id),
                                              ('recount_date', '<=',
                                               self.limit_date)])
-        self.percent_count = (len(recount_ids) * 100.0) / len(item_ids)
+        if item_ids:
+            self.percent_count = (len(recount_ids) * 100.0) / len(item_ids)
+        else:
+            self.percent_count = 0
 
     name = fields.Char("Name")
     limit_date = fields.Date("Limit date")

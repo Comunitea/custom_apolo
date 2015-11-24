@@ -56,9 +56,10 @@ class ItemManagementContract(models.Model):
     customer_local_name = fields.Char("Customer local name")
     customer_local_street = fields.Char("Customer local street")
 
-    @api.one
+    @api.multi
     def action_active(self):
         self.state = "active"
+        return True
 
     @api.one
     def action_done(self):
@@ -80,8 +81,9 @@ class ItemManagementContract(models.Model):
 
     @api.model
     def create(self, vals):
-        vals['name'] = self.env['ir.sequence'].\
-            get('item.management.contract') or '/'
+        if vals.get('name', False) == "/":
+            vals['name'] = self.env['ir.sequence'].\
+                get('item.management.contract') or '/'
 
         new_id = super(ItemManagementContract, self).create(vals)
         return new_id

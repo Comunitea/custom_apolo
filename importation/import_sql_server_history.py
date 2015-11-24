@@ -58,7 +58,7 @@ class DatabaseImport:
 
         self.url_template = "http://%s:%s/xmlrpc/%s"
         self.server = "localhost"
-        self.port = 5069
+        self.port = 9069
         self.dbname = dbname
         self.user_name = user
         self.user_passwd = passwd
@@ -377,14 +377,14 @@ class DatabaseImport:
         #           "numero_carga as picking_info from dbo.cabecera_pedido_copia where cast(fecha_carga as date) >= '2015-08-17 00:00:00'")
         ###################################################################
         ## Se importan sólo pedidos vivos
-        # cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
-        #            "observacion_pedido as customer_comment, observacion_reparto as note, pedido_sam as client_order_ref, 'draft' as state, '' as invoice_info, "
-        #            "'' as picking_info from dbo.cabecera_pedido_ventas")
+        cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
+                    "observacion_pedido as customer_comment, observacion_reparto as note, pedido_sam as client_order_ref, 'draft' as state, '' as invoice_info, "
+                    "'' as picking_info from dbo.cabecera_pedido_ventas")
         ###################################################################
         ## Se importan sólo pedidos históricos
-        cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha_carga as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
-                   "'' as customer_comment, '' as note, '' as client_order_ref, 'history' as state, serie_factura + CONVERT(varchar, numero_factura) as invoice_info, "
-                   "numero_carga as picking_info from dbo.cabecera_pedido_copia")
+        #cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha_carga as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
+        #           "'' as customer_comment, '' as note, '' as client_order_ref, 'history' as state, serie_factura + CONVERT(varchar, numero_factura) as invoice_info, "
+        #           "numero_carga as picking_info from dbo.cabecera_pedido_copia")
         ###################################################################
         data = cr.fetchall()
         num_rows = len(data)
@@ -700,6 +700,10 @@ class DatabaseImport:
         num_rows = len(invoice_data)
         cont = 0
         for row in invoice_data:
+            invoice_ids = self.search("account.invoice", [('type','=','out_invoice'),("number",'=',ustr(row.number_pref) + "/" + str(int(row.number)))])
+            if invoice_ids:
+                cont += 1
+                continue
             customer_ids = self.search("res.partner", [('customer', '=', True),('ref', '=', str(int(row.partner_id_map))),'|',('active', '=', True),('active', '=', False)])
             if customer_ids:
                 cust_data = self.read("res.partner", customer_ids[0], ["property_account_receivable"])
@@ -777,12 +781,12 @@ class DatabaseImport:
             conn = pyodbc.connect("DRIVER={FreeTDS};SERVER=" + self.sql_server_host + ";UID=midban;PWD=midban2015;DATABASE=" + self.sql_server_dbname + ";Port=1433;TDS_Version=10.0")
             cr = conn.cursor()
 
-            self.import_sale_orders(cr)
+            #self.import_sale_orders(cr)
             #self.import_sale_order_lines_open(cr)
-            self.import_sale_order_lines_history(cr)
+            #self.import_sale_order_lines_history(cr)
             #self.import_active_purchase_order(cr)
             #self.import_purchase_invoice(cr)
-            #self.import_sale_invoice(cr)
+            self.import_sale_invoice(cr)
 
         except Exception, ex:
             print u"Error al conectarse a las bbdd: ", repr(ex)
