@@ -142,13 +142,12 @@ class product_product (models.Model):
         return res
 
     @api.multi
-    def get_uom_conversions(self, uom_qty, product_id = False):
+    def get_uom_conversions(self, uom_qty, product_id = False, uom_id = False):
         # product_id = my_args.get("product_id", False)
         # uom_id = my_args.get("uom_id", False)
         # uom_qty = my_args.get("uom_qty", 0.00)
-        #import ipdb; ipdb.set_trace()
+
         ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': 1}
-        #import ipdb; ipdb.set_trace()
         if product_id:
             domain = [('id', '=', product_id)]
             product = self.search(domain)
@@ -158,18 +157,19 @@ class product_product (models.Model):
         product= self.env['product.product'].browse(product.id).with_context(ctx)
         rounding = 0
         base_qty = 0.00
-        uom_id = product.uom_id
+        if not uom_id:
+            uom_id = product.uom_id.id
 
-        if product.log_base_id.id == uom_id.id:
+        if product.log_base_id.id == uom_id:
             base_qty = uom_qty
             rounding = product.log_base_id.rounding
             #si tiene log_box
 
-        elif product.log_unit_id.id == uom_id.id:
+        elif product.log_unit_id.id == uom_id:
             base_qty = uom_qty * product.kg_un
-            rounding = product.log_unit_id.rounding
+            rounding = product.log_unit_id.rounding or 0.00
 
-        elif product.log_box_id.id ==uom_id.id:
+        elif product.log_box_id.id ==uom_id:
             base_qty = uom_qty * product.kg_un * product.un_ca
             rounding = product.log_box_id.rounding or 0.00
 
@@ -223,21 +223,15 @@ class product_product (models.Model):
 
         return conv
 
-
-
-
-
     @api.multi
     def get_uom_from_conversions_from_gun(self,my_args):
         units = my_args.get('units', [])
         product_id = my_args.get ('product_id', False)
         uos_id = my_args.get ('uos_id', False)
-        return self.get_uom_from_conversions(units, product_id)
+        return self.get_uom_from_conversions(units, product_id, uos_id)
 
     @api.multi
     def get_uom_from_conversions(self, units, product_id = False, uos_id = False):
-
-
         ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': 1}
         if product_id:
             domain = [('id', '=', product_id)]
@@ -251,7 +245,7 @@ class product_product (models.Model):
         uom_qty = 0.00
 
         if uos_id:
-            uom_id = self.env['product_uom'].browse(uos_id).with_context(ctx) or False
+            uom_id = self.env['product.uom'].browse(uos_id).with_context(ctx) or False
         else:
             uom_id = product.uom_id
 
@@ -287,8 +281,11 @@ class product_product (models.Model):
         # min_qty = my_args('min_qty', False)
         if product_id:
             t_pack = self.env['stock.quant.package']
+            wh = self.env['stock.warehouse'].search([])[0]
+            stock_loc = wh.lot_stock_id
             domain = [('product_id', '=', product_id),
-                      ('quant_ids', '!=', False)]
+                      ('quant_ids', '!=', False),
+                      ('location_id', 'child_of', [stock_loc.id])]
             pack_objs = t_pack.search(domain)
 
             for p in pack_objs:

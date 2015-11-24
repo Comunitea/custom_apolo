@@ -84,7 +84,13 @@ class stock_picking_wave(models.Model):
                 uom_id = product.uom_id.id
                 uom_qty = op.product_qty
                 if product:
-                    values['units'] = product.get_uom_conversions(uom_qty)
+                    if product.is_var_coeff:
+                        qty = op.uos_qty
+                    else:
+                        qty = uom_qty
+                values['units'] = product.get_uom_conversions(qty, uom_id = op.uos_id.id)
+
+
                 uom_destino = product.log_box_id.id or product.log_unit_id.id or product.log_base_id.id
                 uom_origen = op.uos_id.id or op.uom_id.id
                 values['big_unit'] = product._get_unit_ratios(uom_destino, False) / \
