@@ -86,8 +86,11 @@ calculate rappels.  If left blank is calculated for all')
     def calculate_rappel(self):
         customers = self.customer_ids
         rappels = self.env['rappel'].search([])
+        print "LIQUIDANDO --------------------------------------------------------"
+        print rappels
         for rappel in rappels:
             for customer in customers and rappel.customer_ids & customers or rappel.customer_ids:
+                print customer
                 if (rappel.date_stop and rappel.date_stop >= self.date_start
                         or not rappel.date_stop) and \
                         rappel.date_start < self.date_stop:
@@ -107,6 +110,7 @@ calculate rappels.  If left blank is calculated for all')
                              ('tourism', '=', False),
                              ('promotion_line', '=', False)
                              ])
+                            print inv_lines
                             partner_calc[customer.id] = inv_lines
                         else:
                             all_partners = self.env['res.partner'].search(
