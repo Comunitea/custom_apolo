@@ -124,7 +124,7 @@ class DatabaseImport:
 
         self.url_template = "http://%s:%s/xmlrpc/%s"
         self.server = "localhost"
-        self.port = 8069
+        self.port = 9069
         self.dbname = dbname
         self.user_name = user
         self.user_passwd = passwd
@@ -979,7 +979,17 @@ class DatabaseImport:
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
-    #def fix_product_weight(self, cr):
+    def fix_product_weight(self, cr):
+        cr.execute("select pr1_codi, pr1_capl from dbo.adsd_art where pr1_capl > 0")
+        products_data = cr.fetchall()
+        cont = 0
+        num_rows = len(products_data)
+        for row in products_data:
+            product_ids = self.search("product.product", [('default_code', '=', str(int(row[0]))),'|',('active', '=', True),('active', '=', False)])
+            if product_ids:
+                self.write("product.product", product_ids, {'weight': row[1] / 1000.0})
+            cont += 1
+            print "%s de %s" % (str(cont),str(num_rows))
 
     def import_partner_contacts(self, cr):
         cr.execute("SELECT clf_codi as partner_id_map, clf_dire as street,clf_pobl as city, clf_cpos as zipcode,clf_telf as phone,"
@@ -1157,7 +1167,7 @@ class DatabaseImport:
             #self.import_tourism_data(cr)
             #self.import_giras(cr)
             #self.fix_customer_names(cr)
-            #self.fix_product_weight(cr)
+            self.fix_product_weight(cr)
             #self.import_partner_contacts(cr)
             #self.import_customer_unilever_families(cr)
             self.import_items_data(cr)

@@ -154,7 +154,7 @@ class custom_picking_parser(models.AbstractModel):
                 str(qty_units[1])
             total_list.append(str_total)
             total_list.append(str_total_sc)
-            rem_num_units -= 1
+            # rem_num_units -= 1
             if len(total_list) == 4:
 
                 ind_totals.append(total_list)

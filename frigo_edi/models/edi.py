@@ -349,8 +349,6 @@ class Edi(models.Model):
                 else:
                     create_vals["date"] = date
                 part = partner_obj.create(create_vals)
-                if line[134] != "B" and valid:
-                    partners_to_activate.append(part)
 
             if int(line[167:177]) and int(line[167:177]) != int(line[9:19]):
                 parent_part = partner_obj.search([('indirect_customer', '=',
@@ -365,14 +363,10 @@ class Edi(models.Model):
                     parent = partner_obj.\
                         create({"name": line[177:207].strip(),
                                 "ref": str(int(line[167:177])),
+                                "indirect_customer": True,
                                 "is_company": True,
                                 "customer": True})
                     part.parent_id = parent.id
-        partners_to_activate = list(set(partners_to_activate))
-        for part in partners_to_activate:
-            part.signal_workflow("logic_validated")
-            part.signal_workflow("commercial_validated")
-            part.signal_workflow("active")
         if errors:
             raise ParseException('', '')
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
