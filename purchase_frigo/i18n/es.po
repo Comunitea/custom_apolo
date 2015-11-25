@@ -1,0 +1,86 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#   * purchase_frigo
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-11-25 12:32+0000\n"
+"PO-Revision-Date: 2015-11-25 12:32+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: purchase_frigo
+#: view:purchase.frigo.export:purchase_frigo.purchase_frigo_export_form
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: purchase_frigo
+#: field:purchase.frigo.export,create_uid:0
+msgid "Created by"
+msgstr "Created by"
+
+#. module: purchase_frigo
+#: field:purchase.frigo.export,create_date:0
+msgid "Created on"
+msgstr "Created on"
+
+#. module: purchase_frigo
+#: view:purchase.frigo.export:purchase_frigo.purchase_frigo_export_form
+msgid "Export"
+msgstr "Exportar"
+
+#. module: purchase_frigo
+#: model:ir.actions.act_window,name:purchase_frigo.action_purchase_frigo_export
+msgid "Export frigo"
+msgstr "Exportar frigo"
+
+#. module: purchase_frigo
+#: view:purchase.frigo.export:purchase_frigo.purchase_frigo_export_form
+msgid "Export xls"
+msgstr "Export xls"
+
+#. module: purchase_frigo
+#: field:purchase.frigo.export,id:0
+msgid "ID"
+msgstr "ID"
+
+#. module: purchase_frigo
+#: field:purchase.frigo.export,write_uid:0
+msgid "Last Updated by"
+msgstr "Last Updated by"
+
+#. module: purchase_frigo
+#: field:purchase.frigo.export,write_date:0
+msgid "Last Updated on"
+msgstr "Last Updated on"
+
+#. module: purchase_frigo
+#: code:addons/purchase_frigo/wizard/purchase_export.py:127
+#, python-format
+msgid "Product %s with supplier code %s not found in  xls template"
+msgstr "El producto %s con código de proveedor %s no se ha encontrado en el template"
+
+#. module: purchase_frigo
+#: code:addons/purchase_frigo/wizard/purchase_export.py:121
+#, python-format
+msgid "Product configuration"
+msgstr "Configuración de producto"
+
+#. module: purchase_frigo
+#: code:addons/purchase_frigo/wizard/purchase_export.py:126
+#, python-format
+msgid "Product not found"
+msgstr "Producto no encontrado"
+
+#. module: purchase_frigo
+#: code:addons/purchase_frigo/wizard/purchase_export.py:122
+#, python-format
+msgid "The product %s not have supplier data"
+msgstr "El producto %s no tiene información de proveedor."
+

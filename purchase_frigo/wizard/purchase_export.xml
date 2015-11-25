@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<openerp>
+    <data>
+
+        <record id="purchase_frigo_export_form" model="ir.ui.view">
+            <field name="name">purchase.frigo.export.form</field>
+            <field name="model">purchase.frigo.export</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Export xls">
+                    <button string="Export" name="export" type="object" icon="gtk-ok"/>
+                    <button string="Cancel" special="cancel" icon="gtk-cancel"/>
+                </form>
+            </field>
+        </record>
+
+        <act_window name="Export frigo"
+            res_model="purchase.frigo.export"
+            src_model="purchase.order"
+            view_id="purchase_frigo_export_form"
+            view_mode="form"
+            view_type="form"
+            target="new"
+            id="action_purchase_frigo_export"/>
+
+    </data>
+</openerp>
+
