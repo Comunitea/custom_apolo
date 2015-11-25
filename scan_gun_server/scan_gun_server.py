@@ -141,7 +141,7 @@ class ScanGunProtocol(LineReceiver):
         self.pack_type = 'do_pack'
         self.do_pack = True
         self.reset_log_units()
-        self.package_selected = False
+        self.package_selected = []
         self.list_packages=[]
         self.fixed_qty = False
 
@@ -361,6 +361,8 @@ class ScanGunProtocol(LineReceiver):
             self.handle_print_tags(line)
         elif self.state == 'list_packages':
             self.handle_list_packages(line)
+        elif self.state == 'info_producto':
+            self.handle_info_product(line)
 
 
 
@@ -689,7 +691,6 @@ class ScanGunProtocol(LineReceiver):
         self.active_op = False
         if not self.tasks:
             self.check_task()
-
         strg_data = ''
         for task_ in self.tasks:
             task = self.tasks[task_]
@@ -2325,11 +2326,13 @@ class ScanGunProtocol(LineReceiver):
         #1 tarea finalizada
         #2 hay que añadir paquete
         #3
+        #import ipdb; ipdb.set_trace()
         wave_ = self.waves[str(self.active_wave)]
         # op_id = wave_['ID']
         self.wave_id = wave_['wave_report_id']
         res = False
         #Tengo que comprobar si
+        check_ok = 0.04
         if not force:
 
             message = self.check_max_packet_qty(wave_['pack_id'])
@@ -2346,8 +2349,8 @@ class ScanGunProtocol(LineReceiver):
 
         #tengo que una de las cantidades es menor que la pedida (uom para fijo y uos para variable):
         if not to_revised and not self.f1_ok:
-            if  ((self.new_uom_qty < uom_pedida) and not var_coeff) or \
-                ((self.new_uos_qty < uos_pedida) and var_coeff):
+            if  ((check_ok + self.new_uom_qty < uom_pedida ) and not var_coeff) or \
+                ((check_ok + self.new_uos_qty < uos_pedida) and var_coeff):
                 #Tengo que debemos de preguntar si
                 #opcion 1:  Quieres añadir otro paquete?
                 #opción 2:  Seguir
@@ -2356,12 +2359,10 @@ class ScanGunProtocol(LineReceiver):
                     return -1
                 #Si quiero que siga con cantidades menores debo tener to_revised= True
 
-        if ((self.new_uom_qty  > uom_pedida +0.01) and not var_coeff):
+        if ((self.new_uom_qty  > uom_pedida + check_ok) and not var_coeff):
             message = u"Max: %s (%s) %s"%(wave_['qty'], self.new_uom_qty, wave_['uom'])
             self._snd(self.get_str_form_wave(), message)
             return
-
-
 
         #Si llega aquí cantidades bien o cantidades a revisar.
         #tengo lo que piden ==>> han pulsado F1 directamen
@@ -2529,20 +2530,26 @@ class ScanGunProtocol(LineReceiver):
         return res
 
     def handle_list_packages(self, line):
-
         line_int = self.int_(line)
-        if self.list_packages:
-            if line_int in [1, len(self.list_packages)]:
-                self.package_selected = line_int
-                self._snd(self.get_str_list_packages())
-                return
+        if self.list_packages and line_int>0:
+            if line_int in range(1, len(self.list_packages)):
+                self.new_op_qty = self.new_uom_qty
+                if line_int in range(1, len(self.package_selected)):
+                    self.package_selected.remove(line_int)
+                else:
+                    self.package_selected.append(line_int)
+
+            qty_selected = 0.0
+            for e in self.package_selected:
+                qty_selected += self.list_packages[e-1]['unreserved_qty']
+            uom = self.list_packages[0]['uom']
+            message = u'Actual %s %s'%(qty_selected, uom)
+            self._snd(self.get_str_list_packages(), message)
+            return
 
         if line == KEY_CONFIRM and self.package_selected:
 
-            if self.new_op_qty == 0:
-                q_ = 0
-            else:
-                self.create_operations_on_the_fly(self.new_op_qty)
+            ok = self.create_operations_on_the_fly(self.new_uom_qty)
             return
 
         if line == KEY_CANCEL:
@@ -2550,61 +2557,55 @@ class ScanGunProtocol(LineReceiver):
             self.state= self.last_state
             message =u"Cancelado"
             self.list_packages = []
-            self.package_selected = False
+            self.package_selected = []
             self._snd(self.get_str_form_wave(), message)
             return
 
     def create_operations_on_the_fly(self, last_qty = 0.00):
         print u'operations on the fly'
 
-        package_id =self.list_packages[self.package_selected-1]['package_id']
+        print self.list_packages
+        print last_qty
+
         wave_ = self.waves[str(self.active_wave)]
         wave_report_id = wave_['wave_report_id']
-        if last_qty == 0.00:
-            if wave_['is_var_coeff']:
-                qty = wave_['uos_qty']
-                qty = self.new_uos_qty
-            else:
-                qty = wave_['qty']
-                qty = self.new_uom_qty
-            self.new_op_qty = qty
-        else:
-            self.new_op_qty -= last_qty
+        last_qty = wave_['uom_qty'] - self.new_uom_qty
 
-        new = self.factory.odoo_con.create_operations_on_the_fly(self.user_id, wave_report_id, self.new_op_qty, package_id)
+        new = False
+        for pack_ in self.package_selected:
+            package_id=self.list_packages[pack_-1]['package_id']
+            new = self.factory.odoo_con.create_operations_on_the_fly(self.user_id, wave_report_id, last_qty, package_id)
+            last_qty -= new
+            if new >= last_qty:
+                break
 
         if new:
-            if new >= self.new_op_qty:
-                self.state= self.last_state
-                self.list_packages = []
-                self.package_selected = False
-                message ="\nSe ha modificado las agrupaciones"
-                act = self.active_wave
-                self.waves = self.factory.odoo_con.get_wave_reports_from_task(self.user_id, self.task_id, self.type)
-                self.active_wave
-                self.state = 'list_wave_ops'
-                self._snd(self.get_str_form_wave(), message)
-                return
+            self.state= self.last_state
+            self.list_packages = []
+            self.package_selected = []
+
+            act = self.active_wave
+            self.waves = self.factory.odoo_con.get_wave_reports_from_task(self.user_id, self.task_id, self.type)
+            self.active_wave
+            self.state = 'list_wave_ops'
+            if last_qty <= 0:
+                message ="Se ha modificado las agrupaciones"
             else:
-
-                message = u"\nNecesito otro paquete"
-                self._snd(self.get_str_form_wave(), message)
-                return
-
-
-
+                message = u"Necesito otro paquete"
+            self._snd(self.get_str_form_wave(), message)
+            return
         else:
             self.state= self.last_state
             message =u"Cancelado"
             self.list_packages = []
-            self.package_selected = False
+            self.package_selected = []
 
             self._snd(self.get_str_form_wave(), message)
             return
 
 
 
-    def get_str_list_packages(self, product_id = False, available_qty = 0.0):
+    def get_str_list_packages(self, product_id = False, available_qty = 0.0, short= False):
 
         str_list_packages= u''
         self.new_op_qty = 0
@@ -2618,12 +2619,15 @@ class ScanGunProtocol(LineReceiver):
             for package in self.list_packages:
                 ind+=1
                 cabecera = u'%s> '%ind
-                if self.package_selected == ind:
+                if ind in self.package_selected:
                     cabecera = self.inverse(cabecera)
                 str_list_packages +=u'%s%s: %s \n   %s %s\n'%(cabecera, package['package'], package['bcd_name'], package['unreserved_qty'], package['uom'])
-            str_list_packages += "Selecciona el paquete\n%s Ok %s Cancelar"%(KEY_CONFIRM, KEY_CANCEL)
+
+            if not short:
+                str_list_packages += "Selecciona el paquete\n%s Ok %s Cancelar"%(KEY_CONFIRM, KEY_CANCEL)
         else:
-            str_list_packages = "No encuentro stock\n%s para volver"%KEY_CONFIRM
+            if not short:
+                str_list_packages = "No encuentro stock\n%s para volver"%KEY_CONFIRM
 
         return str_list_packages
 
@@ -2767,7 +2771,7 @@ class ScanGunProtocol(LineReceiver):
                 if self.step == 60:
                     self.last_state = self.state
                     self.list_packages = []
-                    self.package_selected = False
+                    self.package_selected = []
                     self.state = "list_packages"
                     self._snd(self.get_str_list_packages(wave_['product_id'], False), '')
                     return
@@ -3117,7 +3121,7 @@ class ScanGunProtocol(LineReceiver):
             self._snd(self.get_str_form_wave(), message)
             return
 
-        if line_float and line_float != 0:
+        if (line_float >= 0 or line_float<=0) or (line_float == 0 and not self.product['is_var_coeff']):
             print u"Step: %s, Coef Var: %s"%(self.step, self.product['is_var_coeff'])
             message = ''
             one_unit =  (wave_['uom_id'] == wave_['uos_id'])
@@ -4391,6 +4395,7 @@ class ScanGunProtocol(LineReceiver):
                 self._snd(self.get_str_menu1())
                 return
             if self.step==5:
+                self.do_pack = True
                 self.vals = []
                 self.step = 0
                 self._snd(self.get_manual_transfer_packet())
@@ -4419,7 +4424,7 @@ class ScanGunProtocol(LineReceiver):
         #Si en ccualquier momento meto un opaquete reinicio la operación
         if order_line == PRE_PACK:
 
-            self.pack_type ='do_pack'
+            self.do_pack = True
             package_id = line_int
             self.vals={}
             self.vals = self.factory.odoo_con.get_pack_gun_info(self.user_id, package_id)
@@ -4687,6 +4692,7 @@ class ScanGunProtocol(LineReceiver):
 
 
             if self.step == 1 and line in self.vals['packets'].keys():
+                self.pack_type = 'do_pack'
                 pack = self.vals['packets'][line]
                 package_id = pack['package_id']
                 self.handle_manual_transfer_product('%s%s'%(PRE_PACK,package_id))
@@ -4699,6 +4705,7 @@ class ScanGunProtocol(LineReceiver):
             new_packet = 0
             new_packet_=False
             package_id= False
+
             self.pack_type = 'do_pack'
             for packs_ in self.vals['packets']:
                 packs=self.vals['packets'][packs_]
@@ -4812,6 +4819,7 @@ class ScanGunProtocol(LineReceiver):
                 return
             print "SE movio"
             self.vals=VALS
+            self.pack_type = 'do_pack'
             self.loc={}
             self.move={}
             self.step = 0
@@ -4822,6 +4830,7 @@ class ScanGunProtocol(LineReceiver):
         if line == KEY_CANCEL:
             self.reset_all_vals(self.vals)
             self.vals ={}
+            self.pack_type = 'do_pack'
             self.step = 0
             self.move={}
             message = u"Cancelado"
@@ -5691,7 +5700,7 @@ class ScanGunProtocol(LineReceiver):
     def handle_menu_tool(self, line):
 
         print "Menu Tools"
-        if line not in ["1", "3", "6", "8", "9"] and line != KEY_VOLVER:
+        if line not in ["1", "3", "4", "6", "8", "9"] and line != KEY_VOLVER:
             str_error = u"La opcion %s no es valida.\nReintentar:\n" % line
             self.state='tools'
             self._snd(self.get_menu_tools(), str_error)
@@ -5718,7 +5727,7 @@ class ScanGunProtocol(LineReceiver):
             self.state = 'info_producto'
             self.step=0
             self.num_order_list_ops = 1
-            self.packs = []
+            self.pack = {}
             self._snd(self.get_str_info_producto())
         elif line == '6':
             self.state = 'print_tags'
@@ -5756,29 +5765,25 @@ class ScanGunProtocol(LineReceiver):
         return str_menu
 
 
-    def get_str_info_product(self, message =''):
+    def get_str_info_producto(self, message =''):
 
-        str_menu=u"Info Producto\n"
+        if self.pack:
+            pack = self.pack
+            if self.step:
+                str_menu=u"Info Paquete/Producto\n"
 
-        if self.step == 0:
-            self.packs =[]
-            num_order_list_ops = 0
-            str_menu += self.inverse(u"Escanea un paquete\n")
-            #str_menu += self.inverse(u"%s Confimar"%KEY_CONFIRM)
+                str_menu += u'%s : %s\n'%(pack['package'], pack['lot'])
+                str_menu += u'%s: %s %s\n%s'%(pack['product'], pack['packed_qty'],
+                                              pack['uom'], pack['src_location_bcd'])
 
-        if self.step == 1 and self.packs:
-            qty = 0.00
-            for a in range[0,len(self.packs)]:
-                qty += self.packs[a]['qty']
-
-            for inc in range(self.num_order_list_ops, self.num_order_list_ops+MAX_NUM_ONE):
-                if inc <= len(self.packs):
-                    pack = self.packs[inc-1]
-                    str_menu += u'%s: %s %s\n%s'%(pack['name'], pack['qty'], pack['product_uom'], pack['location_bcd_name'])
-                    uom = pack['product_uom']
-
-            str_menu += u'Cant. Total:%s %s'%(qty, uom)
-        str_menu += message
+                message = ('\n%s Mas')%KEY_FINISH
+                str_menu += message
+            else:
+                str_menu = self.get_str_list_packages(self.pack['product_id'], short = True)
+                message = ('\n%s Menos')%KEY_FINISH
+                str_menu += message
+        else:
+            str_menu = u"\nLee paquete"
         return str_menu
 
     def handle_info_product(self, line):
@@ -5790,21 +5795,23 @@ class ScanGunProtocol(LineReceiver):
             order_line = False
         line_int = self.int_(line)
 
-        if line == KEY_NEXT:
-            if self.num_order_list_ops + MAX_NUM_ONE <=len(self.packs):
-                self.num_order_list_ops += MAX_NUM_ONE
-            self._snd(self.get_str_create_multipack())
-            return
-        if line == KEY_PREV:
-            self.num_order_list_ops -= MAX_NUM
-            if self.num_order_list_ops <1:
-                self.num_order_list_ops=1
-            self._snd(self.get_str_create_multipack())
-            return
-
         if order_line == PRE_PACK:
-            new_pack = self.factory.odoo_con.get_pack_gun_info(self.user_id, line_int)
+            self.pack = self.factory.odoo_con.get_pack_gun_info(self.user_id, line_int)
+            self.step = True
+            self._snd(self.get_str_info_producto())
+            return
+        if line == KEY_VOLVER:
+            self.state= 'menu_tools'
+            self.step = 0
+            self._snd(self.get_menu_tools())
+            return
+        if line == KEY_FINISH:
+            self.step = not self.step
+            self._snd(self.get_str_info_producto())
+            return
 
+        self._snd(self.last_send, u'\nNo te entiendo')
+        return
 
 
     def get_str_create_multipack(self, message =''):

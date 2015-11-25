@@ -106,16 +106,18 @@ class StockTask(models.Model):
         for task in task_obj:
             if task.operation_ids:
                 ref = task.operation_ids[0].picking_id.name
+            if task.type == 'picking':
+                num_ops = len(task.wave_id.wave_report_ids)
+            else:
+                num_ops = len(task.operation_ids)
             values = {
                 'id': task.id,
                 'type' : task.type,
                 'paused' : task.paused,
-
                 'ref' : task.wave_id.name or task.picking_id.name or ref or '',
-                #'name': task.name,
-                'ops': len(task.operation_ids) or len(task.wave_id.wave_report_ids),
+                'ops': num_ops,
                 'wave_id': task.wave_id.id or False
-            }
+                   }
             if task.paused:
                 ind += 1
                 vals[format(ind)] = values

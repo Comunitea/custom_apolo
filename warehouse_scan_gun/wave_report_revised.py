@@ -99,14 +99,16 @@ class wave_report(models.Model):
                             quant.reservation_id = False
                             qty_to_reassign += quant.qty
                         else:
-                            force_quants.append((quant, quant.qty))
+                            if quant.qty>0:
+                                force_quants.append((quant, quant.qty))
 
                     for quant in new_quant_objs:
                         if qty_to_reassign >= quant.qty:
                             force_quants.append((quant, quant.qty))
                             qty_to_reassign -= quant.qty
                         else:
-                            force_quants.append((quant, qty_to_reassign))
+                            if qty_to_reassign>0:
+                                force_quants.append((quant, qty_to_reassign))
                             break
                     #Anulamos la reserva
                     move.do_unreserve()

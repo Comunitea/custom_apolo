@@ -164,7 +164,10 @@ class stock_quant_package(models.Model):
 
         package_id = my_args.get("package_id", False)
         domain = [('id', '=', package_id)]
-        package = self.search(domain)
+        ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': 1}
+        self_ = self.env['stock.quant.package'].with_context(ctx)
+        package = self_.search(domain).with_context(ctx)
+
         vals = {'exist':False}
         if package:# and package.quant_ids:
             qty = 0
