@@ -307,6 +307,7 @@ class StockTask(models.Model):
             except Exception:
                 _logger.debug("CMNT EXCEPCION EN EL HILO!!!!!!!!! args %s",
                        Exception)
+                new_cr.close()
             new_cr.commit()
             new_cr.close()
             return {}
