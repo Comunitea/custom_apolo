@@ -2399,10 +2399,10 @@ class ScanGunProtocol(LineReceiver):
         #CANTIDADES OK o mayores que ok: peso fijo y uom o peso variable y uos entonces ok
         #¡¡¡ OJO !!!! Supongo 1 operación por cliente, paquete, uos_id. CONFIRMAR ESTE PUNTO
         elif (not to_revised and ((self.new_uom_qty == uom_pedida) and not var_coeff) or ((self.new_uos_qty >= uos_pedida) and var_coeff)):
-
             if var_coeff:
                 print u"Proceso agrupaciones de peso variable uos= %s"%self.new_uos_qty
-                values = {'to_process': True,
+                values = {
+                    'to_process': True,
                     'product_id': wave_['product_id'],
                     'product_qty': self.new_uom_qty,
                     'uos_qty': self.new_uos_qty}
@@ -2529,26 +2529,30 @@ class ScanGunProtocol(LineReceiver):
             res = res+10
         return res
 
-    def handle_list_packages(self, line):
-        line_int = self.int_(line)
-        if self.list_packages and line_int>0:
-            if line_int in range(1, len(self.list_packages)):
-                self.new_op_qty = self.new_uom_qty
-                if line_int in range(1, len(self.package_selected)):
-                    self.package_selected.remove(line_int)
-                else:
-                    self.package_selected.append(line_int)
 
-            qty_selected = 0.0
-            for e in self.package_selected:
-                qty_selected += self.list_packages[e-1]['unreserved_qty']
-            uom = self.list_packages[0]['uom']
-            message = u'Actual %s %s'%(qty_selected, uom)
-            self._snd(self.get_str_list_packages(), message)
-            return
+
+
+    def handle_list_packages(self, line):
+
+        line_int = self.int_(line)
+        order_line = line[0:2]
+
+        if order_line in (PRE_LOC, PRE_LOT, PRE_PACK, PRE_PROD):
+            line = line [2:]
+        else:
+            order_line = False
+
+        if order_line ==PRE_PACK:
+            int = 0
+            for e in self.list_packages:
+                if str(self.list_packages[int]['package_id']) == line:
+                    line_int = int
+                    break
+                int = int + 1
+
+
 
         if line == KEY_CONFIRM and self.package_selected:
-
             ok = self.create_operations_on_the_fly(self.new_uom_qty)
             return
 
@@ -2560,6 +2564,26 @@ class ScanGunProtocol(LineReceiver):
             self.package_selected = []
             self._snd(self.get_str_form_wave(), message)
             return
+
+        if self.list_packages and (line_int in range(1, len(self.list_packages)) or line == '0'):
+
+            self.new_op_qty = self.new_uom_qty
+            try:
+                self.package_selected.remove(line_int)
+            except:
+                self.package_selected.append(line_int)
+
+            qty_selected = 0.0
+            for e in self.package_selected:
+                qty_selected += self.list_packages[e]['unreserved_qty']
+            uom = self.list_packages[0]['uom']
+            message = u'Actual %s %s'%(qty_selected, uom)
+            self._snd(self.get_str_list_packages(), message)
+            return
+
+        message = u'Selecciona %s'%range(0, len(self.list_packages))
+        self._snd(self.get_str_list_packages(), message)
+        return
 
     def create_operations_on_the_fly(self, last_qty = 0.00):
         print u'operations on the fly'
@@ -2573,7 +2597,7 @@ class ScanGunProtocol(LineReceiver):
 
         new = False
         for pack_ in self.package_selected:
-            package_id=self.list_packages[pack_-1]['package_id']
+            package_id=self.list_packages[pack_]['package_id']
             new = self.factory.odoo_con.create_operations_on_the_fly(self.user_id, wave_report_id, last_qty, package_id)
             last_qty -= new
             if new >= last_qty:
@@ -2590,6 +2614,9 @@ class ScanGunProtocol(LineReceiver):
             self.state = 'list_wave_ops'
             if last_qty <= 0:
                 message ="Se ha modificado las agrupaciones"
+                self.state = 'list_waves'
+                self._snd(self.get_str_list_waves(), message)
+                return
             else:
                 message = u"Necesito otro paquete"
             self._snd(self.get_str_form_wave(), message)
@@ -2617,12 +2644,12 @@ class ScanGunProtocol(LineReceiver):
             str_list_packages= u'%s:\n'%product
             ind=0
             for package in self.list_packages:
-                ind+=1
+
                 cabecera = u'%s> '%ind
                 if ind in self.package_selected:
                     cabecera = self.inverse(cabecera)
                 str_list_packages +=u'%s%s: %s \n   %s %s\n'%(cabecera, package['package'], package['bcd_name'], package['unreserved_qty'], package['uom'])
-
+                ind+=1
             if not short:
                 str_list_packages += "Selecciona el paquete\n%s Ok %s Cancelar"%(KEY_CONFIRM, KEY_CANCEL)
         else:
@@ -2757,6 +2784,9 @@ class ScanGunProtocol(LineReceiver):
             self._snd(self.get_str_form_wave(), message)
             return
 
+        if line == KEY_CONFIRM and self.step in[2, 3] and wave_['is_var_coeff']:
+            line = KEY_QTY
+
         if line in [KEY_NEXT, KEY_PREV]:
             line = KEY_QTY
         if line in [KEY_CONFIRM, KEY_CANCEL, KEY_NEXT, KEY_PREV, KEY_QTY, KEY_VOLVER, KEY_FINISH]:
@@ -2780,22 +2810,6 @@ class ScanGunProtocol(LineReceiver):
 
                 self._snd(self.get_str_form_wave(), '')
                 return
-
-            # if line == KEY_NEXT:
-            #     print (u'%s de %s')%(self.active_wave, len(self.waves))
-            #     if self.active_wave < len(self.waves):
-            #         self.active_wave += 1
-            #
-            #     self.step=0
-            #     self._snd(self.get_str_form_wave())
-            #     return
-            #
-            # if line == KEY_PREV:
-            #     if self.active_wave >1:
-            #         self.active_wave-=1
-            #     self.step=0
-            #     self._snd(self.get_str_form_wave())
-            #     return
 
             if line == KEY_VOLVER:
 
@@ -2872,39 +2886,6 @@ class ScanGunProtocol(LineReceiver):
                     else:
                         self.finish_picking()
                         return
-
-                #self.new_uom_qty = line_
-                #self.new_uos_qty = round(line_ * self.fc, 2)
-                # if self.step ==3:
-                #     if one_unit or not self.product['is_var_coeff']:
-                #         self.step = 10
-                #     else:
-                #         self.step = 5
-                #     self._snd(self.get_str_form_wave(), '')
-                #     return
-                #
-                # if self.step ==5:
-                #     self.step = 10
-                #     self._snd(self.get_str_form_wave(), '')
-                #     return
-                #
-                # if self.step == 4:
-                #     if one_unit or not self.product['is_var_coeff']:
-                #         self.step = 10
-                #     else:
-                #         self.step = 6
-                #     self._snd(self.get_str_form_wave(), '')
-                #     return
-                #
-                # if self.step ==6:
-                #     self.step = 10
-                #     self._snd(self.get_str_form_wave(), '')
-                #     return
-                #
-                # if self.step in[8,9]:
-                #     self.step = 10
-                #     self._snd(self.get_str_form_wave(), '')
-                #     return
 
                 if self.step in [21, 22, 23]:
 
@@ -3066,50 +3047,6 @@ class ScanGunProtocol(LineReceiver):
                 self.handle_form_wave(line=KEY_QTY)
                 return
 
-
-            # if line == KEY_QTY and self.step in [2,3,4]:
-            #     self.new_uos_qty=0
-            #     self.new_uom_qty=0
-            #     self.qty_calc=[]
-            #
-            #
-            #
-            #     if self.step==3 or self.step ==2 or self.step ==5:
-            #         if one_unit:
-            #             message='No procede'
-            #             self._snd(self.get_str_form_wave(), message)
-            #             return
-            #         else:
-            #             self.step = 4
-            #             self._snd(self.get_str_form_wave(), '')
-            #             return
-            #
-            #     if self.step==4 or self.step == 6:
-            #         self.step=3
-            #         self._snd(self.get_str_form_wave(), '')
-            #         return
-            #
-            #
-            #
-            #     if self.step ==8:
-            #          if one_unit:
-            #             message='No procede'
-            #             self._snd(self.get_str_form_wave(), message)
-            #             return
-            #          else:
-            #             self.step = 9
-            #             self._snd(self.get_str_form_wave(), '')
-            #             return
-            #
-            #     if self.step ==9:
-            #         if one_unit:
-            #             message='No procede'
-            #             self._snd(self.get_str_form_wave(), message)
-            #             return
-            #         else:
-            #             self.step = 8
-            #             self._snd(self.get_str_form_wave(), '')
-            #             return
 
 
         if wave_['PROCESADO']:
@@ -3333,19 +3270,20 @@ class ScanGunProtocol(LineReceiver):
         header = ''
         #self.product = self.factory.odoo_con.get_product_gun_complete_info(self.user_id, wave_['product_id'])
         #Esta cabecera es común a rdos los estados
-        if not wave_['customer_id']:
-            num_ops = len(self.waves)
-            op_pendientes = num_ops
-            for wave in self.waves:
-                if self.waves[wave]['PROCESADO']:
-                    op_pendientes -= 1
-
-            menu_str = u"%s (%s de %s)\n"%(wave_['name'], op_pendientes, num_ops)
-
-        else:
+        # if not wave_['customer_id']:
+        #     num_ops = len(self.waves)
+        #     op_pendientes = num_ops
+        #     for wave in self.waves:
+        #         if self.waves[wave]['PROCESADO']:
+        #             op_pendientes -= 1
+        #
+        #     menu_str = u"%s (%s de %s)\n"%(wave_['name'], op_pendientes, num_ops)
+        #
+        # else:
+        #     menu_str = u"[%s] %s\n"%(wave_['ref'], wave_['customer_id'])
+        menu_str = ''
+        if wave_['is_var_coeff']:
             menu_str = u"[%s] %s\n"%(wave_['ref'], wave_['customer_id'])
-
-
 
         str_ = (u'%s - ')%(wave_['package'])
         if self.step in [0] and not wave_['PROCESADO']:
@@ -3358,9 +3296,10 @@ class ScanGunProtocol(LineReceiver):
         #menu_str += u"Mover: %s %s\n"%(wave_['uos_qty'],wave_['uos'])
         unit_str=''
 
+        if wave_['is_var_coeff']:
+            mover = "Pedido: %s %s\n"%(wave_['uos_qty'], wave_['uos'])
+            menu_str += mover
 
-        mover = "Pedido: %s %s\n"%(wave_['uos_qty'], wave_['uos'])
-        menu_str += mover
         mover = "Mover :"
         for unit in reversed(wave_['units']):
             if unit[2] and unit[1]>0:
@@ -3384,102 +3323,6 @@ class ScanGunProtocol(LineReceiver):
         if self.step <= 2:
             cantidad_uos += ''#u"Mover %s %s\n"%(wave_['uos_qty'],wave_['uos'])
             cantidad =''#cantidad += u"(%s %s) "%(wave_['uom_qty'],wave_['uom'])
-
-        #SI CONFIRMAMOS TODO TAL COMO VIENE
-
-
-        # uom = wave_['uom']
-        # uos = wave_['uos']
-        # uom_qty = wave_['uom_qty']
-        # uos_qty = wave_['uos_qty']
-        #
-        # cantidad_uom_full= u'%s %s\n'%(self.new_uom_qty, wave_['uom'])
-        # cantidad_2uos_full = u'(%s) %s %s\n'%(str(wave_['uos_qty']),self.new_uos_qty,  wave_['uos'])
-        #
-        # cantidad_2uos = (len(str(wave_['qty'])) * " ") + u'%s %s %s\n'%(str(wave_['uos_qty']),self.new_uos_qty,  wave_['uos'])
-        # cantidad_uom = (len(str(wave_['uos_qty'])) * " ") + u'%s %s\n'%(self.new_uom_qty, wave_['uom'])
-        #
-        # #AÑADIMOS PARA STEP=3, PESO VARIABLE. INTRO EN UOS
-        #
-        # if self.step == 4 or self.step == 5 or self.step == 9:
-        #     #AQUI INTRODUCIMOS EN UOM
-        #     #cantidad += '(%s) %s %s\n'%(wave_['CANTIDAD'], self.new_uom_qty, wave_['uom'])
-        #     #cantidad_uos += '(len(str(wave_['qty'])) * " ") + %s %s\n'%(str(wave_['uos_qty']),self.new_uos_qty,  wave_['uos'])
-        #     #cantidad += (len(str(wave_['uos_qty'])) * " ") + '%s %s\n'%(wave_['uom_qty'], self.new_uom_qty, wave_['uom'])
-        #     #cantidad_uos += '(%s) %s %s\n'%(str(wave_['uos_qty']),self.new_uos_qty,  wave_['uos'])
-        #     if one_unit:
-        #         cantidad = u'(%s) '%uos_qty
-        #         cantidad_uos = self.inverse(u'%s %s\n'%(self.new_uom_qty, self.inverse(uom)))
-        #     else:
-        #         cantidad = u''#(%s) '%uos_qty
-        #         cantidad_uos = u'Actual: %s %s\n%s%s\n'%(self.new_uos_qty, uos, " "*8 , self.inverse(u'%s %s'%(self.new_uom_qty, self.inverse(uom))))
-        #
-        #     message = u"%s o cantidad en %s"%(KEY_CONFIRM, wave_['uom'])
-        #
-        # #PESO VARIABLE INTRO EN UOM
-        # if self.step == 3 or self.step==6 or self.step ==8:
-        #     #no deberçia usarse
-        #     cantidad += u''
-        #     if one_unit:
-        #         cantidad_uos = u'Actual: %s\n'%self.inverse(u'%s %s'%(self.new_uos_qty, uos))
-        #     else:
-        #         cantidad_uos = u'Actual: %s\n%s%s %s\n'%(self.inverse(u'%s %s'%(self.new_uos_qty, uos)), " "*8 , self.new_uom_qty, uom)#, " "*8 , self.new_uom_qty, uom)
-        #     message = u"%s o intro %s"%(KEY_CONFIRM, wave_['uos'])
-        #
-        # if self.step == 5 and False:
-        #     if one_unit:
-        #         message = u"%s OK uom o intro %s\n"%(KEY_CONFIRM, wave_['uom'])
-        #     else:
-        #         cantidad = u''#(%s) '%uos_qty
-        #         cantidad_uos = u'Actual: %s\n%s%s %s\n'%(self.inverse(u'%s %s'%(self.new_uos_qty, uos)), " " *8, self.new_uom_qty, uom)
-        #     message = u"%s o cantidad en %s"%(KEY_CONFIRM, wave_['uos'])
-        #
-        # if self.step == 6 and False:
-        #     #no deberçia usarse
-        #     cantidad += cantidad_uom
-        #     cantidad_uos += cantidad_2uos_full
-        #     cantidad = self.inverse(cantidad)
-        #     message = "%s Ok Uom, o intro nuevo\n"%(KEY_CONFIRM)
-        #
-        #
-        # if self.step == 8 and False:
-        #     #Aqui es peso fijo one unit, introducimos cantidad para uom o one_unit
-        #     cantidad = u''#(%s) '%uos_qty
-        #     cantidad_uos = u'Actual: %s\n'%self.inverse(u'%s %s'%(self.new_uom_qty, uom))
-        #     message = u'Cantidad en %s\n'%wave_['uom']
-        #
-        # if self.step == 9 and False:
-        #     #peso fijo, 2 unidades
-        #     cantidad = u''
-        #     if one_unit:
-        #         cantidad_uos = u'Actual: %s\n'%self.inverse(u'%s %s'%(self.new_uos_qty, uos))
-        #     else:
-        #         cantidad_uos = u'Actual: %s\n%s%s %s\n'%(self.inverse(u'%s %s'%(self.new_uos_qty, uos)), 8*" " , self.new_uom_qty, uom)
-        #     message = u'Cantidad en %s\n'%wave_['uos']
-        #
-        # if self.step == 10:
-        #     cantidad = u''#(%s) '%uos_qty
-        #     if wave_['is_var_coeff']:
-        #         if one_unit:
-        #             cantidad_uos = u'Actual: %s %s\n'%(self.new_uos_qty, uos)
-        #         else:
-        #             cantidad_uos = u'Actual: %s %s\n%s%s %s\n'%(self.new_uos_qty, uos, 8*" " , self.new_uom_qty, uom)
-        #     else:
-        #         if one_unit:
-        #             cantidad_uos = u'Actual: %s %s\n'%(self.new_uos_qty, uos)
-        #         else:
-        #             cantidad_uos = u'Actual: %s %s\n%s%s %s\n'%(self.new_uos_qty, uos, 8*" " , self.new_uom_qty, uom)
-        #
-        #
-        #     message =u"%s Confirmar Operación\n"%KEY_CONFIRM
-        #     message = self.inverse(message)
-        #
-        # if self.step <20:
-        #
-        #     if wave_['uom'] == wave_['uos']:
-        #         menu_str += cantidad_uos
-        #     else:
-        #         menu_str += cantidad + cantidad_uos
 
         if self.step in [21, 22, 23, 25, 28, 60]:
 
@@ -5136,7 +4979,7 @@ class ScanGunProtocol(LineReceiver):
                 self.active_task= self.get_active_task()
                 self.camera_ids=[]
                 if self.type=='picking':
-                    self.state ='list_waves'
+                    self.state ="list_waves"
                     self._snd(self.get_str_list_waves(), u'\nTarea Creada')
                 elif self.type == "ubication":
                     self.state = 'list_ops'
