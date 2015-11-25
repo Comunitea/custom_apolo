@@ -1167,7 +1167,7 @@ class DatabaseImport:
             #self.import_tourism_data(cr)
             #self.import_giras(cr)
             #self.fix_customer_names(cr)
-            self.fix_product_weight(cr)
+            #self.fix_product_weight(cr)
             #self.import_partner_contacts(cr)
             #self.import_customer_unilever_families(cr)
             self.import_items_data(cr)
