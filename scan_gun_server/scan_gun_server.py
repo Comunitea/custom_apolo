@@ -2757,8 +2757,10 @@ class ScanGunProtocol(LineReceiver):
             self._snd(self.get_str_form_wave(), message)
             return
 
-
+        if line in [KEY_NEXT, KEY_PREV]:
+            line = KEY_QTY
         if line in [KEY_CONFIRM, KEY_CANCEL, KEY_NEXT, KEY_PREV, KEY_QTY, KEY_VOLVER, KEY_FINISH]:
+
 
             if line == KEY_CANCEL:
                 if wave_['PROCESADO']==True:
