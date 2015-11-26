@@ -146,7 +146,6 @@ class product_product (models.Model):
         # product_id = my_args.get("product_id", False)
         # uom_id = my_args.get("uom_id", False)
         # uom_qty = my_args.get("uom_qty", 0.00)
-
         ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': 1}
         if product_id:
             domain = [('id', '=', product_id)]
