@@ -105,7 +105,7 @@ class ExportPdf(Export):
     _cp_path = '/web/export/zb_pdf'
     fmt = {
         'tag': 'pdf',
-        'label': 'PDF',
+        'label': 'PDF.pdf',
         'error': None
     }
     
@@ -175,10 +175,11 @@ class ZbPdfExport(ExportPdf):
     def index(self, req, data, token):
         data = json.loads(data)
         uid = data.get('uid', False)
+        filename = "PDF_Export_" + time.strftime("%d%b%Hh%Mm") + ".pdf"
         return req.make_response(self.from_data(uid, data.get('headers', []), data.get('rows', []),
                                                 data.get('company_name','')),
                                  headers=[('Content-Disposition',
-                                           'attachment; filename=PDF Export'),
+                                           'attachment; filename=%s'%filename),
                                           ('Content-Type', self.content_type)],
                                  cookies={'fileToken': token})
 

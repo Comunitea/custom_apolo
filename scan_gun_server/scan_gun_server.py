@@ -398,6 +398,8 @@ class ScanGunProtocol(LineReceiver):
     def _snd(self, line='\n', message='', custom_format=True):
 
         if self.factory.debug:
+            print line, message, custom_format
+
             self._snd2(line=line, message=message, custom_format=custom_format)
             return
         else:
@@ -2076,7 +2078,7 @@ class ScanGunProtocol(LineReceiver):
             elif self.tasks[self.active_task]['type']=="ubication":
                 keys += u"%s Fin Tarea "%KEY_CONFIRM
             elif self.tasks[self.active_task]['type']=="picking":
-                keys += u"%s Fin Picking "%KEY_FINISH
+                keys += u"%s Finalizar Carga "%KEY_FINISH
 
         strg += keys
         keys = ''
@@ -3292,7 +3294,7 @@ class ScanGunProtocol(LineReceiver):
             menu_str += str_
 
         menu_str += u"(%s)\n%s\n"%(wave_['lot'], wave_['product'])
-        menu_str += u"Stock en Pack: %s %s\n"%(wave_['qty_available'], wave_['uom'])
+        menu_str += u"En Paquete: %s %s\n"%(wave_['qty_available'], wave_['uom'])
         #menu_str += u"Mover: %s %s\n"%(wave_['uos_qty'],wave_['uos'])
         unit_str=''
 
@@ -4980,7 +4982,7 @@ class ScanGunProtocol(LineReceiver):
                 self.camera_ids=[]
                 if self.type=='picking':
                     self.state ="list_waves"
-                    self._snd(self.get_str_list_waves(), u'\nTarea Creada')
+                    self._snd(self.get_str_list_waves(), u'\nCarga Realizada')
                 elif self.type == "ubication":
                     self.state = 'list_ops'
                     self._snd(self.get_str_list_ops(), u'\nTarea Creada')
@@ -5612,6 +5614,7 @@ class ScanGunProtocol(LineReceiver):
 
     def get_str_info_producto(self, message =''):
 
+
         if self.pack:
             pack = self.pack
             if self.step:
@@ -5620,12 +5623,12 @@ class ScanGunProtocol(LineReceiver):
                 str_menu += u'%s : %s\n'%(pack['package'], pack['lot'])
                 str_menu += u'%s: %s %s\n%s'%(pack['product'], pack['packed_qty'],
                                               pack['uom'], pack['src_location_bcd'])
-
-                message = ('\n%s Mas')%KEY_FINISH
+                str_menu += u"\nCaducidad %s"%pack.get('life_date', '00/00/0000')
+                message = u'\n%s Ver Stock'%KEY_FINISH
                 str_menu += message
             else:
                 str_menu = self.get_str_list_packages(self.pack['product_id'], short = True)
-                message = ('\n%s Menos')%KEY_FINISH
+                message = u'\n%s Características'%KEY_FINISH
                 str_menu += message
         else:
             str_menu = u"\nLee paquete"
@@ -5646,7 +5649,8 @@ class ScanGunProtocol(LineReceiver):
             self._snd(self.get_str_info_producto())
             return
         if line == KEY_VOLVER:
-            self.state= 'menu_tools'
+            self.pack = False
+            self.state= 'tools'
             self.step = 0
             self._snd(self.get_menu_tools())
             return
@@ -5655,7 +5659,7 @@ class ScanGunProtocol(LineReceiver):
             self._snd(self.get_str_info_producto())
             return
 
-        self._snd(self.last_send, u'\nNo te entiendo')
+        self._snd(self.get_str_info_producto(), u'\nNo te entiendo')
         return
 
 
