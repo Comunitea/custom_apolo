@@ -78,6 +78,7 @@ ERROR_TAREA_EN_PAUSA = u'\n[x] Tarea en pausa'
 # Para leer el archivo de configuración y guardarlo en params
 
 def read_file():
+
     if len(sys.argv)>1:
         telnet_cfg = sys.argv[1]
     else:
@@ -250,6 +251,8 @@ class ScanGunProtocol(LineReceiver):
 
 
         if not key:
+            if len(line)==2 and line[0:1]==",":
+                line = line[1:2]*9
             if len(line)==9:
                 line_, child = self.check_ubi(line)
                 if line_:
@@ -409,6 +412,7 @@ class ScanGunProtocol(LineReceiver):
                 print Exception, e.message
                 self._snd(self.last_send)
                 return
+
     def _snd2(self, line='\n', message='', custom_format=True):
 
         clean = u'Menu:      ' + str(self.last) + \
@@ -525,13 +529,6 @@ class ScanGunProtocol(LineReceiver):
             keys = u"%s Atrás"%KEY_VOLVER
         menu_str += delimiter + keys
         return menu_str
-
-
-
-
-
-
-
 
     def check_package(self, line):
 
@@ -651,6 +648,7 @@ class ScanGunProtocol(LineReceiver):
             if self.tasks[task]['id']==self.task_id:
                 res = task
         return res
+
     def check_task(self):
         #buscamos tareas asignadas al self.user_id
 
@@ -789,24 +787,24 @@ class ScanGunProtocol(LineReceiver):
             self._snd(self.get_str_menu1())
             return
 
-        # if line == KEY_CANCEL and pausar == True:
-        #     res = self.factory.odoo_con.gun_cancel_task(self.user_id, self.task_id)
-        #     self.check_task()
-        #
-        #     if res==True:
-        #         message = u'Tarea cancelada\n'
-        #     else:
-        #         message = u'Error al cancelar (ERP)\n'
-        #     self._snd(self.get_str_menu_task(), message)
-        #     return
-        #     if self.tasks[self.active_task]['ops']==0:
-        #         res = self.factory.odoo_con.gun_cancel_task(self.user_id, self.task_id)
-        #         self.check_task()
-        #         message = u'Tarea cancelada\n'
-        #     else:
-        #         message = u'No puedes. Tiene Ops\n'
-        #     self._snd(self.get_str_menu_task(), message)
-        #     return
+        if line == KEY_CANCEL and pausar == True:
+            res = self.factory.odoo_con.gun_cancel_task(self.user_id, self.task_id)
+            self.check_task()
+
+            if res==True:
+                message = u'Tarea cancelada\n'
+            else:
+                message = u'Error al cancelar (ERP)\n'
+            self._snd(self.get_str_menu_task(), message)
+            return
+            if self.tasks[self.active_task]['ops']==0:
+                res = self.factory.odoo_con.gun_cancel_task(self.user_id, self.task_id)
+                self.check_task()
+                message = u'Tarea cancelada\n'
+            else:
+                message = u'No puedes. Tiene Ops\n'
+            self._snd(self.get_str_menu_task(), message)
+            return
 
         if line == KEY_CONFIRM and self.task_id and self.ops and confirm==False:
             task_ops_finish = True
@@ -2321,7 +2319,7 @@ class ScanGunProtocol(LineReceiver):
 
         return r12
 
-    def finish_picking(self, force = False, to_revised = False):
+    def finish_picking(self, force = False, to_revised = False, return_here = True):
 
         #Devolvemos
         #0 en error
@@ -2395,6 +2393,8 @@ class ScanGunProtocol(LineReceiver):
             res = self.factory.odoo_con.change_op_values(self.user_id, self.wave_id, values)
             self.step = 0
             self.reset_log_units()
+            if return_here == True:
+                return
             self.state = "list_waves"
             message = u'Operación Realizada'
 
@@ -2531,9 +2531,6 @@ class ScanGunProtocol(LineReceiver):
             res = res+10
         return res
 
-
-
-
     def handle_list_packages(self, line):
 
         line_int = self.int_(line)
@@ -2632,8 +2629,6 @@ class ScanGunProtocol(LineReceiver):
             self._snd(self.get_str_form_wave(), message)
             return
 
-
-
     def get_str_list_packages(self, product_id = False, available_qty = 0.0, short= False):
 
         str_list_packages= u''
@@ -2659,7 +2654,6 @@ class ScanGunProtocol(LineReceiver):
                 str_list_packages = "No encuentro stock\n%s para volver"%KEY_CONFIRM
 
         return str_list_packages
-
 
     def handle_form_wave(self, line, confirm=False):
 
@@ -2778,10 +2772,6 @@ class ScanGunProtocol(LineReceiver):
                     self._snd(self.get_str_form_wave(), message)
                     return
 
-
-
-
-
             message = u'\nPaquete no Válido'
             self._snd(self.get_str_form_wave(), message)
             return
@@ -2803,6 +2793,9 @@ class ScanGunProtocol(LineReceiver):
                     return
 
                 if self.step in [50, 60]:
+                    self.last_state = self.state
+
+                    self.finish_picking(return_here = True)
                     self.last_state = self.state
                     self.list_packages = []
                     self.package_selected = []
@@ -3429,7 +3422,6 @@ class ScanGunProtocol(LineReceiver):
         str +='\n'
         return str
 
-
     def handle_list_ubi_ops(self, line, confirm=False):
         # Manejador de lista de operaciones de ubicacion
         line = line or '0'
@@ -3547,7 +3539,7 @@ class ScanGunProtocol(LineReceiver):
                 self.active_op = len(self.ops)
                 self.op_id = op_id
 
-                message = self.inverse(u'Operación creada\n para el paquete')
+                message = self.inverse(u'Ubicación creada')
             else:
                 message = self.inverse(u'Paquete No existe')
             self._snd(self.get_str_list_ops(), message)
@@ -4094,7 +4086,6 @@ class ScanGunProtocol(LineReceiver):
         self._snd(self.get_str_products_by_zone(), u'No válido\n')
         return
 
-
     def get_manual_transfer_packet(self):
         #Menu de opciones de movimiento manual
         #cuando se escanea un EAN
@@ -4336,7 +4327,6 @@ class ScanGunProtocol(LineReceiver):
         message = "\nNo te entiendo"
         self._snd(self.get_manual_transfer_packet(), message)
         return
-
 
     #DEPRECATED
     def get_manual_transfer_product(self):
