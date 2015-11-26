@@ -65,6 +65,7 @@ class DatabaseImport:
         self.user_id = 0
         self.sql_server_host = sql_server_host
         self.sql_server_dbname = sql_server_dbname
+        self.import_orders = []
 
         #
         # Conectamos con OpenERP
@@ -386,10 +387,21 @@ class DatabaseImport:
         #           "'' as customer_comment, '' as note, '' as client_order_ref, 'history' as state, serie_factura + CONVERT(varchar, numero_factura) as invoice_info, "
         #           "numero_carga as picking_info from dbo.cabecera_pedido_copia")
         ###################################################################
+        #cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
+        #          "observacion_pedido as customer_comment, observacion_reparto as note, pedido_sam as client_order_ref, 'draft' as state, '' as invoice_info, "
+        #           "'' as picking_info from dbo.cabecera_pedido_ventas union "
+        #           "select numero_pedido as name, cliente as partner_id_map, fecha_carga as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
+        #           "'' as customer_comment, '' as note, '' as client_order_ref, 'history' as state, serie_factura + CONVERT(varchar, numero_factura) as invoice_info, "
+        #           "numero_carga as picking_info from dbo.cabecera_pedido_copia")
         data = cr.fetchall()
         num_rows = len(data)
         cont = 0
         for row in data:
+            order_ids = self.search("sale.order", [('name','=',str(int(row.name)))])
+            if order_ids:
+                cont += 1
+                print "%s de %s" % (str(cont), str(num_rows))
+                continue
             partner_ids = self.search("res.partner", [('ref', '=', str(int(row.partner_id_map))),('customer','=',True),'|',('active','=',True),('active','=',False)])
             if not partner_ids:
                 partner_id = self.import_customers(cr, int(row.partner_id_map))
@@ -419,7 +431,9 @@ class DatabaseImport:
                 'client_order_ref': row.client_order_ref or False,
                 'state': row.state
             }
-            self.create("sale.order", sale_vals)
+            order_id = self.create("sale.order", sale_vals)
+            #if row.state == 'history':
+            #    self.import_orders.append(int(row.name))
 
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
@@ -487,8 +501,12 @@ class DatabaseImport:
         #           " inner join dbo.cabecera_pedido_copia on dbo.cabecera_pedido_copia.numero_pedido = dbo.lineas_pedido_copia.numero_pedido where cast(fecha_carga as date) >= '2015-08-17 00:00:00'")
         ###################################################################
         ## Se importan todas las lineas históricas
+        #cr.execute("select dbo.lineas_pedido_copia.numero_pedido as order_id_map, numero_linea as sequence, producto as product_id_map, descripcion as name, cajas as box_qty, composicion as unit_qty, "
+        #           "importe as price_subtotal, tipo_iva as tax_id_map, 'history' as state from dbo.lineas_pedido_copia")
+        ###################################################################
+        ## Lineas históricas de ciertos pedidos
         cr.execute("select dbo.lineas_pedido_copia.numero_pedido as order_id_map, numero_linea as sequence, producto as product_id_map, descripcion as name, cajas as box_qty, composicion as unit_qty, "
-                   "importe as price_subtotal, tipo_iva as tax_id_map, 'history' as state from dbo.lineas_pedido_copia")
+                   "importe as price_subtotal, tipo_iva as tax_id_map, 'history' as state from dbo.lineas_pedido_copia where numero_pedido in ?",(tuple(self.import_orders),))
         data = cr.fetchall()
         num_rows = len(data)
         cont = 0
@@ -713,7 +731,7 @@ class DatabaseImport:
                     "invoice_number": ustr(row.number_pref) + "/" + str(int(row.number)),
                     "account_id": cust_data["property_account_receivable"][0],
                     "partner_id": customer_ids[0],
-                    "date_invoice": row.invoice_date.strftime("%Y-%m-%d"),
+                    "date_invoice": row.invoice_date and row.invoice_date.strftime("%Y-%m-%d") or False,
                     "date_due": row.due_date and row.due_date.strftime("%Y-%m-%d") or False,
                     "state": "history",
                     "journal_id": journal_id,
