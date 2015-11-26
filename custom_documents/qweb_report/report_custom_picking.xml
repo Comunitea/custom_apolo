@@ -426,7 +426,7 @@
                       <tbody>
                           <tr>
                               <td>
-                                  <span t-field="o.user_id.name"/>
+                                  <span t-field="o.sale_id.user_id2.name"/>
                               </td>
                               <td>
                                 <div t-if="o.route_detail_id">
