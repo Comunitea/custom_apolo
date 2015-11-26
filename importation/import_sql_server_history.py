@@ -731,7 +731,7 @@ class DatabaseImport:
                     "invoice_number": ustr(row.number_pref) + "/" + str(int(row.number)),
                     "account_id": cust_data["property_account_receivable"][0],
                     "partner_id": customer_ids[0],
-                    "date_invoice": row.invoice_date.strftime("%Y-%m-%d"),
+                    "date_invoice": row.invoice_date and row.invoice_date.strftime("%Y-%m-%d") or False,
                     "date_due": row.due_date and row.due_date.strftime("%Y-%m-%d") or False,
                     "state": "history",
                     "journal_id": journal_id,
