@@ -224,7 +224,7 @@ class ScanGunProtocol(LineReceiver):
             return
         key = False
         line = line.upper()
-        print u"[%s] Estado: %s Anterior: %s "%(self.step, self.state, self.last_state)
+        print u"Step: [%s] Estado: %s  >>  %s"%(self.step, self.state, self.last_state)
         izq = line.encode('hex')[0:2]
 
         key = False
@@ -239,7 +239,7 @@ class ScanGunProtocol(LineReceiver):
 
         try:
             codificable = line.encode('hex')
-            print "Codificación Tecla: %s > %s"%(line, codificable)
+            #print "Codificación Tecla: %s > %s"%(line, codificable)
             print u"Entrada: " + str(line)
             line = str(line)
         except:
@@ -2802,7 +2802,7 @@ class ScanGunProtocol(LineReceiver):
                     self._snd(self.get_str_list_waves(), 'Picking cancelado')
                     return
 
-                if self.step == 60:
+                if self.step in [50, 60]:
                     self.last_state = self.state
                     self.list_packages = []
                     self.package_selected = []
@@ -2857,7 +2857,7 @@ class ScanGunProtocol(LineReceiver):
                 if self.step == 38:
                     self.step = 31
 
-                if self.step ==60:
+                if self.step == 50 or self.step == 60:
                     self.step = 2
                     self.reset_log_units()
                 self._snd(self.get_str_form_wave(), '')
@@ -2925,10 +2925,8 @@ class ScanGunProtocol(LineReceiver):
 
                 if self.step in [28, 38]:
                     res = self.finish_picking()
-
                     if res == -1:
-                        self.step = 60
-
+                        self.step +=22
                         self._snd(self.get_str_form_wave(), '')
                         return
 
@@ -2936,7 +2934,7 @@ class ScanGunProtocol(LineReceiver):
 
 
 
-                if self.step == 60:
+                if self.step in [50,60]:
                     res = self.finish_picking(force = True)
                     return
 
@@ -3070,66 +3068,6 @@ class ScanGunProtocol(LineReceiver):
             if False and (self.step==2 or self.step == 3):
                 self.reset_log_units()
                 self.step = self.get_step_from_unit(wave_['uos_id'], wave_['units'],self.product['is_var_coeff'] )
-
-
-            #
-            # if self.step in [3,4] and False:
-            #
-            #     if line_float>0:
-            #         self.qty_calc.append(line_float)
-            #     else:
-            #         try:
-            #             self.qty_calc.remove(line_float*-1)
-            #         except:
-            #             res = False
-            #
-            #     cal_qty=0
-            #     for qty in self.qty_calc:
-            #             cal_qty+=qty
-            #     len_qty= len(self.qty_calc)
-            #
-            #     if self.step ==3:
-            #         if self.product['is_var_coeff']:
-            #             self.new_uom_qty = len_qty
-            #         else:
-            #             self.new_uom_qty = round(cal_qty / self.fc, 2)
-            #         self.new_uos_qty = cal_qty
-            #
-            #     if self.step ==4:
-            #         if self.product['is_var_coeff']:
-            #             self.new_uos_qty = len_qty
-            #         else:
-            #             self.new_uos_qty = round(cal_qty * self.fc, 2)
-            #         self.new_uom_qty = cal_qty
-            #
-            #     self._snd(self.get_str_form_wave(), '')
-            #     return
-            #
-            # if self.step==5:
-            #     self.new_uom_qty = line_float
-            #     self.step=5
-            #     self._snd(self.get_str_form_wave(), '')
-            #     return
-            #
-            # if self.step==6:
-            #     self.new_uos_qty = line_float
-            #     self.step=6
-            #     self._snd(self.get_str_form_wave(), '')
-            #     return
-            #
-            #
-            # if self.step == 8:
-            #     self.new_uom_qty = line_float
-            #     self.new_uos_qty = round(line_float * self.fc, 2)
-            #     self._snd(self.get_str_form_wave(), '')
-            #     return
-            #
-            # if self.step == 9:
-            #     self.new_uos_qty = line_float
-            #     self.new_uom_qty = round(line_float / self.fc, 2)
-            #     self._snd(self.get_str_form_wave(), '')
-            #     return
-
 
             if self.step == 21:
                 #metemos unidad en log_base
@@ -3326,7 +3264,7 @@ class ScanGunProtocol(LineReceiver):
             cantidad_uos += ''#u"Mover %s %s\n"%(wave_['uos_qty'],wave_['uos'])
             cantidad =''#cantidad += u"(%s %s) "%(wave_['uom_qty'],wave_['uom'])
 
-        if self.step in [21, 22, 23, 25, 28, 60]:
+        if self.step in [21, 22, 23, 25, 28, 50]:
 
             unit_str=''
             mover = "Actual:"
@@ -3368,7 +3306,7 @@ class ScanGunProtocol(LineReceiver):
 
 
 
-        if self.step in [31, 32, 33, 35, 38, 50]:
+        if self.step in [31, 32, 33, 35, 38, 60]:
             #import ipdb; ipdb.set_trace()
             unit_str=''
             mover = "Actual:"
@@ -3436,7 +3374,7 @@ class ScanGunProtocol(LineReceiver):
             message =u"\n%s Confirmar Operación"%KEY_CONFIRM
             message = self.inverse(message)
 
-        if self.step == 60:
+        if self.step == 60 or self.step == 50:
             #AQUI PREGUNTAMOS SI QUIERE ENVIAR A REVISAR O RECIBIR UNA LISTA DE PAQUETES
             message = u"\n%s OK %s OK (Revisión)\n%s Ver Stock Disponible"%(KEY_CONFIRM, KEY_FINISH, KEY_CANCEL)
             message = self.inverse(message)
