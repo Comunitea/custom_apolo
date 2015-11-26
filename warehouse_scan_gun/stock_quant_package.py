@@ -21,7 +21,7 @@
 from openerp import models, fields, api
 from openerp.exceptions import except_orm
 from openerp.tools.translate import _
-
+from openerp.tools.float_utils import float_round
 class stock_quant(models.Model):
         _inherit = 'stock.quant'
 
@@ -167,7 +167,6 @@ class stock_quant_package(models.Model):
         ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': 1}
         self_ = self.env['stock.quant.package'].with_context(ctx)
         package = self_.search(domain).with_context(ctx)
-
         vals = {'exist':False}
         if package:# and package.quant_ids:
             qty = 0
@@ -218,6 +217,8 @@ class stock_quant_package(models.Model):
                 'picking_location':picking_zone,
                 'src_location_bcd': package.location_id.bcd_name or package.location_id.name or False,
                 'dest_location_bcd': False,
+                'life_date': package.packed_lot_id.life_date or '00/00/0000'
+
             }
             if package.is_multiproduct:
                 picking_zone_id = package.children_ids[0].product_id.picking_location_id.id
