@@ -77,6 +77,7 @@ class PurchaseFrigoExport(models.TransientModel):
 
     @api.multi
     def export(self):
+        print "A EXPORTAR"
         currdir = os.path.dirname(os.path.realpath(__file__))
         template_dir = currdir + '/../xls_template/template.xls'
         template_wb = xlrd.open_workbook(template_dir, formatting_info=True)
@@ -135,6 +136,7 @@ class PurchaseFrigoExport(models.TransientModel):
 
 
         #Se guarda el fichero como adjunto
+        print "Generado"
         final_wb.save('/tmp/prueba.xls')
         file = open('/tmp/prueba.xls')
         attachment = {
