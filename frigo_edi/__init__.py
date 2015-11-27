@@ -20,3 +20,4 @@
 
 from . import wizard
 from . import models
+from . import invoice_frigo_export

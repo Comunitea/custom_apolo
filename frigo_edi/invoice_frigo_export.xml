@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="account_invoice_frigo_export_tree" model="ir.ui.view">
+            <field name="name">account.invoice.frigo.export.tree</field>
+            <field name="model">account.invoice.frigo.export</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="" create="false" edit="false" editable="top">
+                    <field name="frigo_code"/>
+                    <field name="sequence"/>
+                    <field name="ai_number"/>
+                    <field name="id"/>
+                    <field name="date_invoice"/>
+                    <field name="date_proce"/>
+                    <field name="reference"/>
+                    <field name="product_code"/>
+                    <field name="product_name"/>
+                    <field name="qty"/>
+                    <field name="precio_bruto"/>
+                    <field name="amount_untaxed"/>
+                    <field name="create_date"/>
+                    <field name="tpr_discount"/>
+                    <field name="tourism_discount"/>
+                    <field name="supplier_disc_qty"/>
+                    <field name="rest_disc_qty"/>
+                    <field name="week"/>
+                    <field name="cod_j"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_account_invoice_frigo_export">
+            <field name="name">Cuadre mensual Frigo</field>
+            <field name="res_model">account.invoice.frigo.export</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="account_invoice_frigo_export_tree"/>
+        </record>
+
+        <menuitem name="Cuadre mensual Frigo" parent="account.menu_finance_receivables"
+            action="action_account_invoice_frigo_export" id="account_invoice_menu_frigo"/>
+
+    </data>
+</openerp>
