@@ -49,7 +49,8 @@
              "views/stock_view.xml",
              "views/res_currency.xml",
              "views/preferential_agreement_view.xml",
-             "views/product_unilever_family_view.xml"],
+             "views/product_unilever_family_view.xml",
+             "invoice_frigo_export.xml"],
     "installable": True,
     "application": True,
 }

@@ -22,7 +22,7 @@ from openerp import models, fields, api, tools, exceptions, _
 from mako.template import Template
 from mako.lookup import TemplateLookup
 import os
-from datetime import datetime
+from datetime import datetime, date
 
 
 def chunks(l, n):
@@ -413,6 +413,9 @@ class ExportEdiFile(models.TransientModel):
         f.close()
         file_obj = self.create_doc(filename, file_name, doc_type)
         file_obj.count = count
+        # Campos necesarios para cuadre mensual
+        objs_rs = self.env['account.invoice'].browse([x.id for x in objs])
+        objs_rs.write({'frigo_sec': count, 'date_proce': date.today()})
 
     @api.multi
     def export_file_ven(self, active_model, objs=False):
