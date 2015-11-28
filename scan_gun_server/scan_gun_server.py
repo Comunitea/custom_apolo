@@ -219,12 +219,23 @@ class ScanGunProtocol(LineReceiver):
         Método del framework. LLamado cada vez que se recibe una linea
         """
         #try:
-        #import ipdb; ipdb.set_trace()
+
+        try:
+            codificable = line.encode('hex')
+            line = line.upper()
+            #print "Codificación Tecla: %s > %s"%(line, codificable)
+            print u"Entrada: " + str(line)
+            line = str(line)
+        except:
+            message = u"Error al leer"
+            self._snd(self.last_send, message)
+            return
+
         line_received = line
         if line == '' or not line:
             return
         key = False
-        line = line.upper()
+
         print u"Step: [%s] Estado: %s  >>  %s"%(self.step, self.state, self.last_state)
         izq = line.encode('hex')[0:2]
 
@@ -235,20 +246,6 @@ class ScanGunProtocol(LineReceiver):
             line = self.function_keys(line.encode('hex'))
             if line:
                 key = True
-
-
-
-        try:
-            codificable = line.encode('hex')
-            #print "Codificación Tecla: %s > %s"%(line, codificable)
-            print u"Entrada: " + str(line)
-            line = str(line)
-        except:
-            message = u"Error al leer"
-            self._snd(self.last_send, message)
-            return
-
-
 
         if not key:
             if len(line)==2 and line[0:1]==",":
@@ -402,12 +399,14 @@ class ScanGunProtocol(LineReceiver):
 
         if self.factory.debug:
             print line, message, custom_format
-
             self._snd2(line=line, message=message, custom_format=custom_format)
+            self.last_send = line
             return
         else:
             try:
                 self._snd2(line=line, message=message, custom_format=custom_format)
+                self.last_send = line
+                print line, message, custom_format
             except Exception, e:
                 print Exception, e.message
                 self._snd(self.last_send)
@@ -446,7 +445,7 @@ class ScanGunProtocol(LineReceiver):
         clean = clean.encode("UTF-8")
         delimiter = delimiter.encode("UTF-8")
         snd_str =clean + cabecera + delimiter + line + message
-        self.last_send = snd_str
+
         self.sendLine(snd_str)
         return
 
@@ -566,7 +565,7 @@ class ScanGunProtocol(LineReceiver):
         if line not in ["0", "1", "2", "3", "4", "5", "9"] and line != KEY_VOLVER:
             str_error = u"La opcion %s no es valida.\nReintentar:\n"%line
             self.state='menu1'
-            self._snd(str_error + self.get_str_menu1(True))
+            self._snd(self.get_str_menu1(True), str_error)
         elif line =="0_":
             self.state = "register"
             self.factory.users_codes.remove(self.code)
@@ -579,12 +578,12 @@ class ScanGunProtocol(LineReceiver):
             self.camera_ids=[]
             menu_str = self.get_cameras_menu()
             self._snd(menu_str)
-        elif line == "2":
-            self.state = "reposition"
-            self.type = "reposition"
-            self.camera_ids=[]
-            menu_str = self.get_cameras_menu()
-            self._snd(menu_str)
+        # elif line == "2":
+        #     self.state = "reposition"
+        #     self.type = "reposition"
+        #     self.camera_ids=[]
+        #     menu_str = self.get_cameras_menu()
+        #     self._snd(menu_str)
         elif line == "3":
             self.state = 'routes'
             self.type = 'picking'
@@ -619,7 +618,10 @@ class ScanGunProtocol(LineReceiver):
             self.connectionLost(u"Sesion Cerrada\nIntroduzca su codigo\n")
             return False
         else:
-            self._snd(u"No implementado aún")
+            message = u"No implementado aún"
+            self._snd(self.get_str_menu1(True), message)
+            return
+
 
     def menu1_tasks(self):
 
@@ -2027,7 +2029,7 @@ class ScanGunProtocol(LineReceiver):
             total=0
 
         if (self.type =="ubication" or self.type == "reposition" ) and not self.ops:
-            strg =u'Tarea creada.\nScan Paquete para añadir ops\n'
+            strg =u'Tienes una tarea nueva\nLee paquetes a ubicar\n'
         else:
             header1=''
             if self.type!='picking':
@@ -3539,7 +3541,7 @@ class ScanGunProtocol(LineReceiver):
                 self.active_op = len(self.ops)
                 self.op_id = op_id
 
-                message = self.inverse(u'Ubicación creada')
+                message = self.inverse(u'Operación Creada')
             else:
                 message = self.inverse(u'Paquete No existe')
             self._snd(self.get_str_list_ops(), message)
@@ -3601,20 +3603,23 @@ class ScanGunProtocol(LineReceiver):
 
         #aqui pongo cantidades informativas
         strg+=u"Mover: %s %s\n"%(op_['packed_qty'], op_['uom'])
-
-        if op_['is_package']:
-            strg+=u"       (Paquete Completo)\n"
-
         if op_['uom_id']!=op_['uos_id']:
             strg+="%s%s %s\n"%(' ' * 7, op_['uos_qty'], op_['uos'])
 
+        #Aqui pongo si es paquete completo
+        if op_['is_package']:
+            strg+=u"       (Paquete Completo)\n"
+
+        #Si la operación no es de ubicación pongo DE: ...
+        #En ubicación no hace falta
         if self.type != 'ubication':
             strg_= u'De: %s %s\n'%(op_['origen_bcd'], str(op_['origen_id'])* self.show_id)
             if self.step ==0 and not op_['PROCESADO'] :
                 strg += self.inverse(strg_)
             else:
                 strg +=  strg_
-
+        #Si la operación no es de pincking pongo A: ...
+        #En picking no hace falta
         if self.type != 'picking':
             strg_= u'A: %s %s\n'%(op_['destino_bcd'], str(op_['destino_id'])* self.show_id)
             if (self.step==2 or self.step ==3) and not op_['PROCESADO']:
@@ -3642,6 +3647,21 @@ class ScanGunProtocol(LineReceiver):
         line_int = self.int_(line)
         active_op =str(self.active_op)
         if line == KEY_VOLVER:
+
+            if self.step == 2:
+                self.reset_vals()
+                self.step = 0
+                self._snd(self.get_str_form_ops())
+                return
+            if self.step == 0:
+                self.state = 'list_ops'
+                self.reset_vals()
+                self._snd(self.get_str_list_ops())
+                return
+            if self.step == 5:
+                self.step = 2
+                self._snd(self.get_str_form_ops())
+                return
 
             if self.last_state == 'list_ops':
                 self.state = 'list_ops'
@@ -4970,8 +4990,7 @@ class ScanGunProtocol(LineReceiver):
             for key in self.routes:
                 key_ = int(key)
                 if key_>= self.num_order_list_ops and key_<= self.num_order_list_ops + MAX_NUM_ONE:
-                    if self.routes[key][1]:
-                        str_menu += str(key) + " -> " + self.routes[key][1] + "\n"
+                    str_menu += "%s -> %s\n"%(key, self.routes[key][1])
         else:
             str_menu +=u"\nNo hay rutas validadas\n"
         keys = u"%s Volver"%KEY_VOLVER
@@ -5319,36 +5338,36 @@ class ScanGunProtocol(LineReceiver):
 
 
     def function_keys(self, line):
-
-        if line == KEY_F1:
+        if KEY_UP == line:
+            line = "KP"
+        elif KEY_DOWN  == line:
+            line = "KD"
+        elif KEY_F1  == line:
             line = "F1"
-        elif line == KEY_F2:
+        elif KEY_F2  == line:
             line = "F2"
-        elif line == KEY_F3:
+        elif KEY_F3  == line:
             line = "F3"
-        elif line == KEY_F4:
+        elif KEY_F4  == line:
             line = "F4"
-        elif line == KEY_F5:
+        elif KEY_F5  == line:
             line = "F5"
-        elif line == KEY_F6:
+        elif KEY_F6  == line:
             line = "F6"
-        elif line == KEY_F7:
+        elif KEY_F7  == line:
             line = "F7"
-        elif line == KEY_F8:
+        elif KEY_F8  == line:
             line = "F8"
-        elif line == KEY_F9:
+        elif KEY_F9  == line:
             line = "F9"
-        elif line == KEY_F10:
+        elif KEY_F10  == line:
             line = "F10"
-        elif line == KEY_F11:
+        elif KEY_F11  == line:
             line = "F11"
-        elif line == KEY_F12:
+        elif KEY_F12  == line:
             line = "F12"
 
-        elif line == KEY_UP:
-            line = "KP"
-        elif line == KEY_DOWN:
-            line = "KD"
+
         else:
             line = False
         return line
@@ -5573,6 +5592,7 @@ class ScanGunProtocol(LineReceiver):
 
         if order_line == PRE_PACK:
             self.pack = self.factory.odoo_con.get_pack_gun_info(self.user_id, line_int)
+            self.list_packages = self.factory.odoo_con.get_pack_candidates(self.pack['product_id'], available_qty)
             self.step = True
             self._snd(self.get_str_info_producto())
             return
