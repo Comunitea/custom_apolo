@@ -31,7 +31,7 @@ class stock_picking(models.Model):
 
         res = {}
         domain = [('picking_type_id', '=',5), ('validated', '=', True), ('state', 'not in', ('draft','done','cancel'))]
-        route_ids = self.search(domain, order ='name asc')
+        route_ids = self.search(domain)#,  order ='name asc')
         if not route_ids:
             res = False
         indx = 1

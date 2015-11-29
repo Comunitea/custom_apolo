@@ -99,14 +99,16 @@ class wave_report(models.Model):
                             quant.reservation_id = False
                             qty_to_reassign += quant.qty
                         else:
-                            force_quants.append((quant, quant.qty))
+                            if quant.qty>0:
+                                force_quants.append((quant, quant.qty))
 
                     for quant in new_quant_objs:
                         if qty_to_reassign >= quant.qty:
                             force_quants.append((quant, quant.qty))
                             qty_to_reassign -= quant.qty
                         else:
-                            force_quants.append((quant, qty_to_reassign))
+                            if qty_to_reassign>0:
+                                force_quants.append((quant, qty_to_reassign))
                             break
                     #Anulamos la reserva
                     move.do_unreserve()
@@ -196,6 +198,8 @@ class wave_report_revised(models.Model):
     new_uos_qty = fields.Float('Qty effective (uos)', compute='refresh_qtys',
                                digits_compute=
                                dp.get_precision('Product Unit of Measure'))
+    #new_uom_qty: es la cantidad total necesaria
+
     new_uom_qty = fields.Float('Qty effective (uom)',
                                digits_compute=
                                dp.get_precision('Product Unit of Measure'))
@@ -214,6 +218,7 @@ class wave_report_revised(models.Model):
     operation_ids = fields.One2many ('stock.pack.operation', 'wave_revised_id', string = "Operation")
     stock = fields.Float(related = 'wave_report_id.product_id.qty_available')
     #wave_id = fields.Many2one('wave.report', 'Wave Report', readonly = True)
+    #picked_qty es la cantidad de las operaciones realizadas (to_process= True)
     picked_qty = fields.Float('Picked Qty', readonly = True)
 
 
@@ -263,26 +268,23 @@ class wave_report_revised(models.Model):
         return wave_to_revised.id
 
     @api.one
-    #@api.depends('operation_ids')
     def refresh_qtys(self):
-
         picked_qty = 0
-        new_uos_qty = 0
         new_uom_qty = 0
         for op in self.operation_ids:
-            new_uos_qty += op.uos_qty
+            op_qty= 0.0
             if op.product_id:
-                new_uom_qty += op.product_qty
-                if op.to_process:
-                    picked_qty +=  op.product_qty
+                op_qty = op.product_qty
             else:
-                new_uom_qty += op.package_id.packed_qty
-                if op.to_process:
-                    picked_qty +=  op.package_id.packed_qty
+                op_qty = op.package_id.packed_qty
+            #NO VALIDO
+            if op.to_process:
+                picked_qty +=  op_qty
 
+            new_uom_qty += op_qty
 
         vals = {
-            'new_uos_qty' : new_uos_qty,
+            'new_uos_qty' : 0.0,
             'new_uom_qty' : new_uom_qty,
             'picked_qty': picked_qty
         }

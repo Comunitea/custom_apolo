@@ -198,7 +198,7 @@ class integrate_accounting(object):
                         else:
                             posted = False
                         move_vals = {
-                            'ref': row['Concepto'],
+                            'ref': row['Concepto'] + (row['Ampliacion'] or ""),
                             'journal_id': journal_id[0],
                             'period_id': last_period_id,
                             'date': last_date,
@@ -208,11 +208,11 @@ class integrate_accounting(object):
                     elif posted:
                         continue
 
-                    ref = row.get('Documento', "")
-                    if not ref:
-                        ref = row.get('Ampliacion', "")
-                    elif row.get('Ampliacion'):
-                        ref += u" // " + row['Ampliacion']
+                    ref = (row['Documento'] or "") + " " + (row['Ampliacion'] or "") 
+                    #if not ref:
+                    #    ref = row.get('Ampliacion', "")
+                    #elif row.get('Ampliacion'):
+                    #    ref += u" // " + row['Ampliacion']
                     account_ids = self.search('account.account', [('code', '=', row['Cuenta'])])
                     if (row['Cuenta'].startswith('430') or row['Cuenta'].startswith('410') or row['Cuenta'].startswith('400') or row['Cuenta'].startswith('440')) and not account_ids:
                         partner_ref = row['Cuenta'][3:]

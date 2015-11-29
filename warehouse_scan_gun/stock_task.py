@@ -106,16 +106,18 @@ class StockTask(models.Model):
         for task in task_obj:
             if task.operation_ids:
                 ref = task.operation_ids[0].picking_id.name
+            if task.type == 'picking':
+                num_ops = len(task.wave_id.wave_report_ids)
+            else:
+                num_ops = len(task.operation_ids)
             values = {
                 'id': task.id,
                 'type' : task.type,
                 'paused' : task.paused,
-
                 'ref' : task.wave_id.name or task.picking_id.name or ref or '',
-                #'name': task.name,
-                'ops': len(task.operation_ids) or len(task.wave_id.wave_report_ids),
+                'ops': num_ops,
                 'wave_id': task.wave_id.id or False
-            }
+                   }
             if task.paused:
                 ind += 1
                 vals[format(ind)] = values
@@ -279,6 +281,7 @@ class StockTask(models.Model):
     @api.multi
     def gun_finish_task(self, my_args):
         #new_cr = sql_db.db_connect(self.env.cr.dbname).cursor()
+
         task_id = my_args.get('task_id', False)
         task_obj = self.browse(task_id)
         task_obj.write({'state':'process'})
@@ -290,19 +293,25 @@ class StockTask(models.Model):
 
     @api.model
     def _gun_finish_task(self, my_args):
-        with api.Environment.manage():  # class function
-            _logger.debug( "ENTRA EN EL HILO!!!!!!!!! args %s",
+        _logger.debug("CMNT ENTRA EN EL HILO!!!!!!!!! args %s",
                        my_args)
-            new_cr = sql_db.db_connect(self.env.cr.dbname).cursor()
+        task_id = my_args.get('task_id', False)
+        user_id = my_args.get('user_id', False)
+        new_cr = sql_db.db_connect(self.env.cr.dbname).cursor()
+        with api.Environment.manage():  # class function
             uid, context = self.env.uid, self.env.context
-            env = api.Environment(new_cr, uid, context)
-            self.env = env
-            task_id = my_args.get('task_id', False)
-            user_id = my_args.get('user_id', False)
-            task_obj = self.browse(task_id)
-            env2 = task_obj.env(self._cr, user_id, self._context)
-            task_obj_uid = task_obj.with_env(env2)
-            res = task_obj_uid.finish_partial_task()
+            env = api.Environment(new_cr, user_id, context)
+            #self.env = env
+            task_obj = env['stock.task'].browse(task_id)
+            #env2 = task_obj.env(self._cr, user_id, self._context)
+            #task_obj_uid = task_obj.with_env(env2)
+            try:
+                res = task_obj.finish_partial_task()
+            except Exception:
+                _logger.debug("CMNT EXCEPCION EN EL HILO!!!!!!!!! args %s",
+                       Exception)
+                new_cr.rollback()
+                new_cr.close()
             new_cr.commit()
             new_cr.close()
             return {}

@@ -798,6 +798,7 @@ class DatabaseImport:
                 vals = {'property_account_position': self._get_fiscal_position_byname(PFISC_MAP[str(int(row.fiscal_position_map))]),
                         'property_product_pricelist': self.search("product.pricelist", [('name', '=', PLIST_MAP[str(int(row.pricelist_id_map))])], context={'lang': 'es_ES'})[0]}
                 if row.payment_type_map != 0:
+                #vals = {}
                     vals["customer_payment_mode"] = self._get_payment_mode_by_name(MPAGO_MAP[str(int(row.payment_type_map))])
                     vals["property_payment_term"] = self._get_payment_term_by_name(PPAGO_MAP[str(int(row.payment_type_map))])
                 if row.picking_traceability == 'S':
@@ -813,10 +814,10 @@ class DatabaseImport:
                     vals["inv_print_op"] = "group_by_partner"
                     vals["invoice_method"] = "c"
                 else:
-                    if int(row.payment_type_map) in (11,13,18,20):
-                        vals["inv_print_op"] = "give_deliver"
-                    else:
-                        vals["inv_print_op"] = "group_pick"
+                    #if int(row.payment_type_map) in (11,13,18,20):
+                    vals["inv_print_op"] = "give_deliver"
+                    #else:
+                    #    vals["inv_print_op"] = "group_pick"
                     vals["invoice_method"] = "a"
                 self.write("res.partner", [partner_ids[0]], vals)
 

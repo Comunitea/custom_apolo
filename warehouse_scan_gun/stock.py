@@ -32,12 +32,17 @@ class stock_picking_wave(models.Model):
         domain = [('id', '=', task_id)]
         wave_id = self.env['stock.task'].search(domain).wave_id.id
         domain=[('id','=',wave_id)]
-        wave = self.search(domain)
+        ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': 1}
+        self_ = self.env['stock.picking.wave'].with_context(ctx)
+        wave = self_.search(domain)
+
 
         if wave:
+
             vals = {}
             ind = 0
             for op in wave.wave_report_ids:
+
                 values = {
                     'ID': op.id,
                     'wave_report_id': op.id,
