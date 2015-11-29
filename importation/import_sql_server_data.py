@@ -265,8 +265,16 @@ class DatabaseImport:
         group_ids = self.search("product.rappel.group", [("code", "=", code)])
         return group_ids and group_ids[0] or False
 
+    def _getRappelGroup_byInternalCode(self, code):
+        group_ids = self.search("product.rappel.group", [("internal_code", "=", code)])
+        return group_ids and group_ids[0] or False
+
     def _getRappelSubgroup_byCode(self, code):
         subgroup_ids = self.search("product.rappel.subgroup", [("code", "=", code)])
+        return subgroup_ids and subgroup_ids[0] or False
+
+    def _getRappelSubgroup_byInternalCode(self, code):
+        subgroup_ids = self.search("product.rappel.subgroup", [("internal_code", "=", code)])
         return subgroup_ids and subgroup_ids[0] or False
 
     def _getAgreeType_byCode(self, code):
@@ -1138,6 +1146,174 @@ class DatabaseImport:
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
+    def import_cadena(self, cr):
+        cr.execute("select cli_codi as partner_id_map, cli_asoc as parent_id_map from dbo.adsd_clie where cli_asoc != 0")
+        child_partners = cr.fetchall()
+        cont = 0
+        num_rows = len(child_partners)
+        for row in child_partners:
+            if row.partner_id_map != row.parent_id_map:
+                partner_id = self.search("res.partner", [('ref', '=', str(int(row.partner_id_map))),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
+                if partner_id:
+                    partner_data = self.read("res.partner", partner_id[0], ['parent_id'])
+                    if not partner_data['parent_id']:
+                        parent_ids = self.search("res.partner", [('ref', '=', str(int(row.parent_id_map))),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
+                        if parent_ids:
+                            self.write("res.partner", [partner_id[0]], {'parent_id': parent_ids[0]})
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+    def import_product_customer_rules(self, cr):
+        cr.execute("SELECT cliente as customer_id_map,producto as product_id_map FROM dbo.VW_COLECCION_CLIENTES"
+                   " inner join dbo.adsd_clie on dbo.adsd_clie.cli_codi = dbo.VW_COLECCION_CLIENTES.cliente"
+                   " where cli_asoc = 0")
+        data = cr.fetchall()
+        cont = 0
+        num_rows = len(data)
+        for row in data:
+            customer_ids = self.search("res.partner", [('ref', '=', str(int(row.customer_id_map))),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
+            if customer_ids:
+                product_ids = self.search("product.product", [('default_code', '=', str(int(row.product_id_map))),'|',('active', '=', True),('active', '=', False)])
+                if product_ids:
+                    try:
+                        self.create("partner.rules", {'partner_id': customer_ids[0],
+                                                  'product_id': product_ids[0],
+                                                  'start_date': '2015-01-01',
+                                                  'end_date': '2099-12-31'})
+                    except:
+                        pass
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+    def import_rappels(self, cr):
+        cr.execute("SELECT cliente as customer_id_map,dbo.VW_condiciones_rappel.grupo as rappel_group_id_map,dbo.VW_condiciones_rappel.cadena as grouped, "
+                   "dbo.VW_condiciones_rappel.contribucion as discount_assumed, dbo.VW_condiciones_rappel.subgrupo as rappel_subgroup_id_map, "
+                   "dbo.VW_condiciones_rappel.dcto_fra as promotion, dbo.VW_condiciones_rappel.id as rappel_id,  "
+                   "desde as start_date, hasta as end_date, nombre_cliente as name FROM dbo.VW_condiciones_rappel "
+                   "inner join dbo.clientes_rappel on dbo.clientes_rappel.id = dbo.VW_condiciones_rappel.id where dbo.VW_condiciones_rappel.estado = 'A'")
+        rappels_data = cr.fetchall()
+        cont = 0
+        num_rows = len(rappels_data)
+        rappel_type = self.search("rappel.type", [])[0]
+        for row in rappels_data:
+            partner_ids = self.search("res.partner", [('ref', '=', str(int(row.customer_id_map))),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
+            if partner_ids:
+                if row.start_date:
+                    start_date = row.start_date.strftime("%Y-%m-%d")
+                else:
+                    start_date = "2015-01-01"
+                if row.end_date:
+                    end_date = row.end_date.strftime("%Y-%m-%d")
+                else:
+                    end_date = "2999-12-31"
+
+                subgroups = []
+                group_supplier_id = False
+                if row.rappel_subgroup_id_map:
+                    subgroup_id = self._getRappelSubgroup_byInternalCode(str(int(row.rappel_subgroup_id_map)))
+                    subgroup_data = self.read("product.rappel.subgroup", subgroup_id, ["code", "group_id"])
+                    group_data = self.read("product.rappel.group", subgroup_data["group_id"][0], ["supplier_id"])
+                    group_supplier_id = group_data["supplier_id"][0]
+                    subgroups = [subgroup_data["code"]]
+                else:
+                    group_id = self._getRappelGroup_byInternalCode(str(int(row.rappel_group_id_map)))
+                    group_data = self.read("product.rappel.group", group_id, ["subgroup_ids", "supplier_id"])
+                    group_supplier_id = group_data["supplier_id"][0]
+                    for subgroup  in group_data["subgroup_ids"]:
+                        subgroup_data = self.read("product.rappel.subgroup", subgroup, ["code"])
+                        subgroups.append(subgroup_data["code"])
+
+                #promotion
+                if row.promotion:
+                    vals = {
+                        "name": ustr(row.name),
+                        "from_date": start_date,
+                        "to_date": end_date,
+                        "login": "and",
+                        "expected_logic_result": "True",
+                        "sequence": 1,
+                        'customer_ids': [(6,0,partner_ids)]
+                    }
+                    promoton_id = self.create("promos.rules", vals)
+
+                    for subgroup in subgroups:
+                        action_vals = {
+                            "action_type": "prod_disc_perc_sub",
+                            "product_code": "'" + subgroup + "'",
+                            "arguments": str(float(row.promotion)),
+                            "promotion": promoton_id,
+                            "sequence": 1
+                        }
+                        action = self.create("promos.rules.actions", action_vals)
+
+                        rule_vals = {
+                            'stop_further': True,
+                            'attribute': "subgroup",
+                            'comparator': 'in',
+                            'value': "'" + subgroup + "'",
+                            'promotion': promoton_id,
+                            "sequence": 1
+                        }
+                        self.create("promos.rules.conditions.exps", rule_vals)
+
+                    if row.discount_assumed and group_supplier_id:
+                        comp_promo_vals = {'start_date': start_date,
+                                           'end_date': end_date,
+                                           'supplier_id': group_supplier_id,
+                                           'type': 'discount',
+                                           'promotion_id': promoton_id,
+                                           'discount_assumed': float(row.discount_assumed)}
+                        self.create("sale.joint.promotion", comp_promo_vals)
+
+                # Rappel
+                if row.rappel_id:
+                    cr.execute("select hasta as rappel_until, porcentaje as percentage from dbo.clientes_rappel_escalado"
+                               " where id_rappel = ? order by linea asc", (int(row.rappel_id),))
+                    sections_data = cr.fetchall()
+                    rappel_from = 0
+                    sections = []
+                    for section in sections_data:
+                        if section.percentage:
+                            vals = {'rappel_until': float(section.rappel_until),
+                                    'percent': float(section.percentage),
+                                    'rappel_from': rappel_from}
+                            rappel_from = float(section.rappel_until)
+                            sections.append((0,0,vals))
+                    if sections:
+                        rappel_vals = {'type_id': rappel_type,
+                                       'name': ustr(row.name),
+                                       'date_start': start_date,
+                                       'date_stop': end_date,
+                                       'periodicity': 'annual',
+                                       'global_application': False,
+                                       'rappel_subgroup_id': row.rappel_subgroup_id_map and subgroup_id or False,
+                                       'rappel_group_id': not row.rappel_subgroup_id_map and group_id or False,
+                                       'grouped': row.grouped == 'S' and True or False,
+                                       'invoice_grouped': row.grouped == 'S' and True or False,
+                                       'calc_amount': 'percent',
+                                       'customer_ids': [(6,0,partner_ids)]}
+                        if len(sections) == 1:
+                            rappel_vals['calc_mode'] = 'fixed'
+                            rappel_vals['fix_qty'] = sections[0][2]['percent']
+                        else:
+                            rappel_vals['calc_mode'] = 'variable'
+                            rappel_vals['calc_type'] = 'monetary'
+                            rappel_vals['sections'] = sections
+                        rappel_id = self.create("rappel", rappel_vals)
+
+                        if row.discount_assumed and group_supplier_id:
+                            comp_promo_vals = {'start_date': start_date,
+                                               'end_date': end_date,
+                                               'supplier_id': group_supplier_id,
+                                               'type': 'rappel',
+                                               'rappel_id': rappel_id,
+                                               'discount_assumed': float(row.discount_assumed)}
+                            self.create("sale.joint.promotion", comp_promo_vals)
+
+
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
 
     def process_data(self):
         """
@@ -1163,7 +1339,7 @@ class DatabaseImport:
             #self.import_product_frigo_data(cr)
             #self.update_product_sale_price(cr)
             #self.import_other_prices(cr)
-            self.import_customers_other_data(cr)
+            #self.import_customers_other_data(cr)
             #self.import_preferential_agree_data(cr)
             #self.import_tourism_data(cr)
             #self.import_giras(cr)
@@ -1172,6 +1348,9 @@ class DatabaseImport:
             #self.import_partner_contacts(cr)
             #self.import_customer_unilever_families(cr)
             #self.import_items_data(cr)
+            self.import_cadena(cr)
+            self.import_product_customer_rules(cr)
+            self.import_rappels(cr)
 
 
         except Exception, ex:

@@ -129,6 +129,8 @@
                     <group colspan="4">
                         <field name="code"/>
                         <field name="name"/>
+                        <field name="internal_code"/>
+                        <field name="supplier_id"/>
                     </group>
                     <notebook>
                         <page string="Subgroups">
@@ -181,6 +183,8 @@
                     <group colspan="4">
                         <field name="code"/>
                         <field name="name"/>
+                        <field name="internal_code"/>
+                        <field name="group_id"/>
                         <field name="estimation_ids">
                             <tree editable="top">
                                 <field name="partner_id"/>
