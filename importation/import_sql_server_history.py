@@ -843,19 +843,17 @@ class DatabaseImport:
                 if sale_line_ids:
                     for sale_line_id in sale_line_ids:
                         line_data = self.read("sale.order.line", sale_line_id, ['product_uom_qty', 'price_unit'])
-                        decimal_part = line_data['product_uom_qty'] - int(line_data['product_uom_qty'])
-                        self.write("sale.order.line", [sale_line_id], {'product_uom_qty': (int(line_data['product_uom_qty']) / PRODUCT_FIX[product_code]) + decimal_part,
-                                                                       'product_uos_qty': (int(line_data['product_uom_qty']) / PRODUCT_FIX[product_code]) + decimal_part,
-                                                                       'price_unit': line_data['price_unit'] * PRODUCT_FIX[product_code],
-                                                                       'price_udv': line_data['price_unit'] * PRODUCT_FIX[product_code]})
+                        self.write("sale.order.line", [sale_line_id], {'product_uom_qty': (int(line_data['product_uom_qty']) / float(PRODUCT_FIX[product_code])),
+                                                                       'product_uos_qty': (int(line_data['product_uom_qty']) / float(PRODUCT_FIX[product_code])),
+                                                                       'price_unit': line_data['price_unit'] * float(PRODUCT_FIX[product_code]),
+                                                                       'price_udv': line_data['price_unit'] * float(PRODUCT_FIX[product_code])})
 
                 invoice_line_ids = self.search('account.invoice.line', [('product_id', '=', product_ids[0]),('invoice_id.state', '=', 'history')])
                 if invoice_line_ids:
                     for invoice_line in invoice_line_ids:
                         line_data = self.read("account.invoice.line", invoice_line, ['quantity', 'price_unit', 'invoice_id'])
-                        decimal_part = line_data['quantity'] - int(line_data['quantity'])
-                        self.write("account.invoice.line", [invoice_line], {'quantity': (int(line_data['quantity']) / PRODUCT_FIX[product_code]) + decimal_part,
-                                                                            'price_unit': line_data['price_unit'] * PRODUCT_FIX[product_code]})
+                        self.write("account.invoice.line", [invoice_line], {'quantity': (int(line_data['quantity']) / float(PRODUCT_FIX[product_code])),
+                                                                            'price_unit': line_data['price_unit'] * float(PRODUCT_FIX[product_code])})
                         self.execute("account.invoice", "button_reset_taxes", [[line_data['invoice_id'][0]]])
             cont += 1
             print "%s de %s" % (str(cont), str(len(PRODUCT_FIX)))
