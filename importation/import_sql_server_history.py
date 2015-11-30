@@ -79,7 +79,7 @@ class DatabaseImport:
 
         self.url_template = "http://%s:%s/xmlrpc/%s"
         self.server = "localhost"
-        self.port = 8069
+        self.port = 9069
         self.dbname = dbname
         self.user_name = user
         self.user_passwd = passwd
@@ -486,8 +486,8 @@ class DatabaseImport:
             loc_qty = row.box_qty
             price_unit = row.price_unit
             if str(int(row.product_id_map)) in PRODUCT_FIX:
-                loc_qty = loc_qty / PRODUCT_FIX[str(int(row.product_id_map))]
-                price_unit = price_unit * PRODUCT_FIX[str(int(row.product_id_map))]
+                loc_qty = loc_qty / float(PRODUCT_FIX[str(int(row.product_id_map))])
+                price_unit = price_unit * float(PRODUCT_FIX[str(int(row.product_id_map))])
 
             if row.unit_qty:
                 if product_data["log_base_id"]:
@@ -557,8 +557,8 @@ class DatabaseImport:
                 loc_qty = row.box_qty
                 subtotal = row.price_subtotal
                 if str(int(row.product_id_map)) in PRODUCT_FIX:
-                    loc_qty = loc_qty / PRODUCT_FIX[str(int(row.product_id_map))]
-                    subtotal = row.price_subtotal * PRODUCT_FIX[str(int(row.product_id_map))]
+                    loc_qty = loc_qty / float(PRODUCT_FIX[str(int(row.product_id_map))])
+                    subtotal = row.price_subtotal * float(PRODUCT_FIX[str(int(row.product_id_map))])
 
                 if row.unit_qty:
                     if product_data["log_base_id"]:
@@ -647,8 +647,8 @@ class DatabaseImport:
                     loc_qty = row.product_qty
                     price_unit = row.price_unit
                     if str(int(row.product_id_map)) in PRODUCT_FIX:
-                        loc_qty = loc_qty / PRODUCT_FIX[str(int(row.product_id_map))]
-                        price_unit = row.price_unit * PRODUCT_FIX[str(int(row.product_id_map))]
+                        loc_qty = loc_qty / float(PRODUCT_FIX[str(int(row.product_id_map))])
+                        price_unit = row.price_unit * float(PRODUCT_FIX[str(int(row.product_id_map))])
                     line_vals = {
                         'order_id': purchase_id,
                         'product_id': product_id,
@@ -719,8 +719,8 @@ class DatabaseImport:
                         price_unit = float(line.gross_price_unit)
 
                     if str(int(row.product_id_map)) in PRODUCT_FIX:
-                        loc_qty = loc_qty / PRODUCT_FIX[str(int(row.product_id_map))]
-                        price_unit = price_unit * PRODUCT_FIX[str(int(row.product_id_map))]
+                        loc_qty = loc_qty / float(PRODUCT_FIX[str(int(row.product_id_map))])
+                        price_unit = price_unit * float(PRODUCT_FIX[str(int(row.product_id_map))])
 
                     if line.base_qty:
                         if product_data["log_base_id"]:
@@ -800,8 +800,8 @@ class DatabaseImport:
                         loc_qty = line.uom_qty
                         price_unit = line.price_unit
                         if str(int(row.product_id_map)) in PRODUCT_FIX:
-                            loc_qty = loc_qty / PRODUCT_FIX[str(int(row.product_id_map))]
-                            price_unit = price_unit * PRODUCT_FIX[str(int(row.product_id_map))]
+                            loc_qty = loc_qty / float(PRODUCT_FIX[str(int(row.product_id_map))])
+                            price_unit = price_unit * float(PRODUCT_FIX[str(int(row.product_id_map))])
 
                         if line.base_qty:
                             if product_data["log_base_id"]:
