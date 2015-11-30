@@ -3032,7 +3032,7 @@ class ScanGunProtocol(LineReceiver):
                 if self.step == 33:
                      if self.fixed_qty == True:
                          self.fixed_qty = False
-                         self.step += 31
+                         self.step = 31
                          if self.waves[str(self.active_wave)]['units'][0][2] :#and not self.waves[str(self.active_wave)]['var_coeff_ca']:
                              self._snd(self.get_str_form_wave(), '')
                              return
