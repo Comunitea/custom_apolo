@@ -2033,7 +2033,7 @@ class ScanGunProtocol(LineReceiver):
             total=0
 
         if (self.type =="ubication" or self.type == "reposition" ) and not self.ops:
-            strg =u'Tienes una tarea nueva\nLee paquetes a ubicar\n'
+            strg =u'Tienes una tarea nueva\nLee paquetes a ubicar\n(%s) Finalizar Tarea'%KEY_FINISH
         else:
             header1=''
             if self.type!='picking':
@@ -2088,11 +2088,14 @@ class ScanGunProtocol(LineReceiver):
         keys = ''
         keys += u"%s Atras"%KEY_VOLVER
         if self.tasks[self.active_task]['paused']:
-            opc = u'Run'
+            opc = u'Retomar tarea'
+            opc = self.inverse(u"\n%s %s"%(KEY_PAUSE, opc))
+
         else:
-            opc = u'Pause'
+            opc = u'Pausar tarea'
+            opc = u"\n%s %s"%(KEY_PAUSE, opc)
         #keys += u"\n%s %s %s Cancelar Tarea"%(KEY_PAUSE, opc, KEY_CANCEL)
-        keys += u"\n%s %s"%(KEY_PAUSE, opc)
+        keys += opc
         if self.show_keys:
             strg += keys
         return strg
@@ -2391,6 +2394,14 @@ class ScanGunProtocol(LineReceiver):
             else:
                 print u"Proceso agrupacion de 1 operacion de peso variable, y uos= %s"%self.new_uos_qty
                 #esto incluye todo el peso variable de una unidad (99% de casos)
+
+                product_id = wave_['product_id']
+                uom_id = wave_['uom_id']
+                uos_id = wave_['uos_id']
+                self.new_uos_qty = self.new_uom_qty * self.factory.odoo_con.conv_units_from_gun(self.user_id,
+                                                                    product_id,
+                                                                    uom_id,
+                                                                    uos_id)
                 values = {'to_process': True,
                           'product_id': wave_['product_id'],
                           'product_qty': self.new_uom_qty,
@@ -3608,12 +3619,11 @@ class ScanGunProtocol(LineReceiver):
 
         if not op_['CANTIDAD']==1:
             strg += u"%s %s\n"%(op_['CANTIDAD'], op_['uom'])
-
+        if op_['lot']!='MultiPack':
         #aqui pongo cantidades informativas
-        strg+=u"Mover: %s %s\n"%(op_['packed_qty'], op_['uom'])
-        if op_['uom_id']!=op_['uos_id']:
-            strg+="%s%s %s\n"%(' ' * 7, op_['uos_qty'], op_['uos'])
-
+            strg+=u"Mover: %s %s\n"%(op_['packed_qty'], op_['uom'])
+            if op_['uom_id']!=op_['uos_id']:
+                strg+="%s%s %s\n"%(' ' * 7, op_['uos_qty'], op_['uos'])
         #Aqui pongo si es paquete completo
         if op_['is_package']:
             strg+=u"       (Paquete Completo)\n"
@@ -3645,7 +3655,7 @@ class ScanGunProtocol(LineReceiver):
             #
 
             destino =u"Almacen"
-            destino = u"%s (%s)"%("Almacen", op_['picking_location_id'])
+            destino = u"%s (%s)"%("Almacen", op_['picking_location_id'] or '')
             strg_= u'A: %s\n'%destino
 
 
@@ -3810,6 +3820,10 @@ class ScanGunProtocol(LineReceiver):
                         ee=1
                         return
                 else:
+                    parent_id = self.factory.odoo_con.get_parent_package(self.user_id, self.int_(line))
+                    if parent_id:
+                        self.handle_form_ubi_ops(u'%s%s'%(PRE_PACK,  parent_id))
+                        return
                     self.reset_vals()
                     self.step = 0
                     message = u'\nPaquete no Valido'
@@ -4350,8 +4364,8 @@ class ScanGunProtocol(LineReceiver):
         if self.step ==1:
              menu_str += self.inverse(u'\nOpcion o Scan paquete')
 
-
-
+        if self.step == 3:
+            menu_str += self.inverse(u'\nMultiproducto:') + u'\n1> %s\n2> %s: %s)'%(self.vals['package'], self.vals['parent_package'], u'Multiproducto')
 
         if self.step == 5:
             #ya tenemos pakete
@@ -4408,6 +4422,12 @@ class ScanGunProtocol(LineReceiver):
                 self.state="menu1"
                 self._snd(self.get_str_menu1())
                 return
+            if self.step==3:
+                self.do_pack = True
+                self.vals = []
+                self.step = 0
+                self._snd(self.get_manual_transfer_packet())
+                return
             if self.step==5:
                 self.do_pack = True
                 self.vals = []
@@ -4442,6 +4462,11 @@ class ScanGunProtocol(LineReceiver):
             package_id = line_int
             self.vals={}
             self.vals = self.factory.odoo_con.get_pack_gun_info(self.user_id, package_id)
+            if self.vals['parent_id'] and not confirm:
+                self.step = 3
+                self._snd(self.get_manual_transfer_packet(), message)
+                return
+
             busy = self.factory.odoo_con.get_user_packet_busy(self.user_id, package_id)
             self.new_uom_qty = 0
             if self.vals['exist'] == False:
@@ -4462,6 +4487,17 @@ class ScanGunProtocol(LineReceiver):
                     self.loc={}
                     self._snd(self.get_manual_transfer_packet(), message)
                     return
+
+        if self.step ==3:
+            if line == "1":
+                self.handle_manual_transfer_packet(u'%s%s'%(PRE_PACK, self.vals['package_id']), confirm = True)
+                return
+            if line == "2":
+                self.handle_manual_transfer_packet(u'%s%s'%(PRE_PACK, self.vals['parent_id']), confirm = True)
+                return
+            message = u"Selecciona 1 ó 2"
+            self._snd(self.get_manual_transfer_packet(), message)
+            return
 
         if self.step==5 and self.float_(line) and not order_line:
             #introdujo un acantidad

@@ -416,6 +416,11 @@ class OdooDao:
         op_data = self.connection.execute('stock.quant.package', 'get_package_gun_info', [], my_args)
         return op_data
 
+    def get_parent_package(self, user_id, package_id):
+        my_args = {'user_id': user_id, 'package_id': package_id}
+        op_data = self.connection.execute('stock.quant.package', 'get_parent_package', [], my_args)
+        return op_data
+
     def create_package_from_gun(self, user_id, values = {}):
         my_args = {'user_id': user_id, 'values': values}
         package_data = self.connection.execute('stock.quant.package', 'create_package_from_gun', [], my_args)

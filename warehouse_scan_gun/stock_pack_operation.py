@@ -240,7 +240,8 @@ class stock_pack_operation(models.Model):
                 'to_process': op.to_process,
                 'qty_available':op.packed_lot_id.product_id.qty_available or 0.00,
                 'is_package': is_package or False,
-                'picking_location_id' : product_id.picking_location_id.bcd_name
+                'picking_location_id' : product_id.picking_location_id.bcd_name,
+                'parent_id': op.package_id.parent_id or False
                 }
                 #revisar para palet_multiproducto
                 if not op.product_id and not op.package_id.is_multiproduct:
