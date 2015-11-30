@@ -278,7 +278,7 @@ class ScanGunProtocol(LineReceiver):
                 line = self.check_package(line)
                 if not line:
                     message = u"\nPaquete No Encontrado"
-                    self.sendLine(str(self.last_send + message))
+                    self._snd(str(self.last_send), message)
                     return
 
 
