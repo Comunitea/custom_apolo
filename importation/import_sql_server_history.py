@@ -79,14 +79,13 @@ class DatabaseImport:
 
         self.url_template = "http://%s:%s/xmlrpc/%s"
         self.server = "localhost"
-        self.port = 9069
+        self.port = 8069
         self.dbname = dbname
         self.user_name = user
         self.user_passwd = passwd
         self.user_id = 0
         self.sql_server_host = sql_server_host
         self.sql_server_dbname = sql_server_dbname
-        self.import_orders = []
 
         #
         # Conectamos con OpenERP
@@ -389,6 +388,7 @@ class DatabaseImport:
                     self.create("product.supplierinfo", vals)
 
     def import_sale_orders(self, cr):
+        current = False
         ###################################################################
         ## Se importan cabeceras vivas e históricas desde el 17-8-2015
         #cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
@@ -399,14 +399,20 @@ class DatabaseImport:
         #           "numero_carga as picking_info from dbo.cabecera_pedido_copia where cast(fecha_carga as date) >= '2015-08-17 00:00:00'")
         ###################################################################
         ## Se importan sólo pedidos vivos
-        cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
-                    "observacion_pedido as customer_comment, observacion_reparto as note, pedido_sam as client_order_ref, 'draft' as state, '' as invoice_info, "
-                    "'' as picking_info from dbo.cabecera_pedido_ventas")
+        #cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
+        #            "observacion_pedido as customer_comment, observacion_reparto as note, pedido_sam as client_order_ref, 'draft' as state, '' as invoice_info, "
+        #            "'' as picking_info from dbo.cabecera_pedido_ventas")
         ###################################################################
         ## Se importan sólo pedidos históricos
-        #cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha_carga as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
-        #           "'' as customer_comment, '' as note, '' as client_order_ref, 'history' as state, serie_factura + CONVERT(varchar, numero_factura) as invoice_info, "
-        #           "numero_carga as picking_info from dbo.cabecera_pedido_copia")
+        cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha_carga as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
+                   "'' as customer_comment, '' as note, '' as client_order_ref, 'history' as state, serie_factura + CONVERT(varchar, numero_factura) as invoice_info, "
+                   "numero_carga as picking_info from dbo.cabecera_pedido_copia")
+        ###################################################################
+        ## Se importan sólo pedidos históricos que faltan
+        sale_ids = self.search('sale.order', [('state', '=', 'history')])
+        sales_data = self.read('sale.order', sale_ids, ['name'])
+        sale_numbers = [x['name'] for x in sales_data]
+        current = True
         ###################################################################
         #cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
         #          "observacion_pedido as customer_comment, observacion_reparto as note, pedido_sam as client_order_ref, 'draft' as state, '' as invoice_info, "
@@ -415,14 +421,13 @@ class DatabaseImport:
         #           "'' as customer_comment, '' as note, '' as client_order_ref, 'history' as state, serie_factura + CONVERT(varchar, numero_factura) as invoice_info, "
         #           "numero_carga as picking_info from dbo.cabecera_pedido_copia")
         data = cr.fetchall()
-        num_rows = len(data)
+        #num_rows = len(data)
+        num_rows = len(data) - len(sale_numbers)
         cont = 0
         for row in data:
-            order_ids = self.search("sale.order", [('name','=',str(int(row.name)))])
-            if order_ids:
-                cont += 1
-                print "%s de %s" % (str(cont), str(num_rows))
+            if str(int(row.name)) in sale_numbers:
                 continue
+            order_ids = self.search("sale.order", [('name','=',str(int(row.name)))])
             partner_ids = self.search("res.partner", [('ref', '=', str(int(row.partner_id_map))),('customer','=',True),'|',('active','=',True),('active','=',False)])
             if not partner_ids:
                 partner_id = self.import_customers(cr, int(row.partner_id_map))
@@ -453,8 +458,8 @@ class DatabaseImport:
                 'state': row.state
             }
             order_id = self.create("sale.order", sale_vals)
-            #if row.state == 'history':
-            #    self.import_orders.append(int(row.name))
+            if current:
+                self.import_sale_order_lines_history(cr, sale_number=int(row.name))
 
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
@@ -518,7 +523,7 @@ class DatabaseImport:
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
-    def import_sale_order_lines_history(self, cr):
+    def import_sale_order_lines_history(self, cr, sale_number= False):
         #Lineas históricas
         ###################################################################
         ## Se importan lineas históricas desde el 17-8-2015
@@ -531,8 +536,9 @@ class DatabaseImport:
         #           "importe as price_subtotal, tipo_iva as tax_id_map, 'history' as state from dbo.lineas_pedido_copia")
         ###################################################################
         ## Lineas históricas de ciertos pedidos
-        cr.execute("select dbo.lineas_pedido_copia.numero_pedido as order_id_map, numero_linea as sequence, producto as product_id_map, descripcion as name, cajas as box_qty, composicion as unit_qty, "
-                   "importe as price_subtotal, tipo_iva as tax_id_map, 'history' as state from dbo.lineas_pedido_copia where numero_pedido in ?",(tuple(self.import_orders),))
+        if sale_number:
+            cr.execute("select dbo.lineas_pedido_copia.numero_pedido as order_id_map, numero_linea as sequence, producto as product_id_map, descripcion as name, cajas as box_qty, composicion as unit_qty, "
+                       "importe as price_subtotal, tipo_iva as tax_id_map, 'history' as state from dbo.lineas_pedido_copia where numero_pedido = ?",(sale_number,))
         data = cr.fetchall()
         num_rows = len(data)
         cont = 0
@@ -670,14 +676,26 @@ class DatabaseImport:
     def import_purchase_invoice(self, cr):
         account_id = self.search("account.account", [('code', '=', "600000000")])[0]
         journal_id = self.search("account.journal", [('name', '=', "Diario de compras")])[0]
+
         cr.execute("select dic_prov as supplier_id_map, dic_nume as inv_number, dic_femi as invoice_date, "
                    "descuento_pp as ep_discount, fecha_vencimiento as due_date from dbo.adsd_dic")
+        #######################################################################
+        ###### Diferencias
+        invoice_ids = self.search('account.invoice', [('state', '=', 'history'),('type', '=', "in_invoice")])
+        sales_data = self.read('account.invoice', invoice_ids, ['reference', 'partner_id'])
+        invoice_numbers = [x['reference'] + "//" + str(x['partner_id'][0]) for x in sales_data]
+
+        ######################################################################
+
         purchase_invoice_data = cr.fetchall()
-        num_rows = len(purchase_invoice_data)
+        #num_rows = len(purchase_invoice_data)
+        num_rows = len(purchase_invoice_data) - len(invoice_numbers)
         cont = 0
         for row in purchase_invoice_data:
             supplier_ids = self.search("res.partner", [('supplier', '=', True),('ref', '=', str(int(row.supplier_id_map))),'|',('active', '=', True),('active', '=', False)])
             if supplier_ids:
+                if str(int(row.inv_number)) + "//" + str(supplier_ids[0]) in invoice_numbers:
+                    continue
                 sup_data = self.read("res.partner", supplier_ids[0], ["property_account_payable"])
                 invoice_vals = {
                     "number": str(int(row.inv_number)) + " " + str(cont+1),
@@ -686,8 +704,8 @@ class DatabaseImport:
                     "supplier_invoice_number": str(int(row.inv_number)),
                     "account_id": sup_data["property_account_payable"][0],
                     "partner_id": supplier_ids[0],
-                    "date_invoice": row.invoice_date.strftime("%Y-%m-%d"),
-                    "date_due": row.due_date.strftime("%Y-%m-%d"),
+                    "date_invoice": row.invoice_date and row.invoice_date.strftime("%Y-%m-%d") or False,
+                    "date_due": row.due_date and row.due_date.strftime("%Y-%m-%d") or False,
                     "state": "history",
                     "journal_id": journal_id,
                     "type": "in_invoice"
@@ -718,9 +736,9 @@ class DatabaseImport:
                     else:
                         price_unit = float(line.gross_price_unit)
 
-                    if str(int(row.product_id_map)) in PRODUCT_FIX:
-                        loc_qty = loc_qty / float(PRODUCT_FIX[str(int(row.product_id_map))])
-                        price_unit = price_unit * float(PRODUCT_FIX[str(int(row.product_id_map))])
+                    if str(int(line.product_id_map)) in PRODUCT_FIX:
+                        loc_qty = loc_qty / float(PRODUCT_FIX[str(int(line.product_id_map))])
+                        price_unit = price_unit * float(PRODUCT_FIX[str(int(line.product_id_map))])
 
                     if line.base_qty:
                         if product_data["log_base_id"]:
@@ -756,10 +774,21 @@ class DatabaseImport:
         cr.execute("select serie as number_pref, documento as number, fecha_contabilizacion as invoice_date, "
                    "cli_codi as partner_id_map, vencimiento as due_date from dbo.diario_ventas inner join "
                    "dbo.adsd_clie on dbo.adsd_clie.id_cliente = dbo.diario_ventas.cliente_id")
+        #######################################################################
+        ###### Diferencias
+        invoice_ids = self.search('account.invoice', [('state', '=', 'history'),('type', '=', "out_invoice")])
+        sales_data = self.read('account.invoice', invoice_ids, ['number'])
+        invoice_numbers = [x['number'] for x in sales_data]
+        current = True
+
+        ######################################################################
         invoice_data = cr.fetchall()
-        num_rows = len(invoice_data)
+        #num_rows = len(invoice_data)
+        num_rows = len(invoice_data) - len(invoice_numbers)
         cont = 0
         for row in invoice_data:
+            if ustr(row.number_pref) + "/" + str(int(row.number)) in invoice_numbers:
+                continue
             invoice_ids = self.search("account.invoice", [('type','=','out_invoice'),("number",'=',ustr(row.number_pref) + "/" + str(int(row.number)))])
             if invoice_ids:
                 cont += 1
@@ -799,9 +828,9 @@ class DatabaseImport:
                         uom_id = product_data["uom_id"][0]
                         loc_qty = line.uom_qty
                         price_unit = line.price_unit
-                        if str(int(row.product_id_map)) in PRODUCT_FIX:
-                            loc_qty = loc_qty / float(PRODUCT_FIX[str(int(row.product_id_map))])
-                            price_unit = price_unit * float(PRODUCT_FIX[str(int(row.product_id_map))])
+                        if str(int(line.product_id_map)) in PRODUCT_FIX:
+                            loc_qty = loc_qty / float(PRODUCT_FIX[str(int(line.product_id_map))])
+                            price_unit = price_unit * float(PRODUCT_FIX[str(int(line.product_id_map))])
 
                         if line.base_qty:
                             if product_data["log_base_id"]:
@@ -880,13 +909,19 @@ class DatabaseImport:
             cr = conn.cursor()
 
             self.import_sale_orders(cr)
-            self.import_sale_order_lines_open(cr)
+            #self.import_sale_order_lines_open(cr)
             #self.import_sale_order_lines_history(cr)
-            self.import_active_purchase_order(cr)
+            #self.import_active_purchase_order(cr)
             #self.import_purchase_invoice(cr)
             #self.import_sale_invoice(cr)
             #self.fix_product_histories()
-            self.open_sale_orders()
+            #self.open_sale_orders()
+            #self.import_sale_order_lines_open(cr)
+            #self.import_sale_order_lines_history(cr)
+            #self.import_active_purchase_order(cr)
+            self.import_purchase_invoice(cr)
+            self.import_sale_invoice(cr)
+            #self.fix_product_histories()
 
         except Exception, ex:
             print u"Error al conectarse a las bbdd: ", repr(ex)

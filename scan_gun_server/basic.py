@@ -564,7 +564,7 @@ class LineReceiver(protocol.Protocol, _PauseableMixin):
         elif data == KEY_F4:
             res = "F4" + self.delimiter
         elif KEY_F5 in data:
-            res = data[0:1] + "F5" + self.delimiter
+            res = "F5" + self.delimiter
         elif data == KEY_F6:
             res = "F6" + self.delimiter
         elif data == KEY_F7:
