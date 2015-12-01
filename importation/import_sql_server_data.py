@@ -124,7 +124,7 @@ class DatabaseImport:
 
         self.url_template = "http://%s:%s/xmlrpc/%s"
         self.server = "localhost"
-        self.port = 9069
+        self.port = 8069
         self.dbname = dbname
         self.user_name = user
         self.user_passwd = passwd
@@ -1314,6 +1314,22 @@ class DatabaseImport:
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
+    def import_product_rappel_groups(self, cr):
+        cr.execute("select pr1_codi as product_id_map, subgrupo_rappel as subgroup_map_id, codigo_ean_unidad as ean_consum from dbo.adsd_art where subgrupo_rappel is not null")
+        prod_data = cr.fetchall()
+        cont = 0
+        num_rows = len(prod_data)
+        for row in prod_data:
+            product_ids = self.search('product.product', [('default_code', '=', str(int(row.product_id_map))),'|',('active', '=', True),('active', '=', False)])
+            if product_ids:
+                subgroup_ids = self.search("product.rappel.subgroup", [("internal_code", '=', str(row.subgroup_map_id))])
+                if subgroup_ids:
+                    subgroup_data = self.read("product.rappel.subgroup", subgroup_ids[0], ['group_id'])
+                    self.write("product.product", product_ids, {'rappel_subgroup_id': subgroup_ids[0],
+                                                                'ean_consum': row.ean_consum != 0 and str(int(row.ean_consum)) or False,
+                                                                'rappel_group_id':  subgroup_data['group_id'] and subgroup_data['group_id'][0] or False})
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
 
     def process_data(self):
         """
@@ -1348,9 +1364,10 @@ class DatabaseImport:
             #self.import_partner_contacts(cr)
             #self.import_customer_unilever_families(cr)
             #self.import_items_data(cr)
-            self.import_cadena(cr)
-            self.import_product_customer_rules(cr)
-            self.import_rappels(cr)
+            #self.import_cadena(cr)
+            #self.import_product_customer_rules(cr)
+            #self.import_rappels(cr)
+            self.import_product_rappel_groups(cr)
 
 
         except Exception, ex:
