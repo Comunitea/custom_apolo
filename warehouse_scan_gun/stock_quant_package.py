@@ -150,6 +150,17 @@ class stock_quant_package(models.Model):
 
 
     @api.multi
+    def get_parent_package(self, my_args):
+
+        package_id = my_args.get('package_id', False)
+        package = self.browse(package_id)
+        package_id = False
+        if package:
+            package_id = package.parent_id.id
+        return package_id
+
+
+    @api.multi
     def get_package_gun_info(self, my_args):
         name = my_args.get('name', False)
         domain=[('name', 'ilike', '%' + name)]
@@ -161,7 +172,6 @@ class stock_quant_package(models.Model):
 
     @api.multi
     def get_pack_gun_info(self, my_args):
-
         package_id = my_args.get("package_id", False)
         domain = [('id', '=', package_id)]
         ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': 1}
@@ -190,6 +200,7 @@ class stock_quant_package(models.Model):
                     picking_zone = package.packed_lot_id.product_id.picking_location_id.bcd_name or\
                                package.packed_lot_id.product_id.picking_location_id.name or False
 
+
             vals = {
                 'exist' : True,
                 'package' : package.name,
@@ -199,11 +210,12 @@ class stock_quant_package(models.Model):
                 'dest_location_id' : False,
                 'dest_location': False,
                 'lot_id': package.packed_lot_id.id or False,
-                'lot': package.packed_lot_id.name or "",
+                'lot': package.packed_lot_id.name or "Lote",
                 'product_id' : package.packed_lot_id.product_id.id,
                 'product' : package.packed_lot_id.product_id.short_name
-                            or package.packed_lot_id.product_id.name or 'Vacío'
-            ,
+                            or package.packed_lot_id.product_id.name or 'Producto'
+            ,   'parent_id' : package.parent_id.id or False,
+                'parent_package': package.parent_id.name or '',
                 'packed_qty': package.packed_qty or 0,
                 'uom' : package.uom_id.name or '',
                 'uom_id': package.uom_id.id or package.packed_lot_id.product_id.uom_id.id or False,
@@ -217,10 +229,9 @@ class stock_quant_package(models.Model):
                 'picking_location':picking_zone,
                 'src_location_bcd': package.location_id.bcd_name or package.location_id.name or False,
                 'dest_location_bcd': False,
-                'life_date': package.packed_lot_id.life_date or '00/00/0000'
+                'life_date': package.packed_lot_id.life_date or '00/00/0000'}
 
-            }
-            if package.is_multiproduct:
+            if package.children_ids:
                 picking_zone_id = package.children_ids[0].product_id.picking_location_id.id
                 picking_zone = 'Zona de Multipalets'
                 vals = {
@@ -233,7 +244,9 @@ class stock_quant_package(models.Model):
                     'dest_location': False,
                     'lot_id': False,
                     'lot': "MultiPack",
-                    'product_id' : package.children_ids[0].product_id.id or False,
+                    'parent_id' : package.parent_id.id or False,
+                    'parent_package': package.parent_id.name or '',
+                    'product_id' : False,
                     'product' : 'MultiProducto',
                     'packed_qty': package.packed_qty or 0,
                     'uom' : package.children_ids[0].product_id.uom_id.name or '',
@@ -248,6 +261,7 @@ class stock_quant_package(models.Model):
                     'picking_location':picking_zone,
                     'src_location_bcd': package.location_id.bcd_name or package.location_id.name or False,
                     'dest_location_bcd': False,
+
                 }
 
         return vals
@@ -296,7 +310,6 @@ class manual_transfer_wzd(models.TransientModel):
         #miramos paquete en destino
         # location_dest = self.env['stock.location'].browse(dest_location_id)
         # pack = location_dest.get_package_of_lot(lot_id)
-
         vals_prod_line_ids ={
             'package_id': package_id,
             'product_id': product_id,

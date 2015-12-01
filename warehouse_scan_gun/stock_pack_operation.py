@@ -127,6 +127,7 @@ class stock_pack_operation(models.Model):
                 'ORIGEN': op.location_id.bcd_name,
                 'DESTINO': op.location_dest_id.bcd_name,
                 'PROCESADO': op.to_process,
+                'to_process' : op.to_process,
                 'VISITED': op.visited,
                 'origen_id': op.location_id.id or 0,
                 'destino_id': op.location_dest_id.id or 0,
@@ -194,16 +195,19 @@ class stock_pack_operation(models.Model):
                     children_ids_product_id=False
                     lot = False
                     product_name=''
-
                 if not op.product_id:
                     is_package=True
+                    product_id = op.package_id.product_id
                 else:
                     is_package=False
+                    product_id = op.product_id
+
+
                 values = {
                 'ID': op.id,
                 'id': op.id,
-                'product': op.product_id.short_name or op.packed_lot_id.product_id.short_name or product_name,
-                'op_product_id': op.product_id.id or False,
+                'product': product_id.short_name or product_name,
+                'op_product_id': product_id.id,
                 'CANTIDAD': op.product_qty,
                 'lot': op.packed_lot_id and op.packed_lot_id.name or "",
                 'PAQUETE': op.package_id.id and op.package_id.name or "",
@@ -222,7 +226,7 @@ class stock_pack_operation(models.Model):
                 'destino' : op.location_dest_id.bcd_name,
                 'origen_bcd' : op.location_id.bcd_name or op.location_id.name,
                 'destino_bcd' : op.location_dest_id.bcd_name or op.location_dest_id.name,
-                'product_id': op.product_id.id or op.packed_lot_id.product_id.id or children_ids_product_id.id or False,
+                'product_id': product_id.id or children_ids_product_id.id or False,
                 'lot_id': op.packed_lot_id.id,
                 'packed_qty': op.packed_qty or 0,
                 'uom_id':op.product_uom_id.id or op.packed_lot_id.product_id.uom_id.id or False,
@@ -232,11 +236,12 @@ class stock_pack_operation(models.Model):
                 'changed': False,
                 'paquete': op.package_id.id and op.package_id.name or "",
                 'lot': op.packed_lot_id and op.packed_lot_id.name or lot,
-                'producto': op.product_id.short_name or op.packed_lot_id.product_id.short_name or product_name,
+                'producto': product_id.short_name or product_name,
                 'to_process': op.to_process,
                 'qty_available':op.packed_lot_id.product_id.qty_available or 0.00,
-                'is_package': is_package or False
-
+                'is_package': is_package or False,
+                'picking_location_id' : product_id.picking_location_id.bcd_name,
+                'parent_id': op.package_id.parent_id or False
                 }
                 #revisar para palet_multiproducto
                 if not op.product_id and not op.package_id.is_multiproduct:

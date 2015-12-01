@@ -21,6 +21,13 @@
 from openerp import models, fields, api, exceptions, _
 from datetime import datetime, date, timedelta
 
+class AccountInvoice(models.Model):
+
+    _inherit = 'account.invoice'
+    # Campos necesarios para cuadre mensual
+    frigo_sec = fields.Integer('Frigo sec')
+    date_proce = fields.Date('Date proce')
+
 
 class AccountInvoiceLine(models.Model):
 

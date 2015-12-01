@@ -36,6 +36,27 @@ TEMP_TYPE_MAP = {
     "A": "Congelado"
 }
 
+PRODUCT_FIX = {
+    '200102': 12, '140606': 3, '140612': 2, '140614': 6, '140613': 3, '130113': 8, '130109': 12,
+    '247201': 6, '101301': 6, '101303': 6, '101304': 6, '101305': 6, '4127': 6, '101401': 6,
+    '235112': 12, '130101': 16, '130116': 16, '130114': 8, '247231': 100, '205101': 6,
+    '4426': 5, '4791': 10, '4790': 10, '130115': 8, '302102': 12, '11130': 4, '247207': 6,
+    '247206': 6, '247208': 6, '247209': 6, '100701': 6, '423': 6, '4634': 6, '4132': 12,
+    '125': 4, '4131': 12, '140701': 4, '4112': 12, '4108': 12, '4111': 12, '247210': 6,
+    '304': 5, '247212': 6, '100602': 12, '100601': 12, '230105': 12, '4159': 4, '4145': 6,
+    '4146': 6, '4140': 6, '4106': 5, '4115': 5, '101402': 6, '9257': 6, '44405': 6,
+    '247214': 6, '539502': 4, '225203': 12, '225204': 6, '4177': 10, '4113': 6, '4107': 6,
+    '4114': 6, '4123': 12, '4101': 10, '247230': 6, '230114': 12, '100301': 6, '225103': 12,
+    '225104': 12, '225105': 4, '4122': 10, '4119': 6, '225403': 12, '225404': 6, '4205': 12,
+    '4610': 6, '4607': 6, '4608': 6, '4600': 6, '247216': 6, '247217': 6, '661101': 10,
+    '225502': 4, '4821': 12, '247218': 6, '247229': 6, '247219': 6, '247220': 6, '247222': 6,
+    '247223': 6, '101201': 6, '101202': 6, '101203': 6, '101204': 24, '686': 3, '247224': 6,
+    '428': 6, '427': 6, '113': 10, '4470': 3, '247101': 6, '89': 5, '302201': 6, '4801': 12,
+    '230120': 12, '4121': 25, '100802': 6, '100804': 3, '247227': 6, '4820': 12, '245101': 12,
+    '100201': 6, '3003': 24, '3004': 12, '3021': 10, '3008': 40, '3012': 40, '3033': 6, '3024': 10,
+    '3025': 1, '10173': 23, '61': 6
+}
+
 def ustr(text):
     """convierte las cadenas de sql server en iso-8859-1 a utf-8 que es la cofificaciï¿œn de postgresql"""
     return unicode(text.strip(), 'iso-8859-15').encode('utf-8')
@@ -65,6 +86,7 @@ class DatabaseImport:
         self.user_id = 0
         self.sql_server_host = sql_server_host
         self.sql_server_dbname = sql_server_dbname
+        self.import_orders = []
 
         #
         # Conectamos con OpenERP
@@ -386,10 +408,21 @@ class DatabaseImport:
         #           "'' as customer_comment, '' as note, '' as client_order_ref, 'history' as state, serie_factura + CONVERT(varchar, numero_factura) as invoice_info, "
         #           "numero_carga as picking_info from dbo.cabecera_pedido_copia")
         ###################################################################
+        #cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
+        #          "observacion_pedido as customer_comment, observacion_reparto as note, pedido_sam as client_order_ref, 'draft' as state, '' as invoice_info, "
+        #           "'' as picking_info from dbo.cabecera_pedido_ventas union "
+        #           "select numero_pedido as name, cliente as partner_id_map, fecha_carga as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
+        #           "'' as customer_comment, '' as note, '' as client_order_ref, 'history' as state, serie_factura + CONVERT(varchar, numero_factura) as invoice_info, "
+        #           "numero_carga as picking_info from dbo.cabecera_pedido_copia")
         data = cr.fetchall()
         num_rows = len(data)
         cont = 0
         for row in data:
+            order_ids = self.search("sale.order", [('name','=',str(int(row.name)))])
+            if order_ids:
+                cont += 1
+                print "%s de %s" % (str(cont), str(num_rows))
+                continue
             partner_ids = self.search("res.partner", [('ref', '=', str(int(row.partner_id_map))),('customer','=',True),'|',('active','=',True),('active','=',False)])
             if not partner_ids:
                 partner_id = self.import_customers(cr, int(row.partner_id_map))
@@ -419,7 +452,9 @@ class DatabaseImport:
                 'client_order_ref': row.client_order_ref or False,
                 'state': row.state
             }
-            self.create("sale.order", sale_vals)
+            order_id = self.create("sale.order", sale_vals)
+            #if row.state == 'history':
+            #    self.import_orders.append(int(row.name))
 
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
@@ -449,6 +484,11 @@ class DatabaseImport:
 
             product_data = self.read("product.product", product_id, ["uom_id", "log_unit_id", "log_base_id", "log_box_id"])
             loc_qty = row.box_qty
+            price_unit = row.price_unit
+            if str(int(row.product_id_map)) in PRODUCT_FIX:
+                loc_qty = loc_qty / float(PRODUCT_FIX[str(int(row.product_id_map))])
+                price_unit = price_unit * float(PRODUCT_FIX[str(int(row.product_id_map))])
+
             if row.unit_qty:
                 if product_data["log_base_id"]:
                     unit = product_data["log_base_id"][0]
@@ -468,8 +508,8 @@ class DatabaseImport:
                          'product_uos': product_data["uom_id"][0],
                          'product_uom_qty': loc_qty,
                          'product_uos_qty': loc_qty,
-                         'price_unit': row.price_unit,
-                         'price_udv': row.price_unit,
+                         'price_unit': price_unit,
+                         'price_udv': price_unit,
                          'name': ustr(row.name),
                          'discount': row.discount,
                          'tax_id': [(6, 0, self._getTaxes(IVA_MAP[str(int(row.tax_id_map))][0]))],
@@ -487,8 +527,12 @@ class DatabaseImport:
         #           " inner join dbo.cabecera_pedido_copia on dbo.cabecera_pedido_copia.numero_pedido = dbo.lineas_pedido_copia.numero_pedido where cast(fecha_carga as date) >= '2015-08-17 00:00:00'")
         ###################################################################
         ## Se importan todas las lineas históricas
+        #cr.execute("select dbo.lineas_pedido_copia.numero_pedido as order_id_map, numero_linea as sequence, producto as product_id_map, descripcion as name, cajas as box_qty, composicion as unit_qty, "
+        #           "importe as price_subtotal, tipo_iva as tax_id_map, 'history' as state from dbo.lineas_pedido_copia")
+        ###################################################################
+        ## Lineas históricas de ciertos pedidos
         cr.execute("select dbo.lineas_pedido_copia.numero_pedido as order_id_map, numero_linea as sequence, producto as product_id_map, descripcion as name, cajas as box_qty, composicion as unit_qty, "
-                   "importe as price_subtotal, tipo_iva as tax_id_map, 'history' as state from dbo.lineas_pedido_copia")
+                   "importe as price_subtotal, tipo_iva as tax_id_map, 'history' as state from dbo.lineas_pedido_copia where numero_pedido in ?",(tuple(self.import_orders),))
         data = cr.fetchall()
         num_rows = len(data)
         cont = 0
@@ -511,6 +555,11 @@ class DatabaseImport:
                 product_data = self.read("product.product", product_id, ["uom_id", "log_unit_id", "log_base_id", "log_box_id"])
                 uom_id = product_data["uom_id"][0]
                 loc_qty = row.box_qty
+                subtotal = row.price_subtotal
+                if str(int(row.product_id_map)) in PRODUCT_FIX:
+                    loc_qty = loc_qty / float(PRODUCT_FIX[str(int(row.product_id_map))])
+                    subtotal = row.price_subtotal * float(PRODUCT_FIX[str(int(row.product_id_map))])
+
                 if row.unit_qty:
                     if product_data["log_base_id"]:
                         unit = product_data["log_base_id"][0]
@@ -533,8 +582,8 @@ class DatabaseImport:
                          'product_uos': uom_id,
                          'product_uom_qty': loc_qty or 1.0,
                          'product_uos_qty': loc_qty or 1.0,
-                         'price_unit': row.price_subtotal / (loc_qty or 1.0),
-                         'price_udv': row.price_subtotal / (loc_qty or 1.0),
+                         'price_unit': subtotal / (loc_qty or 1.0),
+                         'price_udv': subtotal / (loc_qty or 1.0),
                          'name': ustr(row.name),
                          'tax_id': [(6, 0, self._getTaxes(IVA_MAP[str(int(row.tax_id_map))][0]))],
                          'state': row.state}
@@ -595,17 +644,22 @@ class DatabaseImport:
 
                     if not name:
                         name += product_data["name"]
+                    loc_qty = row.product_qty
+                    price_unit = row.price_unit
+                    if str(int(row.product_id_map)) in PRODUCT_FIX:
+                        loc_qty = loc_qty / float(PRODUCT_FIX[str(int(row.product_id_map))])
+                        price_unit = row.price_unit * float(PRODUCT_FIX[str(int(row.product_id_map))])
                     line_vals = {
                         'order_id': purchase_id,
                         'product_id': product_id,
                         'name': name,
                         'date_planned': order.minimum_planned_date.strftime("%Y-%m-%d"),
-                        'product_uoc_qty': float(row.product_qty),
+                        'product_uoc_qty': loc_qty,
                         'product_uoc': product_data["uom_id"][0],
-                        'price_udc': float(row.price_unit),
+                        'price_udc': price_unit,
                         'product_qty': float(row.product_qty),
                         'product_uom': product_data["uom_id"][0],
-                        'price_unit': float(row.price_unit),
+                        'price_unit': price_unit,
                         'discount': float(row.discount),
                         'taxes_id': [(6, 0, self._getTaxes(IVA_MAP[str(int(row.tax_id_map))][1]))],
                     }
@@ -657,6 +711,17 @@ class DatabaseImport:
                     product_data = self.read("product.product", product_id, ["uom_id", "log_unit_id", "log_base_id", "log_box_id"])
                     uom_id = product_data["uom_id"][0]
                     loc_qty = line.uom_qty
+
+                    if line.discount:
+                        discount = float(line.discount) / 100.0
+                        price_unit = float(line.gross_price_unit) * (1 - discount / 100.0)
+                    else:
+                        price_unit = float(line.gross_price_unit)
+
+                    if str(int(row.product_id_map)) in PRODUCT_FIX:
+                        loc_qty = loc_qty / float(PRODUCT_FIX[str(int(row.product_id_map))])
+                        price_unit = price_unit * float(PRODUCT_FIX[str(int(row.product_id_map))])
+
                     if line.base_qty:
                         if product_data["log_base_id"]:
                             unit = product_data["log_base_id"][0]
@@ -669,11 +734,6 @@ class DatabaseImport:
                             loc_qty += self.execute("product.product", "uos_qty_to_uom_qty", [product_id, line.base_qty, unit])
                             print "end loc_qty: ", loc_qty
 
-                    if line.discount:
-                        discount = float(line.discount) / 100.0
-                        price_unit = float(line.gross_price_unit) * (1 - discount / 100.0)
-                    else:
-                        price_unit = float(line.gross_price_unit)
                     line_vals = {
                         "product_id": product_id,
                         "name": line_name,
@@ -713,7 +773,7 @@ class DatabaseImport:
                     "invoice_number": ustr(row.number_pref) + "/" + str(int(row.number)),
                     "account_id": cust_data["property_account_receivable"][0],
                     "partner_id": customer_ids[0],
-                    "date_invoice": row.invoice_date.strftime("%Y-%m-%d"),
+                    "date_invoice": row.invoice_date and row.invoice_date.strftime("%Y-%m-%d") or False,
                     "date_due": row.due_date and row.due_date.strftime("%Y-%m-%d") or False,
                     "state": "history",
                     "journal_id": journal_id,
@@ -738,6 +798,11 @@ class DatabaseImport:
                         product_data = self.read("product.product", product_id, ["uom_id", "log_unit_id", "log_base_id", "log_box_id"])
                         uom_id = product_data["uom_id"][0]
                         loc_qty = line.uom_qty
+                        price_unit = line.price_unit
+                        if str(int(row.product_id_map)) in PRODUCT_FIX:
+                            loc_qty = loc_qty / float(PRODUCT_FIX[str(int(row.product_id_map))])
+                            price_unit = price_unit * float(PRODUCT_FIX[str(int(row.product_id_map))])
+
                         if line.base_qty:
                             if product_data["log_base_id"]:
                                 unit = product_data["log_base_id"][0]
@@ -769,6 +834,30 @@ class DatabaseImport:
                 cont += 1
                 print "%s de %s" % (str(cont), str(num_rows))
 
+    def fix_product_histories(self):
+        cont = 0
+        for product_code in PRODUCT_FIX:
+            product_ids = self.search("product.product", [('default_code', '=', product_code),'|',('active', '=', False),('active', '=', True)])
+            if product_ids:
+                sale_line_ids = self.search('sale.order.line', [('product_id', '=', product_ids[0]),('order_id.state', '=', 'history')])
+                if sale_line_ids:
+                    for sale_line_id in sale_line_ids:
+                        line_data = self.read("sale.order.line", sale_line_id, ['product_uom_qty', 'price_unit'])
+                        self.write("sale.order.line", [sale_line_id], {'product_uom_qty': (int(line_data['product_uom_qty']) / float(PRODUCT_FIX[product_code])),
+                                                                       'product_uos_qty': (int(line_data['product_uom_qty']) / float(PRODUCT_FIX[product_code])),
+                                                                       'price_unit': line_data['price_unit'] * float(PRODUCT_FIX[product_code]),
+                                                                       'price_udv': line_data['price_unit'] * float(PRODUCT_FIX[product_code])})
+
+                invoice_line_ids = self.search('account.invoice.line', [('product_id', '=', product_ids[0]),('invoice_id.state', '=', 'history')])
+                if invoice_line_ids:
+                    for invoice_line in invoice_line_ids:
+                        line_data = self.read("account.invoice.line", invoice_line, ['quantity', 'price_unit', 'invoice_id'])
+                        self.write("account.invoice.line", [invoice_line], {'quantity': (int(line_data['quantity']) / float(PRODUCT_FIX[product_code])),
+                                                                            'price_unit': line_data['price_unit'] * float(PRODUCT_FIX[product_code])})
+                        self.execute("account.invoice", "button_reset_taxes", [[line_data['invoice_id'][0]]])
+            cont += 1
+            print "%s de %s" % (str(cont), str(len(PRODUCT_FIX)))
+
     def process_data(self):
         """
         Importa la bbdd
@@ -786,7 +875,8 @@ class DatabaseImport:
             #self.import_sale_order_lines_history(cr)
             #self.import_active_purchase_order(cr)
             #self.import_purchase_invoice(cr)
-            self.import_sale_invoice(cr)
+            #self.import_sale_invoice(cr)
+            self.fix_product_histories()
 
         except Exception, ex:
             print u"Error al conectarse a las bbdd: ", repr(ex)

@@ -202,7 +202,7 @@ class OdooDao:
     def get_routes_menu2(self, type = False):
         res = {}
         domain =[]
-        domain = [('picking_type_id', '=',5), ('validated', '=', True), ('state', 'not in', ('draft','done','cancel'))]
+        domain = [('picking_type_id', '=',5), ('validated_state', '=', 'loaded'), ('state', 'not in', ('draft','done','cancel'))]
         route_ids = self.connection.search('stock.picking', domain, order ='orig_planned_date, min_date, name asc')
         if not route_ids:
             res = False
@@ -414,6 +414,11 @@ class OdooDao:
     def get_package_gun_info(self, user_id, name):
         my_args = {'user_id': user_id, 'name': name}
         op_data = self.connection.execute('stock.quant.package', 'get_package_gun_info', [], my_args)
+        return op_data
+
+    def get_parent_package(self, user_id, package_id):
+        my_args = {'user_id': user_id, 'package_id': package_id}
+        op_data = self.connection.execute('stock.quant.package', 'get_parent_package', [], my_args)
         return op_data
 
     def create_package_from_gun(self, user_id, values = {}):

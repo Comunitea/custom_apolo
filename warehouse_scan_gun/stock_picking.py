@@ -30,8 +30,8 @@ class stock_picking(models.Model):
     def get_routes_menu(self):
 
         res = {}
-        domain = [('picking_type_id', '=',5), ('validated', '=', True), ('state', 'not in', ('draft','done','cancel'))]
-        route_ids = self.search(domain, order ='name asc')
+        domain = [('picking_type_id', '=',5), ('validated_state', '=', 'loaded'), ('state', 'not in', ('draft','done','cancel'))]
+        route_ids = self.search(domain)#,  order ='name asc')
         if not route_ids:
             res = False
         indx = 1
