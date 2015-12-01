@@ -699,7 +699,7 @@ class DatabaseImport:
         num_rows = len(rappel_subgroup_data)
         cont = 0
         for row in rappel_subgroup_data:
-            rappel_group_ids = self.search("product.rappel.group", [('internal_code', '=', str(int(row.internal_code)))])
+            rappel_group_ids = self.search("product.rappel.group", [('internal_code', '=', str(int(row.group_id_map)))])
             vals = {'internal_code': str(int(row.internal_code)),
                     'name': ustr(row.name),
                     'group_id': rappel_group_ids and rappel_group_ids[0] or False,
