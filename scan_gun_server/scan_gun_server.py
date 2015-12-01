@@ -3551,6 +3551,16 @@ class ScanGunProtocol(LineReceiver):
             #SI NO ESTA SE AÑADE (si se puede)
             pack_id = self.int_(line)
             op_id, message = self.factory.odoo_con.add_loc_operation_from_gun(self.user_id, self.task_id, pack_id)
+            if not op_id:
+                parent_id = self.factory.odoo_con.get_parent_package(self.user_id, self.int_(line))
+                if parent_id:
+                    self.handle_form_ubi_ops(u'%s%s'%(PRE_PACK,  parent_id))
+                    return
+                # self.reset_vals()
+                # self.step = 0
+                # message = u'\nPaquete no Valido'
+                # self._snd(self.get_str_form_ubi_ops() + message)
+                # return
             #to_process a False
             if op_id:
                 res = self.factory.odoo_con.change_op_value(self.user_id, op_id, 'to_process', False)
@@ -3820,16 +3830,16 @@ class ScanGunProtocol(LineReceiver):
                     except:
                         ee=1
                         return
-                else:
-                    parent_id = self.factory.odoo_con.get_parent_package(self.user_id, self.int_(line))
-                    if parent_id:
-                        self.handle_form_ubi_ops(u'%s%s'%(PRE_PACK,  parent_id))
-                        return
-                    self.reset_vals()
-                    self.step = 0
-                    message = u'\nPaquete no Valido'
-                    self._snd(self.get_str_form_ubi_ops() + message)
-                    return
+                # else:
+                #     parent_id = self.factory.odoo_con.get_parent_package(self.user_id, self.int_(line))
+                #     if parent_id:
+                #         self.handle_form_ubi_ops(u'%s%s'%(PRE_PACK,  parent_id))
+                #         return
+                #     self.reset_vals()
+                #     self.step = 0
+                #     message = u'\nPaquete no Valido'
+                #     self._snd(self.get_str_form_ubi_ops() + message)
+                #     return
             else:
                 self.step = 0
                 message = u'\nOpcion no Valida'
