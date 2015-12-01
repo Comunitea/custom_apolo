@@ -108,22 +108,52 @@ class stock_quant_package(models.Model):
 
         user_id = my_args.get('user_id', False)
         package_ids = my_args.get ('package_id', [])
-        vals= {
-            'is_multiproduct' : True
-        }
-        new_package = self.create(vals)
-        parent_id = new_package.id
 
-        for package_id in package_ids:
-            domain = [('id','=', package_id)]
-            package = self.search(domain)
-            location_id = package.location_id.id
-            vals = {
-                'parent_id':parent_id
+        res = False
+        if package_ids:
+            #creo un paquete nuevo, multiproducto
+            vals= {
+            'is_multiproduct' : True
             }
-            package.write(vals)
-        new_package.write({'location_id':location_id})
-        return new_package.name
+            new_package = self.create(vals)
+            parent_id = new_package.id
+
+            #el primer paquete marca la ubicación y el piking
+            #si hay un pauqte de la lista que no tiene ese picking o esa ubicación
+            #lo borro de la lista
+            domain = [('result_package_id', '=', package_ids[0]), ('picking_id.picking_type_id', '=',1)]
+            pack = self.env['stock.pack.operation'].search(domain)
+            picking_in = pack.picking_id
+            group_id = picking_in.group_id.id
+            domain = [('group_id','=',group_id), ('picking_type_id', '=',6)]
+            picking_ubi = self.env['stock.picking'].search(domain)
+
+            #si no tiene operaciones hago el do_prepare_partial
+            if not picking_ubi.pack_operation_ids:
+                picking_ubi.do_prepare_partial()
+
+            #escribo en todas las operaciones de ubicación de la lista de paquetes
+            #un result package_id del paquete creado
+            domain = [('package_id', 'in', package_ids), ('picking_id', '=', picking_ubi.id)]
+            ops = self.env['stock.pack.operation'].search(domain)
+            ops.write({'result_package_id':parent_id})
+
+            #creo una lista con los paquetes que si están en la lista realmente
+            list_ids = []
+            for op in ops:
+                list_ids.append(op.package_id.id)
+            #seteo todos los paquetes de la lista parent_id al paquete nuevo
+            domain = [('id', 'in', list_ids)]
+            packs = self.search(domain)
+            packs.write({'parent_id':parent_id})
+
+            #saco el picking del primer paquete
+            # y hago
+            picking_ubi.delete_picking_package_operations()
+            picking_ubi.do_prepare_partial()
+
+            res = new_package.name
+        return res
 
 
     @api.multi
