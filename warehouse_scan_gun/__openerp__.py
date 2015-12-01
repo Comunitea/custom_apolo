@@ -35,6 +35,7 @@
         "wave_report.xml",
         "product_view.xml",
         "stock_location.xml",
+        'security/ir.model.access.csv',
         "data/stock_location.xml"],
     "installable": True
 }
