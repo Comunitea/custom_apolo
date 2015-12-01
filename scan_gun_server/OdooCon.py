@@ -202,7 +202,7 @@ class OdooDao:
     def get_routes_menu2(self, type = False):
         res = {}
         domain =[]
-        domain = [('picking_type_id', '=',5), ('validated', '=', True), ('state', 'not in', ('draft','done','cancel'))]
+        domain = [('picking_type_id', '=',5), ('validated_state', '=', 'loaded'), ('state', 'not in', ('draft','done','cancel'))]
         route_ids = self.connection.search('stock.picking', domain, order ='orig_planned_date, min_date, name asc')
         if not route_ids:
             res = False

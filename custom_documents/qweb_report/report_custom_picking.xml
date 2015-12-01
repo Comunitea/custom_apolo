@@ -379,7 +379,7 @@
                 <table>
                   <tr class="tr-separated">
                     <td><label class="header-font">Delivery Number </label></td>
-                    <td> : <span t-esc="o.sale_id.client_order_ref" class="reference-font"/></td>
+                    <td> : <span t-esc="o.name" class="reference-font"/></td>
                   </tr>
                   <tr class="tr-separated">
                     <td><label class="header-font">Date Of Delivery </label></td>
@@ -387,7 +387,7 @@
                   </tr>
                   <tr class="tr-separated">
                     <td><label class="header-font">Customer Control Nº</label></td>
-                    <td> : ¿?<!--span t-esc="o.supplier_id.name"/--></td>
+                    <td> : <span t-esc="o.sale_id.client_order_ref"/></td>
                   </tr>
                 </table>
               </div>
@@ -467,7 +467,7 @@
                 <br/>
                 <br/>
                 <p><strong>Agente / Repartidor:</strong> <span t-if="o.route_detail_id" t-field="o.user_id.name"/> / <span t-if="o.route_detail_id" t-field="o.route_detail_id.comercial_id.name"/></p>
-                <span t-esc="o.sale_id.client_order_ref" class="reference-font"/>
+                <span t-esc="o.name" class="reference-font"/>
               </div>
               <div class="col-xs-1 no-padd-left">
               </div>
