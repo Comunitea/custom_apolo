@@ -54,7 +54,7 @@ class stock_picking_wave(models.Model):
                     'package': op.pack_id.id and op.pack_id.name or "",
                     'ORIGEN': op.location_id.bcd_name,
                     'DESTINO': 'Salida', #; op.location_dest_id.bcd_name,
-                    'PROCESADO': op.to_process or False,
+                    'to_process': op.to_process or False,
                     'VISITED': op.visited or False,
                     'origen_id': op.location_id.id or 0,
                     'destino_id': 0,

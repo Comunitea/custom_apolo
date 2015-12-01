@@ -238,9 +238,9 @@ class DatabaseImport:
                 product_data = self.read("product.product", product_ids[0], ["uom_id", "log_unit_id", "log_base_id", "log_box_id"])
                 loc_qty = row.box_qty
                 if str(int(row.product_id_map)) in PRODUCT_FIX:
-                    loc_qty = loc_qty / PRODUCT_FIX[str(int(row.product_id_map))]
+                    loc_qty = loc_qty / float(PRODUCT_FIX[str(int(row.product_id_map))])
                 elif str(int(row.product_id_map)) in PRODUCT_VAR:
-                    loc_qty = loc_qty * PRODUCT_VAR[str(int(row.product_id_map))]
+                    loc_qty = loc_qty * float(PRODUCT_VAR[str(int(row.product_id_map))])
 
                 if row.unit_qty:
                     if product_data["log_base_id"]:

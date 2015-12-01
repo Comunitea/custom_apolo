@@ -40,6 +40,7 @@ class StockTask(models.Model):
         new_task = task_obj.with_env(env2)
         vals = {
             'user_id': user_id,
+            'type':'ubication',
             'from_gun': True
         }
         task_id = new_task.create(vals)
