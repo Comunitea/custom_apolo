@@ -80,7 +80,8 @@ class stock_picking_wave(models.Model):
                     'ref': op.customer_id.ref or False,
                     'qty_available': op.product_id.qty_available or 0.00,
                     'name':op.wave_id.name or '',
-                    'is_package': op.is_package
+                    'is_package': op.is_package,
+                    'origen_bcd_code':op.location_id.bcd_code or ''
                     }
                 values['qty_available'] = op.pack_id.packed_qty or 0.00
                 # if op.operation_ids:
