@@ -62,6 +62,8 @@ class StockTask(models.Model):
         op_id = False
         try:
             op_id = task.add_loc_operation (pack_id)
+            if op_id:
+                op_id = op_id[0]
         except:
             message = u'paquete no encontrado'
         return op_id, message

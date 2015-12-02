@@ -2375,6 +2375,7 @@ class ScanGunProtocol(LineReceiver):
         #Si llega aquei cantidades bien o cantidades a revisar.
         #tengo lo que piden ==>> han pulsado F1 directamen
         if self.f1_ok:
+
             print u"Proceso con F1"
             values = {'to_process': True}
             res = self.factory.odoo_con.change_wave_op_values(self.user_id, self.wave_id, values)
@@ -3552,13 +3553,14 @@ class ScanGunProtocol(LineReceiver):
                 #llamamos con el id del parent
                 parent_id = self.factory.odoo_con.get_parent_package(self.user_id, self.int_(line))
                 if parent_id:
-                    self.handle_list_ubi_ops(u'%s%s'%(PRE_PACK,  parent_id))
                     pack_id = parent_id
+                    self.handle_list_ubi_ops(u'%s%s'%(PRE_PACK,  parent_id))
                     return
 
             #SI NO ESTA SE AÑADE (si se puede)
             pack_id = self.int_(line)
             op_id, message = self.factory.odoo_con.add_loc_operation_from_gun(self.user_id, self.task_id, pack_id)
+
                 # if not op_id:
                 #
                 # self.reset_vals()
@@ -3576,7 +3578,7 @@ class ScanGunProtocol(LineReceiver):
 
                 message = self.inverse(u'Operacion Creada')
             else:
-                message = self.inverse(u'Paquete No existe')
+                message = self.inverse(u'Ese paquete no hay ubicarlo')
             self._snd(self.get_str_list_ops(), message)
             return
 
