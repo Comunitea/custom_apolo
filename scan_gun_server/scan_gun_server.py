@@ -2808,7 +2808,8 @@ class ScanGunProtocol(LineReceiver):
 
             if line == KEY_CANCEL:
                 if wave_['to_process']==True:
-                    task_ops_finish = self.factory.odoo_con.set_wave_ops_values(self.user_id , self.wave_id, wave_report_id, {'to_process':False})
+                    
+                    task_ops_finish = self.factory.odoo_con.set_wave_ops_values(1 , self.wave_id, wave_report_id, {'to_process':False})
                     self.step = 0
                     self.state = "list_waves"
                     self._snd(self.get_str_list_waves(), 'Picking cancelado')

@@ -70,10 +70,13 @@ class StockTask(models.Model):
 
     @api.multi
     def reset_to_process(self, my_args):
-        for op in self.operation_ids:
-             op.to_process = False
-             op.visited = False
-             op.gun_procces = False
+
+        values = {'to_process': False,
+                  'visited' : False,
+                  'gun_process': False}
+
+        self.operation_ids.write(values)
+
 
     @api.multi
     def set_task_pause_state(self, my_args):
@@ -82,7 +85,8 @@ class StockTask(models.Model):
         pause_state = my_args.get ('pause_state', False)
 
         task_obj = self.search([('user_id', '=', user_id), ('paused', '=', False)])
-        env2 = task_obj.env(self._cr, user_id, self._context)
+        ctx = {'no_recompute': True}
+        env2 = task_obj.env(self._cr, user_id, ctx)
         task_obj_uid = task_obj.with_env(env2)
         task_obj_uid.write ({'paused':True})
 
@@ -270,15 +274,10 @@ class StockTask(models.Model):
         user_id = my_args.get('user_id', False)
         run = my_args.get('run', False)
         task_obj = self.browse(task_id)
-        env2 = task_obj.env(self._cr, user_id, self._context)
+        ctx = {'no_recompute': True}
+        env2 = task_obj.env(self._cr, user_id, ctx)
         task_obj_uid = task_obj.with_env(env2)
-
-        for op_ in task_obj_uid.operation_ids:
-            #si se mueve pause a run no se pone a false to_process
-            #if not run:
-                #op_.to_process = False
-            op_.visited = False
-
+        task_obj_uid.operation_ids.write ({'visited':False})
         return True
 
     @api.multi
@@ -327,6 +326,7 @@ class StockTask(models.Model):
 
         task_obj = self.browse(task_id)
         env2 = task_obj.env(self._cr, user_id, self._context)
+
         task_obj_uid = task_obj.with_env(env2)
 
         task_obj_uid.cancel_task()

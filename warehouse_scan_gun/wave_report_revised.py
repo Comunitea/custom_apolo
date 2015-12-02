@@ -64,7 +64,8 @@ class wave_report(models.Model):
         user_id = my_args.get('user_id', False)
         vals = my_args.get('values', False)
         wave_obj = self.browse(id)
-        env2 = wave_obj.env(self._cr, user_id, self._context)
+        ctx = {'no_recompute': True}
+        env2 = wave_obj.env(self._cr, user_id, ctx)
         wave = wave_obj.with_env(env2)
         res = False
         product_id = vals.get('product_id', False)
@@ -138,16 +139,19 @@ class wave_report(models.Model):
 
     @api.multi
     def change_wave_op_values(self, my_args):
-
         id = my_args.get('id', 0)
         user_id = my_args.get('user_id', False)
         values = my_args.get('values', {})
         wave_obj = self.browse(id)
-        env2 = wave_obj.env(self._cr, user_id, self._context)
+        ctx = {'no_recompute': True}
+        env2 = wave_obj.env(self._cr, user_id, ctx)
+        #env2 = wave_obj.env(self._cr, user_id, self._context)
         wave = wave_obj.with_env(env2)
         res = False
         if wave:
-            res = wave.operation_ids.write(values)
+            for op in wave.operation_ids:
+                op.write (values)
+            #res = wave.operation_ids.write(values)
         return res
 
 
