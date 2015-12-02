@@ -1,44 +1,248 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-        <!-- TOP HEADER -->
-      <template id="report_custom_invoice">
-        <style type="text/css">
-          .top_part{
+    <!-- TOP HEADER -->
+    <template id="report_custom_invoice">
+    <!-- Se añade el css del informe de picking para que -->
+    <!-- pueda ser recogido por el informe del módulo stock_picking_batch-->
+    <style type="text/css">
+        .top_part{
             min-height:30mm;
-          }
-          .middle_part{
+        }
+        .middle_part{
             min-height:162mm;
-          }
-          .middle_part_summary{
+        }
+        .middle_part_summary{
             min-height:172mm;
-          }
-          .top-border {
+        }
+        .top-border {
             border-top: solid 2px #000000;
-          }
-          .table1{
+        }
+        .table1{
             width: 100%;
             font-size: 10px;
-          }
-          p{
+        }
+        p{
             line-height: 9px;
             font-size: 11px;
-          }
-          strong {
+        }
+        strong {
             font-size: 12px;
-          }
-          .no-padd-left {
+        }
+        .no-padd-left {
             padding-left: 0px !important;
-          }
-          .no-padd-right {
+        }
+        .no-padd-right {
             padding-right: 0px !important;
-          }
-          .my_margin_top {
+        }
+        .my_margin_top {
             min-height: 50mm;
-          }
+        }
 
-      </style>
-          <t t-call="report.html_container">
+        .top-border-p {
+            border-top: solid 2px #000000;
+        }
+        p {
+            line-height: 9px;
+            font-size: 11px;
+        }
+        strong {
+            font-size: 12px;
+        }
+        th{
+            font-size: 7px;
+        }
+        .no-padd-left-p {
+            padding-left: 0px !important;
+        }
+        .table1-p{
+            width: 100%;
+            font-size: 10px;
+        }
+        .table2-p{
+            width: 100%;
+        }
+        .table2-p td{
+            font-size: 12px;
+        }
+        .table2-p .col-ref{
+            width: 10%;
+        }
+        .table2-p .col-des{
+            width: 20%;
+        }
+        .table2-p .col-iva{
+            width: 10%;
+        }
+        .table2-p .col-qty{
+            width: 10%;
+        }
+        .table2-p .col-unit{
+            width: 20%;
+        }
+        .table2-p .col-pp{
+            width: 10%;
+        }
+        .table2-p .col-ap{
+            width: 10%;
+        }
+        .table2-p .col-net{
+            width: 10%;
+        }
+        .table2-p td{
+            padding-right:4px;
+        }
+        .table2-p th{
+            padding-right:4px;
+         }
+        .table2-p thead{
+            border-top: solid 2px #000000;
+            border-bottom: solid 2px #000000;
+        }
+        .table2-p tfoot{
+            border-top: solid 2px #000000;
+        }
+        .top_part-p{
+            min-height:30mm;
+        }
+        .middle_part-p{
+            min-height:162mm;
+        }
+        .my_footer_direct-p{
+            border-top: solid 2px #000000;
+            border-bottom: solid 2px #000000;
+            min-height:18mm;
+        }
+        .my_footer_indirect-p{
+            border-top: solid 2px #000000;
+            min-height:18mm;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .my_footer_indirect-p .right{
+            text-align: right;
+        }
+        .table3t-p{
+            width: 100%;
+        }
+        .table3t-p th strong{
+            font-size: 10px;
+        }
+        .table3t-p .col-fbase{
+            width:20%;
+        }
+        .table3t-p .col-fiva{
+            width:6%;
+        }
+        .table3t-p .col-fivaimp{
+            width:20%;
+        }
+        .table3t-p .col-freq{
+            width:6%;
+        }
+        .table3t-p .col-freqimp{
+            width:15%;
+        }
+        .table3t-p .col-ftd{
+            width:20%;
+        }
+        .table3t-p .col-fap"{
+            width:20%;
+        }
+        .table3t-p .col-ftotal{
+            width:20%;
+        }
+        .table3t-p td{
+            font-size: 11px;
+        }
+        .track_info-p{
+            background-color:#C0C0C0;
+            font-size:9px;
+        }
+        .full-border-p{
+            border-top: solid 1px #000000;
+            border-left: solid 1px #000000;
+            border-bottom: solid 1px #000000;
+            border-right: solid 1px #000000;
+            margin-left: 6px;
+            margin-right: 6px;
+        }
+        .full-border-p2{
+            border-top: solid 1px #000000;
+            border-left: solid 1px #000000;
+            border-bottom: solid 1px #000000;
+            border-right: solid 1px #000000;
+        }
+        .header_part-p{
+            min-height: 45mm;
+        }
+        .full-height-p{
+            height: 45mm;
+        }
+        .header-font-p{
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .reference-font-p{
+            font-weight: bold;
+            font-size: 20px;
+            font-family: monospace;
+        }
+        .tr-separated-p{
+            line-height: 170%;
+        }
+        .foot-text-p .Text1{
+            font-size: 10px;
+            text-align: center;
+        }
+        .table4-p{
+            width: 100%;
+        }
+        .table4-p .col-ref{
+            width:9%;
+        }
+        .table4-p .col-prod{
+            width:31%;
+        }
+        .table4-p .col-sc{
+            width:6%;
+        }
+        .table4-p .col-sc-right{
+            width:6%;
+            text-align: right;
+            padding-right: 4px;
+        }
+        .table4-p .col-ean{
+            width:14%;
+        }
+        .table4-p .col-total{
+            width:8%;
+        }
+        .table4-p thead{
+            border-bottom: solid 2px #000000;
+        }
+        .table4-p tfoot{
+            border-top: solid 2px #000000;
+        }
+        .table4-p .col-ref-td{
+            text-align: right;
+            padding-right: 3px;
+        }
+        .table4-p td{
+            font-size: 12px;
+        }
+        .table5-p{
+            width: 100%;
+        }
+        .table5-p td .totaluds{
+            text-aligh: right;
+        }
+        .table5-p td{
+            padding-top: 5px;
+        }
+
+        </style>
+            <t t-call="report.html_container">
               <t t-foreach="docs" t-as="o">
 
                   <div class="page">

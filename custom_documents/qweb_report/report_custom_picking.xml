@@ -2,8 +2,10 @@
 <openerp>
     <data>
         <template id="report_custom_picking">
+        <!-- Se añade el css del informe de factura para que -->
+        <!-- pueda ser recogido por el informe del módulo stock_picking_batch-->
         <style type="text/css">
-        .top-border {
+        .top-border-p {
             border-top: solid 2px #000000;
         }
         p {
@@ -16,114 +18,114 @@
         th{
          font-size: 7px;
         }
-        .no-padd-left {
+        .no-padd-left-p {
            padding-left: 0px !important;
         }
-        .table1{
+        .table1-p{
           width: 100%;
           font-size: 10px;
         }
-        .table2{
+        .table2-p{
          width: 100%;
         }
-        .table2 td{
+        .table2-p td{
          font-size: 12px;
         }
-        .table2 .col-ref{
+        .table2-p .col-ref{
           width: 10%;
         }
-        .table2 .col-des{
+        .table2-p .col-des{
           width: 20%;
         }
-        .table2 .col-iva{
+        .table2-p .col-iva{
           width: 10%;
         }
-        .table2 .col-qty{
+        .table2-p .col-qty{
           width: 10%;
         }
-        .table2 .col-unit{
+        .table2-p .col-unit{
           width: 20%;
         }
-        .table2 .col-pp{
+        .table2-p .col-pp{
           width: 10%;
         }
-        .table2 .col-ap{
+        .table2-p .col-ap{
           width: 10%;
         }
-        .table2 .col-net{
+        .table2-p .col-net{
           width: 10%;
         }
-        .table2 td{
+        .table2-p td{
           padding-right:4px;
         }
-        .table2 th{
+        .table2-p th{
           padding-right:4px;
          }
-        .table2 thead{
+        .table2-p thead{
           border-top: solid 2px #000000;
           border-bottom: solid 2px #000000;
         }
-        .table2 tfoot{
+        .table2-p tfoot{
           border-top: solid 2px #000000;
         }
-        .top_part{
+        .top_part-p{
           min-height:30mm;
         }
-        .middle_part{
+        .middle_part-p{
           min-height:162mm;
         }
-        .my_footer_direct{
+        .my_footer_direct-p{
           border-top: solid 2px #000000;
           border-bottom: solid 2px #000000;
           min-height:18mm;
         }
-        .my_footer_indirect{
+        .my_footer_indirect-p{
           border-top: solid 2px #000000;
           min-height:18mm;
           font-size: 10px;
           font-weight: bold;
         }
-        .my_footer_indirect .right{
+        .my_footer_indirect-p .right{
           text-align: right;
         }
-        .table3{
+        .table3t-p{
           width: 100%;
         }
-        .table3 th strong{
+        .table3t-p th strong{
           font-size: 10px;
         }
-        .table3 .col-fbase{
+        .table3t-p .col-fbase{
           width:20%;
         }
-        .table3 .col-fiva{
+        .table3t-p .col-fiva{
           width:6%;
         }
-        .table3 .col-fivaimp{
+        .table3t-p .col-fivaimp{
           width:20%;
         }
-        .table3 .col-freq{
+        .table3t-p .col-freq{
           width:6%;
         }
-        .table3 .col-freqimp{
+        .table3t-p .col-freqimp{
           width:15%;
         }
-        .table3 .col-ftd{
+        .table3t-p .col-ftd{
           width:20%;
         }
-        .table3 .col-fap"{
+        .table3t-p .col-fap"{
           width:20%;
         }
-        .table3 .col-ftotal{
+        .table3t-p .col-ftotal{
           width:20%;
         }
-        .table3 td{
+        .table3t-p td{
           font-size: 11px;
         }
-        .track_info{
+        .track_info-p{
           background-color:#C0C0C0;
           font-size:9px;
         }
-        .full-border{
+        .full-border-p{
           border-top: solid 1px #000000;
           border-left: solid 1px #000000;
           border-bottom: solid 1px #000000;
@@ -131,42 +133,284 @@
           margin-left: 6px;
           margin-right: 6px;
         }
-        .full-border2{
+        .full-border-p2{
           border-top: solid 1px #000000;
           border-left: solid 1px #000000;
           border-bottom: solid 1px #000000;
           border-right: solid 1px #000000;
         }
-        .header_part{
+        .header_part-p{
           min-height: 45mm;
         }
-        .full-height{
+        .full-height-p{
           height: 45mm;
         }
-        .header-font{
+        .header-font-p{
           font-weight: bold;
           font-size: 14px;
         }
-        .reference-font{
+        .reference-font-p{
           font-weight: bold;
           font-size: 20px;
           font-family: monospace;
         }
-        .tr-separated{
+        .tr-separated-p{
           line-height: 170%;
         }
-        .foot-text .Text1{
+        .foot-text-p .Text1{
           font-size: 10px;
           text-align: center;
+        }
+
+        .top_part{
+        min-height:30mm;
+        }
+        .middle_part{
+        min-height:162mm;
+        }
+        .middle_part_summary{
+        min-height:172mm;
+        }
+        .top-border {
+        border-top: solid 2px #000000;
+        }
+        .table1{
+        width: 100%;
+        font-size: 10px;
+        }
+        p{
+        line-height: 9px;
+        font-size: 11px;
+        }
+        strong {
+        font-size: 12px;
+        }
+        .no-padd-left {
+        padding-left: 0px !important;
+        }
+        .no-padd-right {
+        padding-right: 0px !important;
+        }
+        .my_margin_top {
+        min-height: 50mm;
+        }
+                .summary-table{
+        width: 100%;
+        }
+        .summary-table td{
+        padding-right:4px;
+        }
+        .summary-table th{
+        padding-right:4px;
+        }
+        .summary-table thead{
+        border-top: solid 2px #000000;
+        border-bottom: solid 2px #000000;
+        }
+        .summary-table td span{
+        font-size: 10px;
+        }
+        .summary-table .col-sp-empty1{
+        width: 5%;
+        }
+        .summary-table .col-sp-code{
+        width: 10%;
+        }
+        .summary-table .col-sp-name{
+        width: 30%;
+        }
+        .summary-table .col-sp-qty{
+        width: 10%;
+        }
+        .summary-table .col-sp-unit{
+        width: 10%;
+        }
+        .summary-table .col-sp-total{
+        width: 10%;
+        text-align: right;
+        }
+        .summary-table .col-sp-iva{
+        width: 10%;
+        }
+        .summary-table .col-sp-empty2{
+        width: 20%;
+        }
+                  .table-del{
+          width: 100%;
+        }
+        .table-del td span{
+          font-size: 10px;
+        }
+        .table-del .col-ref{
+          width: 5%;
+        }
+        .table-del .col-des{
+          width: 25%;
+        }
+        .table-del .col-iva{
+          width: 10%;
+        }
+        .table-del .col-qty{
+          width: 10%;
+        }
+        .table-del .col-unit{
+          width: 20%;
+        }
+        .table-del .col-pp{
+          width: 10%;
+        }
+        .table-del .col-ap{
+          width: 10%;
+        }
+        .table-del .col-net{
+          width: 10%;
+        }
+
+        .table-del td{
+         padding-right:4px;
+        }
+        .table-del th{
+          padding-right:4px;
+         }
+        .table-del thead{
+          border-top: solid 2px #000000;
+          border-bottom: solid 2px #000000;
+        }
+        .table-del tfoot{
+          border-top: solid 2px #000000;
+        }
+               .table-ga{
+            width: 100%;
+          }
+          .table-ga td span{
+            font-size: 10px;
+          }
+          .table-ga .col-ga-code{
+            width: 10%;
+          }
+          .table-ga .col-ga-name{
+            width: 40%;
+          }
+          .table-ga .col-ga-date{
+            width: 30%;
+          }
+          .table-ga .col-ga-import{
+            width: 20%;
+          }
+          .table-ga td{
+           padding-right:4px;
+          }
+          .table-ga th{
+            padding-right:4px;
+           }
+          .table-ga thead{
+            border-top: solid 2px #000000;
+            border-bottom: solid 2px #000000;
+          }
+
+          .table-ga .col-ga-blank{
+            min-width: 40mm;
+          }
+          .table-ga .text-bold{
+            font-weight: bold;
+          }
+                      .table-bp{
+          width: 100%;
+        }
+        .table-bp td span{
+          font-size: 10px;
+        }
+        .table-bp td{
+         padding-right:4px;
+        }
+        .table-bp th{
+          padding-right:4px;
+         }
+        .table-bp thead{
+          border-top: solid 2px #000000;
+          border-bottom: solid 2px #000000;
+        }
+        .table-bp tfoot{
+          border-top: solid 1px #000000;
+        }
+        .table-bp .col-bp-code{
+          width: 10%;
+        }
+        .table-bp .col-bp-desc{
+          width: 33%;
+        }
+        .table-bp .col-bp-qty{
+          width: 11%;
+        }
+        .table-bp .col-bp-unit{
+          width: 11%;
+        }
+        .table-bp .col-bp-price{
+          width: 10%;
+        }
+        .table-bp .col-bp-disc{
+          width: 15%;
+        }
+        .table-bp .col-bp-total{
+          width: 10%;
+        }
+                  .my_footer{
+        border-top: solid 2px #000000;
+        border-bottom: solid 2px #000000;
+        min-height:13mm;
+        }
+        .table_totals{
+        width: 100%;
+        }
+        .table_totals th strong{
+        font-size: 10px;
+        }
+        .table_totals .col-fbase{
+        width:20%;
+        }
+        .table_totals .col-fiva{
+        width:6%;
+        }
+        .table_totals .col-fivaimp{
+        width:20%;
+        }
+        .table_totals .col-freq{
+        width:6%;
+        }
+        .table_totals .col-freqimp{
+        width:15%;
+        }
+        .table_totals .col-ftd{
+        width:20%;
+        }
+        .table_totals .col-fap"{
+        width:20%;
+        }
+        .table_totals .col-ftotal{
+        width:20%;
+        }
+        .table_totals td{
+        font-size: 9px;
+        }
+        .table_totals .full-border{
+        border-top: solid 1px #000000;
+        border-left: solid 1px #000000;
+        border-bottom: solid 1px #000000;
+        border-right: solid 1px #000000;
+        margin-left: 6px;
+        margin-right: 6px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 10px;
         }
         </style>
           <t t-call="report.html_container">
                 <t t-foreach="docs" t-as="o">
                     <!-- CUSTOM VALUED REPORT -->
                     <div class="page">
-                      <t t-call="custom_documents.picking_header_part"/>
-                        <t t-call="custom_documents.picking_top_part"/>
-                         <div class="row middle_part">
+                      <t t-call="custom_documents.picking_header_part-p"/>
+                        <t t-call="custom_documents.picking_top_part-p"/>
+                         <div class="row middle_part-p">
                            <div t-if="o.indirect">
                              <t t-call="custom_documents.picking_indirect_table"/>
                            </div>
@@ -182,7 +426,7 @@
         </template>
 
         <template id="picking_direct_table">
-          <table class="table2 no-padd-left">
+          <table class="table2-p no-padd-left-p">
             <thead>
               <tr>
                   <th class="col-ref"><strong>Ref.</strong></th>
@@ -230,7 +474,7 @@
                     </div>
                   </td>
               </tr>
-              <tr class="track_info" t-if="o.partner_id.pick_print_op == 'tracked'">
+              <tr class="track_info-p" t-if="o.partner_id.pick_print_op == 'tracked'">
                  <t t-foreach="l['lots']" t-as="op_info">
                    <td></td>
                    <td style="font-size: 9px" colspan="1">
@@ -281,53 +525,54 @@
 
         <template id="picking_indirect_table">
           <style type="text/css">
-            .table4{
+            .table4-p{
               width: 100%;
             }
-            .table4 .col-ref{
+            .table4-p .col-ref{
               width:9%;
             }
-            .table4 .col-prod{
+            .table4-p .col-prod{
               width:31%;
             }
-            .table4 .col-sc{
+            .table4-p .col-sc{
               width:6%;
             }
-            .table4 .col-sc-right{
+            .table4-p .col-sc-right{
               width:6%;
               text-align: right;
               padding-right: 4px;
             }
-            .table4 .col-ean{
+            .table4-p .col-ean{
               width:14%;
             }
-            .table4 .col-total{
+            .table4-p .col-total{
               width:8%;
             }
-            .table4 thead{
+            .table4-p thead{
               border-bottom: solid 2px #000000;
             }
-            .table4 tfoot{
+            .table4-p tfoot{
               border-top: solid 2px #000000;
             }
-            .table4 .col-ref-td{
+            .table4-p .col-ref-td{
               text-align: right;
               padding-right: 3px;
             }
-            .table4 td{
+            .table4-p td{
               font-size: 12px;
             }
-            .table5{
+            .table5-p{
               width: 100%;
             }
-            .table5 td .totaluds{
+            .table5-p td .totaluds{
               text-aligh: right;
             }
-            .table5 td{
+            .table5-p td{
               padding-top: 5px;
             }
+
           </style>
-          <table class="table4 no-padd-left">
+          <table class="table4-p no-padd-left-p">
             <thead>
               <th class="col-ref text-center"><strong>Ref.</strong></th>
               <th class="col-prod"><strong>Product</strong></th>
@@ -355,7 +600,7 @@
               </tr>
             </tbody>
             <tfoot>
-              <table class="table5">
+              <table class="table5-p">
                 <tr t-foreach="ind_totals[o.id]" t-as="ind_t">
                   <td colspan="2"><strong><span t-esc="ind_t[0]"/></strong></td>
                   <td colspan="2"><strong><span t-esc="ind_t[1]"/></strong></td>
@@ -367,26 +612,26 @@
           </table>
         </template>
 
-        <template id="picking_header_part">
-          <div class="header_part row">
+        <template id="picking_header_part-p">
+          <div class="header_part-p row">
             <div t-if="o.indirect">
-              <div class="col-xs-4 header_part">
+              <div class="col-xs-4 header_part-p">
                 <img t-if="o.supplier_id.image" t-att-src="'data:image/png;base64,%s' % o.supplier_id.image" style="max-height: 45mm;"/>
               </div>
-              <div class="col-xs-8 header_part">
+              <div class="col-xs-8 header_part-p">
                 <h4>Delivery Pick</h4>
                 <br/>
                 <table>
-                  <tr class="tr-separated">
-                    <td><label class="header-font">Delivery Number </label></td>
-                    <td> : <span t-esc="o.name" class="reference-font"/></td>
+                  <tr class="tr-separated-p">
+                    <td><label class="header-font-p">Delivery Number </label></td>
+                    <td> : <span t-esc="o.name" class="reference-font-p"/></td>
                   </tr>
-                  <tr class="tr-separated">
-                    <td><label class="header-font">Date Of Delivery </label></td>
+                  <tr class="tr-separated-p">
+                    <td><label class="header-font-p">Date Of Delivery </label></td>
                     <td> : <span t-esc="o.min_date"/></td>
                   </tr>
-                  <tr class="tr-separated">
-                    <td><label class="header-font">Customer Control Nº</label></td>
+                  <tr class="tr-separated-p">
+                    <td><label class="header-font-p">Customer Control Nº</label></td>
                     <td> : <span t-esc="o.sale_id.client_order_ref"/></td>
                   </tr>
                 </table>
@@ -395,10 +640,10 @@
           </div>
         </template>
 
-        <template id="picking_top_part">
-            <div class="row top_part" t-if="not o.indirect">
-              <div class="col-xs-7 top-border no-padd-left">
-                  <div class="col-xs-3 no-padd-left">
+        <template id="picking_top_part-p">
+            <div class="row top_part-p" t-if="not o.indirect">
+              <div class="col-xs-7 top-border-p no-padd-left-p">
+                  <div class="col-xs-3 no-padd-left-p">
                         <strong>PICKING:</strong>
                   </div>
                   <div class="col-xs-4">
@@ -416,7 +661,7 @@
                       <p>Tlfo. <span t-field="o.partner_id.phone"/></p>
                   </div>
                   <div>
-                      <table class="table1">
+                      <table class="table1-p">
                       <thead>
                           <tr>
                               <th><strong>Agent</strong></th>
@@ -446,10 +691,10 @@
                         <br/>
                         <br/>
                         <!-- Page: <span class="page"/> de <span class="topage"/> -->
-                        <div class="col-xs-7 no-padd-left">
+                        <div class="col-xs-7 no-padd-left-p">
                           <p><strong>INVOICE TO</strong></p>
                         </div>
-                        <div class="col-xs-5 no-padd-left text-right">
+                        <div class="col-xs-5 no-padd-left-p text-right">
                           <p>Pág. 1 de 1</p>
                         </div>
                         <p><span t-field="o.partner_id.commercial_partner_id.ref"/> <span t-field="o.partner_id.commercial_partner_id.name"/></p>
@@ -461,17 +706,17 @@
                 </div>
             </div>
 
-            <div  class="row top_part"  t-if="o.indirect">
-              <div class="col-xs-7 no-padd-left">
+            <div  class="row top_part-p"  t-if="o.indirect">
+              <div class="col-xs-7 no-padd-left-p">
                 <br/>
                 <br/>
                 <br/>
                 <p><strong>Agente / Repartidor:</strong> <span t-if="o.route_detail_id" t-field="o.user_id.name"/> / <span t-if="o.route_detail_id" t-field="o.route_detail_id.comercial_id.name"/></p>
-                <span t-esc="o.name" class="reference-font"/>
+                <span t-esc="o.name" class="reference-font-p"/>
               </div>
-              <div class="col-xs-1 no-padd-left">
+              <div class="col-xs-1 no-padd-left-p">
               </div>
-              <div class="col-xs-4 no-padd-left">
+              <div class="col-xs-4 no-padd-left-p">
                 <div t-if="o.partner_id.commercial_partner_id">
                     <br/>
                     <div class="col-xs-6 row">
@@ -493,8 +738,8 @@
         </template>
 
         <template id="picking_bottom_part">
-          <div class="row my_footer_direct" t-if="not o.indirect and o.partner_id.pick_print_op">
-              <table class="table3" t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">
+          <div class="row my_footer_direct-p" t-if="not o.indirect and o.partner_id.pick_print_op">
+              <table class="table3t-p" t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing'">
               <thead>
                   <tr>
                       <th class="col-fbase text-right"><strong>IMPONIBLE BASE</strong></th>
@@ -513,7 +758,7 @@
                         <span t-esc="totals[o.id]['iva_import']"/>
                     </td>
                     <td class="text-center">
-                       <div class="full-border">
+                       <div class="full-border-p">
                         <strong><span t-esc="totals[o.id]['total_doc']"/></strong>
                       </div>
                     </td>
@@ -528,7 +773,7 @@
               </table>
           </div>
           <div class="row" t-if="o.indirect">
-            <div class="my_footer_indirect">
+            <div class="my_footer_indirect-p">
               <div class="col-xs-4">
                 OBSERVATIONS:
               </div>
@@ -536,7 +781,7 @@
                 SIGN, STAMP ACCORDING CUSTOMER AND DATE RECEIVING MERCHANDISE
               </div>
             </div>
-            <div class="foot-text">
+            <div class="foot-text-p">
               <p class="Text1"><span t-esc="o.supplier_id.name"/>, <span t-esc="o.supplier_id.street"/> <span t-esc="o.supplier_id.street2"/> - Teléfono <span t-esc="o.supplier_id.phone"/> - Fax <span t-esc="o.supplier_id.fax"/> - <span t-esc="o.supplier_id.zip"/> <span t-esc="o.supplier_id.city"/></p>
               <p class="Text1"><span t-esc="o.supplier_id.vat"/></p>
               <!-- <p class="Text2">Registro Mercantil de Barcelona, Hoja B343092, Inscripción 129, Folio 140, Tomo 39375 A28660520</p> -->
