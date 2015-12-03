@@ -566,7 +566,7 @@ class ScanGunProtocol(LineReceiver):
         self.task_id = False
         self.vals= VALS
         self.num_order_list_ops = 1
-        print "handle_menu" + str(line)
+        print "handle_menu %s"%line
         if line not in ["0", "1","3", "4", "5", "9"] and line != KEY_VOLVER:
             str_error = u"La opcion %s no es valida.\nReintentar:\n"%line
             self.state='menu1'
@@ -635,7 +635,7 @@ class ScanGunProtocol(LineReceiver):
         self.last_state = self.state
 
         if res==1:
-            print "Tengo tarea activa: " + str(self.task_id)
+            print u"Tengo tarea activa: %s"%self.task_id
             self.state = "tasks"
             str_menu = self.get_str_menu_task()
         elif res ==0:
@@ -3956,7 +3956,7 @@ class ScanGunProtocol(LineReceiver):
                 self._snd(self.get_str_form_ubi_ops(), message)
                 return
 
-            print "Enviando " + str(new_state) + " para id :" +str(self.op_id)
+            print u"Enviando %s para id %s"%(new_state, self.op_id)
             task_ops_finish = self.factory.odoo_con.set_op_to_process(self.user_id, self.task_id, self.op_id, new_state)
             self.ops = self.factory.odoo_con.get_ops(self.user_id, self.task_id)
             #task_ops_finish es que estan todas finalizadas.
@@ -4230,7 +4230,7 @@ class ScanGunProtocol(LineReceiver):
                 self._snd(self.get_str_form_ubi_ops(), message)
                 return
 
-            print "Enviando " + str(new_state) + " para id :" +str(self.op_id)
+            print u"Enviando %s para id %s"%(new_state, self.op_id)
             task_ops_finish = self.factory.odoo_con.set_op_to_process(self.user_id, self.task_id, self.op_id, new_state)
             self.ops = self.factory.odoo_con.get_ops(self.user_id, self.task_id)
             #task_ops_finish es que estan todas finalizadas.
@@ -4270,7 +4270,7 @@ class ScanGunProtocol(LineReceiver):
                 new_state = True
             if line == KEY_NO:
                 new_state = False
-            print "Enviando " + str(new_state) + " para id :" +str(self.op_id)
+            print u"Enviando %s para id %s"%(new_state, self.op_id)
             task_ops_finish = self.factory.odoo_con.set_op_to_process(self.user_id, self.task_id, self.op_id, new_state)
 
             if not task_ops_finish:
@@ -4404,7 +4404,7 @@ class ScanGunProtocol(LineReceiver):
         return str_menu
 
     def handle_products_by_zone(self, line):
-        print "handle_products_by_zone" + str(line)
+        print u"handle_products_by_zone %s"%line
 
         if line== KEY_VOLVER:
             self.state = "menu1"
@@ -5143,7 +5143,7 @@ class ScanGunProtocol(LineReceiver):
     def get_views(self, line, message = ""):
 
         if self.type =='reposition':
-            print "get_views: " + line + "task: " +str(self.task_id) + " > Op: " +str(self.op_id)
+            #print "get_views: " + line + "task: " +str(self.task_id) + " > Op: " +str(self.op_id)
             self.op_id = self.ops[str(self.active_op)]['ID']
             vis = self.ops[str(self.active_op)]['VISITED']
             proc = self.ops[str(self.active_op)]['V']
@@ -5167,7 +5167,7 @@ class ScanGunProtocol(LineReceiver):
                 self._snd(self.get_str_form_repo_ops() + message)
 
         if self.type =='ubication':
-            print "get_views: " + line + "task: " +str(self.task_id) + " > Op: " +str(self.op_id)
+            #print "get_views: " + line + "task: " +str(self.task_id) + " > Op: " +str(self.op_id)
             self.op_id = self.ops[str(self.active_op)]['ID']
             vis = self.ops[str(self.active_op)]['VISITED']
             proc = self.ops[str(self.active_op)]['to_process']
@@ -5357,10 +5357,12 @@ class ScanGunProtocol(LineReceiver):
         self.routes = self.factory.odoo_con.get_routes_menu(self.user_id, type)
         inc=1
         if self.routes:
-            for key in self.routes:
-                key_ = int(key)
-                if key_>= self.num_order_list_ops and key_<= self.num_order_list_ops + MAX_NUM_ONE:
-                    str_menu += "%s -> %s\n"%(key, self.routes[key][1])
+            for key in range(1, len(self.routes)+1):
+                ruta = self.routes[str(str(key))][1]
+                print u'%s > %s'%(key, ruta)
+                if key>= self.num_order_list_ops and key<= self.num_order_list_ops + MAX_NUM_ONE:
+                    str_menu += "%s -> %s\n"%(key, ruta)
+
         else:
             str_menu +=u"\nNo hay rutas validadas\n"
         keys = u"%s Volver"%KEY_VOLVER
@@ -5369,7 +5371,7 @@ class ScanGunProtocol(LineReceiver):
 
     def handle_route_selected(self, line=False):
 
-        print "handle_route_selected" + str(line)
+        print u"handle_route_selected: %s"%line
         if line== KEY_VOLVER:
             self.state = "menu1"
             self.machine_id = False
@@ -5414,7 +5416,7 @@ class ScanGunProtocol(LineReceiver):
 
     def handle_machine_selected(self, line=False):
 
-        print "handle_mchines" + str(line)
+        print u"handle_mchines %s"%line
 
         if line== KEY_VOLVER:
             self.state = "menu1"
@@ -5962,7 +5964,7 @@ class ScanGunProtocol(LineReceiver):
 
         if order_line == PRE_PACK:
             self.pack = self.factory.odoo_con.get_pack_gun_info(self.user_id, line_int)
-            self.list_packages = self.factory.odoo_con.get_pack_candidates(self.pack['product_id'], available_qty)
+            self.list_packages = self.factory.odoo_con.get_pack_candidates(self.pack['product_id'], 0)
             self.step = True
             self._snd(self.get_str_info_producto())
             return
@@ -6287,7 +6289,7 @@ class ScanGunProtocol(LineReceiver):
         return
 
     def print_packs(self, packs):
-        print "Imprimiendo: %s"%packs[0]
+        print u"Imprimiendo: %s"%packs[0]
         if not self.print_tag_option:
             return
         if len(packs)<1:
