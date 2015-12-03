@@ -39,11 +39,11 @@ class custom_picking_parser(models.AbstractModel):
         pd = pick_date.split("-")
         pick_date = pd[2] + "/" + pd[1] + "/" + pd[0]
         totals = {
-            'base': '{0:.2f}'.format(pick.amount_untaxed),
-            'iva_import': '{0:.2f}'.format(pick.amount_tax),
-            'total_doc': '{0:.2f}'.format(pick.amount_total),
-            'acc_paid': '{0:.2f}'.format(0.00),
-            'total_paid': '{0:.2f}'.format(pick.amount_total - 0.0),
+            'base': '{0:.2f}'.format(pick.amount_untaxed_acc),
+            'iva_import': '{0:.2f}'.format(pick.amount_tax_acc),
+            'total_doc': '{0:.2f}'.format(pick.amount_total_acc),
+            'acc_paid': '{0:.2f}'.format(pick.receipt_amount),
+            'total_paid': '{0:.2f}'.format(pick.amount_total_acc - pick.receipt_amount),
             'pick_date': pick_date
         }
         move_qty = 0.0
@@ -82,21 +82,23 @@ class custom_picking_parser(models.AbstractModel):
                     lots.append(op_info)
 
             pu = 0.0
+            p_app = 0.0
             if move.procurement_id and move.procurement_id.sale_line_id:
                 pu = move.procurement_id.sale_line_id.price_udv
+                p_app = pu * (1 - (move.procurement_id.sale_line_id.discount / 100.0))
             dic = {
                 'ref': move.product_id.default_code,
                 'des': move.product_id.name,
                 'iva': iva,
-                'qty': '{0:.4f}'.format(move.product_uos_qty),
+                'qty': '{0:.4f}'.format(move.accepted_qty),
                 'unit': move.product_uos.name,
                 'pric_price': '{0:.2f}'.format(pu),
-                'app_price': '{0:.2f}'.format(pu),
-                'net': '{0:.2f}'.format(move.price_subtotal),
+                'app_price': '{0:.2f}'.format(p_app),
+                'net': '{0:.2f}'.format(move.price_subtotal_accepted),
                 'lots': lots
             }
-            move_qty += move.product_uos_qty
-            move_net += move.price_subtotal
+            move_qty += move.accepted_qty
+            move_net += move.price_subtotal_accepted
             lines.append(dic)
 
             if pick.indirect:
@@ -104,20 +106,25 @@ class custom_picking_parser(models.AbstractModel):
                 prod_name = move.product_id.name
                 if move.product_id.seller_ids:
                     supp_info = move.product_id.seller_ids[0]
-                    show_name = supp_info.name.supp_name_prod
-                    if show_name and supp_info.product_name:
+                    # show_name = supp_info.name.supp_name_prod
+                    # if show_name and supp_info.product_name:
+                    #     prod_name = supp_info.product_name
+                    # if show_name and supp_info.product_code:
+                    #     prod_code = supp_info.product_code
+
+                    if supp_info.product_name:
                         prod_name = supp_info.product_name
-                    if show_name and supp_info.product_code:
+                    if supp_info.product_code:
                         prod_code = supp_info.product_code
 
                 prod_ean_box = move.product_id.ean14 or ''
                 prod_ean_consum = move.product_id.ean_consum or ''
-                if move.price_subtotal:
-                    qty = move.product_uos_qty
+                if move.price_subtotal_accepted:
+                    qty = move.accepted_qty
                     qty_sc = 0.00
                 else:
                     qty = 0.00
-                    qty_sc = move.product_uos_qty
+                    qty_sc = move.accepted_qty
                 unit = move.product_uos.name
                 ind_dic = {
                     'ref': prod_code,
@@ -129,7 +136,7 @@ class custom_picking_parser(models.AbstractModel):
                     'unit': unit,
                     'qty_sc': qty_sc,
                     'unit_sc': unit,
-                    'total': move.price_subtotal,
+                    'total': move.price_subtotal_accepted,
                 }
                 ind_lines.append(ind_dic)
 

@@ -12,6 +12,10 @@
                   <field name="indirect_customer"/>
                   <field name="supplier_ids" widget="many2many_tags"/>
               </field>
+
+                <field name="reception_method" position="before">
+                    <field name="supplier_seq_id" attrs="{'invisible': [('customer', '=', True)]}"/>
+                </field>
             </field>
           </record>
 

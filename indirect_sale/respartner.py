@@ -33,3 +33,4 @@ class partner_supplier_rel(models.Model):
                                     string='Customers',
                                     domain=[('customer', '=', True)])
     indirect_customer = fields.Boolean("Indirect customer")
+    supplier_seq_id = fields.Many2one('ir.sequence', 'Supplier sequence')

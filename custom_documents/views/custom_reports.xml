@@ -93,5 +93,10 @@
         <record id="purchase.action_report_purchase_order" model="ir.actions.report.xml">
             <field name="paperformat_id" ref="my_A4_paperformat"/>
         </record>
+
+
+        <record id="stock_picking_batch.action_report_picking_batch" model="ir.actions.report.xml">
+            <field name="paperformat_id" ref="my_A4_paperformat"/>
+        </record>
     </data>
 </openerp>
