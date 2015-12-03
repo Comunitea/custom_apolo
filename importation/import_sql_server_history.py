@@ -233,6 +233,9 @@ class DatabaseImport:
         if row:
             uom_id = self.search("product.uom", [('name', '=', UOM_MAP[row.uom_id_map.strip()])])[0]
             uob_id = self.search("product.uom", [('name', '=', UOM_MAP[row.uomb_map.strip()])])[0]
+            cost_unit = row.standard_price
+            if str(int(row.default_code)) in PRODUCT_FIX:
+                cost_unit = cost_unit * float(PRODUCT_FIX[str(int(row.default_code))])
             product_vals = {
                 "default_code": str(int(row.default_code)),
                 "name": ustr(row.name),
@@ -242,7 +245,7 @@ class DatabaseImport:
                 "log_unit_id": uom_id,
                 "ca_ma": row.ca_ma or 0,
                 "ma_pa": row.ma_pa or 0,
-                "standard_price": row.standard_price,
+                "standard_price": cost_unit,
                 "weight": row.weight and row.weight / 1000.0 or 0.0,
                 "description": (row.description and ustr(row.description) or "") + (row.active != "N" and "\nBLOQUEADO" or ""),
                 "unit_use_sale": True,
@@ -274,7 +277,18 @@ class DatabaseImport:
             cr.execute("select top 1 tari_prec as lst_price from dbo.adsd_tari where tari_arti = ? order by tari_desd desc", (row.default_code,))
             row2 = cr.fetchone()
             if row2 and row2.lst_price:
-                self.write("product.product", [prod_id], {"lst_price": row2.lst_price})
+                price_unit = row2.lst_price
+                if str(int(row.default_code)) in PRODUCT_FIX:
+                    price_unit = price_unit * float(PRODUCT_FIX[str(int(row.default_code))])
+                self.write("product.product", [prod_id], {"lst_price": price_unit})
+
+            cr.execute("select top 1 tari_cost as purchase_price from dbo.adsd_tari where tari_arti = ? order by tari_desd desc", (row.default_code,))
+            row3 = cr.fetchone()
+            if row3 and row3.purchase_price:
+                cost_unit = row3.purchase_price
+                if str(int(row.default_code)) in PRODUCT_FIX:
+                    cost_unit = cost_unit * float(PRODUCT_FIX[str(int(row.default_code))])
+                self.write("product.product", [prod_id], {"purchase_price": cost_unit})
 
         return prod_id
 
