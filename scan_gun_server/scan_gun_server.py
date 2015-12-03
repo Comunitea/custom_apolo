@@ -2334,7 +2334,40 @@ class ScanGunProtocol(LineReceiver):
         #0 en error
         #1 tarea finalizada
         #2 hay que añadir paquete
-        #3
+
+        def write_one_operation(self, wave_):
+            #Esto escribe en una operación cantidaes y pesos
+            product_id = wave_['product_id']
+            uom_id = wave_['uom_id']
+            uos_id = wave_['uos_id']
+            # En peso variable no recalculo
+            if wave_['var_coeff']:
+                self.new_uos_qty = self.new_uom_qty * self.factory.odoo_con.conv_units_from_gun(self.user_id,
+                                                                product_id,
+                                                                uom_id,
+                                                                uos_id)
+            values = {'to_process': True,
+                'product_id': wave_['product_id'],
+                'lot_id': wave_['lot_id'],
+                'product_uom_id': wave_['uom_id'],
+                'product_qty': self.new_uom_qty,
+                'uos_qty': self.new_uos_qty}
+
+            res = self.factory.odoo_con.change_op_values(self.user_id, self.wave_id, values)
+            self.step = 0
+            self.reset_log_units()
+            if return_here == True:
+                self.last_state = self.state
+                self.list_packages = []
+                self.package_selected = []
+                self.state = "list_packages"
+                self._snd(self.get_str_list_packages(wave_['product_id'], False), '')
+                return
+            self.state = "list_waves"
+            message = u'Operacion Realizada'
+            return message
+
+
 
         wave_ = self.waves[str(self.active_wave)]
         # op_id = wave_['ID']
@@ -2375,7 +2408,6 @@ class ScanGunProtocol(LineReceiver):
         #Si llega aquei cantidades bien o cantidades a revisar.
         #tengo lo que piden ==>> han pulsado F1 directamen
         if self.f1_ok:
-
             print u"Proceso con F1"
             values = {'to_process': True}
             res = self.factory.odoo_con.change_wave_op_values(self.user_id, self.wave_id, values)
@@ -2383,30 +2415,87 @@ class ScanGunProtocol(LineReceiver):
             self.state = "list_waves"
             message = u'Operacion Realizada'
 
+        #Todo el peso variable debe de entrar por aquí
+        elif (num_ops == 1 and var_coeff):
+            values = {'to_process': True,
+                'product_id': wave_['product_id'],
+                'lot_id': wave_['lot_id'],
+                'product_uom_id': wave_['uom_id'],
+                'product_qty': self.new_uom_qty,
+                'uos_qty': self.new_uos_qty}
+
+            res = self.factory.odoo_con.change_op_values(self.user_id, self.wave_id, values)
+            self.step = 0
+            self.reset_log_units()
+            if return_here == True:
+                self.last_state = self.state
+                self.list_packages = []
+                self.package_selected = []
+                self.state = "list_packages"
+                self._snd(self.get_str_list_packages(wave_['product_id'], False), '')
+                return
+            self.state = "list_waves"
+            message = u'Operacion Realizada'
+
+        #Todo el peso fijo de una operacion y cambio de unidades viene por aquí:
+        elif (num_ops == 1 and not var_coeff):
+
+            print u"Proceso agrupacion de 1 operacion de peso variable, y uos= %s"%self.new_uos_qty
+            #esto incluye todo el peso variable de una unidad (99% de casos)
+            product_id = wave_['product_id']
+            uom_id = wave_['uom_id']
+            uos_id = wave_['uos_id']
+            # En peso variable no recalculo
+            self.new_uos_qty = self.new_uom_qty * self.factory.odoo_con.conv_units_from_gun(self.user_id,
+                                                                product_id,
+                                                                uom_id,
+                                                                uos_id)
+            values = {'to_process': True,
+                'product_id': wave_['product_id'],
+                'lot_id': wave_['lot_id'],
+                'product_uom_id': wave_['uom_id'],
+                'product_qty': self.new_uom_qty,
+                'uos_qty': self.new_uos_qty}
+
+            res = self.factory.odoo_con.change_op_values(self.user_id, self.wave_id, values)
+            self.step = 0
+            self.reset_log_units()
+            if return_here == True:
+                self.last_state = self.state
+                self.list_packages = []
+                self.package_selected = []
+                self.state = "list_packages"
+                self._snd(self.get_str_list_packages(wave_['product_id'], False), '')
+                return
+            self.state = "list_waves"
+            message = u'Operacion Realizada'
+
+
 
         #Si es una 1 operacion, escribo en la operacion directamente. en este caso NO SE ENVIA A REVISAR
         elif (not to_revised and num_ops == 1):
             #import ipdb; ipdb.set_trace()
-
             #si solo hay una operacion pongo a to_proceess
             if uom_pedida == self.new_uom_qty and not var_coeff:
                 print  u"Proceso agrupacion de 1 operacion de peso fijo, y uom= %s"%self.new_uom_qty
                 values = {'to_process': True}
-            else:
+            elif (var_coeff and (uos_pedida == self.new_uos_qty or uom_pedida == self.new_uom_qty)) or (not var_coeff and uos_pedida!=self.new_uom_qty):
                 print u"Proceso agrupacion de 1 operacion de peso variable, y uos= %s"%self.new_uos_qty
                 #esto incluye todo el peso variable de una unidad (99% de casos)
-
                 product_id = wave_['product_id']
                 uom_id = wave_['uom_id']
                 uos_id = wave_['uos_id']
-                self.new_uos_qty = self.new_uom_qty * self.factory.odoo_con.conv_units_from_gun(self.user_id,
-                                                                    product_id,
-                                                                    uom_id,
-                                                                    uos_id)
+                # En peso variable no recalculo
+                # self.new_uos_qty = self.new_uom_qty * self.factory.odoo_con.conv_units_from_gun(self.user_id,
+                #                                                     product_id,
+                #                                                     uom_id,
+                #                                                     uos_id)
                 values = {'to_process': True,
-                          'product_id': wave_['product_id'],
-                          'product_qty': self.new_uom_qty,
-                          'uos_qty': self.new_uos_qty}
+                    'product_id': wave_['product_id'],
+                    'lot_id': wave_['lot_id'],
+                    'product_uom_id': wave_['uom_id'],
+                    'product_qty': self.new_uom_qty,
+                    'uos_qty': self.new_uos_qty}
 
             res = self.factory.odoo_con.change_op_values(self.user_id, self.wave_id, values)
             self.step = 0
@@ -2426,12 +2515,12 @@ class ScanGunProtocol(LineReceiver):
         elif (not to_revised and ((self.new_uom_qty == uom_pedida) and not var_coeff) or ((self.new_uos_qty >= uos_pedida) and var_coeff)):
             if var_coeff:
                 print u"Proceso agrupaciones de peso variable uos= %s"%self.new_uos_qty
-                values = {
-                    'to_process': True,
+                values = {'to_process': True,
                     'product_id': wave_['product_id'],
+                    'lot_id': wave_['lot_id'],
+                    'product_uom_id': wave_['uom_id'],
                     'product_qty': self.new_uom_qty,
                     'uos_qty': self.new_uos_qty}
-
                 res = self.factory.odoo_con.change_op_values(self.user_id, self.wave_id, values)
             else:
                 print u"Proceso agrupaciones de peso fijo uom= %s"%self.new_uos_qty
@@ -2446,7 +2535,6 @@ class ScanGunProtocol(LineReceiver):
         #todo lo que llega aquei se procesa como a revisar y listo:
         #peso fijo distinto a lo que se pide o peso variable menor que lo que se pide y de mas de 1 operacion.
         elif ((self.new_uom_qty != uom_pedida) and not var_coeff) or ((self.new_uos_qty < uos_pedida) and var_coeff):
-
             if var_coeff:
                 print u"A revisar peso variable: Piden %s y picko %s"%(wave_['uos_qty'], self.new_uos_qty)
 
@@ -5186,6 +5274,7 @@ class ScanGunProtocol(LineReceiver):
             return
 
         if line == KEY_CONFIRM and (self.type=='picking' and self.camera_ids) or self.type != 'picking':
+
             try:
                 self.camera_id=[]
                 for camera_ in self.camera_ids:
