@@ -1273,11 +1273,12 @@ class DatabaseImport:
                     rappel_from = 0
                     sections = []
                     for section in sections_data:
-                        vals = {'rappel_until': float(section.rappel_until),
-                                'percent': float(section.percentage),
-                                'rappel_from': rappel_from}
-                        rappel_from = float(section.rappel_until)
-                        sections.append((0,0,vals))
+                        if section.rappel_until:
+                            vals = {'rappel_until': float(section.rappel_until),
+                                    'percent': float(section.percentage),
+                                    'rappel_from': rappel_from}
+                            rappel_from = float(section.rappel_until)
+                            sections.append((0,0,vals))
                     if sections:
                         rappel_vals = {'type_id': rappel_type,
                                        'name': ustr(row.name),
