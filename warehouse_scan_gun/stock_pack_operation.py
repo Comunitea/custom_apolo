@@ -94,10 +94,13 @@ class stock_pack_operation(models.Model):
         domain = [('id', '=', wave_id)]
 
         wave_reports= self.env['wave.report'].search(domain)
-        env2 = wave_reports.env(self._cr, user_id, self._context)
+        ctx = {'no_recompute': True}
+        env2 = wave_reports.env(self._cr, user_id, ctx)
         wave_reports_uid = wave_reports.with_env(env2)
         res = False
         if wave_reports_uid:
+            #for op in wave_reports_uid.operation_ids:
+            #    res = op.write (fields)
             res = wave_reports_uid.operation_ids.write (fields)
         return res
 
@@ -276,7 +279,8 @@ class stock_pack_operation(models.Model):
                              _('No operation founded to set as visited'))
 
         # Browse with correct uid, an mark as visited
-            env2 = op_obj.env(self._cr, user_id, self._context)
+            ctx = {'no_recompute': True}
+            env2 = op_obj.env(self._cr, user_id, ctx)
             op_obj_uid = op_obj.with_env(env2)
 
         op_obj_uid.write ({'gun_procces' : state , 'visited' : True})
@@ -334,7 +338,8 @@ class stock_pack_operation(models.Model):
                                  _('No operation founded to set as to process'))
 
             # Browse with correct uid, an mark as visited
-            env2 = op_obj.env(self._cr, user_id, self._context)
+            ctx = {'no_recompute': True}
+            env2 = op_obj.env(self._cr, user_id, ctx)
             op_obj_uid = op_obj.with_env(env2)
             op_obj_uid.write({'to_process': to_process})
 
@@ -368,7 +373,8 @@ class stock_pack_operation(models.Model):
                                  _('No operation founded to set as visited'))
 
             # Browse with correct uid, an mark as visited
-            env2 = op_obj.env(self._cr, user_id, self._context)
+            ctx = {'no_recompute': True}
+            env2 = op_obj.env(self._cr, user_id, ctx)
             op_obj_uid = op_obj.with_env(env2)
             op_obj_uid.write({'visited': True})
 
@@ -419,7 +425,8 @@ class stock_pack_operation(models.Model):
         # Browse with correct uid, an mark as visited
 
         try:
-            env2 = op_obj.env(self._cr, user_id, self._context)
+            ctx = {'no_recompute': True}
+            env2 = op_obj.env(self._cr, user_id, ctx)
             op_obj_uid = op_obj.with_env(env2)
             #op_obj_uid.write(field_values)
             if not 'package_id' in field_values.keys():
@@ -455,7 +462,8 @@ class stock_pack_operation(models.Model):
 
         # Browse with correct uid, an mark as visited
         try:
-            env2 = op_obj.env(self._cr, user_id, self._context)
+            ctx = {'no_recompute': True}
+            env2 = op_obj.env(self._cr, user_id, ctx)
             op_obj_uid = op_obj.with_env(env2)
             op_obj_uid.write({field: value})
             return True

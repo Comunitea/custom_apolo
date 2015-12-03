@@ -868,7 +868,7 @@ class DatabaseImport:
         for product_code in PRODUCT_FIX:
             product_ids = self.search("product.product", [('default_code', '=', product_code),'|',('active', '=', False),('active', '=', True)])
             if product_ids:
-                sale_line_ids = self.search('sale.order.line', [('product_id', '=', product_ids[0]),('order_id.state', '=', 'history')])
+                sale_line_ids = self.search('sale.order.line', [('product_id', '=', product_ids[0]),('order_id.state', '=', 'history'),('write_date', '<', '2015-11-30 00:00:01')])
                 if sale_line_ids:
                     for sale_line_id in sale_line_ids:
                         line_data = self.read("sale.order.line", sale_line_id, ['product_uom_qty', 'price_unit'])
@@ -877,7 +877,7 @@ class DatabaseImport:
                                                                        'price_unit': line_data['price_unit'] * float(PRODUCT_FIX[product_code]),
                                                                        'price_udv': line_data['price_unit'] * float(PRODUCT_FIX[product_code])})
 
-                invoice_line_ids = self.search('account.invoice.line', [('product_id', '=', product_ids[0]),('invoice_id.state', '=', 'history')])
+                invoice_line_ids = self.search('account.invoice.line', [('product_id', '=', product_ids[0]),('invoice_id.state', '=', 'history'),('write_date', '<', '2015-11-30 00:00:01')])
                 if invoice_line_ids:
                     for invoice_line in invoice_line_ids:
                         line_data = self.read("account.invoice.line", invoice_line, ['quantity', 'price_unit', 'invoice_id'])
@@ -886,6 +886,15 @@ class DatabaseImport:
                         self.execute("account.invoice", "button_reset_taxes", [[line_data['invoice_id'][0]]])
             cont += 1
             print "%s de %s" % (str(cont), str(len(PRODUCT_FIX)))
+
+    def open_sale_orders(self):
+        sale_ids = self.search('sale.order', [('state', '=', 'draft')])
+        num_rows = len(sale_ids)
+        cont = 0
+        for sale_id in sale_ids:
+            self.execute("sale.order", "action_button_confirm", [[sale_id]])
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
 
     def process_data(self):
         """
@@ -900,6 +909,13 @@ class DatabaseImport:
             cr = conn.cursor()
 
             self.import_sale_orders(cr)
+            #self.import_sale_order_lines_open(cr)
+            #self.import_sale_order_lines_history(cr)
+            #self.import_active_purchase_order(cr)
+            #self.import_purchase_invoice(cr)
+            #self.import_sale_invoice(cr)
+            #self.fix_product_histories()
+            #self.open_sale_orders()
             #self.import_sale_order_lines_open(cr)
             #self.import_sale_order_lines_history(cr)
             #self.import_active_purchase_order(cr)

@@ -124,7 +124,7 @@ class DatabaseImport:
 
         self.url_template = "http://%s:%s/xmlrpc/%s"
         self.server = "localhost"
-        self.port = 8069
+        self.port = 9069
         self.dbname = dbname
         self.user_name = user
         self.user_passwd = passwd
@@ -1444,7 +1444,7 @@ class DatabaseImport:
             #self.import_items_data(cr)
             #self.import_cadena(cr)
             #self.import_product_customer_rules(cr)
-            #self.import_rappels(cr)
+            self.import_rappels(cr)
             #self.import_product_rappel_groups(cr)
             self.import_other_promotions(cr)
 

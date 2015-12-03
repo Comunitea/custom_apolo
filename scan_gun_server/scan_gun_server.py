@@ -2375,6 +2375,7 @@ class ScanGunProtocol(LineReceiver):
         #Si llega aquei cantidades bien o cantidades a revisar.
         #tengo lo que piden ==>> han pulsado F1 directamen
         if self.f1_ok:
+
             print u"Proceso con F1"
             values = {'to_process': True}
             res = self.factory.odoo_con.change_wave_op_values(self.user_id, self.wave_id, values)
@@ -2607,8 +2608,8 @@ class ScanGunProtocol(LineReceiver):
         return
 
     def create_operations_on_the_fly(self, last_qty = 0.00):
-        print u'operations on the fly'
 
+        print u'operations on the fly'
         print self.list_packages
         print last_qty
 
@@ -2807,7 +2808,8 @@ class ScanGunProtocol(LineReceiver):
 
             if line == KEY_CANCEL:
                 if wave_['to_process']==True:
-                    task_ops_finish = self.factory.odoo_con.set_wave_ops_values(self.user_id , self.wave_id, wave_report_id, {'to_process':False})
+
+                    task_ops_finish = self.factory.odoo_con.set_wave_ops_values(1 , self.wave_id, wave_report_id, {'to_process':False})
                     self.step = 0
                     self.state = "list_waves"
                     self._snd(self.get_str_list_waves(), 'Picking cancelado')
@@ -3552,13 +3554,14 @@ class ScanGunProtocol(LineReceiver):
                 #llamamos con el id del parent
                 parent_id = self.factory.odoo_con.get_parent_package(self.user_id, self.int_(line))
                 if parent_id:
-                    self.handle_list_ubi_ops(u'%s%s'%(PRE_PACK,  parent_id))
                     pack_id = parent_id
+                    self.handle_list_ubi_ops(u'%s%s'%(PRE_PACK,  parent_id))
                     return
 
             #SI NO ESTA SE AÑADE (si se puede)
             pack_id = self.int_(line)
             op_id, message = self.factory.odoo_con.add_loc_operation_from_gun(self.user_id, self.task_id, pack_id)
+
                 # if not op_id:
                 #
                 # self.reset_vals()
@@ -3576,7 +3579,7 @@ class ScanGunProtocol(LineReceiver):
 
                 message = self.inverse(u'Operacion Creada')
             else:
-                message = self.inverse(u'Paquete No existe')
+                message = self.inverse(u'Ese paquete no hay ubicarlo')
             self._snd(self.get_str_list_ops(), message)
             return
 
