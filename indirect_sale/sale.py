@@ -83,4 +83,9 @@ class SaleOrder(models.Model):
                     pick_ids.write({"invoice_state": 'none',
                                     "supplier_id": order.supplier_id.id,
                                     "indirect": True})
+                for pick in pick_ids:
+                    if pick.picking_type_code == 'outgoing' and order.supplier_id.supplier_seq_id:
+                        supp_seq = order.supplier_id.supplier_seq_id
+                        seq = order.supplier_id.supplier_seq_id.next_by_id(supp_seq.id)
+                        pick.name = seq
         return res
