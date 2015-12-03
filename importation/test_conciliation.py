@@ -214,7 +214,7 @@ class conciliation(object):
         print u"Conciliar una lista de %s"%(len(move_list))
         res =sum_list(move_list)
 
-        while not self.isclose(res[0], res[1]) and len(move_list):
+        while not self.isclose(res[0], res[1], 0.0001, 0.0001) and len(move_list):
             print "Comienza pruebas"
             diff = res[0] - res[1]
             moves = busca_move(move_list, diff)
@@ -224,7 +224,7 @@ class conciliation(object):
                 res = sum_list(move_list)
                 break
 
-        if self.isclose(res[0],res[1]) and not self.isclose(res[0], 0) and len(move_list):
+        if self.isclose(res[0],res[1], 0.0001, 0.0001) and not self.isclose(res[0], 0, 0.0001, 0.0001) and len(move_list):
             move_ids = [move['id'] for move in move_list]
             print u"Ejecuta conciliacción %s movimientos"%(len(move_ids))
             self.execute('account.move.line', 'reconcile', move_ids, 'manual', False,
