@@ -187,10 +187,10 @@ class conciliation(object):
             if len(move_list) > 1:
                 for move in move_list:
                     print u"Numero de movimiento %s"%(num)
-                    if self.isclose(move['debit'], amnt):
+                    if self.isclose(move['debit'], amnt, 0.0001, 0.0001):
                         res.append(num)
                         return res
-                    if self.isclose(move['credit'], -amnt):
+                    if self.isclose(move['credit'], -amnt, 0.0001, 0.0001):
                         res.append(num)
                         return res
                         # HAsta aqui si un movimiento coincide al 100% con la
