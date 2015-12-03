@@ -221,10 +221,14 @@ class conciliation(object):
         print "Comienza pruebas"
         diff = res[0] - res[1]
         moves = busca_move(move_list, diff)
+        # Prepara para eliminar
         if moves:
-            for move in moves.reverse():
-                move_list.pop(move)
-            res = sum_list(move_list)
+            if len(moves) > 1:
+                for move in moves.reverse():
+                    move_list.pop(move)
+            else:
+                move_list.pop(moves[0])
+        res = sum_list(move_list)
 
 
         if self.isclose(res[0],res[1], 0.0001, 0.0001) and not self.isclose(res[0], 0, 0.0001, 0.0001) and len(move_list):
