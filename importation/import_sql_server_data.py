@@ -1273,7 +1273,7 @@ class DatabaseImport:
                     rappel_from = 0
                     sections = []
                     for section in sections_data:
-                        if section.percentage:
+                        if section.rappel_until:
                             vals = {'rappel_until': float(section.rappel_until),
                                     'percent': float(section.percentage),
                                     'rappel_from': rappel_from}
@@ -1331,6 +1331,84 @@ class DatabaseImport:
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
+    def import_other_promotions(self, cr):
+        cr.execute("select * from (SELECT dto_clie as customer_id_map, dto_tipo as discount_type, dto_prod as product_id_map,dto_dcto as discount, dto_prec as fix_price, "
+                   "dto_desd as from_date,dto_hast as to_date, art1.pr1_prov as supplier_id_map FROM dbo.adsd_dto LEFT JOIN "
+                   "dbo.adsd_art art1 on art1.pr1_codi = dto_prod and dto_tipo in ('O','P') where dto_tipo in ('P','O') and dto_hast > GETDATE() "
+                   "union all "
+                   "SELECT dto_clie as customer_id_map, dto_tipo as discount_type, art2.pr1_codi as product_id_map,dto_dcto as discount, dto_prec as fix_price, "
+                   "dto_desd as from_date,dto_hast as to_date, art2.pr1_prov as supplier_id_map FROM dbo.adsd_dto LEFT JOIN dbo.adsd_art art2 on "
+                   "art2.pr1_cofa = dto_prod and dto_tipo = 'S' where dto_tipo in ('S') and dto_hast > GETDATE()) as t order by customer_id_map,supplier_id_map")
+        data = cr.fetchall()
+        cont = 0
+        num_rows = len(data)
+        promotion_id = False
+        customer_code = False
+        supplier_code = False
+
+        for row in data:
+            if int(row.customer_id_map) != customer_code and int(row.supplier_id_map) != supplier_code:
+                customer_ids = self.search("res.partner", [('ref', '=', str(int(row.customer_id_map))),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
+                supplier_ids = self.search("res.partner", [('ref', '=', str(int(row.supplier_id_map))),('supplier', '=', True),'|',('active', '=', True),('active', '=', False)])
+                if customer_ids and supplier_ids:
+                    customer_data = self.read("res.partner", customer_ids[0], ["name"])
+                    customer_code = int(row.customer_id_map)
+                    supplier_data = self.read("res.partner", supplier_ids[0], ["name"])
+                    supplier_code = int(row.supplier_id_map)
+                    vals = {
+                            "name": supplier_data["name"] + " - " + customer_data["name"],
+                            "from_date": row.from_date.strftime("%Y-%m-%d"),
+                            "to_date": row.to_date.strftime("%Y-%m-%d"),
+                            "login": "and",
+                            "expected_logic_result": "True",
+                            "sequence": 1,
+                            'customer_ids': [(6,0,customer_ids)]
+                    }
+                    promotion_id = self.create("promos.rules", vals)
+                    if supplier_code in [3, 4, 2, 1, 94, 101] and int(row.product_id_map) not in [81733, 81738, 81731, 81732]:
+                        comp_promo_vals = {'start_date': row.from_date.strftime("%Y-%m-%d"),
+                                           'end_date': row.to_date.strftime("%Y-%m-%d"),
+                                           'supplier_id': supplier_ids[0],
+                                           'type': 'discount',
+                                           'promotion_id': promotion_id}
+                        if supplier_code in [3, 2, 1, 101]:
+                            comp_promo_vals["discount_assumed"] = 75
+                        else:
+                            if row.discount <= 20.0:
+                                comp_promo_vals["discount_assumed"] = 60.0
+                            else:
+                                comp_promo_vals["discount_assumed"] = row.discount - 8.0
+                        self.create("sale.joint.promotion", comp_promo_vals)
+
+            product_ids = self.search("product.product", [('default_code','=',str(int(row.product_id_map))),'|',('active','=',True),('active','=',False)])
+            if product_ids:
+                if row.fix_price:
+                    product_data = self.read("product.product", product_ids[0], ["lst_price"])
+                    discount = 100 - ((float(row.fix_price) * 100.0) / product_data["lst_price"])
+                else:
+                    discount = float(row.discount)
+                action_vals = {
+                    "action_type": "prod_disc_perc",
+                    "product_code": "'" + str(int(row.product_id_map)) + "'",
+                    "arguments": str(discount),
+                    "promotion": promotion_id,
+                    "sequence": 1
+                }
+                action = self.create("promos.rules.actions", action_vals)
+
+                rule_vals = {
+                    'stop_further': True,
+                    'attribute': "product",
+                    'comparator': 'in',
+                    'value': "'" + str(int(row.product_id_map)) + "'",
+                    'promotion': promotion_id,
+                    "sequence": 1
+                }
+                self.create("promos.rules.conditions.exps", rule_vals)
+
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
     def process_data(self):
         """
         Importa la bbdd
@@ -1367,7 +1445,8 @@ class DatabaseImport:
             #self.import_cadena(cr)
             #self.import_product_customer_rules(cr)
             self.import_rappels(cr)
-            self.import_product_rappel_groups(cr)
+            #self.import_product_rappel_groups(cr)
+            self.import_other_promotions(cr)
 
 
         except Exception, ex:

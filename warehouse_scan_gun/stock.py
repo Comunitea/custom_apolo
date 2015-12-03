@@ -50,6 +50,7 @@ class stock_picking_wave(models.Model):
                     'EAN' :op.ean13,
                     'CANTIDAD': op.product_qty or 0.00,
                     'lot': op.lot_id and op.lot_id.name or "",
+                    'lot_id': op.lot_id.id or False,
                     'PAQUETE': op.pack_id and op.pack_id.name or "",
                     'package': op.pack_id.id and op.pack_id.name or "",
                     'ORIGEN': op.location_id.bcd_name,
