@@ -202,7 +202,7 @@ class conciliation(object):
                     #Acumula debe y haber
                     testing.append(num)
                     diff = suma - amnt
-                    if self.isclose(diff, 0, 0.0001, 0.0001):
+                    if self.isclose(diff, 0, 0.0001, 0.0001) and len(testing) != len(move_list):
                         print "Cuadrado"
                         print testing
                         res = testing
