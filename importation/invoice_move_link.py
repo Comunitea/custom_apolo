@@ -6,7 +6,7 @@ import xmlrpclib
 import socket
 import traceback
 
-class conciliation(object):
+class invoice_move(object):
     def __init__(self, dbname, user, passwd):
         """método incial"""
 
@@ -26,7 +26,7 @@ class conciliation(object):
             self.user_id = login_facade.login(self.dbname, self.user_name, self.user_passwd)
             self.object_facade = xmlrpclib.ServerProxy(self.url_template % (self.server, self.port, 'object'))
 
-            res = self.run_concilie()
+            res = self.invoice_move_link()
             #con exito
             if res:
                 print ("!!!!!All concilied!!!!!!!")
@@ -168,105 +168,59 @@ class conciliation(object):
     def isclose(self, a, b, rel_tol=1e-09, abs_tol=0.0):
         return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
-    def try_concilie(self, customer, move_list):
-        def sum_list(move_list):
-            debit = 0
-            credit =0
-            for move in move_list:
-                debit += move['debit']
-                credit += move['credit']
-            return [debit, credit]
 
-        def busca_move(move_list, amnt):
-            num=0
-            res =[]
-            suma = 0
-            diff = amnt
-            testing =[]
-            print u"Buscando con importe %s "%(amnt)
-            if len(move_list) > 1:
-                for move in move_list:
-                    print u"Numero de movimiento %s"%(num)
-                    if self.isclose(move['debit'], amnt, 0.0001, 0.0001):
-                        res.append(num)
-                        print res
-                        return res
-                    if self.isclose(move['credit'], -amnt, 0.0001, 0.0001):
-                        res.append(num)
-                        print res
-                        return res
-                        # HAsta aqui si un movimiento coincide al 100% con la
-                        # diferencia, se dejaría fuera de la conciliación
-                        # si no, intentamos buscar más de uno
-
-                    suma += move['debit']
-                    suma -= move['credit']
-                    #Acumula debe y haber
-                    testing.append(num)
-                    diff = suma - amnt
-                    if self.isclose(diff, 0, 0.0001, 0.0001) and len(testing) != len(move_list):
-                        print "Cuadrado"
-                        #print testing
-                        res = testing
-                        print res
-                        return res
-                    num += 1
-                    print u"Buscando diferencia %s "%(diff)
-            return False
-
-        print u"Conciliar una lista de %s"%(len(move_list))
-        res =sum_list(move_list)
-
-        #while not self.isclose(res[0], res[1], 0.0001, 0.0001) and len(move_list):
-        print "Comienza pruebas"
-        diff = res[0] - res[1]
-        moves = busca_move(move_list, diff)
-        # Prepara para eliminar
-        if moves:
-            if len(moves) > 1:
-                for move in moves.reverse():
-                    move_list.pop(move)
-            else:
-                move_list.pop(moves[0])
-        res = sum_list(move_list)
-
-
-        if self.isclose(res[0],res[1], 0.0001, 0.0001) and not self.isclose(res[0], 0, 0.0001, 0.0001) and len(move_list):
-            move_ids = [move['id'] for move in move_list]
-            print u"Ejecuta conciliacción %s movimientos"%(len(move_ids))
-            self.execute('account.move.line', 'reconcile', move_ids, 'manual', False,
-                                    False, False)
-            print u"Conciliación realizada para : %s con  %s movimientos"%(customer['name'], len(move_ids))
-        else:
-            self.no_conciliados.append(customer['name'])
-            print u"ATENCIÓN!!!! No se pudo conciliar : %s !!!!!!"%(customer['name'])
-
-    def run_concilie(self):
+    def invoice_move_link(self):
         try:
-            customer_ids = self.search('res.partner', [('is_company', '=', True),('customer', '=', True)], order = 'id ASC')
-            total = len(customer_ids)
-            print u"Iniciando conciliación para : %s clientes"%(total)
-            customers = self.read('res.partner', customer_ids, ['id', 'name', 'property_account_receivable'])
-            num = 1
-            for customer in customers:
-                print u"Buscando conciliación para : %s , (%s/%s) "%(customer['name'], num, total)
-                move_ids = self.search('account.move.line', [('account_id', '=', customer['property_account_receivable'][0]),
-                                                             ('partner_id', '=', customer['id']),
-                                                              ('reconcile_ref', '=', False)], order = 'date DESC, id DESC')
-                if len(move_ids) > 1:
-                    move_fields = self.read('account.move.line', move_ids, ['id', 'credit', 'debit'])
-                    self.try_concilie(customer, move_fields)
+            invoice_ids = self.search('account.invoice', [('state','=','history'),
+                                                          ('type','=','out_invoice'),
+                                                          ('amount_total', '>', 0),
+                                                          ('move_id', '=', False)])
+            total = len(invoice_ids)
+            num=0
+            realizadas = 0
+            print u"Iniciando asociación  movimientos para un total de: %s facturas"%(total)
+            for invoice_id in invoice_ids:
+                invoice = self.read('account.invoice', invoice_id, ['number', 'id',
+                                                                    'amount_total', 'partner_id',
+                                                                    'date_invoice', 'date_due'])
+                separ = invoice['number'].split('/')
+                move_ref = separ[0] + "/00" + separ[1]
+                domain = [('account_id.type', '=', 'receivable'),
+                        ('debit', '=', invoice['amount_total']),
+                        ('partner_id', '=', invoice['partner_id'][0]),
+                        ('ref', 'like', move_ref)]
+
+                move_ids = self.search('account.move.line',domain)
+                if move_ids:
+                    if len(move_ids) == 1:
+                        moves = self.read('account.move.line', move_ids, ['move_id'])
+                        if invoice['date_due']:
+                            date_due = invoice['date_due']
+                        else:
+                            date_due = invoice['date_invoice']
+                        vals = {
+                            'move_id': moves[0]['move_id'][0],
+                            'date_due': date_due
+                        }
+                        self.write('account.invoice', invoice['id'], vals)
+                        vals = {
+                            'maurity_date': date_due
+                        }
+                        self.write('account.move.line', move_ids[0], vals)
+                        print u"HECHO   para %s"%(invoice['number'])
+                        realizadas += 1
+                    else:
+                        print u"Más de un Asiento no encontrado  para %s"%(invoice['number'])
                 else:
-                    print "Nada que realizar. Siguiente...."
+                    print u"Asiento no encontrado  para %s"%(invoice['number'])
                 num +=1
+                print u"Procesado %s : %s/%s/%s"%(invoice['number'],realizadas, num, total)
             print "FINALIZado!!. No conciliados procesados TOTAL:"
-            for n in self.no_conciliados:
-                print n
+
         except Exception, e:
             print u"EXCEPTION: REC %s"%(e)
             print "No conciliados procesados hasta el momento:"
-            for n in self.no_conciliados:
-                print n
+
 
         return True
 
@@ -275,4 +229,4 @@ if __name__ == "__main__":
     if len(sys.argv) < 4:
         print u"Uso: %s <dbname> <user> <password>" % sys.argv[0]
     else:
-        conciliation(sys.argv[1], sys.argv[2], sys.argv[3])
+        invoice_move(sys.argv[1], sys.argv[2], sys.argv[3])
