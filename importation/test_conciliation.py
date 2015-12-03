@@ -219,8 +219,8 @@ class conciliation(object):
             diff = res[0] - res[1]
             moves = busca_move(move_list, diff)
             if moves:
-                for move in moves:
-                    move_list.pop(0)
+                for move in moves.reverse():
+                    move_list.pop(move)
                 res = sum_list(move_list)
                 break
 
