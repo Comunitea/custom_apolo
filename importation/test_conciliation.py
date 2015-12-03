@@ -189,9 +189,11 @@ class conciliation(object):
                     print u"Numero de movimiento %s"%(num)
                     if self.isclose(move['debit'], amnt, 0.0001, 0.0001):
                         res.append(num)
+                        print res
                         return res
                     if self.isclose(move['credit'], -amnt, 0.0001, 0.0001):
                         res.append(num)
+                        print res
                         return res
                         # HAsta aqui si un movimiento coincide al 100% con la
                         # diferencia, se dejaría fuera de la conciliación
@@ -204,9 +206,10 @@ class conciliation(object):
                     diff = suma - amnt
                     if self.isclose(diff, 0, 0.0001, 0.0001) and len(testing) != len(move_list):
                         print "Cuadrado"
-                        print testing
+                        #print testing
                         res = testing
-                        return testing
+                        print res
+                        return res
                     num += 1
                     print u"Buscando diferencia %s "%(diff)
             return False
@@ -222,7 +225,7 @@ class conciliation(object):
             for move in moves.reverse():
                 move_list.pop(move)
             res = sum_list(move_list)
-            
+
 
         if self.isclose(res[0],res[1], 0.0001, 0.0001) and not self.isclose(res[0], 0, 0.0001, 0.0001) and len(move_list):
             move_ids = [move['id'] for move in move_list]
