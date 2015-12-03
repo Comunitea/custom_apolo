@@ -2608,8 +2608,8 @@ class ScanGunProtocol(LineReceiver):
         return
 
     def create_operations_on_the_fly(self, last_qty = 0.00):
-        print u'operations on the fly'
 
+        print u'operations on the fly'
         print self.list_packages
         print last_qty
 
@@ -2808,7 +2808,7 @@ class ScanGunProtocol(LineReceiver):
 
             if line == KEY_CANCEL:
                 if wave_['to_process']==True:
-                    
+
                     task_ops_finish = self.factory.odoo_con.set_wave_ops_values(1 , self.wave_id, wave_report_id, {'to_process':False})
                     self.step = 0
                     self.state = "list_waves"
