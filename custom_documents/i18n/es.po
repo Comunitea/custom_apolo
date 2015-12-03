@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-30 13:06+0000\n"
-"PO-Revision-Date: 2015-10-30 13:06+0000\n"
+"POT-Creation-Date: 2015-12-02 21:11+0000\n"
+"PO-Revision-Date: 2015-12-02 21:11+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -54,12 +54,12 @@ msgid "Add a page to the invoice with the summary of invoiced products"
 msgstr "Añade un página a la factura con el resumen de productos facturados"
 
 #. module: custom_documents
-#: view:website:custom_documents.picking_top_part
+#: view:website:custom_documents.picking_top_part-p
 msgid "Agent"
 msgstr "Agente"
 
 #. module: custom_documents
-#: view:website:custom_documents.picking_top_part
+#: view:website:custom_documents.picking_top_part-p
 msgid "Agente / Repartidor:"
 msgstr "Agente / Repartidor:"
 
@@ -96,38 +96,38 @@ msgid "Code"
 msgstr "Código"
 
 #. module: custom_documents
-#: view:website:custom_documents.picking_header_part
+#: view:website:custom_documents.picking_header_part-p
 msgid "Customer Control Nº"
 msgstr "Nº Control Cliente"
 
 #. module: custom_documents
-#: view:website:custom_documents.picking_top_part
+#: view:website:custom_documents.picking_top_part-p
 msgid "Customer Nº:"
 msgstr "Cliente Nº:"
 
 #. module: custom_documents
 #: view:website:custom_documents.invoice_top_part
-#: view:website:custom_documents.picking_top_part
+#: view:website:custom_documents.picking_top_part-p
 msgid "DATE:"
 msgstr "FECHA:"
 
 #. module: custom_documents
-#: view:website:custom_documents.picking_header_part
+#: view:website:custom_documents.picking_header_part-p
 msgid "Date Of Delivery"
 msgstr "Fecha de entrega"
 
 #. module: custom_documents
-#: view:website:custom_documents.picking_top_part
+#: view:website:custom_documents.picking_top_part-p
 msgid "Delivery Man"
 msgstr "Repartidor"
 
 #. module: custom_documents
-#: view:website:custom_documents.picking_header_part
+#: view:website:custom_documents.picking_header_part-p
 msgid "Delivery Number"
 msgstr "Número entrega"
 
 #. module: custom_documents
-#: view:website:custom_documents.picking_header_part
+#: view:website:custom_documents.picking_header_part-p
 msgid "Delivery Pick"
 msgstr "Albarán entrega"
 
@@ -200,7 +200,7 @@ msgstr "INFORMATIVO"
 
 #. module: custom_documents
 #: view:website:custom_documents.invoice_top_part
-#: view:website:custom_documents.picking_top_part
+#: view:website:custom_documents.picking_top_part-p
 msgid "INVOICE TO"
 msgstr "FACTURAR A"
 
@@ -236,7 +236,7 @@ msgstr "MANTOS"
 
 #. module: custom_documents
 #: view:website:custom_documents.invoice_top_part
-#: view:website:custom_documents.picking_top_part
+#: view:website:custom_documents.picking_top_part-p
 msgid "NIF:"
 msgstr "NIF:"
 
@@ -277,7 +277,7 @@ msgid "PALETS"
 msgstr "PALETS"
 
 #. module: custom_documents
-#: view:website:custom_documents.picking_top_part
+#: view:website:custom_documents.picking_top_part-p
 msgid "PICKING:"
 msgstr "ALBARÁN:"
 
@@ -314,7 +314,7 @@ msgstr "Importe del albarán:"
 #. module: custom_documents
 #: view:website:custom_documents.op_group_by_partner
 msgid "Pick Number"
-msgstr "Número albarán"
+msgstr "Nº albarán"
 
 #. module: custom_documents
 #: view:website:custom_documents.op_group_pick
@@ -354,7 +354,7 @@ msgstr "Número pedido:"
 
 #. module: custom_documents
 #: view:website:custom_documents.invoice_top_part
-#: view:website:custom_documents.picking_top_part
+#: view:website:custom_documents.picking_top_part-p
 msgid "Pág. 1 de 1"
 msgstr "Pág. 1 de 1"
 
@@ -406,7 +406,7 @@ msgstr "SIGN, STAMP ACCORDING CUSTOMER AND DATE RECEIVING MERCHANDISE"
 
 #. module: custom_documents
 #: view:website:custom_documents.invoice_top_part
-#: view:website:custom_documents.picking_top_part
+#: view:website:custom_documents.picking_top_part-p
 msgid "SOLICITANT"
 msgstr "SOLICITANTE"
 
@@ -459,7 +459,7 @@ msgstr "TOTALES:"
 
 #. module: custom_documents
 #: view:website:custom_documents.invoice_top_part
-#: view:website:custom_documents.picking_top_part
+#: view:website:custom_documents.picking_top_part-p
 msgid "Tlfo."
 msgstr "Tlfo."
 
@@ -526,3 +526,4 @@ msgstr "Albarán valorado"
 #: view:website:custom_documents.invoice_top_part
 msgid "Way To Pay:"
 msgstr "Forma de pago:"
+
