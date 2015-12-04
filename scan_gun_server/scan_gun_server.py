@@ -5371,7 +5371,7 @@ class ScanGunProtocol(LineReceiver):
         self.routes = self.factory.odoo_con.get_routes_menu(self.user_id, type)
         inc=1
         if self.routes:
-            for key in range(1, len(self.routes)):
+            for key in range(1, len(self.routes)+1):
                 ruta = self.routes[str(key)][1]
                 print u'%s > %s'%(key, ruta)
                 if key>= self.num_order_list_ops and key<= self.num_order_list_ops + MAX_NUM_ONE:
