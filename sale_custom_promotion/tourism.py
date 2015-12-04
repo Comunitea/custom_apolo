@@ -49,6 +49,7 @@ class TourismGroup(models.Model):
     guar_price = fields.Float('Guaranteed price', required=True,
                               help="Unit guaranteed price")
     supplier_id = fields.Many2one('res.partner', 'Supplier', required=True)
+    uom_id = fields.Many2one('product.uom', 'Unidad de medida', required=True)
 
     @api.one
     def _get_exported_customer(self):
@@ -234,16 +235,11 @@ than the minimum price')}}
             precio por unidad de medida del producto.
         """
         #print "get_box_price!!"
-        product_uom = product.uom_id
-        if product_uom == product.log_base_id:
-            #print "log_base"
-            return self.agreed_price
-        elif product_uom == product.log_unit_id:
-            #print "log_unit"
-            return self.agreed_price * product.kg_un
-        else:
-            #print "log_other"
-            return self.agreed_price
+        p_unit, p_uos = product.get_uom_uos_prices(self.tourism_id.uom_id.id, custom_price_udv=self.agreed_price )
+        print p_unit
+        print p_uos
+        print self.agreed_price
+        return p_unit
 
 
 class TourismConsumption(models.Model):
