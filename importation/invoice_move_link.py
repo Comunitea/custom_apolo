@@ -190,10 +190,12 @@ class invoice_move(object):
                 move_ref_post = move_ref_post[-7:]
                 move_ref = move_ref_pre + move_ref_post
                 domain = [('account_id.type', '=', 'receivable'),
-                        ('debit', '=', invoice['amount_total']),
+                        ('debit', '>=', invoice['amount_total']-0.1),
+                          ('debit', '<=', invoice['amount_total']+0.1),
                         ('ref', 'like', move_ref)]
-
+                print "Buscando %s : %s - %s  "%(move_ref,invoice['date_invoice'], invoice['amount_total'])
                 move_ids = self.search('account.move.line',domain)
+
                 if move_ids:
                     if len(move_ids) == 1:
                         moves = self.read('account.move.line', move_ids, ['move_id'])
