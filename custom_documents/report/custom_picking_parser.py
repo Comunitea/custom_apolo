@@ -49,6 +49,15 @@ class custom_picking_parser(models.AbstractModel):
         move_qty = 0.0
         move_net = 0.0
         ind_total_units = {}
+        ind_totals_dic = {
+            'box_qty': 0.0,
+            'box_qty_sc': 0.0,
+            'box_qty_p': 0.0,
+            'un_qty': 0.0,
+            'un_qty_sc': 0.0,
+            'un_qty_p': 0.0,
+            'tot_un': 0.0,
+        }
         for move in pick.move_lines:
             iva = ""
             sale_line = False
@@ -119,33 +128,67 @@ class custom_picking_parser(models.AbstractModel):
 
                 prod_ean_box = move.product_id.ean14 or ''
                 prod_ean_consum = move.product_id.ean_consum or ''
-                if move.price_subtotal_accepted:
-                    qty = move.accepted_qty
-                    qty_sc = 0.00
-                else:
-                    qty = 0.00
-                    qty_sc = move.accepted_qty
+                move_subtotal = move.price_subtotal if move.state != 'done' else move.price_subtotal_accepted
+                # ifmove_subtotal = move.price_subtotal if move.state != 'done' else move.price_subtotal_accepted move_subtotal:
+                #     qty = move.accepted_qty
+                #     qty_sc = 0.00
+                # else:
+                #     qty = 0.00
+                #     qty_sc = move.accepted_qty
+                # unit = move.product_uos.name
+                # ind_dic = {
+                #     'ref': prod_code,
+                #     'prod': prod_name,
+                #     'uc': int(move.product_id.kg_un),
+                #     'ean_box': prod_ean_box,
+                #     'ean_consum': prod_ean_consum,
+                #     'qty': qty,
+                #     'unit': unit,
+                #     'qty_sc': qty_sc,
+                #     'unit_sc': unit,
+                #     'total': move_subtotal,
+                # }
+                # ind_lines.append(ind_dic)
+                box_qty, box_qty_sc, \
+                un_qty, un_qty_sc, tot_un = self._get_unilever_units(move)
+                ind_totals_dic['box_qty'] += box_qty
+                ind_totals_dic['box_qty_sc'] += box_qty_sc
+                ind_totals_dic['box_qty_p'] += box_qty + box_qty_sc
+                ind_totals_dic['un_qty'] += un_qty
+                ind_totals_dic['un_qty_sc'] += un_qty_sc
+                ind_totals_dic['un_qty_p'] += un_qty + un_qty_sc
+                ind_totals_dic['tot_un'] += tot_un
+                # if move_subtotal:
+                #     qty = move.accepted_qty
+                #     qty_sc = 0.00
+                # else:
+                #     qty = 0.00
+                #     qty_sc = move.accepted_qty
                 unit = move.product_uos.name
                 ind_dic = {
                     'ref': prod_code,
                     'prod': prod_name,
-                    'uc': int(move.product_id.un_ca),
+                    'uc': int(move.product_id.kg_un),
                     'ean_box': prod_ean_box,
                     'ean_consum': prod_ean_consum,
-                    'qty': qty,
-                    'unit': unit,
-                    'qty_sc': qty_sc,
-                    'unit_sc': unit,
-                    'total': move.price_subtotal_accepted,
+                    # 'qty': qty,
+                    # 'unit': unit,
+                    # 'qty_sc': qty_sc,
+                    # 'unit_sc': unit,
+                    'box_qty': box_qty,
+                    'box_qty_sc': box_qty_sc,
+                    'un_qty': un_qty,
+                    'un_qty_sc': un_qty_sc,
+                    'total': move_subtotal,
+                    'total': tot_un,
                 }
                 ind_lines.append(ind_dic)
-
-                if unit not in ind_total_units:
-                    ind_total_units[unit] = (qty, qty_sc)
-                else:
-                    new_qty = ind_total_units[unit][0] + qty
-                    new_qty_sc = ind_total_units[unit][1] + qty_sc
-                    ind_total_units[unit] = (new_qty, new_qty_sc)
+                # if unit not in ind_total_units:
+                #     ind_total_units[unit] = (qty, qty_sc)
+                # else:
+                #     new_qty = ind_total_units[unit][0] + qty
+                #     new_qty_sc = ind_total_units[unit][1] + qty_sc
+                #     ind_total_units[unit] = (new_qty, new_qty_sc)
 
         tfoot['sum_qty'] = '{0:.4f}'.format(move_qty)
         tfoot['sum_net'] = '{0:.2f}'.format(move_net)
@@ -172,7 +215,34 @@ class custom_picking_parser(models.AbstractModel):
                         total_list.append('')
                         ind_totals.append(total_list)
                         total_list = []
-        return lines, ind_lines, tfoot, totals, ind_totals
+        # return lines, ind_lines, tfoot, totals, ind_totals
+        for k in ind_totals_dic.keys():
+            ind_totals_dic[k] = str(int(ind_totals_dic[k]))
+        return lines, ind_lines, tfoot, totals, ind_totals_dic
+
+    def _get_unilever_units(self, move):
+        box_qty = box_qty_sc = un_qty = un_qty_sc = tot_un = 0.0
+        uos = move.product_uos
+        prod = move.product_id
+        if uos and prod:
+            move_subtotal = move.price_subtotal if move.state != 'done' else move.price_subtotal_accepted
+            if uos.id == prod.log_base_id.id:
+                if move_subtotal:
+                    un_qty = move.accepted_qty
+                    un_qty_sc = 0.00
+                else:
+                    un_qty = 0.00
+                    un_qty_sc = move.accepted_qty
+            else:
+                move_subtotal = move.price_subtotal if move.state != 'done' else move.price_subtotal_accepted
+                if move_subtotal:
+                    box_qty = move.accepted_qty
+                    box_qty_sc = 0.00
+                else:
+                    box_qty = 0.00
+                    box_qty_sc = move.accepted_qty
+        tot_un = prod.kg_un * box_qty + un_qty
+        return int(box_qty), int(box_qty_sc), int(un_qty), int(un_qty_sc), int(tot_un)
 
     @api.multi
     def render_html(self, data=None):
@@ -185,10 +255,13 @@ class custom_picking_parser(models.AbstractModel):
         tfoot = {}
         totals = {}
         ind_totals = {}
+        ind_totals2 = {}
         for pick in self.env[report.model].browse(self._ids):
             docs.append(pick)
+            # lines[pick.id], ind_lines[pick.id], tfoot[pick.id], \
+            #     totals[pick.id], ind_totals[pick.id] = self.get_picking_args(pick)
             lines[pick.id], ind_lines[pick.id], tfoot[pick.id], \
-                totals[pick.id], ind_totals[pick.id] = self.get_picking_args(pick)
+                totals[pick.id], ind_totals2[pick.id] = self.get_picking_args(pick)
         docargs = {
             'doc_ids': self._ids,
             'doc_model': report.model,
@@ -198,5 +271,6 @@ class custom_picking_parser(models.AbstractModel):
             'tfoot': tfoot,
             'totals': totals,
             'ind_totals': ind_totals,
+            'ind_t2': ind_totals2,
         }
         return report_obj.render(report_name, docargs)
