@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* frigo_edi
+#   * frigo_edi
 #
 msgid ""
 msgstr ""
@@ -25,6 +25,43 @@ msgstr "%s: Fichero no encontrado en la carpeta. Fichero: %s"
 #: field:res.partner,afternoon_close_time:0
 msgid "Afternoon close time"
 msgstr "Horario cierre tarde"
+
+#. module: frigo_edi
+#: model:ir.ui.menu,name:frigo_edi.menu_edi_changes
+msgid "EDI changes"
+msgstr "Modificaciones EDI"
+
+#. module: frigo_edi
+#: field:edi.update,date:0
+msgid "Reception date"
+msgstr "Fecha importación"
+
+#. module: frigo_edi
+#: field:edi.update,name:0
+msgid "Document name"
+msgstr "Nombre de documento"
+
+#. module: frigo_edi
+#: view:edi.update:frigo_edi.edi_update_form
+msgid "changes"
+msgstr "Modificaciones"
+
+#. module: frigo_edi
+#: field:edi.update,ref_2:0
+msgid "Reference"
+msgstr "Referencia 2"
+
+#. module: frigo_edi
+#: field:edi.update,ref:0
+msgid "Reference"
+msgstr "Reference"
+
+
+
+#. module: frigo_edi
+#: field:edi.update,type:0
+msgid "Document type"
+msgstr "Tipo de documento"
 
 #. module: frigo_edi
 #: field:res.partner,afternoon_open_time:0

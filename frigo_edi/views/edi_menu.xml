@@ -4,5 +4,7 @@
 
         <menuitem id="menu_edi_frigo" parent="depot_edi.menu_edi" name="Frigo" sequence="40"/>
 
+        <menuitem id="menu_edi_changes" parent="menu_edi_frigo" name="EDI changes" action="action_edi_update" sequence="70"/>
+
     </data>
 </openerp>
