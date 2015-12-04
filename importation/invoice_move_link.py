@@ -174,7 +174,8 @@ class invoice_move(object):
             invoice_ids = self.search('account.invoice', [('state','=','history'),
                                                           ('type','=','out_invoice'),
                                                           ('amount_total', '>', 0),
-                                                          ('move_id', '=', False)])
+                                                          ('move_id', '=', False)],
+                                      order="date_invoice DESC")
             total = len(invoice_ids)
             num=0
             realizadas = 0
@@ -184,10 +185,12 @@ class invoice_move(object):
                                                                     'amount_total', 'partner_id',
                                                                     'date_invoice', 'date_due'])
                 separ = invoice['number'].split('/')
-                move_ref = separ[0] + "/00" + separ[1]
+                move_ref_pre = separ[0] + "/"
+                move_ref_post = "0000" + separ[1]
+                move_ref_post = move_ref_post[-7:]
+                move_ref = move_ref_pre + move_ref_post
                 domain = [('account_id.type', '=', 'receivable'),
                         ('debit', '=', invoice['amount_total']),
-                        ('partner_id', '=', invoice['partner_id'][0]),
                         ('ref', 'like', move_ref)]
 
                 move_ids = self.search('account.move.line',domain)
