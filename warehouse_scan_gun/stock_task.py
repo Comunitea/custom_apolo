@@ -286,11 +286,12 @@ class StockTask(models.Model):
 
         task_id = my_args.get('task_id', False)
         task_obj = self.browse(task_id)
-        task_obj.write({'state':'process'})
+
         uid, context = self.env.uid, self.env.context
         thread = threading.Thread(
             target=self._gun_finish_task, args=(my_args,))
         thread.start()
+        task_obj.write({'state':'process'})
         return True
 
     @api.model
