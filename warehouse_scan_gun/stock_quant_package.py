@@ -247,6 +247,9 @@ class stock_quant_package(models.Model):
             ,   'parent_id' : package.parent_id.id or False,
                 'parent_package': package.parent_id.name or '',
                 'packed_qty': package.packed_qty or 0,
+                'packed_lot_id': package.packed_lot_id.id or False,
+                'packed_lot' : package.packed_lot_id.name or 'Lote',
+
                 'uom' : package.uom_id.name or '',
                 'uom_id': package.uom_id.id or package.packed_lot_id.product_id.uom_id.id or False,
                 'is_multiproduct':package.is_multiproduct,
@@ -260,7 +263,6 @@ class stock_quant_package(models.Model):
                 'src_location_bcd': package.location_id.bcd_name or package.location_id.name or False,
                 'dest_location_bcd': False,
                 'life_date': package.packed_lot_id.life_date or '00/00/0000'}
-
             if package.children_ids:
                 picking_zone_id = package.children_ids[0].product_id.picking_location_id.id
                 picking_zone = 'Zona de Multipalets'
@@ -274,6 +276,8 @@ class stock_quant_package(models.Model):
                     'dest_location': False,
                     'lot_id': False,
                     'lot': "MultiPack",
+                    'packed_lot_id': package.packed_lot_id.id or False,
+                    'packed_lot' : package.packed_lot_id.name or 'Lote',
                     'parent_id' : package.parent_id.id or False,
                     'parent_package': package.parent_id.name or '',
                     'product_id' : False,

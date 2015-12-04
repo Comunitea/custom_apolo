@@ -61,11 +61,13 @@ class StockTask(models.Model):
         message = ''
         op_id = False
         try:
-            op_id = task.add_loc_operation (pack_id)
-            if op_id:
+            op_id = task.add_loc_operation(pack_id)
+            if op_id == -1:
+                message = u"No está en Entrada"
+            elif op_id:
                 op_id = op_id[0]
         except:
-            message = u'paquete no encontrado'
+            message = u'Paquete no encontrado'
         return op_id, message
 
     @api.multi
@@ -154,7 +156,7 @@ class StockTask(models.Model):
         self_ = self.env['stock.task'].with_context(ctx)
         task_obj = self.search(domain).with_context(ctx)
         if task_obj:
-            print "Te doy la que tenias"
+            print u"Te doy la que tenias"
             return task_obj.id
         trans_route_id = False
         if route_id:
@@ -194,7 +196,7 @@ class StockTask(models.Model):
         elif task_type == 'picking':
             task_id = wzd_obj_uid.with_context(gun=True).get_picking_task()
 
-        print "te doy una creada: Id" +str(task_id)
+        print u"te doy una creada: Id" +str(task_id)
         return task_id
 
     @api.multi
