@@ -14,10 +14,24 @@
                     <field name="add_summary"/>
                     <field name="pick_print_op"/>
                     <field name="supp_name_prod" attrs="{'invisible': [('customer', '=', True)]}"/>
+                    <field name="merchantil_info" colspan="4"/>
                 </group>
             </page>
         </notebook>
       </field>
     </record>
+
+      <!--<record id="custom_view_form" model="ir.ui.view">-->
+      <!--<field name="name">custom.documents.view.form</field>-->
+      <!--<field name="model">res.partner</field>-->
+      <!--<field name="inherit_id" ref="midban_partner.midban_view_partner_form"/>-->
+      <!--<field name="arch" type="xml">-->
+            <!--<group string="Delivery Orders Time Slot" position="after">-->
+                <!--<field name="merchantil_info" colspan="4">-->
+
+                <!--</field>-->
+            <!--</group>-->
+      <!--</field>-->
+    <!--</record>-->
   </data>
 </openerp>
