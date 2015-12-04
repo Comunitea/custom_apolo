@@ -161,6 +161,10 @@
           font-size: 10px;
           text-align: center;
         }
+        .foot-text-p .Text2{
+          font-size: 6px;
+          text-align: center;
+        }
 
         .top_part{
         min-height:30mm;
@@ -559,7 +563,7 @@
               padding-right: 3px;
             }
             .table4-p td{
-              font-size: 12px;
+              font-size: 10px;
             }
             .table5-p{
               width: 100%;
@@ -579,33 +583,53 @@
               <th class="col-sc text-center"><strong>U / C</strong></th>
               <th class="col-ean text-center"><strong>EAN BOX</strong></th>
               <th class="col-ean text-center"><strong>EAN CONSUM</strong></th>
-              <th class="col-sc text-center"><strong>Qty.</strong></th>
-              <th class="col-sc text-center"><strong>Units</strong></th>
-              <th class="col-sc text-center"><strong>Qty. S/C</strong></th>
-              <!-- <th class="col-sc text-center"><strong>Units S/C</strong></th> -->
-              <th class="col-total text-center"><strong>Total Qty</strong></th>
+              <!--<th class="col-sc text-center"><strong>Qty.</strong></th>-->
+              <!--<th class="col-sc text-center"><strong>Units</strong></th>-->
+              <!--<th class="col-sc text-center"><strong>Qty. S/C</strong></th>-->
+              <!--&lt;!&ndash; <th class="col-sc text-center"><strong>Units S/C</strong></th> &ndash;&gt;-->
+              <!--<th class="col-total text-center"><strong>Total Qty</strong></th>-->
+              <th class="col-sc text-center"><strong>Cajas.</strong></th>
+              <th class="col-sc text-center"><strong>S / C</strong></th>
+              <th class="col-sc text-center"><strong>Unid</strong></th>
+              <th class="col-sc text-center"><strong>S / C</strong></th>
+              <th class="col-total text-center"><strong>Total Unids.</strong></th>
             </thead>
             <tbody>
               <tr t-foreach="ind_lines[o.id]" t-as="lin">
                 <td class="col-ref-td"><strong><span t-esc="lin['ref']"/></strong></td>
                 <td class="col-prod"><span t-esc="lin['prod']"/></td>
-                <td class="col-sc-right"><span t-esc="lin['uc']"/></td>
+                <td class="col-sc text-center"><span t-esc="lin['uc']"/></td>
                 <td class="col-ean"><span t-esc="lin['ean_box']"/></td>
                 <td class="col-ean"><span t-esc="lin['ean_consum']"/></td>
-                <td class="col-sc-right"><span t-esc="lin['qty']"/></td>
-                <td class="col-sc"><span t-esc="lin['unit']"/></td>
-                <td class="col-sc-right"><span t-esc="lin['qty_sc']"/></td>
-                <!-- <td class="col-sc"><span t-esc="lin['unit_sc']"/></td> -->
-                <td class="col-total text-right"><span t-esc="lin['total']"/></td>
+                <!--<td class="col-sc-right"><span t-esc="lin['qty']"/></td>-->
+                <!--<td class="col-sc"><span t-esc="lin['unit']"/></td>-->
+                <!--<td class="col-sc-right"><span t-esc="lin['qty_sc']"/></td>-->
+                <td class="col-sc-right"><span t-esc="lin['box_qty'] if lin['box_qty'] else ''"/></td>
+                <td class="col-sc-right"><span t-esc="lin['box_qty_sc'] if lin['box_qty_sc'] else ''"/></td>
+                <td class="col-sc-right"><span t-esc="lin['un_qty'] if lin['un_qty'] else ''"/></td><td class="col-sc"><span t-esc="lin['un_qty_sc']"/></td>
+                <td class="col-total text-right"><span t-esc="lin['total'] if lin['total'] else ''"/></td>
               </tr>
             </tbody>
             <tfoot>
-              <table class="table5-p">
-                <tr t-foreach="ind_totals[o.id]" t-as="ind_t">
-                  <td colspan="2"><strong><span t-esc="ind_t[0]"/></strong></td>
-                  <td colspan="2"><strong><span t-esc="ind_t[1]"/></strong></td>
-                  <td colspan="2"><strong><span t-esc="ind_t[2]"/></strong></td>
-                  <td colspan="2"><strong><span t-esc="ind_t[3]"/></strong></td>
+              <!--<table class="table5-p">-->
+                <!--<tr t-foreach="ind_totals[o.id]" t-as="ind_t">-->
+                  <!--<td colspan="2"><strong><span t-esc="ind_t[0]"/></strong></td>-->
+                  <!--<td colspan="2"><strong><span t-esc="ind_t[1]"/></strong></td>-->
+                  <!--<td colspan="2"><strong><span t-esc="ind_t[2]"/></strong></td>-->
+                  <!--<td colspan="2"><strong><span t-esc="ind_t[3]"/></strong></td>-->
+                <!--</tr>-->
+            <!--</table>-->
+                <table class="table5-p">
+                <tr>
+                  <td><strong>Total cajas: <span t-esc="ind_t2[o.id]['box_qty'] if ind_t2[o.id]['box_qty'] else ''"/></strong></td>
+                  <td><strong>Total cajas sin cargo: <span t-esc="ind_t2[o.id]['box_qty_sc'] if ind_t2[o.id]['box_qty_sc'] else ''"/></strong></td>
+                  <td><strong>Total cajas albarán: <span t-esc="ind_t2[o.id]['box_qty_p'] if ind_t2[o.id]['box_qty_p'] else ''"/></strong></td>
+                  <td class="totaluds"><strong>Total unids.: <span t-esc="ind_t2[o.id]['tot_un'] if ind_t2[o.id]['tot_un'] else ''"/></strong></td>
+                </tr>
+                <tr>
+                  <td><strong>Total unid.: <span t-esc="ind_t2[o.id]['un_qty'] if ind_t2[o.id]['un_qty'] else ''"/></strong></td>
+                  <td><strong>Total unid. sin cargo: <span t-esc="ind_t2[o.id]['un_qty_sc'] if ind_t2[o.id]['un_qty_sc'] else ''"/></strong></td>
+                  <td><strong>Total unid. albarán: <span t-esc="ind_t2[o.id]['un_qty_p'] if ind_t2[o.id]['un_qty_p'] else ''"/></strong></td>
                 </tr>
             </table>
             </tfoot>
@@ -628,7 +652,7 @@
                   </tr>
                   <tr class="tr-separated-p">
                     <td><label class="header-font-p">Date Of Delivery </label></td>
-                    <td> : <span t-esc="o.min_date"/></td>
+                    <td> : <span t-esc="o.min_date.split(' ')[0].split('-')[2] + '/' + o.min_date.split(' ')[0].split('-')[1] + '/' + o.min_date.split(' ')[0].split('-')[0]"/></td>
                   </tr>
                   <tr class="tr-separated-p">
                     <td><label class="header-font-p">Customer Control Nº</label></td>
@@ -672,11 +696,11 @@
                           <tr>
                               <td>
                                   <!--<span t-field="o.sale_id.user_id2.name"/>-->
-                                  <span t-field="o.sale_id.create_uid.name"/>
+                                  <span t-field="o.sale_id.create_uid.custom_code"/>
                               </td>
                               <td>
                                 <div t-if="o.route_detail_id">
-                                  <span t-field="o.route_detail_id.comercial_id.name"/>
+                                  <span t-field="o.route_detail_id.comercial_id.custom_code"/>
                                 </div>
                               </td>
                           </tr>
@@ -708,10 +732,18 @@
 
             <div  class="row top_part-p"  t-if="o.indirect">
               <div class="col-xs-7 no-padd-left-p">
-                <br/>
-                <br/>
-                <br/>
-                <p><strong>Agente / Repartidor:</strong> <span t-if="o.route_detail_id" t-field="o.user_id.name"/> / <span t-if="o.route_detail_id" t-field="o.route_detail_id.comercial_id.name"/></p>
+                <table class="table4-p no-padd-left-p">
+                    <thead>
+                      <th class="col-ref text-center"><strong>Concesionario autorizado para distribución en la zona</strong></th>
+                    </thead>
+                    <tbody>
+                    <tr >
+                        <td class="col-sc text-center"><strong>ALBERTO POLO DIST. S.A.</strong></td>
+                    </tr>
+                    </tbody>
+                </table>
+                  <br/>
+                <p><strong>Agente / Repartidor:</strong> <span t-if="o.route_detail_id" t-field="o.user_id.custom_code"/> / <span t-if="o.route_detail_id" t-field="o.route_detail_id.comercial_id.custom_code"/></p>
                 <span t-esc="o.name" class="reference-font-p"/>
               </div>
               <div class="col-xs-1 no-padd-left-p">
@@ -778,12 +810,13 @@
                 OBSERVATIONS:
               </div>
               <div class="col-xs-8 right">
-                SIGN, STAMP ACCORDING CUSTOMER AND DATE RECEIVING MERCHANDISE
+                FIRMA, SELLO CONFORME CLIENTE Y FECHA RECEPCIÓN DE MERCANCIA
               </div>
             </div>
             <div class="foot-text-p">
               <p class="Text1"><span t-esc="o.supplier_id.name"/>, <span t-esc="o.supplier_id.street"/> <span t-esc="o.supplier_id.street2"/> - Teléfono <span t-esc="o.supplier_id.phone"/> - Fax <span t-esc="o.supplier_id.fax"/> - <span t-esc="o.supplier_id.zip"/> <span t-esc="o.supplier_id.city"/></p>
-              <p class="Text1"><span t-esc="o.supplier_id.vat"/></p>
+              <!--<p class="Text1"><span t-esc="o.supplier_id.vat"/></p>-->
+              <p class="Text2"><span t-esc="o.supplier_id.merchantil_info"/></p>
               <!-- <p class="Text2">Registro Mercantil de Barcelona, Hoja B343092, Inscripción 129, Folio 140, Tomo 39375 A28660520</p> -->
             </div>
           </div>

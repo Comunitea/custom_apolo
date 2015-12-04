@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-02 21:11+0000\n"
-"PO-Revision-Date: 2015-12-02 21:11+0000\n"
+"POT-Creation-Date: 2015-12-04 10:41+0000\n"
+"PO-Revision-Date: 2015-12-04 10:41+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -42,6 +42,11 @@ msgstr "- Teléfono"
 #: view:website:custom_documents.picking_bottom_part
 msgid "ACCOUNT PAID"
 msgstr "PAGADO A CUENTA"
+
+#. module: custom_documents
+#: view:website:custom_documents.picking_top_part-p
+msgid "ALBERTO POLO DIST. S.A."
+msgstr "ALBERTO POLO DIST. S.A."
 
 #. module: custom_documents
 #: field:res.partner,add_summary:0
@@ -90,10 +95,20 @@ msgid "COMP."
 msgstr "COMP."
 
 #. module: custom_documents
+#: view:website:custom_documents.picking_indirect_table
+msgid "Cajas."
+msgstr "Cajas."
+
+#. module: custom_documents
 #: view:website:custom_documents.invoice_summary_products
 #: view:website:custom_documents.op_group_pick
 msgid "Code"
 msgstr "Código"
+
+#. module: custom_documents
+#: view:website:custom_documents.picking_top_part-p
+msgid "Concesionario autorizado para distribución en la zona"
+msgstr "Concesionario autorizado para distribución en la zona"
 
 #. module: custom_documents
 #: view:website:custom_documents.picking_header_part-p
@@ -158,6 +173,11 @@ msgstr "EAN CONSUMO"
 #: view:website:custom_documents.invoice_top_part
 msgid "Expiration:"
 msgstr "Vencimiento:"
+
+#. module: custom_documents
+#: view:website:custom_documents.picking_bottom_part
+msgid "FIRMA, SELLO CONFORME CLIENTE Y FECHA RECEPCIÓN DE MERCANCIA"
+msgstr "FIRMA, SELLO CONFORME CLIENTE Y FECHA RECEPCIÓN DE MERCANCIA"
 
 #. module: custom_documents
 #: selection:res.partner,inv_print_op:0
@@ -233,6 +253,11 @@ msgstr "MANTO PALET"
 #: view:website:custom_documents.purchase_order_middle_part
 msgid "MANTLES"
 msgstr "MANTOS"
+
+#. module: custom_documents
+#: field:res.partner,merchantil_info:0
+msgid "Mercantil Info."
+msgstr "Info. mercantil."
 
 #. module: custom_documents
 #: view:website:custom_documents.invoice_top_part
@@ -363,14 +388,8 @@ msgstr "Pág. 1 de 1"
 #: view:website:custom_documents.op_give_deliver
 #: view:website:custom_documents.op_group_pick
 #: view:website:custom_documents.picking_direct_table
-#: view:website:custom_documents.picking_indirect_table
 msgid "Qty."
 msgstr "Cant."
-
-#. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "Qty. S/C"
-msgstr "Cant. S/C"
 
 #. module: custom_documents
 #: view:website:custom_documents.purchase_order_middle_part
@@ -400,9 +419,9 @@ msgid "Reports Preferences"
 msgstr "Preferencias informes"
 
 #. module: custom_documents
-#: view:website:custom_documents.picking_bottom_part
-msgid "SIGN, STAMP ACCORDING CUSTOMER AND DATE RECEIVING MERCHANDISE"
-msgstr "SIGN, STAMP ACCORDING CUSTOMER AND DATE RECEIVING MERCHANDISE"
+#: view:website:custom_documents.picking_indirect_table
+msgid "S / C"
+msgstr "S / C"
 
 #. module: custom_documents
 #: view:website:custom_documents.invoice_top_part
@@ -476,8 +495,43 @@ msgstr "Total"
 
 #. module: custom_documents
 #: view:website:custom_documents.picking_indirect_table
-msgid "Total Qty"
-msgstr "Cant. total"
+msgid "Total Unids."
+msgstr "Total Unids."
+
+#. module: custom_documents
+#: view:website:custom_documents.picking_indirect_table
+msgid "Total cajas albarán:"
+msgstr "Total cajas albarán:"
+
+#. module: custom_documents
+#: view:website:custom_documents.picking_indirect_table
+msgid "Total cajas sin cargo:"
+msgstr "Total cajas sin cargo:"
+
+#. module: custom_documents
+#: view:website:custom_documents.picking_indirect_table
+msgid "Total cajas:"
+msgstr "Total cajas:"
+
+#. module: custom_documents
+#: view:website:custom_documents.picking_indirect_table
+msgid "Total unid. albarán:"
+msgstr "Total unid. albarán:"
+
+#. module: custom_documents
+#: view:website:custom_documents.picking_indirect_table
+msgid "Total unid. sin cargo:"
+msgstr "Total unid. sin cargo:"
+
+#. module: custom_documents
+#: view:website:custom_documents.picking_indirect_table
+msgid "Total unid.:"
+msgstr "Total unids.:"
+
+#. module: custom_documents
+#: view:website:custom_documents.picking_indirect_table
+msgid "Total unids.:"
+msgstr "Total unids.:"
 
 #. module: custom_documents
 #: view:website:custom_documents.purchase_order_middle_part
@@ -495,17 +549,17 @@ msgid "U / C"
 msgstr "U / C"
 
 #. module: custom_documents
+#: view:website:custom_documents.picking_indirect_table
+msgid "Unid"
+msgstr "Unid."
+
+#. module: custom_documents
 #: view:website:custom_documents.invoice_summary_products
 #: view:website:custom_documents.op_give_deliver
 #: view:website:custom_documents.op_group_pick
 #: view:website:custom_documents.picking_direct_table
 msgid "Unit"
 msgstr "Unidad"
-
-#. module: custom_documents
-#: view:website:custom_documents.picking_indirect_table
-msgid "Units"
-msgstr "Unidades"
 
 #. module: custom_documents
 #: help:res.partner,supp_name_prod:0
@@ -516,6 +570,16 @@ msgstr "Usar nombre de producto de proveedor en albaranes indirectos"
 #: field:res.partner,supp_name_prod:0
 msgid "Use supplier names in indirect notes"
 msgstr "Usar nombre proveedor en albaranes indirectos"
+
+#. module: custom_documents
+#: field:res.users,custom_code:0
+msgid "User Code"
+msgstr "Código usuario"
+
+#. module: custom_documents
+#: model:ir.model,name:custom_documents.model_res_users
+msgid "Users"
+msgstr "Usuarios"
 
 #. module: custom_documents
 #: selection:res.partner,pick_print_op:0

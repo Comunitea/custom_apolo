@@ -233,12 +233,16 @@ than the minimum price')}}
             En los turismos se trabaja con unidades, esta función calcula el
             precio por unidad de medida del producto.
         """
+        #print "get_box_price!!"
         product_uom = product.uom_id
         if product_uom == product.log_base_id:
-            return self.agreed_price / product.kg_un
-        elif product_uom == product.log_box_id:
-            return self.agreed_price * product.un_ca
+            #print "log_base"
+            return self.agreed_price
+        elif product_uom == product.log_unit_id:
+            #print "log_unit"
+            return self.agreed_price * product.kg_un
         else:
+            #print "log_other"
             return self.agreed_price
 
 

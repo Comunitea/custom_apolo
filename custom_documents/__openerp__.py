@@ -38,10 +38,13 @@
         "stock",
         "account",
         "midban_product",
+        "midban_partner",
     ],
     "data": ['views/res_partner_view.xml',
              #  'views/custom_assets.xml', NO ME FUNCIONA en esta revision
              'views/custom_reports.xml',
+             'views/res_users_view.xml',
+             'views/res_partner_view.xml',
              'qweb_report/report_custom_picking.xml',
              'qweb_report/report_custom_picking_batch.xml',
              'qweb_report/report_custom_invoice.xml',
