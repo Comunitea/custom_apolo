@@ -79,7 +79,7 @@ class DatabaseImport:
 
         self.url_template = "http://%s:%s/xmlrpc/%s"
         self.server = "localhost"
-        self.port = 8069
+        self.port = 9069
         self.dbname = dbname
         self.user_name = user
         self.user_passwd = passwd
@@ -1011,21 +1011,15 @@ class DatabaseImport:
             conn = pyodbc.connect("DRIVER={FreeTDS};SERVER=" + self.sql_server_host + ";UID=midban;PWD=midban2015;DATABASE=" + self.sql_server_dbname + ";Port=1433;TDS_Version=10.0")
             cr = conn.cursor()
 
-            #self.import_sale_orders(cr)
+            self.import_sale_orders(cr)
             #self.import_sale_order_lines_open(cr)
             #self.import_sale_order_lines_history(cr)
             #self.import_active_purchase_order(cr)
-            #self.import_purchase_invoice(cr)
-            #self.import_sale_invoice(cr)
+            self.import_purchase_invoice(cr)
+            self.import_sale_invoice(cr)
             #self.fix_product_histories()
             #self.open_sale_orders()
-            #self.import_sale_order_lines_open(cr)
-            #self.import_sale_order_lines_history(cr)
-            #self.import_active_purchase_order(cr)
-            #self.import_purchase_invoice(cr)
-            #self.import_sale_invoice(cr)
-            self.import_autosale_orders(cr)
-            #self.fix_product_histories()
+            #self.import_autosale_orders(cr)
 
         except Exception, ex:
             print u"Error al conectarse a las bbdd: ", repr(ex)
