@@ -207,7 +207,7 @@ class invoice_move(object):
                         }
                         self.write('account.invoice', invoice['id'], vals)
                         vals = {
-                            'maurity_date': date_due
+                            'date_maturity': date_due
                         }
                         self.write('account.move.line', move_ids[0], vals)
                         print u"HECHO   para %s"%(invoice['number'])
