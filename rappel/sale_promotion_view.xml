@@ -2,6 +2,17 @@
 <openerp>
     <data>
 
+        <record id="sale_promotion_add_rappeltree" model="ir.ui.view">
+            <field name="name">sale.joint.promotion.add.rapeltree</field>
+            <field name="model">sale.joint.promotion</field>
+            <field name="inherit_id" ref="sale_custom_promotion.sale_joint_promotion_tree"/>
+            <field name="arch" type="xml">
+                <field name="promotion_id" position="after">
+                    <field name="rappel_id"/>
+                </field>
+            </field>
+        </record>
+
         <record id="joint_promotion_add_rappel" model="ir.ui.view">
             <field name="name">sale.joint.promotion.form</field>
             <field name="model">sale.joint.promotion</field>

@@ -258,8 +258,8 @@ class product_product (models.Model):
         conv.append(base_append)
         conv.append(unit_append)
         conv.append(box_append)
-        print "Conversion para %s de %s de %s. Conv %s/%s" %(uom_qty, unit_to.name, product.name, product.un_ca, product.kg_un)
-        print "          >> %s\n"%conv
+        print u"Conversion para %s de %s de %s. Conv %s/%s" %(uom_qty, unit_to.name, product.name, product.un_ca, product.kg_un)
+        print u"          >> %s\n"%conv
         return conv
 
     #Esta es la nueva NO OK
@@ -340,8 +340,8 @@ class product_product (models.Model):
         conv.append(base_append)
         conv.append(unit_append)
         conv.append(box_append)
-        print "Conversion para %s de %s de %s. Conv %s/%s" %(uom_qty, unit_to.name, product.name, product.un_ca, product.kg_un)
-        print "          >> %s\n"%conv
+        print u"Conversion para %s de %s de %s. Conv %s/%s" %(uom_qty, unit_to.name, product.short_name, product.un_ca, product.kg_un)
+        print u"          >> %s\n"%conv
         return conv
 
     @api.multi

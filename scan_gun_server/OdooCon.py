@@ -42,7 +42,7 @@ class OdooConnector:
 
     def exception_handler(self, exception):
         """Manejador de Excepciones"""
-        print "HANDLER: ", (exception)
+        print u"HANDLER: ", (exception)
         return True
 
     def create(self, model, data, context={}):

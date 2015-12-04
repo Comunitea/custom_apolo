@@ -28,10 +28,9 @@ class stock_picking(models.Model):
 
     @api.multi
     def get_routes_menu(self):
-
         res = {}
         domain = [('picking_type_id', '=',5), ('validated_state', '=', 'loaded'), ('state', 'not in', ('draft','done','cancel'))]
-        route_ids = self.search(domain)#,  order ='name asc')
+        route_ids = self.search(domain, order = 'route_detail_id')#.detail_name_str')#,  order ='name asc')
         if not route_ids:
             res = False
         indx = 1
@@ -43,6 +42,7 @@ class stock_picking(models.Model):
                 res[str(indx)] = (id, name)
                 name_pool.append(name)
                 indx += 1
+
         return res
 
 

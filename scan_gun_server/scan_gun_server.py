@@ -527,8 +527,10 @@ class ScanGunProtocol(LineReceiver):
         if self.tasks_paused():
             #menu_str += u"1 -> Tarea de ubicacion\n2 -> Tarea de reposicion\n3 -> Tarea de picking\n"
             menu_str += u"1 -> Tarea de ubicacion\n3 -> Tarea de picking\n"
-        menu_str+= u"4 -> Transferencia manual\n"
+        menu_str+= u"4 -> Movimiento Manual\n"
+        menu_str+= u"8 -> Info Etiqueta\n"
         menu_str+= u"9 -> Herramientas\n"
+
         if self.show_keys:
             keys = u"%s Atras"%KEY_VOLVER
         menu_str += delimiter + keys
@@ -567,7 +569,7 @@ class ScanGunProtocol(LineReceiver):
         self.vals= VALS
         self.num_order_list_ops = 1
         print "handle_menu %s"%line
-        if line not in ["0", "1","3", "4", "5", "9"] and line != KEY_VOLVER:
+        if line not in ["0", "1","3", "4", "5", "8", "9"] and line != KEY_VOLVER:
             str_error = u"La opcion %s no es valida.\nReintentar:\n"%line
             self.state='menu1'
             self._snd(self.get_str_menu1(True), str_error)
@@ -602,11 +604,15 @@ class ScanGunProtocol(LineReceiver):
             self._snd(menu_str)
 
         elif line == "8":
-            self.state = 'config'
-            self.vals = VALS_MANUAL
-            menu_str = self.menu_config()
-            self._snd(menu_str)
-
+            self.state = 'info_producto'
+            self.step=0
+            self.num_order_list_ops = 1
+            self.pack = {}
+            self._snd(self.get_str_info_producto())
+            # self.state = 'config'
+            # self.vals = VALS_MANUAL
+            # menu_str = self.menu_config()
+            # self._snd(menu_str)
         elif line == "9":
             self.state = 'tools'
             self.vals = VALS_MANUAL
@@ -3338,18 +3344,18 @@ class ScanGunProtocol(LineReceiver):
             menu_str += str_
 
         menu_str += u"(%s)\n%s\n"%(wave_['lot'], wave_['product'])
-        menu_str += u"En Paquete: %s %s\n"%(wave_['qty_available'], wave_['uom'])
+        menu_str += u"En Paquete: %s %s\n"%(round(wave_['qty_available'],2), wave_['uom'])
         #menu_str += u"Mover: %s %s\n"%(wave_['uos_qty'],wave_['uos'])
         unit_str=''
 
         if wave_['is_var_coeff']:
-            mover = "Pedido: %s %s\n"%(wave_['uos_qty'], wave_['uos'])
+            mover = "Pedido: %s %s\n"%(round(wave_['uos_qty'],2), wave_['uos'])
             menu_str += mover
 
         mover = "Mover :"
         for unit in reversed(wave_['units']):
-            if unit[2] and unit[1]>0:
-                unit_str += u"%s %s %s\n"%(mover, unit[1], unit[0])
+            if unit[2] and round(unit[1],2)>0:
+                unit_str += u"%s %s %s\n"%(mover, round(unit[1],2), unit[0])
                 mover = "       "
         menu_str += unit_str
 
@@ -3658,7 +3664,8 @@ class ScanGunProtocol(LineReceiver):
                 # self._snd(self.get_str_form_ubi_ops() + message)
                 # return
                 #to_process a False
-            if op_id:
+
+            if op_id and op_id!=-1:
                 res = self.factory.odoo_con.change_op_value(self.user_id, op_id, 'to_process', False)
                 self.check_task()
                 self.ops = self.factory.odoo_con.get_ops(self.user_id, self.task_id, self.type)
@@ -5241,10 +5248,17 @@ class ScanGunProtocol(LineReceiver):
             return
 
         if line == '9' and self.type == "ubication":
-            self.state = 'multipack'
+
+            self.state = 'create_multipack'
+            self.step=0
+            self.num_order_list_ops = 1
             self.packs = []
-            self.step = 0
-            self._snd(self.get_str_create_multipack_from_pick())
+            self._snd(self.get_str_create_multipack())
+            #
+            # self.state = 'multipack'
+            # self.packs = []
+            # self.step = 0
+            # self._snd(self.get_str_create_multipack_from_pick())
             return
 
         if line== KEY_VOLVER:
@@ -5350,15 +5364,15 @@ class ScanGunProtocol(LineReceiver):
         Devuelve el menu con las camaras disponibles
         """
         self.last = "get_routes_menu"
+
         delimiter = "\n********************\n"
         #str_menu = "0 -> Volver\n"
         str_menu=""
-
         self.routes = self.factory.odoo_con.get_routes_menu(self.user_id, type)
         inc=1
         if self.routes:
             for key in range(1, len(self.routes)+1):
-                ruta = self.routes[str(str(key))][1]
+                ruta = self.routes[str(key)][1]
                 print u'%s > %s'%(key, ruta)
                 if key>= self.num_order_list_ops and key<= self.num_order_list_ops + MAX_NUM_ONE:
                     str_menu += "%s -> %s\n"%(key, ruta)
@@ -5933,21 +5947,21 @@ class ScanGunProtocol(LineReceiver):
 
     def get_str_info_producto(self, message =''):
 
-
         if self.pack:
             pack = self.pack
             if self.step:
                 str_menu=u"Info Paquete/Producto\n"
-
                 str_menu += u'%s : %s\n'%(pack['package'], pack['lot'])
-                str_menu += u'%s: %s %s\n%s'%(pack['product'], pack['packed_qty'],
+                str_menu += u'%s\n%s %s\n%s'%(pack['product'], pack['packed_qty'],
                                               pack['uom'], pack['src_location_bcd'])
                 str_menu += u"\nCaducidad %s"%pack.get('life_date', '00/00/0000')
-                message = u'\n%s Ver Stock'%KEY_FINISH
+                if pack['parent_id']:
+                    str_menu += u"\n[x] Multi: %s"%pack['parent_package']
+                message = self.inverse(u'\n%s Ver Stock'%KEY_FINISH)
                 str_menu += message
             else:
                 str_menu = self.get_str_list_packages(self.pack['product_id'], short = True)
-                message = u'\n%s Caracteristicas'%KEY_FINISH
+                message = self.inverse(u'\n%s Caracteristicas'%KEY_FINISH)
                 str_menu += message
         else:
             str_menu = u"\nLee paquete"
@@ -5963,6 +5977,7 @@ class ScanGunProtocol(LineReceiver):
         line_int = self.int_(line)
 
         if order_line == PRE_PACK:
+
             self.pack = self.factory.odoo_con.get_pack_gun_info(self.user_id, line_int)
             self.list_packages = self.factory.odoo_con.get_pack_candidates(self.pack['product_id'], 0)
             self.step = True

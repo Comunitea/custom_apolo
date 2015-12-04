@@ -102,6 +102,27 @@ PREF_AGREE_MAP = {
     "O": ("H","IM"),
 }
 
+PRODUCT_FIX = {
+    '200102': 12, '140606': 3, '140612': 2, '140614': 6, '140613': 3, '130113': 8, '130109': 12,
+    '247201': 6, '101301': 6, '101303': 6, '101304': 6, '101305': 6, '4127': 6, '101401': 6,
+    '235112': 12, '130101': 16, '130116': 16, '130114': 8, '247231': 100, '205101': 6,
+    '4426': 5, '4791': 10, '4790': 10, '130115': 8, '302102': 12, '11130': 4, '247207': 6,
+    '247206': 6, '247208': 6, '247209': 6, '100701': 6, '423': 6, '4634': 6, '4132': 12,
+    '125': 4, '4131': 12, '140701': 4, '4112': 12, '4108': 12, '4111': 12, '247210': 6,
+    '304': 5, '247212': 6, '100602': 12, '100601': 12, '230105': 12, '4159': 4, '4145': 6,
+    '4146': 6, '4140': 6, '4106': 5, '4115': 5, '101402': 6, '9257': 6, '44405': 6,
+    '247214': 6, '539502': 4, '225203': 12, '225204': 6, '4177': 10, '4113': 6, '4107': 6,
+    '4114': 6, '4123': 12, '4101': 10, '247230': 6, '230114': 12, '100301': 6, '225103': 12,
+    '225104': 12, '225105': 4, '4122': 10, '4119': 6, '225403': 12, '225404': 6, '4205': 12,
+    '4610': 6, '4607': 6, '4608': 6, '4600': 6, '247216': 6, '247217': 6, '661101': 10,
+    '225502': 4, '4821': 12, '247218': 6, '247229': 6, '247219': 6, '247220': 6, '247222': 6,
+    '247223': 6, '101201': 6, '101202': 6, '101203': 6, '101204': 24, '686': 3, '247224': 6,
+    '428': 6, '427': 6, '113': 10, '4470': 3, '247101': 6, '89': 5, '302201': 6, '4801': 12,
+    '230120': 12, '4121': 25, '100802': 6, '100804': 3, '247227': 6, '4820': 12, '245101': 12,
+    '100201': 6, '3003': 24, '3004': 12, '3021': 10, '3008': 40, '3012': 40, '3033': 6, '3024': 10,
+    '3025': 1, '10173': 23, '61': 6
+}
+
 def ustr(text):
     """convierte las cadenas de sql server en iso-8859-1 a utf-8 que es la cofificaciï¿œn de postgresql"""
     return unicode(text.strip(), 'iso-8859-15').encode('utf-8')
@@ -124,7 +145,7 @@ class DatabaseImport:
 
         self.url_template = "http://%s:%s/xmlrpc/%s"
         self.server = "localhost"
-        self.port = 9069
+        self.port = 8069
         self.dbname = dbname
         self.user_name = user
         self.user_passwd = passwd
@@ -371,13 +392,16 @@ class DatabaseImport:
         cr.execute("select v.articulo as default_code, v.descripcion as name, v.familia as categ_id_map, m.pr1_cenv as temp_type_map, "
                    "v.medida_base as uom_id_map, v.medida_composicion as uomb_map, v.cantidad_composicion as kg_un, m.pr1_tcom as var_coeff_un, "
                    "v.cajas_por_rellano as ca_ma, v.cajas_por_pale / nullif(v.cajas_por_rellano, 0) as ma_pa, v.control_stock as type_map, "
-                   "v.codigo_iva as tax_map, v.ean_base as ean14, v.precio_ultima_compra as standard_price, v.bloqueado as active, "
-                   "m.medida_peso as weight, m.observaciones_articulo as description, v.tipo_composicion as base_use_sale, v.id as internal_code "
+                   "v.codigo_iva as tax_map, v.ean_base as ean14, m.pr1_pmpn as standard_price, v.bloqueado as active, "
+                   "m.pr1_capl as weight, m.observaciones_articulo as description, v.tipo_composicion as base_use_sale, v.id as internal_code "
                    "from dbo.articulos v inner join dbo.adsd_art m on m.pr1_codi = v.articulo")
         data = cr.fetchall()
         for row in data:
             uom_id = self.search("product.uom", [('name', '=', UOM_MAP[row.uom_id_map.strip()])])[0]
             uob_id = self.search("product.uom", [('name', '=', UOM_MAP[row.uomb_map.strip()])])[0]
+            cost_unit = row.standard_price
+            if str(int(row.default_code)) in PRODUCT_FIX:
+                cost_unit = cost_unit * float(PRODUCT_FIX[str(int(row.default_code))])
             product_vals = {
                 "default_code": str(int(row.default_code)),
                 "name": ustr(row.name),
@@ -388,8 +412,8 @@ class DatabaseImport:
                 "kg_un": row.kg_un,
                 "ca_ma": row.ca_ma or 0,
                 "ma_pa": row.ma_pa or 0,
-                "standard_price": row.standard_price,
-                "weight": row.weight,
+                "standard_price": cost_unit,
+                "weight": row.weight and row.weight / 1000.0 or 0.0,
                 "description": (row.description and ustr(row.description) or "") + (row.active != "N" and "\nBLOQUEADO" or ""),
                 "unit_use_sale": True,
                 "type": TYPE_MAP[row.type_map],
@@ -418,16 +442,21 @@ class DatabaseImport:
             cr.execute("select top 1 tari_prec as lst_price from dbo.adsd_tari where tari_arti = ? order by tari_desd desc", (row.default_code,))
             row2 = cr.fetchone()
             if row2 and row2.lst_price:
-                self.write("product.product", [prod_id], {"lst_price": row2.lst_price})
+                price_unit = row2.lst_price
+                if str(int(row.default_code)) in PRODUCT_FIX:
+                    price_unit = price_unit * float(PRODUCT_FIX[str(int(row.default_code))])
+                self.write("product.product", [prod_id], {"lst_price": price_unit})
+
+            cr.execute("select top 1 tari_cost as purchase_price from dbo.adsd_tari where tari_arti = ? order by tari_desd desc", (row.default_code,))
+            row3 = cr.fetchone()
+            if row3 and row3.purchase_price:
+                cost_unit = row3.purchase_price
+                if str(int(row.default_code)) in PRODUCT_FIX:
+                    cost_unit = cost_unit * float(PRODUCT_FIX[str(int(row.default_code))])
+                self.write("product.product", [prod_id], {"purchase_price": cost_unit})
 
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
-
-    def import_list_price(self, cr, product_code, product_id):
-        cr.execute("select top 1 tari_prec as lst_price from dbo.adsd_tari where tari_arti = ? order by tari_desd desc", (product_code,))
-        row2 = cr.fetchone()
-        if row2 and row2.lst_price:
-            self.write("product.product", [product_id], {"lst_price": row2.lst_price})
 
     def _create_or_update_partner(self, row, unregister_id,parent_id=False):
         partner_ids = self.search("res.partner", [('ref', '=', str(row[0])),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
@@ -776,9 +805,15 @@ class DatabaseImport:
                     if nook_price and doorstep_price:
                         break
                     if not nook_price and row.nook_price:
-                        nook_price = float(row.nook_price)
+                        cost_unit = row.nook_price
+                        if str(int(product.product_id_map)) in PRODUCT_FIX:
+                            cost_unit = cost_unit * float(PRODUCT_FIX[str(int(row.default_code))])
+                        nook_price = cost_unit
                     if not doorstep_price and row.doorstep_price:
-                        doorstep_price = float(row.doorstep_price)
+                        cost_unit = row.doorstep_price
+                        if str(int(product.product_id_map)) in PRODUCT_FIX:
+                            cost_unit = cost_unit * float(PRODUCT_FIX[str(int(row.default_code))])
+                        doorstep_price = cost_unit
 
                 if doorstep_price or nook_price:
                     self.write("product.product", [product_ids[0]], {'nook_price': nook_price,
@@ -1068,7 +1103,10 @@ class DatabaseImport:
                 cr.execute("select top 1 tari_prec as lst_price from dbo.adsd_tari where tari_arti = ? order by tari_desd desc", (int(row.default_code),))
                 row2 = cr.fetchone()
                 if row2 and row2.lst_price:
-                    self.write("product.product", [product_ids[0]], {"lst_price": row2.lst_price})
+                    price_unit = row2.lst_price
+                    if str(int(product.product_id_map)) in PRODUCT_FIX:
+                        price_unit = price_unit * float(PRODUCT_FIX[str(int(row.default_code))])
+                    self.write("product.product", [product_ids[0]], {"lst_price": price_unit})
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
@@ -1409,6 +1447,34 @@ class DatabaseImport:
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
+    def update_cost_product_price(self, cr):
+        cr.execute("select distinct tari_arti as default_code, pr1_pmpn as standard_price from dbo.adsd_tari inner join dbo.adsd_art on "
+                   "dbo.adsd_art.pr1_codi = dbo.adsd_tari.tari_arti")
+        products_data = cr.fetchall()
+        cont = 0
+        num_rows = len(products_data)
+        for row in products_data:
+            product_ids = self.search('product.product', [('default_code', '=', str(int(row.default_code))),'|',('active','=',True),('active','=',False)])
+            vals = {}
+            if product_ids:
+                if row.standard_price:
+                    cost_p_unit = row.standard_price
+                    if str(int(row.default_code)) in PRODUCT_FIX:
+                        cost_p_unit = cost_p_unit * float(PRODUCT_FIX[str(int(row.default_code))])
+                    vals['standard_price'] = cost_p_unit
+
+                cr.execute("select top 1 tari_cost as purchase_price from dbo.adsd_tari where tari_arti = ? order by tari_desd desc", (int(row.default_code),))
+                row3 = cr.fetchone()
+                if row3 and row3.purchase_price:
+                    cost_unit = row3.purchase_price
+                    if str(int(row.default_code)) in PRODUCT_FIX:
+                        cost_unit = cost_unit * float(PRODUCT_FIX[str(int(row.default_code))])
+                    vals['purchase_price'] = cost_unit
+                if vals:
+                    self.write("product.product", product_ids, vals)
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
     def process_data(self):
         """
         Importa la bbdd
@@ -1444,9 +1510,10 @@ class DatabaseImport:
             #self.import_items_data(cr)
             #self.import_cadena(cr)
             #self.import_product_customer_rules(cr)
-            self.import_rappels(cr)
+            #self.import_rappels(cr)
             #self.import_product_rappel_groups(cr)
-            self.import_other_promotions(cr)
+            #self.import_other_promotions(cr)
+            self.update_cost_product_price(cr)
 
 
         except Exception, ex:

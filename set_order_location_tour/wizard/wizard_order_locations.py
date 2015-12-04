@@ -80,7 +80,7 @@ class WizardOrderLocations(models.TransientModel):
 
     @api.multi
     def set_defined_order(self):
-        print "Entro al set_defined_order"
+        print u"Entro al set_defined_order"
         t_sl = self.env['stock.location']
         for cam in self.camera_order_ids:
             posc = cam.sequence
