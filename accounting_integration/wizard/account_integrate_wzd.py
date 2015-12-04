@@ -112,13 +112,16 @@ class AccountIntegrateWzd(models.TransientModel):
                                                         ('journal_id', '=',
                                                          journal_id.id)])
                         if move_ids:
+                            for line in move_ids[0].line_id:
+                                if line.reconcile_id:
+                                    move_line_obj._remove_move_reconcile(move_ids=[line.id])
                             move_ids[0].button_cancel()
                             move_ids[0].unlink()
                         if row.get('Sit', False) == 'B':
                             posted = True
                             continue
                         move_vals = {
-                            'ref': row['Concepto'],
+                            'ref': row['Concepto'] + (row['Ampliacion'] or ""),
                             'journal_id': journal_id.id,
                             'period_id': last_period_id.id,
                             'date': last_date,
@@ -130,11 +133,11 @@ class AccountIntegrateWzd(models.TransientModel):
                     elif posted:
                         continue
 
-                    ref = row.get('Documento', "")
-                    if not ref:
-                        ref = row.get('Ampliacion', "")
-                    elif row.get('Ampliacion'):
-                        ref += u" // " + row['Ampliacion']
+                    ref = (row['Documento'] or "") + " " + (row['Ampliacion'] or "")
+                    #if not ref:
+                    #    ref = row.get('Ampliacion', "")
+                    #elif row.get('Ampliacion'):
+                    #    ref += u" // " + row['Ampliacion']
                     account_ids = account_obj.search([('code', '=',
                                                        row['Cuenta'])])
                     if (row['Cuenta'].startswith('430') or row['Cuenta'].

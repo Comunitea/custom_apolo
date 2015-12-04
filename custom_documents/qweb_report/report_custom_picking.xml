@@ -628,7 +628,7 @@
                   </tr>
                   <tr class="tr-separated-p">
                     <td><label class="header-font-p">Date Of Delivery </label></td>
-                    <td> : <span t-esc="o.min_date"/></td>
+                    <td> : <span t-esc="o.min_date.split(' ')[0].split('-')[2] + '/' + o.min_date.split(' ')[0].split('-')[1] + '/' + o.min_date.split(' ')[0].split('-')[0]"/></td>
                   </tr>
                   <tr class="tr-separated-p">
                     <td><label class="header-font-p">Customer Control Nº</label></td>

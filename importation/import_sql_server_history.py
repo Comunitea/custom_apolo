@@ -79,7 +79,7 @@ class DatabaseImport:
 
         self.url_template = "http://%s:%s/xmlrpc/%s"
         self.server = "localhost"
-        self.port = 8069
+        self.port = 9069
         self.dbname = dbname
         self.user_name = user
         self.user_passwd = passwd
@@ -233,6 +233,9 @@ class DatabaseImport:
         if row:
             uom_id = self.search("product.uom", [('name', '=', UOM_MAP[row.uom_id_map.strip()])])[0]
             uob_id = self.search("product.uom", [('name', '=', UOM_MAP[row.uomb_map.strip()])])[0]
+            cost_unit = row.standard_price
+            if str(int(row.default_code)) in PRODUCT_FIX:
+                cost_unit = cost_unit * float(PRODUCT_FIX[str(int(row.default_code))])
             product_vals = {
                 "default_code": str(int(row.default_code)),
                 "name": ustr(row.name),
@@ -242,7 +245,7 @@ class DatabaseImport:
                 "log_unit_id": uom_id,
                 "ca_ma": row.ca_ma or 0,
                 "ma_pa": row.ma_pa or 0,
-                "standard_price": row.standard_price,
+                "standard_price": cost_unit,
                 "weight": row.weight and row.weight / 1000.0 or 0.0,
                 "description": (row.description and ustr(row.description) or "") + (row.active != "N" and "\nBLOQUEADO" or ""),
                 "unit_use_sale": True,
@@ -274,7 +277,18 @@ class DatabaseImport:
             cr.execute("select top 1 tari_prec as lst_price from dbo.adsd_tari where tari_arti = ? order by tari_desd desc", (row.default_code,))
             row2 = cr.fetchone()
             if row2 and row2.lst_price:
-                self.write("product.product", [prod_id], {"lst_price": row2.lst_price})
+                price_unit = row2.lst_price
+                if str(int(row.default_code)) in PRODUCT_FIX:
+                    price_unit = price_unit * float(PRODUCT_FIX[str(int(row.default_code))])
+                self.write("product.product", [prod_id], {"lst_price": price_unit})
+
+            cr.execute("select top 1 tari_cost as purchase_price from dbo.adsd_tari where tari_arti = ? order by tari_desd desc", (row.default_code,))
+            row3 = cr.fetchone()
+            if row3 and row3.purchase_price:
+                cost_unit = row3.purchase_price
+                if str(int(row.default_code)) in PRODUCT_FIX:
+                    cost_unit = cost_unit * float(PRODUCT_FIX[str(int(row.default_code))])
+                self.write("product.product", [prod_id], {"purchase_price": cost_unit})
 
         return prod_id
 
@@ -409,7 +423,7 @@ class DatabaseImport:
                    "numero_carga as picking_info from dbo.cabecera_pedido_copia")
         ###################################################################
         ## Se importan sólo pedidos históricos que faltan
-        sale_ids = self.search('sale.order', [('state', '=', 'history')])
+        sale_ids = self.search('sale.order', [('state', '=', 'history'),('chanel', '!=', "other")])
         sales_data = self.read('sale.order', sale_ids, ['name'])
         sale_numbers = [x['name'] for x in sales_data]
         current = True
@@ -427,7 +441,7 @@ class DatabaseImport:
         for row in data:
             if str(int(row.name)) in sale_numbers:
                 continue
-            order_ids = self.search("sale.order", [('name','=',str(int(row.name)))])
+
             partner_ids = self.search("res.partner", [('ref', '=', str(int(row.partner_id_map))),('customer','=',True),'|',('active','=',True),('active','=',False)])
             if not partner_ids:
                 partner_id = self.import_customers(cr, int(row.partner_id_map))
@@ -896,6 +910,95 @@ class DatabaseImport:
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
+    def import_autosale_orders(self, cr):
+        cr.execute("SELECT hal_seri + '/' + cast(hal_docu as CHAR) as name, MAX(hal_feac) as date_order, "
+                   "MAX(hal_clpr) as partner_id_map FROM dbo.adsd_hal where televenta in ('T','A') group by hal_seri,hal_docu")
+        autosale_data = cr.fetchall()
+        cont = 0
+        ######################Diferencias
+        #sale_ids = self.search('sale.order', [('state', '=', 'history'),('chanel', '=', "other")])
+        #sales_data = self.read('sale.order', invoice_ids, ['name'])
+        #sale_numbers = [x['name'] for x in sales_data]
+        #num_rows = len(autosale_data) - len(sale_numbers)
+        ##################################
+        num_rows = len(autosale_data)
+        for row in autosale_data:
+            #if row.name.strip() in sale_numbers:
+            #    continue
+            partner_ids = self.search("res.partner", [('ref', '=', str(int(row.partner_id_map))),('customer','=',True),'|',('active','=',True),('active','=',False)])
+            if not partner_ids:
+                partner_id = self.import_customers(cr, int(row.partner_id_map))
+                if not partner_id:
+                    print "No hay un cliente con codigo ", str(int(row.partner_id_map))
+                    cont += 1
+                    print "%s de %s" % (str(cont), str(num_rows))
+                    continue
+            else:
+                partner_id = partner_ids[0]
+
+            sale_vals = {
+                'name': row.name.strip(),
+                'partner_id': partner_id,
+                'partner_invoice_id': partner_id,
+                'partner_shipping_id': partner_id,
+                'date_order': row.date_order and row.date_order.strftime("%Y-%m-%d %H:%M:%S") or time.strftime("%Y-%m-%d %H:%M:%S"),
+                'date_planned': row.date_order and row.date_order.strftime("%Y-%m-%d %H:%M:%S") or False,
+                'state': "history",
+                'chanel': 'other',
+                'supplier_id': False
+            }
+            order_id = self.create("sale.order", sale_vals)
+            serie, number = row.name.split("/")
+            number = int(number)
+            cr.execute("SELECT hal_prod as product_id_map, hal_canb as box_qty, hal_canc as unit_qty, hal_prec as price_unit, "
+                       "hal_dtol as discount FROM dbo.adsd_hal where hal_seri = ? and hal_docu = ?", (serie,number))
+            lines_data = cr.fetchall()
+            for line in lines_data:
+                product_ids = self.search("product.product", [('default_code', '=', str(int(line.product_id_map))),'|',('active','=',True),('active','=',False)])
+                if not product_ids:
+                    product_id = self.import_products(cr, int(line.product_id_map))
+                    self.import_rel_product_supplier(cr, int(line.product_id_map))
+                else:
+                    product_id = product_ids[0]
+                if product_id:
+                    product_data = self.read("product.product", product_id, ["uom_id", "taxes_id", "log_unit_id", "log_base_id", "log_box_id", "name"])
+                    uom_id = product_data["uom_id"][0]
+                    loc_qty = line.box_qty
+                    price_unit = line.price_unit
+                    if str(int(line.product_id_map)) in PRODUCT_FIX:
+                        loc_qty = loc_qty / float(PRODUCT_FIX[str(int(line.product_id_map))])
+                        price_unit = line.price_unit * float(PRODUCT_FIX[str(int(line.product_id_map))])
+
+                    if line.unit_qty:
+                        if product_data["log_base_id"]:
+                            unit = product_data["log_base_id"][0]
+                        elif product_data["log_unit_id"]:
+                            unit = product_data["log_unit_id"][0]
+                        else:
+                            unit = product_data["log_box_id"][0]
+                        if unit:
+                            print "initial loc_qty: ", loc_qty
+                            loc_qty += self.execute("product.product", "uos_qty_to_uom_qty", [product_id, line.unit_qty, unit])
+                            print "end loc_qty: ", loc_qty
+                else:
+                     loc_qty = line.box_qty + line.unit_qty
+                     uom_id = 1
+
+                line_vals = {'order_id': order_id,
+                             'product_id': product_id,
+                             'product_uom': uom_id,
+                             'product_uos': uom_id,
+                             'product_uom_qty': loc_qty or 1.0,
+                             'product_uos_qty': loc_qty or 1.0,
+                             'price_unit': price_unit,
+                             'price_udv': price_unit,
+                             'name': product_data["name"],
+                             'tax_id': [(6, 0, product_data['taxes_id'])],
+                             'state': "history"}
+                self.create("sale.order.line", line_vals)
+            cont +=1
+            print "%s de %s" % (str(cont), str(num_rows))
+
     def process_data(self):
         """
         Importa la bbdd
@@ -912,16 +1015,11 @@ class DatabaseImport:
             #self.import_sale_order_lines_open(cr)
             #self.import_sale_order_lines_history(cr)
             #self.import_active_purchase_order(cr)
-            #self.import_purchase_invoice(cr)
-            #self.import_sale_invoice(cr)
-            #self.fix_product_histories()
-            #self.open_sale_orders()
-            #self.import_sale_order_lines_open(cr)
-            #self.import_sale_order_lines_history(cr)
-            #self.import_active_purchase_order(cr)
             self.import_purchase_invoice(cr)
             self.import_sale_invoice(cr)
             #self.fix_product_histories()
+            #self.open_sale_orders()
+            #self.import_autosale_orders(cr)
 
         except Exception, ex:
             print u"Error al conectarse a las bbdd: ", repr(ex)
