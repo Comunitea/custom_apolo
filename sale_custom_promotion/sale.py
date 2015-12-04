@@ -99,3 +99,45 @@ minimum price'))
                                              _('can not sell below the \
 minimum price'))
         return res
+
+
+from openerp.osv import orm, fields
+
+
+class SaleOrder(orm.Model):
+    '''
+    Sale Order
+    '''
+    _inherit = 'sale.order'
+
+    def clear_existing_promotion_lines(self, cursor, user,
+                                        order_id, context=None):
+        """
+        Sobrescrita para que no ponga el descuento a 0 antes de aplicarlas
+        """
+        order = self.browse(cursor, user, order_id, context)
+        order_line_obj = self.pool.get('sale.order.line')
+        #Delete all promotion lines
+        order_line_ids = order_line_obj.search(cursor, user,
+                                            [
+                                             ('order_id', '=', order.id),
+                                             ('promotion_line', '=', True),
+                                            ], context=context
+                                            )
+        if order_line_ids:
+            order_line_obj.unlink(cursor, user, order_line_ids, context)
+        #Clear discount column
+        order_line_ids = order_line_obj.search(cursor, user,
+                                            [
+                                             ('order_id', '=', order.id),
+                                            ], context=context
+                                            )
+        for line in order_line_obj.browse(cursor, user, order_line_ids, context):
+            if line.orig_qty:
+                order_line_obj.write(cursor, user, [line.id], {'product_uom_qty': line.orig_qty}, context)
+        # if order_line_ids:
+        #     order_line_obj.write(cursor, user,
+        #                          order_line_ids,
+        #                          {'discount':0.00},
+        #                          context=context)
+        return True

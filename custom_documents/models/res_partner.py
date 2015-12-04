@@ -45,3 +45,4 @@ class ResPartner(models.Model):
                                  " summary of invoiced products")
     supp_name_prod = fields.Boolean('Use supplier names in indirect notes',
                                  help="Use product name of supplier in indirect notes")
+    merchantil_info = fields.Text('Mercantil Info.')

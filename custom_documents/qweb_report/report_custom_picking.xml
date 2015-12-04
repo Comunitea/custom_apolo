@@ -161,6 +161,10 @@
           font-size: 10px;
           text-align: center;
         }
+        .foot-text-p .Text2{
+          font-size: 6px;
+          text-align: center;
+        }
 
         .top_part{
         min-height:30mm;
@@ -692,11 +696,11 @@
                           <tr>
                               <td>
                                   <!--<span t-field="o.sale_id.user_id2.name"/>-->
-                                  <span t-field="o.sale_id.create_uid.name"/>
+                                  <span t-field="o.sale_id.create_uid.custom_code"/>
                               </td>
                               <td>
                                 <div t-if="o.route_detail_id">
-                                  <span t-field="o.route_detail_id.comercial_id.name"/>
+                                  <span t-field="o.route_detail_id.comercial_id.custom_code"/>
                                 </div>
                               </td>
                           </tr>
@@ -729,16 +733,17 @@
             <div  class="row top_part-p"  t-if="o.indirect">
               <div class="col-xs-7 no-padd-left-p">
                 <table class="table4-p no-padd-left-p">
-                <thead>
-                  <th class="col-ref text-center"><strong>Concesionario autorizado para distribución en la zona</strong></th>
-                </thead>
-                <tbody>
-                <tr >
-                    <td class="col-sc text-center"><strong>ALBERTO POLO DIST. S.A.</strong></td>
-                </tr>
-                </tbody>
-            </table>
-                <p><strong>Agente / Repartidor:</strong> <span t-if="o.route_detail_id" t-field="o.user_id.name"/> / <span t-if="o.route_detail_id" t-field="o.route_detail_id.comercial_id.name"/></p>
+                    <thead>
+                      <th class="col-ref text-center"><strong>Concesionario autorizado para distribución en la zona</strong></th>
+                    </thead>
+                    <tbody>
+                    <tr >
+                        <td class="col-sc text-center"><strong>ALBERTO POLO DIST. S.A.</strong></td>
+                    </tr>
+                    </tbody>
+                </table>
+                  <br/>
+                <p><strong>Agente / Repartidor:</strong> <span t-if="o.route_detail_id" t-field="o.user_id.custom_code"/> / <span t-if="o.route_detail_id" t-field="o.route_detail_id.comercial_id.custom_code"/></p>
                 <span t-esc="o.name" class="reference-font-p"/>
               </div>
               <div class="col-xs-1 no-padd-left-p">
@@ -810,7 +815,8 @@
             </div>
             <div class="foot-text-p">
               <p class="Text1"><span t-esc="o.supplier_id.name"/>, <span t-esc="o.supplier_id.street"/> <span t-esc="o.supplier_id.street2"/> - Teléfono <span t-esc="o.supplier_id.phone"/> - Fax <span t-esc="o.supplier_id.fax"/> - <span t-esc="o.supplier_id.zip"/> <span t-esc="o.supplier_id.city"/></p>
-              <p class="Text1"><span t-esc="o.supplier_id.vat"/></p>
+              <!--<p class="Text1"><span t-esc="o.supplier_id.vat"/></p>-->
+              <p class="Text2"><span t-esc="o.supplier_id.merchantil_info"/></p>
               <!-- <p class="Text2">Registro Mercantil de Barcelona, Hoja B343092, Inscripción 129, Folio 140, Tomo 39375 A28660520</p> -->
             </div>
           </div>
