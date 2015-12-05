@@ -202,7 +202,7 @@ class invoice_move(object):
                     if len(move_ids) == 1:
                         print u"ENCONTRADA REFERENCIA para %s"%(invoice['number'])
                         moves = self.read('account.move.line', move_ids, ['move_id', 'debit'])
-                        if self.isclose(moves[0]['debit'], invoice['amount_total'],abs_tol=0.02):
+                        if self.isclose(moves[0]['debit'], invoice['amount_total'],abs_tol=0.05):
                             if invoice['date_due']:
                                 date_due = invoice['date_due']
                             else:
