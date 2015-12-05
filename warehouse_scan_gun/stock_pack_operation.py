@@ -49,7 +49,7 @@ class stock_pack_operation(models.Model):
     op_package_id = fields.Many2one('stock.quant.package', 'Original Pack',  default = False)
     to_revised = fields.Boolean('To Revised')
     wrong_qty = fields.Boolean('Wrong Qty', default=False)
-    wave_revised_id = fields.Many2one('wave.revised')
+    wave_revised_id = fields.Many2one('wave.report.revised')
     partner_id = fields.Many2one(related = 'picking_id.partner_id', readonly = True)
     product_uos_qty = fields.Float('product_uos_qty', compute = '_get_sale_qty', readonly=True,
                                    digits_compute=

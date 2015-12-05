@@ -27,8 +27,8 @@ from . import res_partner
 from . import item_move_sync
 from . import item
 from . import stock
-from . import preferential_agreement
 from . import product_unilever_family
+from . import preferential_agreement
 from . import res_currency
 from . import sale_export_edi
 from . import tourism_group
