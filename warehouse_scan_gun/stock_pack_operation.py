@@ -49,7 +49,7 @@ class stock_pack_operation(models.Model):
     op_package_id = fields.Many2one('stock.quant.package', 'Original Pack',  default = False)
     to_revised = fields.Boolean('To Revised')
     wrong_qty = fields.Boolean('Wrong Qty', default=False)
-    wave_revised_id = fields.Many2one('wave.revised')
+    wave_revised_id = fields.Many2one('wave.report.revised')
     partner_id = fields.Many2one(related = 'picking_id.partner_id', readonly = True)
     product_uos_qty = fields.Float('product_uos_qty', compute = '_get_sale_qty', readonly=True,
                                    digits_compute=
@@ -123,6 +123,7 @@ class stock_pack_operation(models.Model):
                 values = {
                 'ID': op.id,
                 'product': op.product_id.short_name or "",
+                'default_code': op.product_id.default_code or '',
                 'CANTIDAD': op.product_qty,
                 'lot': op.packed_lot_id.name or "",
                 'lot_id': op.packed_lot_id.id or "",
@@ -156,6 +157,7 @@ class stock_pack_operation(models.Model):
                     values['lot_id'] = package_pool.packed_lot_id.id
                     values['product'] = package_pool.packed_lot_id.product_id.short_name or ""
                     values['product_id'] = package_pool.packed_lot_id.product_id.id or False
+                    values['default_code'] = package_pool.packed_lot_id.product_id.default_code or '',
                     values['qty_available'] = package_pool.packed_lot_id.product_id.qty_available or 0.00
 
                 #si pide Jaume que la cantidad mostrada sea la cantidad restante del paquete
@@ -178,8 +180,141 @@ class stock_pack_operation(models.Model):
         else:
             return False
 
+
     @api.multi
     def get_ops_from_task (self, my_args):
+        task_id = my_args.get ('task_id', False)
+        op_id = my_args.get ('op_id', False)
+        user_id = my_args.get('user_id', 1)
+        vals = False
+        if task_id:
+            domain = [
+            ('task_id', '=', task_id)
+            ]
+            ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': user_id}
+            op_obj = self.search(domain).with_context(ctx)
+            if op_obj:
+                vals = {}
+                ind = 0
+                for op in op_obj:
+                    ind += 1
+                    vals[str(ind)] = op.get_op_values()
+                return vals
+
+        if op_id:
+            domain = [
+            ('id', '=', op_id)
+            ]
+            ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': user_id}
+            op_obj = self.search(domain).with_context(ctx)
+            if op_obj:
+                vals = {}
+                op = op_obj[0]
+                vals = op.get_op_values()
+                return vals
+        return vals
+
+    @api.multi
+    def get_op_values(self):
+        #sacamos los valores necesarios
+        values = {}
+        if not self:
+            return values
+        self.ensure_one()
+        op = self
+        if self.package_id.is_multiproduct:
+            children_ids_product_id = self.package_id.children_ids[0].product_id
+            lot = 'MultiPack'
+            product_name = "Multiproducto"
+        else:
+            children_ids_product_id=False
+            lot = ''
+            product_name=''
+
+        if not self.product_id:
+            is_package=True
+            product_id = self.package_id.product_id
+            lot_id = self.packed_lot_id
+            qty = self.packed_qty
+        else:
+            is_package=False
+            product_id = self.product_id
+            lot_id = self.lot_id
+            qty = self.product_qty
+
+        values = {
+            'id': self.id,
+            'product_id': product_id.id or children_ids_product_id.id or False,
+            'product': product_id.short_name or product_name,
+            'default_code': product_id.default_code or '',
+            'qty': qty or 0.00,
+            'is_package': is_package or False,
+            'package': self.package_id.id and self.package_id.name or "",
+            'package_id': self.package_id.id or 0,
+            'packed_qty': self.packed_qty or 0,
+            'lot_id': lot_id.id or False,
+            'lot': lot_id.name or lot,
+            'origen_id': self.location_id.id or 0,
+            'destino_id': self.location_dest_id.id or 0,
+            'destino_bcd' : self.location_dest_id.bcd_name or self.location_dest_id.name or '',
+            'origen_bcd' : self.location_id.bcd_name or self.location_id.name or '',
+            'result_package_id' : self.result_package_id.id or False,
+            'result_package' : self.result_package_id.name or '',
+            'picking_location_id' : product_id.picking_location_id.id or False,
+            'picking_location_bcd' : product_id.picking_location_id.bcd_name or '',
+            'to_process': self.to_process,
+            'uom_id':product_id.uom_id.id or False,
+            'uom' :product_id.uom_id.id and product_id.uom_id.name or "",
+            'uos_id' :op.uos_id.id or False,
+            'uos': op.uos_id.name or '',
+            'uos_qty': op.uos_qty or 0,
+            'qty_available':op.packed_lot_id.product_id.qty_available or 0.00,
+            'parent_id': op.package_id.parent_id or False,
+        }
+        return values
+            # 'uom_id':product_id.uom_id.id or False,
+            # 'uom' :product_id.uom_id.id and product_id.uom_id.name or "",
+            # 'uos_id' :op.uos_id.id or False,
+            # 'uos': op.uos_id.name or '',
+            # 'uos_qty': op.uos_qty or 0,
+            # 'qty_available':op.packed_lot_id.product_id.qty_available or 0.00,
+            # 'to_process': op.to_process,
+            # 'picking_location_id' : product_id.picking_location_id.bcd_name,
+            # 'parent_id': op.package_id.parent_id or False,
+            #
+            #
+            # 'CANTIDAD': op.product_qty,
+            # 'PAQUETE': op.package_id.id and op.package_id.name or "",
+            # 'ORIGEN': op.location_id.bcd_name,
+            # 'DESTINO': op.location_dest_id.bcd_name,
+            # 'PROCESADO': op.to_process,
+            # 'VISITED': False,
+            # 'pack_id': op.package_id.id or 0,
+            # 'changed': False,
+            # 'paquete': op.package_id.id and op.package_id.name or "",
+            # 'producto': product_id.short_name or product_name,
+            # 'picking_location_id' : product_id.picking_location_id.bcd_name,
+            # 'parent_id': op.package_id.parent_id or False,
+            # 'destino_bcd_code':op.location_dest_id.bcd_code or '',
+            # 'op_product_id': product_id.id
+            # }
+            #revisar para palet_multiproducto
+            # if not op.product_id and not op.package_id.is_multiproduct:
+            #     domain_package = [('id', '=', op.package_id.id)]
+            #     package_pool_= self.env['stock.quant.package'].search(domain_package).with_context(ctx)
+            #     if package_pool_:
+            #         package_pool=package_pool_[0]
+            #         if len(package_pool)==1:
+            #             values['lot']=package_pool.packed_lot_id.name
+            #             values['lot_id'] = package_pool.packed_lot_id.id
+            #             values['product'] = package_pool.packed_lot_id.product_id.short_name or ''
+            #             values['product_id'] = package_pool.packed_lot_id.product_id.id or False
+            #             values['uom']=package_pool.packed_lot_id.product_id.uom_id.name
+            #             values['default_code'] = package_pool.packed_lot_id.product_id.default_code or '',
+            #             values['qty_available'] = package_pool.packed_lot_id.product_id.qty_available or 0.00
+
+    @api.multi
+    def get_ops_from_task2 (self, my_args):
         task_id = my_args.get ('task_id', 0)
         user_id = my_args.get('user_id', 1)
         domain = [
@@ -212,6 +347,7 @@ class stock_pack_operation(models.Model):
                 'id': op.id,
                 'product': product_id.short_name or product_name,
                 'op_product_id': product_id.id,
+                'default_code': op.product_id.default_code or '',
                 'CANTIDAD': op.product_qty,
                 'lot_id': op.packed_lot_id.id or False,
                 'PAQUETE': op.package_id.id and op.package_id.name or "",
@@ -225,6 +361,7 @@ class stock_pack_operation(models.Model):
                 'pack_id': op.package_id.id or 0,
                 'qty': op.product_qty or 0,
                 'result_package_id' : op.result_package_id.id or False,
+                'result_package' : op.result_package_id.name or '',
                 'uom' :op.product_uom_id and op.product_uom_id.name or "",
                 'origen' : op.location_id.bcd_name,
                 'destino' : op.location_dest_id.bcd_name,
@@ -260,11 +397,13 @@ class stock_pack_operation(models.Model):
                             values['product'] = package_pool.packed_lot_id.product_id.short_name or ''
                             values['product_id'] = package_pool.packed_lot_id.product_id.id or False
                             values['uom']=package_pool.packed_lot_id.product_id.uom_id.name
+                            values['default_code'] = package_pool.packed_lot_id.product_id.default_code or '',
                             values['qty_available'] = package_pool.packed_lot_id.product_id.qty_available or 0.00
 
-                if values['product_id'] and values['package']:
-                    ind += 1
-                    vals[str(ind)] = values
+                #no se porque puse esto, lo comento
+                # if values['product_id'] and values['package']:
+                ind += 1
+                vals[str(ind)] = values
             return vals
         else:
             return False
@@ -424,17 +563,18 @@ class stock_pack_operation(models.Model):
                             _('No operation founded to set as visited'))
 
         # Browse with correct uid, an mark as visited
-
         try:
             ctx = {'no_recompute': True}
             env2 = op_obj.env(self._cr, user_id, ctx)
             op_obj_uid = op_obj.with_env(env2)
             #op_obj_uid.write(field_values)
+            #Si cambiamos paquete, entonces hay que hacer un unlink y recalcular
+            #de nuevo para ese picking
             if not 'package_id' in field_values.keys():
                 res = op_obj_uid.write(field_values)
-                res = op_id
+
             else:
-                field_values['picking_id']=op_obj_uid.picking_id.id
+                field_values['picking_id'] = op_obj_uid.picking_id.id
                 field_values['task_id'] = op_obj_uid.task_id.id
                 op_obj_uid.unlink()
                 new_op = op_obj_uid.create(field_values)

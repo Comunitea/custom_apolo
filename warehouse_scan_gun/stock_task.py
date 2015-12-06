@@ -49,7 +49,6 @@ class StockTask(models.Model):
 
     @api.multi
     def add_loc_operation_from_gun(self, my_args):
-
         user_id = my_args.get('user_id', False)
         pack_id = my_args.get('pack_id', False)
         task_id = my_args.get('task_id', False)
@@ -78,7 +77,6 @@ class StockTask(models.Model):
                   'gun_process': False}
 
         self.operation_ids.write(values)
-
 
     @api.multi
     def set_task_pause_state(self, my_args):
@@ -210,7 +208,7 @@ class StockTask(models.Model):
         return False
 
     @api.multi
-    def get_op_data(self, my_args):
+    def get_op_data_no_se_usa(self, my_args):
         """
         Return data for next operation not visited.
         """

@@ -243,8 +243,9 @@ class stock_quant_package(models.Model):
                 'lot': package.packed_lot_id.name or "Lote",
                 'product_id' : package.packed_lot_id.product_id.id,
                 'product' : package.packed_lot_id.product_id.short_name
-                            or package.packed_lot_id.product_id.name or 'Producto'
-            ,   'parent_id' : package.parent_id.id or False,
+                            or package.packed_lot_id.product_id.name or 'Producto',
+                'ref' : package.product_id.default_code or package.packed_lot_id.product_id.default_code or '',
+                'parent_id' : package.parent_id.id or False,
                 'parent_package': package.parent_id.name or '',
                 'packed_qty': package.packed_qty or 0,
                 'packed_lot_id': package.packed_lot_id.id or False,
@@ -276,6 +277,7 @@ class stock_quant_package(models.Model):
                     'dest_location': False,
                     'lot_id': False,
                     'lot': "MultiPack",
+                    'ref':'Multi',
                     'packed_lot_id': package.packed_lot_id.id or False,
                     'packed_lot' : package.packed_lot_id.name or 'Lote',
                     'parent_id' : package.parent_id.id or False,
@@ -295,7 +297,6 @@ class stock_quant_package(models.Model):
                     'picking_location':picking_zone,
                     'src_location_bcd': package.location_id.bcd_name or package.location_id.name or False,
                     'dest_location_bcd': False,
-
                 }
 
         return vals
@@ -317,6 +318,7 @@ class stock_production_lot(models.Model):
                 'lot' : lot.name,
                 'product_id': lot.product_id.id or False,
                 'product': lot.product_id.short_name and  lot.product_id.name ,
+                'ref': lot.product_id.default_code
 
             }
         return vals

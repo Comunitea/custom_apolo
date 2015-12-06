@@ -20,14 +20,15 @@
 ##############################################################################
 
 from openerp import models, fields, api
-
+import time
 
 class stock_picking_wave(models.Model):
     _inherit ='stock.picking.wave'
 
     @api.multi
-    def get_wave_reports_from_task(self, my_args):
+    def get_wave_reports_from_task2(self, my_args):
 
+        #Aquí recargamos la pistola con las oleadas ...
         task_id = my_args.get ('task_id', 0)
         domain = [('id', '=', task_id)]
         wave_id = self.env['stock.task'].search(domain).wave_id.id
@@ -47,11 +48,10 @@ class stock_picking_wave(models.Model):
                     'ID': op.id,
                     'wave_report_id': op.id,
                     'product': op.product_id.name and op.product_id.short_name or "",
-                    'EAN' :op.ean13,
+                    'default_code' : op.product_id.default_code or '',
                     'CANTIDAD': op.product_qty or 0.00,
                     'lot': op.lot_id and op.lot_id.name or "",
                     'lot_id': op.lot_id.id or False,
-                    'PAQUETE': op.pack_id and op.pack_id.name or "",
                     'package': op.pack_id.id and op.pack_id.name or "",
                     'ORIGEN': op.location_id.bcd_name,
                     'DESTINO': 'Salida', #; op.location_dest_id.bcd_name,
@@ -105,5 +105,34 @@ class stock_picking_wave(models.Model):
 
                 ind += 1
                 vals[str(ind)] = values
+
+            return vals
+
+
+    @api.multi
+    def get_wave_reports_from_task(self, my_args):
+
+        #Aquí recargamos la pistola con las oleadas ...
+
+        task_id = my_args.get ('task_id', 0)
+        domain = [('id', '=', task_id)]
+        wave_id = self.env['stock.task'].search(domain).wave_id.id
+        domain=[('id','=',wave_id)]
+        ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': 1}
+        self_ = self.env['stock.picking.wave'].with_context(ctx)
+        wave = self_.search(domain)
+        num_to_process = 0
+        print u"Actualizamos Oleadas. %s"%wave.name
+        if wave:
+            vals = {}
+            ind = 0
+            for wave_report in wave.wave_report_ids:
+
+                values = wave_report.get_wave_report_values()
+                if values ['to_process']:
+                    num_to_process += 1
+                ind += 1
+                vals[str(ind)] = values
+                print u"Etiqueta %s: %s %s"%(values['package'], values['qty'], values['uom'])
 
             return vals

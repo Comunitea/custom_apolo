@@ -46,7 +46,10 @@ class create_tag_wizard(models.TransientModel):
                         'user_id':user_id
                     }
 
-        res = self.print_from_gun(my_args)
+        try:
+            res = self.print_from_gun(my_args)
+        except:
+            res = False
         return res
 
 
@@ -64,25 +67,27 @@ class create_tag_wizard(models.TransientModel):
         t_wzd = self.env['tag'].with_context(context)
         res = False
         ids = []
+        if package_ids:
+            for package_id in package_ids:
+                item = self.env['stock.quant.package'].search([('id','=',package_id)])
+                if item:
+                    vals = {
+                        'product_id': item.product_id.id or False,
+                        'default_code': item.product_id.default_code or "",
+                        'lot_id': item.packed_lot_id.id or False,
+                        'removal_date': item.packed_lot_id.removal_date,
+                        'package_id': item.id or False,
+                        'company_id':  self.env['res.partner'].browse([1]).id,
 
-        for package_id in package_ids:
-            item = self.env['stock.quant.package'].search([('id','=',package_id)])
-            if item:
-                vals = {
-                    'product_id': item.product_id.id or False,
-                    'default_code': item.product_id.default_code or "",
-                    'lot_id': item.packed_lot_id.id or False,
-                    'removal_date': item.packed_lot_id.removal_date,
-                    'package_id': item.id or False,
-                    'company_id':  self.env['res.partner'].browse([1]).id,
 
-
-                }
-                res=True
-                ids.append(t_wzd.create(vals).id)
+                    }
+                    res=True
+                    ids.append(t_wzd.create(vals).id)
         if res:
-            ctx = dict(context)
-            report = self.pool.get('report')
-            report.print_document(self._cr, user_id, ids, 'midban_depot_stock.report_stock_tag')
-
+            try:
+                ctx = dict(context)
+                report = self.pool.get('report')
+                report.print_document(self._cr, user_id, ids, 'midban_depot_stock.report_stock_tag')
+            except:
+                res = False
         return res

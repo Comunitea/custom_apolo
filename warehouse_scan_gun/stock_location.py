@@ -158,6 +158,7 @@ class stock_location(models.Model):
 
         location_id = my_args.get("location_id", False)
         bcd_code = my_args.get('bcd_code', False)
+        lot_id = my_args.get('lot_id', False)
         if location_id:
             domain = [('id', '=', location_id)]
         elif bcd_code:
@@ -182,6 +183,9 @@ class stock_location(models.Model):
         vals = {'exist':False}
         if not type:
             type = ''
+
+
+
         if location:
             vals = {
                 'exist' : True,
@@ -193,7 +197,13 @@ class stock_location(models.Model):
                 type + 'bcd_name': location.bcd_name,
                 'parent_id': location.location_id.id or False,
                 'childs': childs,
+
             }
+            if lot_id:
+                package = location.get_package_of_lot(lot_id)
+                if package:
+                    vals['package_id'] = package.id
+                    vals['package'] = package.name
 
         return vals
 

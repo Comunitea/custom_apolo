@@ -23,7 +23,7 @@ from openerp import models, fields, api
 from openerp.exceptions import except_orm
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
-
+from openerp.tools.float_utils import float_round
 
 class wave_report(models.Model):
 
@@ -134,8 +134,7 @@ class wave_report(models.Model):
 
                 res = op.write(vals)
 
-        return res
-
+        return res or False
 
     @api.multi
     def change_wave_op_values(self, my_args):
@@ -154,7 +153,71 @@ class wave_report(models.Model):
             #res = wave.operation_ids.write(values)
         return res
 
+    @api.multi
+    def get_wave_report_values(self):
+        #sacamos los valores necesarios ddel wave_report para la lpistola
+        values = {}
+        if not self:
+            return values
+        self.ensure_one()
+        wh = self.env['stock.warehouse'].search([])[0]
+        lot_id = self.lot_id
+        product_id = self.product_id
+        if self.is_package:
+            qty = self.pack_id.packed_qty
+        packed_qty = float_round(self.pack_id.packed_qty, precision_rounding = self.pack_id.uom_id.rounding)
+        uos_id = self.uos_id or self.uom_id
+        values = {
+            'id': self.id,
+            'wave_report_id':self.id,
+            'wave_id': self.wave_id.id,
+            'name':self.wave_id.name or '',
+            'product_id': product_id.id or False,
+            'product': product_id.short_name or '',
+            'default_code': self.product_id.default_code or '',
+            'qty': float_round(self.product_qty, precision_rounding = self.uom_id.rounding) or 0.00,
+            'is_package': self.is_package,
+            'package': self.pack_id.id and self.pack_id.name or "",
+            'package_id': self.pack_id.id or 0,
+            'packed_qty': packed_qty or 0,
+            'lot_id': self.lot_id.id or False,
+            'lot': self.lot_id.name or '',
+            'origen_id': self.location_id.id or 0,
+            'origen_bcd' : self.location_id.bcd_name or self.location_id.name or '',
+            'result_package_id' : False,
+            'result_package' : '',
+            'destino_id': wh.wh_output_stock_loc_id.id or False,
+            'destino_bcd' : wh.wh_output_stock_loc_id.name or '',
+            'to_process': self.to_process,
+            'uom': self.uom_id.name or False,
+            'uom_id': self.uom_id.id or False,
+            'uom_qty' : float_round(self.product_qty, precision_rounding = self.uom_id.rounding) or 0.00,
+            'uos_qty': float_round(self.uos_qty, precision_rounding = uos_id.rounding) or 0.00,
+            'uos' :uos_id.name,
+            'uos_id':uos_id.id,
+            'to_revised':self.to_revised,
+            'is_var_coeff': self.product_id.is_var_coeff or False,
+            'var_coeff_ca':self.product_id.var_coeff_ca or False,
+            'var_coeff_un':self.product_id.var_coeff_un or False,
+            'num_ops':len(self.operation_ids),
+            'customer': self.customer_id.ref or '',
+            'customer_id': self.customer_id.comercial or self.customer_id.name,
+            'qty_available': packed_qty or 0.00
+        }
+        product = self.product_id
+        values ['units'] = {}
+        if product:
+            if product.is_var_coeff:
+                qty = self.uos_qty
+            else:
+                qty = self.product_qty
+            values['units'] = product.get_uom_conversions(qty, uom_id = self.uos_id.id)
+        # uom_destino = product.log_box_id.id or product.log_unit_id.id or product.log_base_id.id
+        # uom_origen = op.uos_id.id or op.uom_id.id
+        # values['big_unit'] = product._get_unit_ratios(uom_destino, False) / \
+        #     product._get_unit_ratios(uom_origen, False)
 
+        return values
 
 class wave_report_revised(models.Model):
 

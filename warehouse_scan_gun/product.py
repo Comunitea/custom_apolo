@@ -22,7 +22,7 @@
 ##############################################################################
 from openerp import models, fields, api, _, exceptions
 #from openerp.exceptions import except_orm
-from openerp.tools.float_utils import float_round
+from openerp.tools.float_utils import float_round, float_compare
 import decimal
 
 class ProductTemplate(models.Model):
@@ -49,6 +49,7 @@ class product_product (models.Model):
 
     @api.multi
     def get_product_gun_complete_info(self, my_args):
+
         id = my_args.get("product_id", False)
         ean = my_args.get('ean', False)
         domain = []
@@ -57,6 +58,9 @@ class product_product (models.Model):
         if id:
             domain = [('id', '=', id)]
         product = self.search(domain)
+        if not product:
+            domain = [('id', '=', id), ('active', '=', False)]
+            product = self.search(domain)
         vals = False
         if domain and product:
             var_coeff_un_id =False
@@ -82,7 +86,8 @@ class product_product (models.Model):
                 'picking_location':product.picking_location_id.bcd_name,
                 'bcd_picking_location':product.picking_location_id.bcd_name,
                 'temp_type_id': product.temp_type.id,
-                'qty_available' :product.qty_available
+                'qty_available' :product.qty_available,
+                'active': product.active
             }
         return vals
 
@@ -413,20 +418,22 @@ class product_product (models.Model):
             pack_objs = t_pack.search(domain)
 
             for p in pack_objs:
-                if min_qty and p.unreserved_qty < min_qty \
-                        or not p.unreserved_qty:
+                print u'Etiqueta: %s Cantidad: %s (%s Reserv)'%(p.name, p.packed_qty,  p.packed_qty - p.unreserved_qty)
+                if not float_compare(p.unreserved_qty, min_qty, precision_rounding =  p.uom_id.rounding) > -1:
                     continue
                 dic = {
                     'package_id': p.id,
                     'package': p.name,
                     'product': p.product_id.name,
                     'unreserved_qty': p.unreserved_qty,
+                    'packed_qty': p.packed_qty,
                     'uom': p.uom_id.name,
                     'bcd_name': p.location_id.bcd_name,
+                    'removal_date': p.packed_lot_id.removal_date
                 }
                 res.append(dic)
         if res:
-            res = sorted(res, key=lambda d: d['unreserved_qty'], reverse=True)
+            res = sorted(res, key=lambda d: d['removal_date'], reverse=True)
         return res
 
     @api.multi
