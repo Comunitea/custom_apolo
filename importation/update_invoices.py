@@ -171,74 +171,53 @@ class invoice_move(object):
 
     def invoice_move_link(self):
         try:
-            logfile_diff = open('log_invoices_amount_diff.csv', 'w') # Indicamos el valor 'w'.
-            logfile_no_found = open('log_invoices_no_found.csv', 'w')
-
-            invoice_ids = self.search('account.invoice', [('state','=','history'),
-                                                          ('type','=','out_invoice'),
-                                                          ('amount_total', '>', 0),
-                                                          ('move_id', '=', False),
-                                                          ('date_invoice', '<>', False)],
+            invoice_ids = self.search('account.invoice', [('fiscal_position', '=', False)],
                                       order="date_invoice DESC")
             total = len(invoice_ids)
             num=0
             realizadas = 0
             print u"Iniciando asociación  movimientos para un total de: %s facturas"%(total)
             for invoice_id in invoice_ids:
-                invoice = self.read('account.invoice', invoice_id, ['number', 'id',
-                                                                    'amount_total', 'partner_id',
-                                                                    'date_invoice', 'date_due'])
-                separ = invoice['number'].split('/')
-                move_ref_pre = separ[0] + "/"
-                move_ref_post = "0000" + separ[1]
-                move_ref_post = move_ref_post[-7:]
-                move_ref = move_ref_pre + move_ref_post
-                domain = [('account_id.type', '=', 'receivable'),
-                        ('ref', 'like', move_ref)]
-                print "Buscando %s : %s - %s  "%(move_ref,invoice['date_invoice'], invoice['amount_total'])
-                move_ids = self.search('account.move.line',domain)
-
-                if move_ids:
-                    if len(move_ids) == 1:
-                        print u"ENCONTRADA REFERENCIA para %s"%(invoice['number'])
-                        moves = self.read('account.move.line', move_ids, ['move_id', 'debit'])
-                        if self.isclose(moves[0]['debit'], invoice['amount_total'],abs_tol=0.05):
-                            if invoice['date_due']:
-                                date_due = invoice['date_due']
-                            else:
-                                date_due = invoice['date_invoice']
-                            vals = {
-                                'move_id': moves[0]['move_id'][0],
-                                'date_due': date_due
-                            }
-                            self.write('account.invoice', invoice['id'], vals)
-                            vals = {
-                                'date_maturity': date_due
-                            }
-                            self.write('account.move.line', move_ids[0], vals)
-                            print u"HECHO   para %s %s"%(invoice['number'],invoice['amount_total'])
-                            realizadas += 1
-                        else:
-                            print u"IMPORTES DIFERENTES para %s: %s(asiento) -  %s(factura)"%(invoice['number'],
-                                                                                              moves[0]['debit'], invoice['amount_total'])
-                            logfile_diff.write("%s,%s,%s\n"%(invoice['number'],moves[0]['debit'], invoice['amount_total']))
-                    else:
-                        print u"Más de un Asiento no encontrado  para %s"%(invoice['number'])
+                invoice = self.read('account.invoice', invoice_id, ['id', 'number','amount_total', 'partner_id',
+                                                                    'date_invoice', 'date_due',
+                                                                    'invoice_line'])
+                print u"Comprobando %s"%(invoice['number'])
+                partner_id = invoice['partner_id'][0]
+                #partner_ids = self.search('res.partner',[('id','=',partner_id)])
+                partner = self.read('res.partner', partner_id, ['property_account_position'])
+                #moves = self.read('account.move.line', move_ids, ['move_id'])
+                fpos_ob = partner['property_account_position']
+                if fpos_ob:
+                    fpos= fpos_ob[0]
                 else:
-                    print u"Asiento no encontrado  para %s"%(invoice['number'])
-                    logfile_no_found.write("%s\n"%(invoice['number']))
+                    fpos =0
+                if fpos:
+                    vals = {'fiscal_position':fpos}
+                    res = self.write('account.invoice', invoice_id, vals)
+
+                if fpos != 0 and fpos != 1: # DOMICILIO RECALCULA
+                    print u"Ha domicilio %s"%(invoice['number'])
+                    ils = self.read('account.invoice.line',  invoice['invoice_line'], ['id', 'product_id',
+                                                                                      'invoice_line_tax_id'])
+                    for line in ils:
+                        taxes = self.execute('account.fiscal.position','map_tax_id', fpos,
+                                     line['invoice_line_tax_id'])
+                        vals = {
+                            'invoice_line_tax_id': [(6,0,taxes)]
+                        }
+                        res= self.write('account.invoice.line', line['id'], vals)
+                    self.execute('account.invoice','button_reset_taxes', invoice_id)
+                    print u"HECHO para %s"%(invoice['number'])
+                    realizadas += 1
                 num +=1
                 print u"Procesado %s : %s/%s/%s"%(invoice['number'],realizadas, num, total)
             print "FINALIZado!!. No conciliados procesados TOTAL:"
-            logfile_diff.close()
-            logfile_no_found.close()
+
         except Exception, e:
             print u"EXCEPTION: REC %s"%(e)
             print "No conciliados procesados hasta el momento:"
-            logfile_diff.close()
-            logfile_no_found.close()
-        return True
 
+        return True
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:

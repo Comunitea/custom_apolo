@@ -18,17 +18,11 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import edi
-from . import account_invoice
-from . import partner_sync
-from . import res_company
-from . import partner_competence
-from . import res_partner
-from . import item_move_sync
-from . import item
-from . import stock
-from . import product_unilever_family
-from . import preferential_agreement
-from . import res_currency
-from . import sale_export_edi
-from . import tourism_group
+from openerp import models, fields, api, exceptions, _
+
+
+class TourismGroup(models.Model):
+
+    _inherit = 'tourism.group'
+
+    new = fields.Boolean('New')

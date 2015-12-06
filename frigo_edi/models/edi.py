@@ -38,6 +38,71 @@ class EdiDoc(models.Model):
     count = fields.Integer("Seq. count", readonly=True)
 
 
+class EdiUpdate(models.Model):
+
+    _name = 'edi.update'
+
+    date = fields.Date('Reception date')
+    type = fields.Char('Document type')
+    name = fields.Char('Document name')
+    ref = fields.Reference(selection=[('product.product', 'Product'),
+                                      ('res.partner', 'Customer'),
+                                      ('tourism.group', 'tourism')], string='Reference')
+    changes = fields.Text('Changes')
+    ref_2 = fields.Reference(selection=[('product.supplierinfo', 'Product supplier info')],
+                                       string='Reference')
+    changes_2 = fields.Text('Changes')
+    changes_show = fields.Text('Changes', compute='_get_changes')
+    state = fields.Selection((('draft', 'Draft'), ('done', 'Done'), ('cancel', 'Cancel')),
+                             'State', default='draft')
+
+    @api.multi
+    def act_done(self):
+        self.state = 'done'
+        self.ref.write(eval(self.changes))
+        if self.ref_2:
+            self.ref_2.write(eval(self.changes_2))
+
+    @api.multi
+    def act_cancel(self):
+        self.state = 'cancel'
+
+    @api.one
+    def _get_changes(self):
+        changes = ''
+        for i in ('', '_2'):
+            ref_field = 'ref%s' % i
+            changes_field = 'changes%s' % i
+            if not self[ref_field] or not self[changes_field]:
+                continue
+            changes += _(self[ref_field]._description) + '\n'
+            changes_dict = eval(self[changes_field])
+            for col in changes_dict.keys():
+                column = False
+                if col in self[ref_field]._columns.keys():
+                    column = self[ref_field]._columns[col]
+                else:
+                    column = self[ref_field]._inherit_fields[col][2]
+
+                if column._type == 'many2one':
+                    model = column._obj
+                    name = self.env[model].browse(changes_dict[col]).name_get()[0][1]
+                    changes += '%s          %s\n' % (_(column.string), name)
+                elif column._type in ('one2many', 'many2many'):
+                    model = column._obj
+                    change_ids = 0
+                    if changes_dict[col][0][0] == 4:
+                        change_ids = [x[1] for x in changes_dict[col]]
+                    elif changes_dict[col][0][0] == 6:
+                        change_ids = changes_dict[col][0][2]
+                    for m_changes in change_ids:
+                        name = self.env[model].browse(m_changes).name_get()[0][1]
+                        changes += '%s          %s\n' % (_(column.string), name)
+                else:
+                    changes += '%s          %s\n' % (_(column.string), changes_dict[col])
+        self.changes_show = changes
+
+
 class Edi(models.Model):
 
     _inherit = "edi"
@@ -77,10 +142,12 @@ class Edi(models.Model):
     def parse_tourism(self, file_path, doc):
         f = codecs.open(file_path, "r", "ISO-8859-1", 'ignore')
         errors = False
+        tot_vals = {}
         for line in f:
+            vals = {}
             """En los ficheros de ejemplo se marca el final del archivo con una
                linea de 0"""
-            if line == '0' * 69:
+            if '00000000000000000000000000000000000000000000000000000000000000000000' in line:
                 break
             product_code = line[:10].strip()[:6]
             group_code = line[10:16].strip()
@@ -105,29 +172,60 @@ class Edi(models.Model):
                      'date_end': '%s-12-31' % year,
                      'min_price': min_price,
                      'guar_price': sec_price,
-                     'supplier_id': supplierinfo.name.id
+                     'supplier_id': supplierinfo.name.id,
+                     'new': True,
                      })
-            else:
+            elif not group.new and group.id not in tot_vals.keys():
+                tot_vals[group.id] = []
                 if group.name != group_code:
-                    group.name = group_code
+                    vals['name'] = group_code
                 if group.description != description:
-                    group.description = description
+                    vals['description'] = description
                 if group.date_start != '%s-01-01' % year:
-                    group.date_start = '%s-01-01' % year
+                    vals['date_start'] = '%s-01-01' % year
                 if group.date_end != '%s-12-31' % year:
-                    group.date_end = '%s-12-31' % year
+                    vals['date_end'] = '%s-12-31' % year
                 if group.min_price != min_price:
-                    group.min_price = min_price
+                    vals['min_price'] = min_price
                 if group.guar_price != sec_price:
-                    group.sec_price = sec_price
+                    vals['sec_price'] = sec_price
                 if group.supplier_id != supplierinfo.name:
-                    group.supplier_id = supplierinfo.name
+                    vals['supplier_id'] = supplierinfo.name
+                tot_vals[group.id].append(vals)
             product = supplierinfo.product_tmpl_id
-            group.write({'product_ids': [(4, product.id)]})
+            if group.id in tot_vals.keys():
+                tot_vals[group.id].append({'product_ids': [(4, product.id)]})
+
+            else:
+                group.write({'product_ids': [(4, product.id)]})
         if errors:
             raise ParseException('', '')
+        elif tot_vals:
+            for group in tot_vals.keys():
+                final_vals = {}
+                prod_ids = []
+                for vals in tot_vals[group]:
+                    if not len(final_vals.keys()):
+                        final_vals = vals
+                        if vals.get('product_ids', False):
+                            prod_ids = [x[1] for x in final_vals['product_ids']]
+                    else:
+                        prod_ids += [x[1] for x in vals['product_ids'] if x[1] not in prod_ids]
+                if prod_ids:
+                    final_vals['product_ids'] = [(6, 0, prod_ids)]
+                vals_upd = {'date': datetime.now().date(), 'type': doc.doc_type.code,
+                            'name': doc.name, 'ref': 'tourism.group,%s' % group,
+                            'changes': final_vals}
+                upd = self.env['edi.update'].search([('state', '=', 'draft'), ('name', '=', doc.name), ('ref', '=', 'tourism.group,%s' % group)])
+                if upd:
+                    upd.write(vals_upd)
+                elif not upd:
+                    self.env['edi.update'].create(vals_upd)
+
+        self.env['tourism.group'].search([('new', '=', True)]).write({'new': False})
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
         self.make_backup(file_path, doc.file_name)
+
 
     @api.model
     def parse_products_file(self, file_path, doc):
@@ -177,14 +275,14 @@ class Edi(models.Model):
             ptax = False
             if int(line[106:108]):
                 stax = tax_obj.search(['|', ('name', '=',
-                                             'S_IVA' + line[106:108]),
-                                       ('code', '=', 'S_IVA' + line[106:108])])
+                                             'S_IVA' + line[106:108] + '_B'),
+                                       ('description', '=', 'S_IVA' + line[106:108] + '_B')])
                 if stax:
                     stax = stax[0]
             if int(line[106:108]):
                 ptax = tax_obj.search(['|', ('name', '=',
                                              'P_IVA' + line[106:108] + '_BC'),
-                                       ('code', '=',
+                                       ('description', '=',
                                         'P_IVA' + line[106:108] + '_BC')])
                 if ptax:
                     ptax = ptax[0]
@@ -214,29 +312,56 @@ class Edi(models.Model):
             if product_ids:
                 visited_supp_ids.append(product_ids[0].id)
                 prod = product_ids[0].product_tmpl_id.product_variant_ids[0]
-                prod.rappel_subgroup_id = rappel_subgroup.id
-                prod.rappel_group_id = rappel_subgroup.group_id.id
-                prod.unilever_family_id = family.id
-                product_ids[0].product_name = line[50:80].strip()
-                prod.supplier_un_ca = int(line[98:106])
-                prod.volume = volume
-                prod.weight = weight
-                product_ids[0].supp_kg_un = supplier_kg_un
-                product_ids[0].supp_ca_ma = un_ma
-                product_ids[0].supp_ma_pa = ma_pa
-                prod.uom_po_id = purchase_uom.id
-                product_ids[0].pricelist_ids.unlink()
-                if stax:
-                    prod.taxes_id = [(6, 0, [stax.id])]
-                if ptax:
-                    prod.supplier_taxes_id = [(6, 0, [ptax.id])]
+                vals = {}
+                vals2 = {}
 
+                if prod.rappel_subgroup_id.id != rappel_subgroup.id:
+                    vals['rappel_subgroup_id'] = rappel_subgroup.id
+                if prod.rappel_group_id.id != rappel_subgroup.group_id.id:
+                    vals['rappel_group_id'] = rappel_subgroup.group_id.id
+                if prod.unilever_family_id.id != family.id:
+                    vals['unilever_family_id'] = family.id
+                if prod.volume != volume:
+                    vals['volume'] = volume
+                if prod.weight != weight:
+                    vals['weight'] = weight
+                if prod.uom_po_id.id != purchase_uom.id:
+                    vals2['uom_po_id'] = purchase_uom.id
+                if stax:
+                    if not prod.taxes_id or prod.taxes_id[0].id != stax.id:
+                        vals['taxes_id'] = [(6, 0, [stax.id])]
+                if ptax:
+                    if not prod.supplier_taxes_id or prod.supplier_taxes_id[0].id != ptax.id:
+                        vals['supplier_taxes_id'] = [(6, 0, [ptax.id])]
+                if product_ids[0].product_name != line[50:80].strip():
+                    vals2['product_name'] = line[50:80].strip()
+                if product_ids[0].supp_un_ca != int(line[98:106]):
+                    vals2['supp_un_ca'] = int(line[98:106])
+
+                if product_ids[0].supp_kg_un != supplier_kg_un:
+                    vals2['supp_kg_un'] = supplier_kg_un
+                if product_ids[0].supp_ca_ma != un_ma:
+                    vals2['supp_ca_ma'] = un_ma
+                if product_ids[0].supp_ma_pa != ma_pa:
+                    vals2['supp_ma_pa'] = ma_pa
+
+                product_ids[0].pricelist_ids.unlink()
                 plst_sup.create({"suppinfo_id": product_ids[0].id,
                                  "min_quantity": 1,
                                  "price": int(line[80:90]) / 100.0,
                                  "from_date": date.today(),
                                  "to_date": date.today() + timedelta(365),}
                                  )
+                if vals:
+                    upd_vals = {'date': datetime.now().date(), 'type': doc.doc_type.code,
+                                'name': doc.name, 'ref': 'product.product,%s' % prod.id,
+                                'ref_2': 'product.supplierinfo,%s' % product_ids[0].id,
+                                'changes': vals, 'changes_2': vals2}
+                    edi_upd = self.env['edi.update'].search([('state', '=', 'draft'), ('name', '=', doc.name), ('ref', '=', 'product.product,%s' % prod.id)])
+                    if edi_upd:
+                        edi_upd.write(upd_vals)
+                    elif not edi_upd:
+                        self.env['edi.update'].create(upd_vals)
             else:
                 create_vals = {'unilever_family_id': family.id,
                                'name': line[50:80].strip(),
@@ -297,6 +422,7 @@ class Edi(models.Model):
         partners_to_activate = []
         errors = False
         for line in f:
+            write = False
             parts = partner_obj.search([('indirect_customer', '=', True),
                                         ('ref', '=', str(int(line[9:19]))),
                                         '|', ('active', '=', True),
@@ -313,21 +439,30 @@ class Edi(models.Model):
                                      "%Y-%m-%d")
 
             if parts:
+                write = True
                 part = parts[0]
-                part.name = line[19:49].strip()
-                part.street = line[49:79].strip()
-                part.city = line[79:109].strip()
-                part.zip = line[109:119].strip()
-                part.phone = line[135:150].strip()
-                part.fax = line[151:166].strip()
-                if valid:
-                    part.vat = "ES" + vat
+                vals = {}
+                if part.name != line[19:49].strip():
+                    vals['name'] = line[19:49].strip()
+                if part.street != line[49:79].strip():
+                    vals['street'] = line[49:79].strip()
+                if part.city != line[79:109].strip():
+                    vals['city'] = line[79:109].strip()
+                if part.zip != line[109:119].strip():
+                    vals['zip'] = line[109:119].strip()
+                if part.phone != line[135:150].strip():
+                    vals['phone'] = line[135:150].strip()
+                if part.fax != line[151:166].strip():
+                    vals['fax'] = line[151:166].strip()
+                if valid and part.vat != 'ES' + vat:
+                    vals['vat'] = "ES" + vat
                 if line[134] == "B":
-                    part.state2 = "unregistered"
-                    part.comment = (part.comment or "") + \
+                    vals['state2'] = "unregistered"
+                    vals['comment'] = (part.comment or "") + \
                         "\nFecha de baja: " + str(date)
                 else:
-                    part.date = date
+                    if part.date != date:
+                        vals['date'] = date
                     if part.state2 != "registered" and valid:
                         partners_to_activate.append(part)
             else:
@@ -357,7 +492,9 @@ class Edi(models.Model):
                                                    str(int(line[167:177]))),
                                                   '|', ('active', '=', True),
                                                   ('active', '=', False)])
-                if parent_part:
+                if parent_part and write and part.parent_id.id != parent_part[0].id:
+                    vals['parent_id'] = parent_part[0].id
+                elif parent_part:
                     part.parent_id = parent_part[0].id
                 else:
                     parent = partner_obj.\
@@ -366,7 +503,19 @@ class Edi(models.Model):
                                 "indirect_customer": True,
                                 "is_company": True,
                                 "customer": True})
-                    part.parent_id = parent.id
+                    if write:
+                        vals['parent_id'] = parent.id
+                    else:
+                        part.parent_id = parent.id
+            if vals:
+                vals_upd = {'date': datetime.now().date(), 'type': doc.doc_type.code,
+                            'name': doc.name, 'ref': 'res.partner,%s' % part.id,
+                            'changes': vals}
+                edi_upd = self.env['edi.update'].search([('state', '=', 'draft'), ('name', '=', doc.name), ('ref', '=', 'res.partner,%s' % part.id)])
+                if edi_upd:
+                    edi_upd.write(vals_upd)
+                elif not edi_upd:
+                    self.env['edi.update'].create(vals_upd)
         if errors:
             raise ParseException('', '')
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
@@ -477,12 +626,11 @@ class Edi(models.Model):
         unlink_products = self.env['product.template'].search(
             [('id', 'in', supplier_product_ids), ('exclusive_ids', '!=',
                                                   False)])
-        delete_links = [(3, x.id) for x in unlink_products]
-        self.env['res.partner'].search(
-            [('customer', '=', True),
-             ('exclusive_ids', '!=', False)]).write({'exclusive_ids':
-                                                     delete_links})
+        import ipdb; ipdb.set_trace()
+        self.env['partner.rules'].search([('product_id', 'in', supplier_product_ids),
+                                          ('partner_id.indirect_customer', '=', True)]).unlink()
         customer_vals = {}
+        added = []
         end_line = '0' * 36
         errors = False
         for line in f:
@@ -512,13 +660,19 @@ class Edi(models.Model):
                 errors = True
                 continue
             product = product_info.product_tmpl_id
-            if customer.id not in customer_vals.keys():
-                customer_vals[customer.id] = [(4, product.id)]
-            else:
-                customer_vals[customer.id].append((4, product.id))
-        # import ipdb; ipdb.set_trace()
+            start_date = datetime.strptime(line[20:28], '%Y%m%d').date()
+            end_date = datetime.strptime(line[28:36], '%Y%m%d').date()
+            if customer.id not in customer_vals.keys() and product.id not in added:
+                customer_vals[customer.id] = [(0, 0, {'start_date':start_date, 'end_date': end_date,
+                                                      'product_id': product.id})]
+                added.append(product.id)
+            elif product.id not in added:
+                customer_vals[customer.id].append((0, 0, {'start_date':start_date, 'end_date': end_date,
+                                                          'product_id': product.id}))
+                added.append(product.id)
+
         for customer in self.env['res.partner'].browse(customer_vals.keys()):
-            customer.write({'exclusive_ids': customer_vals[customer.id]})
+            customer.write({'rule_type': 'specific_catalog', 'rule_ids': customer_vals[customer.id]})
         if errors:
             raise ParseException('', '')
         doc.write({'state': 'imported', 'date_process': fields.Datetime.now()})
