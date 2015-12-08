@@ -23,7 +23,7 @@ from openerp import models, fields, api
 from openerp.exceptions import except_orm
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
-
+from openerp.tools.float_utils import float_round
 
 class wave_report(models.Model):
 
@@ -134,8 +134,7 @@ class wave_report(models.Model):
 
                 res = op.write(vals)
 
-        return res
-
+        return res or False
 
     @api.multi
     def change_wave_op_values(self, my_args):
@@ -154,7 +153,71 @@ class wave_report(models.Model):
             #res = wave.operation_ids.write(values)
         return res
 
+    @api.multi
+    def get_wave_report_values(self):
+        #sacamos los valores necesarios ddel wave_report para la lpistola
+        values = {}
+        if not self:
+            return values
+        self.ensure_one()
+        wh = self.env['stock.warehouse'].search([])[0]
+        lot_id = self.lot_id
+        product_id = self.product_id
+        if self.is_package:
+            qty = self.pack_id.packed_qty
+        packed_qty = float_round(self.pack_id.packed_qty, precision_rounding = self.pack_id.uom_id.rounding)
+        uos_id = self.uos_id or self.uom_id
+        values = {
+            'id': self.id,
+            'wave_report_id':self.id,
+            'wave_id': self.wave_id.id,
+            'name':self.wave_id.name or '',
+            'product_id': product_id.id or False,
+            'product': product_id.short_name or '',
+            'default_code': self.product_id.default_code or '',
+            'qty': float_round(self.product_qty, precision_rounding = self.uom_id.rounding) or 0.00,
+            'is_package': self.is_package,
+            'package': self.pack_id.id and self.pack_id.name or "",
+            'package_id': self.pack_id.id or 0,
+            'packed_qty': packed_qty or 0,
+            'lot_id': self.lot_id.id or False,
+            'lot': self.lot_id.name or '',
+            'origen_id': self.location_id.id or 0,
+            'origen_bcd' : self.location_id.bcd_name or self.location_id.name or '',
+            'result_package_id' : False,
+            'result_package' : '',
+            'destino_id': wh.wh_output_stock_loc_id.id or False,
+            'destino_bcd' : wh.wh_output_stock_loc_id.name or '',
+            'to_process': self.to_process,
+            'uom': self.uom_id.name or False,
+            'uom_id': self.uom_id.id or False,
+            'uom_qty' : float_round(self.product_qty, precision_rounding = self.uom_id.rounding) or 0.00,
+            'uos_qty': float_round(self.uos_qty, precision_rounding = uos_id.rounding) or 0.00,
+            'uos' :uos_id.name,
+            'uos_id':uos_id.id,
+            'to_revised':self.to_revised,
+            'is_var_coeff': self.product_id.is_var_coeff or False,
+            'var_coeff_ca':self.product_id.var_coeff_ca or False,
+            'var_coeff_un':self.product_id.var_coeff_un or False,
+            'num_ops':len(self.operation_ids),
+            'customer': self.customer_id.ref or '',
+            'customer_id': self.customer_id.comercial or self.customer_id.name,
+            'qty_available': packed_qty or 0.00
+        }
+        product = self.product_id
+        values ['units'] = {}
+        if product:
+            if product.is_var_coeff:
+                qty = self.uos_qty
+            else:
+                qty = self.product_qty
+            values['units'] = product.get_uom_conversions(qty, uom_id = self.uos_id.id)
+        # uom_destino = product.log_box_id.id or product.log_unit_id.id or product.log_base_id.id
+        # uom_origen = op.uos_id.id or op.uom_id.id
+        # values['big_unit'] = product._get_unit_ratios(uom_destino, False) / \
+        #     product._get_unit_ratios(uom_origen, False)
 
+        return values
 
 class wave_report_revised(models.Model):
 
@@ -197,32 +260,36 @@ class wave_report_revised(models.Model):
     #         res['operation_ids'] = list(set(item_res))
     #     return res['operation_ids']
 
+    @api.depends('operation_ids')
+    @api.one
+    def _get_assigned_qtys(self):
+        res = 0.0
+        for l in self.operation_ids:
+            res += l.product_qty
+        self.picked_qty = res
+
 
     to_revised = fields.Boolean(string = 'To Revised', compute='_get_to_revised')
-    new_uos_qty = fields.Float('Qty effective (uos)', compute='refresh_qtys',
+    new_uos_qty = fields.Float('Picked Qty (uos)',compute=_get_assigned_qtys,
                                digits_compute=
                                dp.get_precision('Product Unit of Measure'))
-    #new_uom_qty: es la cantidad total necesaria
-
-    new_uom_qty = fields.Float('Qty effective (uom)',
+    new_uom_qty = fields.Float('Picked Qty (uom)',
                                digits_compute=
                                dp.get_precision('Product Unit of Measure'))
-    pack_id = fields.Many2one(related = 'wave_report_id.pack_id')
+    pack_id = fields.Many2one(related = 'wave_report_id.pack_id', string ='Pack')
+    packed_qty = fields.Float(related = 'wave_report_id.pack_id.unreserved_qty', string = 'Unreserved Qty in pack')
     #product_id = fields.Many2one('product.product', 'Product')
     product_id = fields.Many2one(related = 'wave_report_id.product_id')
     lot_id = fields.Many2one(related = 'wave_report_id.lot_id')
     product_qty= fields.Float(related='wave_report_id.product_qty', readonly=True)
-    uos_qty= fields.Float(related='wave_report_id.uos_qty', readonly=True)
-    uom_id= fields.Many2one(related='wave_report_id.uom_id', readonly=True)
-    uos_id= fields.Many2one(related='wave_report_id.uos_id', readonly=True)
-    wave = fields.Many2one(related = 'wave_report_id.wave_id', readonly = True)
+    uos_qty= fields.Float(related='wave_report_id.uos_qty', readonly=True, string = 'Qty (uos)')
+    uom_qty= fields.Float(readonly=True, string = 'Qty (uom)')
+    uom_id= fields.Many2one(related='wave_report_id.uom_id', readonly=True, string = 'Stock Unit')
+    uos_id= fields.Many2one(related='wave_report_id.uos_id', readonly=True, string = "UoS")
+    wave = fields.Many2one(related = 'wave_report_id.wave_id', readonly = True, string = 'Wave')
     wave_report_id = fields.Many2one('wave.report', 'Ref', readonly = True)
-    #operation_ids = fields.One2many(related='wave_report_id.operation_ids')
-    #operation_ids = fields.One2many (string="Operation", compute = '_get_operation_ids')
     operation_ids = fields.One2many ('stock.pack.operation', 'wave_revised_id', string = "Operation")
-    stock = fields.Float(related = 'wave_report_id.product_id.qty_available')
-    #wave_id = fields.Many2one('wave.report', 'Wave Report', readonly = True)
-    #picked_qty es la cantidad de las operaciones realizadas (to_process= True)
+    stock = fields.Float(related = 'wave_report_id.product_id.qty_available', string = "Stock QTY")
     picked_qty = fields.Float('Picked Qty', readonly = True)
 
 
@@ -237,22 +304,27 @@ class wave_report_revised(models.Model):
 
     @api.multi
     def new_wave_to_revised(self, my_args):
-        # new_uos_qty = my_args.get('new_uos_qty', 0)
-        # new_uom_qty = my_args.get('new_uom_qty', 0)
+        new_uos_qty = my_args.get('new_uos_qty', 0)
+        new_uom_qty = my_args.get('new_uom_qty', 0)
         # qty = my_args.get('qty', 0)
-        # uos_qty = my_args('uos_qty', 0)
+        uom_qty = my_args('uom_qty', 0)
         wave_report_id = my_args.get('wave_id', False)
         task_id = my_args.get('task_id', False)
         wave_report = self.env['wave.report'].browse(wave_report_id)
         product_id = wave_report.product_id
         wave_to_revised = self.env['wave.report.revised']
+        wave_report = self.env['wave.report'].browse(wave_report_id)
+
         vals = {
+            'wave_report_id': wave_report_id,
             'to_revised' : True,
-            'new_uos_qty' : 0,
-            'new_uom_qty' : 0,
+            'new_uos_qty' : new_uos_qty,
+            'new_uom_qty' : new_uom_qty,
             'wave_report_id': wave_report_id,
             'product_id': product_id.id,
             'picked_qty': 0,
+            'pack_id': wave_report.pack_id.id,
+            'uom_qty': uom_qty
         }
         wave_ = wave_to_revised.search([('wave_report_id','=',wave_report_id)])
         if wave_:
@@ -260,15 +332,16 @@ class wave_report_revised(models.Model):
         else:
             wave_ = wave_to_revised.create(vals)
 
-        wave_report = self.env['wave.report'].browse(wave_report_id)
-        wave_report.operation_ids.write({'to_process': True})
-        picking_wave = self.env['stock.picking.wave'].browse(wave_report.wave_id.id)
-        for wave_report in picking_wave.wave_report_ids:
-            if wave_report.product_id.id == product_id.id:
-                wave_report.operation_ids.write({'to_revised' : True, 'wave_revised_id' : wave_.id})
-                wave_report.write({'wave_report_revised_id' : wave_.id})
+        wave_report.operation_ids.write({'to_process': True, 'to_revised' : True, 'wave_revised_id' : wave_.id})
+        wave_report.write({'wave_report_revised_id' : wave_.id})
 
-        wave_.refresh_qtys()
+        #Marcamos como procesados, a revisar y le damos un wave_id las operaciones del wave_report
+        # picking_wave = self.env['stock.picking.wave'].browse(wave_report.wave_id.id)
+        # for wave_report in picking_wave.wave_report_ids:
+        #     if wave_report.product_id.id == product_id.id:
+        #         wave_report.operation_ids.write({'to_revised' : True, 'wave_revised_id' : wave_.id})
+        #         wave_report.write({'wave_report_revised_id' : wave_.id})
+        #wave_.refresh_qtys()
         return wave_to_revised.id
 
     @api.one
@@ -303,6 +376,9 @@ class wave_report_revised(models.Model):
 
     @api.multi
     def set_wave_revised(self, ctx, to_revised = False):
+        if self.picked_qty > self.uom_qty:
+            raise except_orm(_('Error'),
+                             _('Picked Qty > UoS Qty'))
         for wave in self:
             revised = to_revised
             values = ({'to_revised': revised})

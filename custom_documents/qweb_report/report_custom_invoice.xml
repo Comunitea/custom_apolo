@@ -5,6 +5,7 @@
     <template id="report_custom_invoice">
     <!-- Se añade el css del informe de picking para que -->
     <!-- pueda ser recogido por el informe del módulo stock_picking_batch-->
+    <!-- CUIDADO: MODIFICAR AQUÍ CSS IMPLICA REPLICARLO EN EL CUSTOM PICKING PARA QUE FUNCIONE EL PICKING BATCH-->
     <style type="text/css">
         .top_part{
             min-height:30mm;
@@ -499,6 +500,8 @@
                         <th class="col-des"><strong>Description</strong></th>
                         <th class="col-iva text-right"><strong>% IVA</strong></th>
                         <th class="col-qty text-right"><strong>Qty.</strong></th>
+                        <th class="col-unit"><strong>Sale Unit</strong></th>
+                        <th class="col-qty text-right"><strong>Qty.</strong></th>
                         <th class="col-unit"><strong>Unit</strong></th>
                         <th class="col-pp text-right"><strong>Pricelist Price</strong></th>
                         <th class="col-ap text-right"><strong>Applied Price</strong></th>
@@ -516,6 +519,12 @@
                             </td>
                             <td class="text-right">
                                 <span t-esc="l['iva']"/>
+                            </td>
+                            <td class="text-right">
+                                <span t-esc="l['qty_sale']"/>
+                            </td>
+                            <td>
+                                <span t-esc="l['unit_sale']"/>
                             </td>
                             <td class="text-right">
                                 <span t-esc="l['qty']"/>

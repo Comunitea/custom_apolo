@@ -11,7 +11,8 @@
                         <t t-set="ind_lines" t-value="picking_vals(docs)['ind_lines']"/>
                         <t t-set="tfoot" t-value="picking_vals(docs)['tfoot']"/>
                         <t t-set="totals" t-value="picking_vals(docs)['totals']"/>
-                        <t t-set="ind_totals" t-value="picking_vals(docs)['ind_totals']"/>
+                        <!--<t t-set="ind_totals" t-value="picking_vals(docs)['ind_totals']"/>-->
+                        <t t-set="ind_t2" t-value="picking_vals(docs)['ind_totals2']"/>
                     </t>
                 </t>
                 <t t-if="o.invoice_id">

@@ -8,7 +8,7 @@ import re
 import base64
 import time
 import csv
-
+import psycopg2
 
 class OdooConnector:
 
@@ -185,6 +185,22 @@ class OdooDao:
         loc_ids = self.connection.search('stock.location', domain, order ='id desc')
         return loc_ids
 
+    def sql_execute(self, model, where, values, sql = False):
+        try:
+            if not sql:
+                coma = ''
+                str_vals = ''
+                for key in values.keys():
+                    str_vals += u', %s = %s'%(key, values[key])
+                sql = "update %s set %s where %s"%(model, str_vals[1:], where)
+            connection=psycopg2.connect("dbname=%s user=%s password=%s"%(self.connection.dbname, 'odoo', 'odoo'))
+            cursor=connection.cursor()
+            cursor.execute(sql)
+            connection.commit()
+            return True
+        except:
+            return False
+
 
     def get_cameras_menu(self, user_id=1):
         res = {}
@@ -264,14 +280,14 @@ class OdooDao:
 
     def get_ops (self, user_id, id, type='ubication'):
         if type == 'ubication':
-            return self.get_ops_from_tasks(user_id, id)
+            return self.get_ops_from_task(user_id, id)
         if type == 'picking':
             return self.get_ops_from_wave(user_id, id)
         if type == 'reposition':
-            return self.get_ops_from_tasks(user_id, id)
+            return self.get_ops_from_task(user_id, id)
 
-    def get_ops_from_tasks(self, user_id, task_id):
-        my_args = {'user_id': user_id, 'task_id': task_id}
+    def get_ops_from_task(self, user_id, task_id = False, op_id = False):
+        my_args = {'user_id': user_id, 'task_id': task_id, 'op_id' : op_id}
         ops_data = self.connection.execute('stock.pack.operation', 'get_ops_from_task', [], my_args)
         return ops_data
 
@@ -446,7 +462,7 @@ class OdooDao:
         op_data = self.connection.execute('product.product', 'get_uom_from_conversions_from_gun', [], my_args)
         return op_data
 
-    def get_pack_candidates(self, product_id, min_qty):
+    def get_pack_candidates(self, product_id, min_qty = False):
         my_args = {'min_qty': min_qty, 'product_id': product_id}
         op_data = self.connection.execute('product.product', 'get_pack_candidates_from_gun', [], my_args)
         return op_data
@@ -476,8 +492,8 @@ class OdooDao:
         op_data = self.connection.execute('stock.location', 'get_subpicking_zones', [], my_args)
         return op_data
 
-    def get_location_gun_info(self, user_id, location_id=False, bcd_code=False, type=False):
-        my_args = {'user_id': user_id, 'location_id': location_id, 'bcd_code' : bcd_code, 'type' : type}
+    def get_location_gun_info(self, user_id, location_id=False, lot_id = False, bcd_code=False, type=False):
+        my_args = {'user_id': user_id, 'location_id': location_id, 'lot_id': lot_id, 'bcd_code' : bcd_code, 'type' : type}
         op_data = self.connection.execute('stock.location', 'get_location_gun_info', [], my_args)
         return op_data
 
@@ -522,10 +538,10 @@ class OdooDao:
         res = self.connection.execute('stock.pack.operation', 'get_user_packet_busy', [], my_args)
         return res
 
-    def new_wave_to_revised(self, user_id, task_id, wave_id, new_uom_qty = 0, new_uos_qty = 0, qty = 0, uos_qty = 0):
+    def new_wave_to_revised(self, user_id, task_id, wave_id, new_uom_qty = 0, new_uos_qty = 0, uom_qty = 0, uos_qty = 0):
         my_args = {'user_id': user_id, 'new_uom_qty' : new_uom_qty, 'wave_id': wave_id,
                    'new_uos_qty' : new_uos_qty, 'task_id': task_id,
-                   'qty': qty, 'uos_qty': uos_qty }
+                   'uom_qty': uom_qty, 'uos_qty': uos_qty }
         res = self.connection.execute('wave.report.revised', 'new_wave_to_revised', [], my_args)
         return res
 

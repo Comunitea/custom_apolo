@@ -4,6 +4,7 @@
         <template id="report_custom_picking">
         <!-- Se añade el css del informe de factura para que -->
         <!-- pueda ser recogido por el informe del módulo stock_picking_batch-->
+        <!-- CUIDADO: MODIFICAR AQUÍ CSS IMPLICA REPLICARLO EN EL CUSTOM INVOICE PARA QUE FUNCIONE EL PICKING BATCH-->
         <style type="text/css">
         .top-border-p {
             border-top: solid 2px #000000;
@@ -640,7 +641,7 @@
           <div class="header_part-p row">
             <div t-if="o.indirect">
               <div class="col-xs-4 header_part-p">
-                <img t-if="o.supplier_id.image" t-att-src="'data:image/png;base64,%s' % o.supplier_id.image" style="max-height: 45mm;"/>
+                <img t-if="o.supplier_id.image" t-att-src="'data:image/png;base64,%s' % o.supplier_id.image" style="max-height:2.3cm; max-width:5cm;"/>
               </div>
               <div class="col-xs-8 header_part-p">
                 <h4>Delivery Pick</h4>

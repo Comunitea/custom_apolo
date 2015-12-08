@@ -61,19 +61,23 @@ class custom_invoice_parser(models.AbstractModel):
                 if line.invoice_line_tax_id:
                     for tax in line.invoice_line_tax_id:
                         if iva:
-                            iva += ''
+                            iva += ', '
                         iva += str('{0:.2f}'.format(int(tax.amount * 100)))
                 dic = {
                     'ref': line.product_id.default_code,
                     'des': line.product_id.name,
                     'iva': iva,
+                    'qty_sale': '{0:.4f}'.format(line.quantity_second_uom),
+                    'unit_sale': line.second_uom_id and line.second_uom_id.name or '',
                     'qty': '{0:.4f}'.format(line.quantity),
                     'unit': line.uos_id.name,
                     'pric_price': '{0:.2f}'.format(line.price_unit),
                     'app_price': '{0:.2f}'.format(line.price_unit),
                     'net': '{0:.2f}'.format(line.price_subtotal),
                 }
-
+                print "***********************"
+                print dic
+                print "***********************"
                 line_qty += line.quantity
                 line_net += line.price_subtotal
                 lines.append(dic)
