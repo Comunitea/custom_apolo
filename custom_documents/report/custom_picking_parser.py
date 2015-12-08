@@ -254,7 +254,7 @@ class custom_picking_parser(models.AbstractModel):
         ind_lines = {}
         tfoot = {}
         totals = {}
-        ind_totals = {}
+        ind_totals = {}  # No se usa, cambio unilever
         ind_totals2 = {}
         for pick in self.env[report.model].browse(self._ids):
             docs.append(pick)

@@ -46,15 +46,17 @@ class report_custom_batch(models.AbstractModel):
         ind_lines = {}
         tfoot = {}
         totals = {}
-        ind_totals = {}
+        ind_totals = {}  # No se usa, cambio unilever
+        ind_totals2 = {}
         lines[pick.id], ind_lines[pick.id], tfoot[pick.id], \
-            totals[pick.id], ind_totals[pick.id] = self.env['report.custom_documents.report_custom_picking'].get_picking_args(pick)
+            totals[pick.id], ind_totals2[pick.id] = self.env['report.custom_documents.report_custom_picking'].get_picking_args(pick)
         return {
             'lines': lines,
             'ind_lines': ind_lines,
             'tfoot': tfoot,
             'totals': totals,
             'ind_totals': ind_totals,
+            'ind_totals2': ind_totals2,
         }
 
     @api.multi
