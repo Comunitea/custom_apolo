@@ -220,12 +220,11 @@ class StockTask(models.Model):
             if op.visited:
                 continue
             op_data = {
-                'ID': op.id,
+                'id': op.id,
                 'product': op.product_id and op.product_id.name or "",
                 'CANTIDAD': str(op.product_qty),
                 'lot': op.packed_lot_id and op.packed_lot_id.name or "",
                 'PAQUETE': op.package_id and op.package_id.name or "",
-                'ORIGEN': op.location_id.bcd_name,
                 'DESTINO': op.location_dest_id.bcd_name,
                 'PROCESADO': op.to_process,
                 'VISITED' :op.visited,

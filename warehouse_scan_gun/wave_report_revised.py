@@ -260,32 +260,36 @@ class wave_report_revised(models.Model):
     #         res['operation_ids'] = list(set(item_res))
     #     return res['operation_ids']
 
+    @api.depends('operation_ids')
+    @api.one
+    def _get_assigned_qtys(self):
+        res = 0.0
+        for l in self.operation_ids:
+            res += l.product_qty
+        self.picked_qty = res
+
 
     to_revised = fields.Boolean(string = 'To Revised', compute='_get_to_revised')
-    new_uos_qty = fields.Float('Qty effective (uos)', compute='refresh_qtys',
+    new_uos_qty = fields.Float('Picked Qty (uos)',compute=_get_assigned_qtys,
                                digits_compute=
                                dp.get_precision('Product Unit of Measure'))
-    #new_uom_qty: es la cantidad total necesaria
-
-    new_uom_qty = fields.Float('Qty effective (uom)',
+    new_uom_qty = fields.Float('Picked Qty (uom)',
                                digits_compute=
                                dp.get_precision('Product Unit of Measure'))
-    pack_id = fields.Many2one(related = 'wave_report_id.pack_id')
+    pack_id = fields.Many2one(related = 'wave_report_id.pack_id', string ='Pack')
+    packed_qty = fields.Float(related = 'wave_report_id.pack_id.unreserved_qty', string = 'Unreserved Qty in pack')
     #product_id = fields.Many2one('product.product', 'Product')
     product_id = fields.Many2one(related = 'wave_report_id.product_id')
     lot_id = fields.Many2one(related = 'wave_report_id.lot_id')
     product_qty= fields.Float(related='wave_report_id.product_qty', readonly=True)
-    uos_qty= fields.Float(related='wave_report_id.uos_qty', readonly=True)
-    uom_id= fields.Many2one(related='wave_report_id.uom_id', readonly=True)
-    uos_id= fields.Many2one(related='wave_report_id.uos_id', readonly=True)
-    wave = fields.Many2one(related = 'wave_report_id.wave_id', readonly = True)
+    uos_qty= fields.Float(related='wave_report_id.uos_qty', readonly=True, string = 'Qty (uos)')
+    uom_qty= fields.Float(readonly=True, string = 'Qty (uom)')
+    uom_id= fields.Many2one(related='wave_report_id.uom_id', readonly=True, string = 'Stock Unit')
+    uos_id= fields.Many2one(related='wave_report_id.uos_id', readonly=True, string = "UoS")
+    wave = fields.Many2one(related = 'wave_report_id.wave_id', readonly = True, string = 'Wave')
     wave_report_id = fields.Many2one('wave.report', 'Ref', readonly = True)
-    #operation_ids = fields.One2many(related='wave_report_id.operation_ids')
-    #operation_ids = fields.One2many (string="Operation", compute = '_get_operation_ids')
     operation_ids = fields.One2many ('stock.pack.operation', 'wave_revised_id', string = "Operation")
-    stock = fields.Float(related = 'wave_report_id.product_id.qty_available')
-    #wave_id = fields.Many2one('wave.report', 'Wave Report', readonly = True)
-    #picked_qty es la cantidad de las operaciones realizadas (to_process= True)
+    stock = fields.Float(related = 'wave_report_id.product_id.qty_available', string = "Stock QTY")
     picked_qty = fields.Float('Picked Qty', readonly = True)
 
 
@@ -300,22 +304,27 @@ class wave_report_revised(models.Model):
 
     @api.multi
     def new_wave_to_revised(self, my_args):
-        # new_uos_qty = my_args.get('new_uos_qty', 0)
-        # new_uom_qty = my_args.get('new_uom_qty', 0)
+        new_uos_qty = my_args.get('new_uos_qty', 0)
+        new_uom_qty = my_args.get('new_uom_qty', 0)
         # qty = my_args.get('qty', 0)
-        # uos_qty = my_args('uos_qty', 0)
+        uom_qty = my_args('uom_qty', 0)
         wave_report_id = my_args.get('wave_id', False)
         task_id = my_args.get('task_id', False)
         wave_report = self.env['wave.report'].browse(wave_report_id)
         product_id = wave_report.product_id
         wave_to_revised = self.env['wave.report.revised']
+        wave_report = self.env['wave.report'].browse(wave_report_id)
+
         vals = {
+            'wave_report_id': wave_report_id,
             'to_revised' : True,
-            'new_uos_qty' : 0,
-            'new_uom_qty' : 0,
+            'new_uos_qty' : new_uos_qty,
+            'new_uom_qty' : new_uom_qty,
             'wave_report_id': wave_report_id,
             'product_id': product_id.id,
             'picked_qty': 0,
+            'pack_id': wave_report.pack_id.id,
+            'uom_qty': uom_qty
         }
         wave_ = wave_to_revised.search([('wave_report_id','=',wave_report_id)])
         if wave_:
@@ -323,15 +332,16 @@ class wave_report_revised(models.Model):
         else:
             wave_ = wave_to_revised.create(vals)
 
-        wave_report = self.env['wave.report'].browse(wave_report_id)
-        wave_report.operation_ids.write({'to_process': True})
-        picking_wave = self.env['stock.picking.wave'].browse(wave_report.wave_id.id)
-        for wave_report in picking_wave.wave_report_ids:
-            if wave_report.product_id.id == product_id.id:
-                wave_report.operation_ids.write({'to_revised' : True, 'wave_revised_id' : wave_.id})
-                wave_report.write({'wave_report_revised_id' : wave_.id})
+        wave_report.operation_ids.write({'to_process': True, 'to_revised' : True, 'wave_revised_id' : wave_.id})
+        wave_report.write({'wave_report_revised_id' : wave_.id})
 
-        wave_.refresh_qtys()
+        #Marcamos como procesados, a revisar y le damos un wave_id las operaciones del wave_report
+        # picking_wave = self.env['stock.picking.wave'].browse(wave_report.wave_id.id)
+        # for wave_report in picking_wave.wave_report_ids:
+        #     if wave_report.product_id.id == product_id.id:
+        #         wave_report.operation_ids.write({'to_revised' : True, 'wave_revised_id' : wave_.id})
+        #         wave_report.write({'wave_report_revised_id' : wave_.id})
+        #wave_.refresh_qtys()
         return wave_to_revised.id
 
     @api.one
@@ -366,6 +376,9 @@ class wave_report_revised(models.Model):
 
     @api.multi
     def set_wave_revised(self, ctx, to_revised = False):
+        if self.picked_qty > self.uom_qty:
+            raise except_orm(_('Error'),
+                             _('Picked Qty > UoS Qty'))
         for wave in self:
             revised = to_revised
             values = ({'to_revised': revised})
