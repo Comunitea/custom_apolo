@@ -275,6 +275,8 @@ class product_product (models.Model):
         # uom_qty = my_args.get("uom_qty", 0.00)
         ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': 1}
 
+
+
         if product_id:
             domain = [('id', '=', product_id)]
             product = self.search(domain)
@@ -282,20 +284,19 @@ class product_product (models.Model):
             product = self.ensure_one()
 
         product= self.env['product.product'].browse(product.id).with_context(ctx)
-
-
         base_qty = 0.00
-        if uom_qty < 1:
-            uom_qty = uom_qty - 0.001
+        # if uom_qty < 1:
+        #     uom_qty = uom_qty - 0.001
+        #decim = decimal.Decimal(str(uom_qty))
+        #decimales = decim.as_tuple().exponent
+        #
+        # if product.is_var_coeff or product.consignment:
+        #     import ipdb; ipdb.set_trace()
 
-
-        decim = decimal.Decimal(str(uom_qty))
-        decimales = decim.as_tuple().exponent
-        uom_qty += 0.001
         if not uom_id:
             uom_id = product.uom_id.id
-        unit_to = self.env['product.uom'].browse(uom_id)
 
+        unit_to = self.env['product.uom'].browse(uom_id)
         #base_qty = float_round(base_qty,  precision_rounding = rounding)
         conv =[]
         rest = uom_qty
@@ -310,37 +311,41 @@ class product_product (models.Model):
         base_append = (False, 0, False, 1)
         box_append = (False, 0, False, 1)
 
+        #Pasamos unidades todo a log_base_id
         if product.log_base_id.id == uom_id:
-            rest = uom_qty
+            rest = float_round(uom_qty, precision_rounding = product.log_base_id.rounding)
 
         elif product.log_unit_id.id == uom_id:
-            rest = uom_qty * product.kg_un
+            rest = float_round(uom_qty * product.kg_un, precision_rounding = product.log_base_id.rounding)
 
         elif product.log_box_id.id ==uom_id:
-            rest = uom_qty * product.kg_un * product.un_ca
+            rest = float_round(uom_qty * product.kg_un * product.un_ca, precision_rounding = product.log_base_id.rounding)
 
         #si hay unidades
 
         if product.log_box_id:
             if product.log_unit_id or product.log_base_id:
                 box_qty = int(rest / (product.kg_un * product.un_ca))
+                box_qty = float_round (box_qty, precision_rounding = product.log_box_id.rounding)
                 rest = rest - (box_qty * product.kg_un * product.un_ca)
             else:
                 box_qty = rest / (product.kg_un * product.un_ca)
 
-            box_append = (product.log_box_id.name, float_round (box_qty, precision_rounding = product.log_box_id.rounding), product.log_box_id.id, 1)
+            box_append = (product.log_box_id.name, box_qty, product.log_box_id.id, 1)
 
         if product.log_unit_id:
             if product.log_base_id:
-                unit_qty = int(rest /product.kg_un)
+                unit_qty = int(rest / product.kg_un)
+                unit_qty = float_round (unit_qty, precision_rounding = product.log_unit_id.rounding)
                 rest = rest - (unit_qty * product.kg_un)
             else:
                 unit_qty= rest / product.kg_un
-            unit_append = (unit_id, float_round (unit_qty, precision_rounding = product.log_unit_id.rounding), product.log_unit_id.id, product.un_ca)
+            unit_append = (unit_id, unit_qty, product.log_unit_id.id, product.un_ca)
 
         if product.log_base_id:
             base_qty = rest
-            base_append = (base_id, float_round (base_qty, precision_rounding = product.log_base_id.rounding), product.log_base_id.id, product.kg_un )
+            base_qty = float_round (base_qty, precision_rounding = product.log_base_id.rounding)
+            base_append = (base_id, base_qty, product.log_base_id.id, product.kg_un )
 
         conv.append(base_append)
         conv.append(unit_append)
