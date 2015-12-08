@@ -187,11 +187,11 @@ class conciliation(object):
             if len(move_list) > 1:
                 for move in move_list:
                     print u"Numero de movimiento %s"%(num)
-                    if self.isclose(move['debit'], amnt, abs_tol=0.0001):
+                    if self.isclose(move['debit'], amnt, abs_tol=0.001):
                         res.append(num)
                         print res
                         return res
-                    if self.isclose(move['credit'], -amnt, abs_tol=0.0001):
+                    if self.isclose(move['credit'], -amnt, abs_tol=0.001):
                         res.append(num)
                         print res
                         return res
@@ -204,7 +204,7 @@ class conciliation(object):
                     #Acumula debe y haber
                     testing.append(num)
                     diff = suma - amnt
-                    if self.isclose(diff, 0, abs_tol=0.0001) and len(testing) != len(move_list):
+                    if self.isclose(diff, 0, abs_tol=0.001) and len(testing) != len(move_list):
                         print "Cuadrado"
                         #print testing
                         res = testing
@@ -238,7 +238,7 @@ class conciliation(object):
                 move_list.pop(moves[0])
         res = sum_list(move_list)
 
-        if self.isclose(res[0],res[1], abs_tol=0.0001) and not self.isclose(res[0], 0, abs_tol=0.0001) and len(move_list):
+        if self.isclose(res[0],res[1], abs_tol=0.001) and not self.isclose(res[0], 0, abs_tol=0.001) and len(move_list):
             move_ids = [move['id'] for move in move_list]
             print u"Ejecuta conciliacción %s movimientos"%(len(move_ids))
             self.execute('account.move.line', 'reconcile', move_ids, 'manual', False,
