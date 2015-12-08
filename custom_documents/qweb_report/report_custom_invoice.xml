@@ -5,6 +5,7 @@
     <template id="report_custom_invoice">
     <!-- Se añade el css del informe de picking para que -->
     <!-- pueda ser recogido por el informe del módulo stock_picking_batch-->
+    <!-- CUIDADO: MODIFICAR AQUÍ CSS IMPLICA REPLICARLO EN EL CUSTOM PICKING PARA QUE FUNCIONE EL PICKING BATCH-->
     <style type="text/css">
         .top_part{
             min-height:30mm;
