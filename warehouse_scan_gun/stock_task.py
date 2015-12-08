@@ -290,7 +290,8 @@ class StockTask(models.Model):
         thread = threading.Thread(
             target=self._gun_finish_task, args=(my_args,))
         thread.start()
-        task_obj.write({'state':'process'})
+
+        #task_obj.write({'state':'process'})
         return True
 
     @api.model
@@ -299,6 +300,13 @@ class StockTask(models.Model):
                        my_args)
         task_id = my_args.get('task_id', False)
         user_id = my_args.get('user_id', False)
+
+        sql = "update stock_task set state = 'process' where id = %s"%task_id
+        new_cr_ = sql_db.db_connect(self.env.cr.dbname).cursor()
+        new_cr_.execute (sql)
+        new_cr_.commit()
+        new_cr_.close()
+
         new_cr = sql_db.db_connect(self.env.cr.dbname).cursor()
         with api.Environment.manage():  # class function
             uid, context = self.env.uid, self.env.context
@@ -310,6 +318,7 @@ class StockTask(models.Model):
             try:
                 res = task_obj.finish_partial_task()
             except Exception:
+                print u'Error en el hilo'
                 _logger.debug("CMNT EXCEPCION EN EL HILO!!!!!!!!! args %s",
                        Exception)
                 new_cr.rollback()

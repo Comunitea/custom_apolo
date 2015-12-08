@@ -224,17 +224,24 @@ class wave_report_revised(models.Model):
     _name = 'wave.report.revised'
     _rec_name='wave_report_id'
 
-    @api.one
-    #@api.depends('operation_ids')
-    def _get_to_revised(self):
 
+    @api.depends('operation_ids')
+    @api.one
+    def _get_to_revised(self):
         to_revised= False
         for op in self.operation_ids:
             if op.to_revised:
                 to_revised=True
-
         self.to_revised = to_revised
-        return to_revised
+
+    @api.depends('operation_ids')
+    @api.one
+    def _get_assigned_qtys(self):
+        res = 0.0
+        for l in self.operation_ids:
+            res += l.product_qty
+        self.picked_qty = res
+
 
     @api.multi
     def set_to_revised(self, value = False):
@@ -260,16 +267,9 @@ class wave_report_revised(models.Model):
     #         res['operation_ids'] = list(set(item_res))
     #     return res['operation_ids']
 
-    @api.depends('operation_ids')
-    @api.one
-    def _get_assigned_qtys(self):
-        res = 0.0
-        for l in self.operation_ids:
-            res += l.product_qty
-        self.picked_qty = res
 
 
-    to_revised = fields.Boolean(string = 'To Revised', compute='_get_to_revised')
+    to_revised = fields.Boolean(string = 'To Revised', compute=_get_to_revised)
     new_uos_qty = fields.Float('Picked Qty (uos)',compute=_get_assigned_qtys,
                                digits_compute=
                                dp.get_precision('Product Unit of Measure'))
@@ -291,7 +291,7 @@ class wave_report_revised(models.Model):
     operation_ids = fields.One2many ('stock.pack.operation', 'wave_revised_id', string = "Operation")
     stock = fields.Float(related = 'wave_report_id.product_id.qty_available', string = "Stock QTY")
     picked_qty = fields.Float('Picked Qty', readonly = True)
-
+    state = fields.Selection(related = 'wave_report_id.wave_id.state', string ="Wave Asociated State", readonly = True)
 
     # @api.one
     # def _get_operation_ids(self):
@@ -307,14 +307,13 @@ class wave_report_revised(models.Model):
         new_uos_qty = my_args.get('new_uos_qty', 0)
         new_uom_qty = my_args.get('new_uom_qty', 0)
         # qty = my_args.get('qty', 0)
-        uom_qty = my_args('uom_qty', 0)
+        uom_qty = my_args.get('uom_qty', 0)
         wave_report_id = my_args.get('wave_id', False)
         task_id = my_args.get('task_id', False)
         wave_report = self.env['wave.report'].browse(wave_report_id)
         product_id = wave_report.product_id
         wave_to_revised = self.env['wave.report.revised']
         wave_report = self.env['wave.report'].browse(wave_report_id)
-
         vals = {
             'wave_report_id': wave_report_id,
             'to_revised' : True,
@@ -322,7 +321,7 @@ class wave_report_revised(models.Model):
             'new_uom_qty' : new_uom_qty,
             'wave_report_id': wave_report_id,
             'product_id': product_id.id,
-            'picked_qty': 0,
+            'picked_qty': new_uom_qty,
             'pack_id': wave_report.pack_id.id,
             'uom_qty': uom_qty
         }
@@ -383,7 +382,7 @@ class wave_report_revised(models.Model):
             revised = to_revised
             values = ({'to_revised': revised})
             wave.operation_ids.write(values)
-        self.refresh_qtys()
+        #self.refresh_qtys()
 
     @api.multi
     def finish_revised_task(self):

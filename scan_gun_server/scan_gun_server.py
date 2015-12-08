@@ -856,11 +856,12 @@ class ScanGunProtocol(LineReceiver):
         if line == KEY_CONFIRM and confirm == True:
 
             res = self.factory.odoo_con.finish_task(self.user_id, self.task_id)
-
             if not res:
                 message = u'\nError:\nRevisa Ubicaciones y/o Cantidades\n%s para volver'%KEY_VOLVER
                 self._snd(message)
             else:
+
+
                 self.print_task(self.task_id)
                 self.handle_new_task()
             return
@@ -2196,8 +2197,8 @@ class ScanGunProtocol(LineReceiver):
                 #marcamos la tarea como finalizada
                 #llamamos a finish_partial_task de stock_task
                 ok = self.factory.odoo_con.finish_task(self.user_id, self.task_id)
-                if ok:
-                    self.print_task(self.task_id)
+                # if ok:
+                #     self.print_task(self.task_id)
                 self.step=0
                 self.last_state = "list_waves"
                 self.state ='menu1'
@@ -2558,7 +2559,7 @@ class ScanGunProtocol(LineReceiver):
 
         #CANTIDADES OK o mayores que ok: peso fijo y uom o peso variable y uos entonces ok
         #¡¡¡ OJO !!!! Supongo 1 operacion por cliente, paquete, uos_id. CONFIRMAR ESTE PUNTO
-        elif (not to_revised and ((self.new_uom_qty == uom_pedida) and not var_coeff) or ((self.new_uos_qty >= uos_pedida) and var_coeff)):
+        elif (not to_revised and ((self.new_uom_qty == uom_pedida) and not var_coeff) or var_coeff):#((self.new_uos_qty >= uos_pedida) and var_coeff)):
             if var_coeff:
                 print u"Proceso agrupaciones de peso variable uos= %s"%self.new_uos_qty
                 values = {'to_process': True,
@@ -2580,13 +2581,12 @@ class ScanGunProtocol(LineReceiver):
 
         #todo lo que llega aquei se procesa como a revisar y listo:
         #peso fijo distinto a lo que se pide o peso variable menor que lo que se pide y de mas de 1 operacion.
-        elif ((self.new_uom_qty != uom_pedida) and not var_coeff) or ((self.new_uos_qty < uos_pedida) and var_coeff):
+        elif ((self.new_uom_qty != uom_pedida) and not var_coeff):# or ((self.new_uos_qty < uos_pedida) and var_coeff):
             if var_coeff:
                 print u"A revisar peso variable: Piden %s y picko %s"%(wave_['uos_qty'], self.new_uos_qty)
 
             else:
                 print u"A revisar peso fijo: Piden %s y picko %s"%(wave_['qty'], self.new_uom_qty)
-
             wave_to_revised = self.factory.odoo_con.new_wave_to_revised(self.user_id, self.task_id, self.wave_id, self.new_uom_qty, self.new_uos_qty, wave_['qty'],wave_['uos_qty'])
             self.step = 0
             self.reset_log_units()
@@ -2823,8 +2823,6 @@ class ScanGunProtocol(LineReceiver):
         #step = 0: Espera localizaciony pasa a step 1
         #step 1, espera pack , si ok pasa a step9
         #if self.step>=3:
-
-
 
         line_int = self.int_(line)
         line_float = self.float_(line)
@@ -3133,6 +3131,8 @@ class ScanGunProtocol(LineReceiver):
                 #import ipdb; ipdb.set_trace()
                 self.f1_ok = False
                 inc = 1
+                wave_ = self.waves[str(self.active_wave)]
+
                 if self.step in [2,3]:
                     self.reset_log_units()
                     self.fixed_qty = False
@@ -3144,28 +3144,35 @@ class ScanGunProtocol(LineReceiver):
 
                 if self.step ==21:
                     self.step += inc
-                    if self.waves[str(self.active_wave)]['units'][1][2]:
+                    if wave_['units'][1][2]:
                         self._snd(self.get_str_form_wave(), '')
                         return
 
                 if self.step == 22:
                     self.step += inc
-                    if self.waves[str(self.active_wave)]['units'][2][2]:
+                    if wave_['units'][2][2]:
                         self._snd(self.get_str_form_wave(), '')
                         return
 
                 if self.step == 23:
                     self.step -= 2 * inc
-                    if self.waves[str(self.active_wave)]['units'][0][2]:
+                    if wave_['units'][0][2]:
                         self._snd(self.get_str_form_wave(), '')
                         return
 
 
                 if self.step ==31:
+                    # if wave_['units'][0][3] and wave_['uos_id'] != wave_['units'][0][2] and self.fixed_qty == True:
+                    #     #self.fixed_qty = False
+                    #     self.step = 32
+                    #     self.handle_form_wave(line=KEY_QTY)
+                    #     return
+
                     if self.fixed_qty == True:
                         self.fixed_qty = False
                         self.step += inc
-                        if self.waves[str(self.active_wave)]['units'][1][2]: #and not (wave_['var_coeff_ca'] and wave_['units'][1][2]!= wave_['uos_id']):
+
+                        if wave_['units'][1][2]: #and not (wave_['var_coeff_ca'] and wave_['units'][1][2]!= wave_['uos_id']):
                             self._snd(self.get_str_form_wave(), '')
                             return
                     else:
@@ -3173,10 +3180,18 @@ class ScanGunProtocol(LineReceiver):
                         self._snd(self.get_str_form_wave(), '')
                         return
                 if self.step == 32:
+
+                    # if wave_['units'][0][3] and wave_['uos_id'] == wave_['units'][0][2] and self.fixed_qty == True:
+                    #     #self.fixed_qty = False
+                    #     self.step += inc
+                    #     self.handle_form_wave(line=KEY_QTY)
+                    #     return
+
                     if self.fixed_qty == True:
                         self.fixed_qty = False
                         self.step += inc
-                        if self.waves[str(self.active_wave)]['units'][2][2]:# and not (wave_['var_coeff_ca'] and wave_['units'][2][2]!= wave_['uos_id']):
+
+                        if wave_['units'][2][2]:# and not (wave_['var_coeff_ca'] and wave_['units'][2][2]!= wave_['uos_id']):
                             self._snd(self.get_str_form_wave(), '')
                             return
                     else:
@@ -3185,20 +3200,21 @@ class ScanGunProtocol(LineReceiver):
                         return
 
                 if self.step == 33:
-                     if self.fixed_qty == True:
-                         self.fixed_qty = False
-                         self.step = 31
-                         if self.waves[str(self.active_wave)]['units'][0][2] :#and not self.waves[str(self.active_wave)]['var_coeff_ca']:
-                             self._snd(self.get_str_form_wave(), '')
-                             return
-                     else:
-                         self.fixed_qty = True
-                         self._snd(self.get_str_form_wave(), '')
-                         return
+
+                    if self.fixed_qty == True:
+                        self.fixed_qty = False
+                        self.step = 31
+                        if wave_['units'][0][2] :#and not self.waves[str(self.active_wave)]['var_coeff_ca']:
+                            self._snd(self.get_str_form_wave(), '')
+                            return
+                    else:
+                        self.fixed_qty = True
+                        self._snd(self.get_str_form_wave(), '')
+                        return
                 #No llega a 34
                 if self.step == 34:
                     self.step -= 3 * inc
-                    if self.waves[str(self.active_wave)]['units'][0][2]:
+                    if wave_['units'][0][2]:
                         self._snd(self.get_str_form_wave(), '')
                         return
                     else:
@@ -3399,7 +3415,6 @@ class ScanGunProtocol(LineReceiver):
         if wave_['is_var_coeff']:
             mover = "Pedido: %s %s\n"%(round(wave_['uos_qty'],2), wave_['uos'])
             menu_str += mover
-
         mover = "Mover :"
         for unit in reversed(wave_['units']):
             if unit[2] and round(unit[1],2)>0:
