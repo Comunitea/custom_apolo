@@ -121,7 +121,7 @@ class stock_pack_operation(models.Model):
         if ops:
             for op in ops:
                 values = {
-                'ID': op.id,
+                'id': op.id,
                 'product': op.product_id.short_name or "",
                 'default_code': op.product_id.default_code or '',
                 'CANTIDAD': op.product_qty,
@@ -129,7 +129,6 @@ class stock_pack_operation(models.Model):
                 'lot_id': op.packed_lot_id.id or "",
                 'PAQUETE': op.package_id.id and op.package_id.name or "",
                 'package': op.package_id.id and op.package_id.name or "",
-                'ORIGEN': op.location_id.bcd_name,
                 'DESTINO': op.location_dest_id.bcd_name,
                 'PROCESADO': op.to_process,
                 'to_process' : op.to_process,
@@ -343,7 +342,7 @@ class stock_pack_operation(models.Model):
 
 
                 values = {
-                'ID': op.id,
+                'id': op.id,
                 'id': op.id,
                 'product': product_id.short_name or product_name,
                 'op_product_id': product_id.id,
@@ -352,7 +351,6 @@ class stock_pack_operation(models.Model):
                 'lot_id': op.packed_lot_id.id or False,
                 'PAQUETE': op.package_id.id and op.package_id.name or "",
                 'package': op.package_id.id and op.package_id.name or "",
-                'ORIGEN': op.location_id.bcd_name,
                 'DESTINO': op.location_dest_id.bcd_name,
                 'PROCESADO': op.to_process,
                 'VISITED': False,

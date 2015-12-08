@@ -45,7 +45,7 @@ class stock_picking_wave(models.Model):
             for op in wave.wave_report_ids:
 
                 values = {
-                    'ID': op.id,
+                    'id': op.id,
                     'wave_report_id': op.id,
                     'product': op.product_id.name and op.product_id.short_name or "",
                     'default_code' : op.product_id.default_code or '',
@@ -53,7 +53,6 @@ class stock_picking_wave(models.Model):
                     'lot': op.lot_id and op.lot_id.name or "",
                     'lot_id': op.lot_id.id or False,
                     'package': op.pack_id.id and op.pack_id.name or "",
-                    'ORIGEN': op.location_id.bcd_name,
                     'DESTINO': 'Salida', #; op.location_dest_id.bcd_name,
                     'to_process': op.to_process or False,
                     'VISITED': op.visited or False,

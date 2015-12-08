@@ -538,10 +538,10 @@ class OdooDao:
         res = self.connection.execute('stock.pack.operation', 'get_user_packet_busy', [], my_args)
         return res
 
-    def new_wave_to_revised(self, user_id, task_id, wave_id, new_uom_qty = 0, new_uos_qty = 0, qty = 0, uos_qty = 0):
+    def new_wave_to_revised(self, user_id, task_id, wave_id, new_uom_qty = 0, new_uos_qty = 0, uom_qty = 0, uos_qty = 0):
         my_args = {'user_id': user_id, 'new_uom_qty' : new_uom_qty, 'wave_id': wave_id,
                    'new_uos_qty' : new_uos_qty, 'task_id': task_id,
-                   'qty': qty, 'uos_qty': uos_qty }
+                   'uom_qty': uom_qty, 'uos_qty': uos_qty }
         res = self.connection.execute('wave.report.revised', 'new_wave_to_revised', [], my_args)
         return res
 
