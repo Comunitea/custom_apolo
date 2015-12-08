@@ -307,7 +307,7 @@ class wave_report_revised(models.Model):
         new_uos_qty = my_args.get('new_uos_qty', 0)
         new_uom_qty = my_args.get('new_uom_qty', 0)
         # qty = my_args.get('qty', 0)
-        uom_qty = my_args('uom_qty', 0)
+        uom_qty = my_args.get('uom_qty', 0)
         wave_report_id = my_args.get('wave_id', False)
         task_id = my_args.get('task_id', False)
         wave_report = self.env['wave.report'].browse(wave_report_id)

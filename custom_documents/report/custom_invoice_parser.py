@@ -72,7 +72,7 @@ class custom_invoice_parser(models.AbstractModel):
                     'qty': '{0:.4f}'.format(line.quantity),
                     'unit': line.uos_id.name,
                     'pric_price': '{0:.2f}'.format(line.price_unit),
-                    'app_price': '{0:.2f}'.format(line.price_unit),
+                    'app_price': '{0:.2f}'.format(line.price_unit * (1 - (line.discount / 100.0))),
                     'net': '{0:.2f}'.format(line.price_subtotal),
                 }
                 print "***********************"
