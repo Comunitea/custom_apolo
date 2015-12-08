@@ -220,25 +220,26 @@ class conciliation(object):
         #while not self.isclose(res[0], res[1], 0.0001, 0.0001) and len(move_list):
         print "Comienza pruebas"
         diff = res[0] - res[1]
-        moves = busca_move(move_list, diff)
-        # Prepara para eliminar
-        if moves:
-            if len(moves) > 1:
-                print "Moves"
-                print moves
-                moves.reverse()
-                print "Movesr"
-                print moves
-                print "Moves List"
-                print move_list
-                for move in moves:
-                    move_list.pop(move)
+        if not self.isclose(diff, 0, abs_tol=0.001 ):
+            moves = busca_move(move_list, diff)
+            # Prepara para eliminar
+            if moves:
+                if len(moves) > 1:
+                    print "Moves"
+                    print moves
+                    moves.reverse()
+                    print "Movesr"
+                    print moves
+                    print "Moves List"
                     print move_list
-            else:
-                move_list.pop(moves[0])
-        res = sum_list(move_list)
+                    for move in moves:
+                        move_list.pop(move)
+                        print move_list
+                else:
+                    move_list.pop(moves[0])
+            res = sum_list(move_list)
 
-        if self.isclose(res[0],res[1], abs_tol=0.001) and not self.isclose(res[0], 0, abs_tol=0.001) and len(move_list):
+        if self.isclose(res[0],res[1], abs_tol=0.001) and  len(move_list):
             move_ids = [move['id'] for move in move_list]
             print u"Ejecuta conciliacción %s movimientos"%(len(move_ids))
             self.execute('account.move.line', 'reconcile', move_ids, 'manual', False,
