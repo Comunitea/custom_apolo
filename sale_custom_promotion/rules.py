@@ -34,10 +34,10 @@ class PromotionsRules(models.Model):
 
     @api.model
     def evaluate(self, promotion_rule, order):
-        res = super(PromotionsRules, self).evaluate(promotion_rule, order)
-        if res and promotion_rule.customer_ids and order.partner_id not in \
+        res = False
+        if not promotion_rule.customer_ids or order.partner_id in \
                 promotion_rule.customer_ids:
-            return False
+            res = super(PromotionsRules, self).evaluate(promotion_rule, order)
         return res
 
     @api.multi
@@ -65,7 +65,7 @@ subgroup')])
         for order_line in order.order_line:
             if order_line.product_id.rappel_subgroup_id.code == \
                     eval(action.product_code):
-                return order_line.write({'discount': eval(action.arguments)})
+                order_line.write({'discount': eval(action.arguments)})
 
     @api.model
     def create_line(self, args):
@@ -130,6 +130,6 @@ class PromotionsRulesConditionsExprs(models.Model):
 
     def serialise(self, attribute, comparator, value):
         if attribute == 'subgroup':
-            return 'len([x for x in product_ids if x in subgroup_products])'
+            return 'bool(len([x for x in product_ids if x in subgroup_products]))'
         return super(PromotionsRulesConditionsExprs, self).serialise(
             attribute, comparator, value)
