@@ -626,7 +626,6 @@ class Edi(models.Model):
         unlink_products = self.env['product.template'].search(
             [('id', 'in', supplier_product_ids), ('exclusive_ids', '!=',
                                                   False)])
-        import ipdb; ipdb.set_trace()
         self.env['partner.rules'].search([('product_id', 'in', supplier_product_ids),
                                           ('partner_id.indirect_customer', '=', True)]).unlink()
         customer_vals = {}
