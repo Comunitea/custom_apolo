@@ -559,10 +559,10 @@ class stock_pack_operation(models.Model):
         if not op_obj:
             raise except_orm(_('Error'),
                             _('No operation founded to set as visited'))
-
         # Browse with correct uid, an mark as visited
         try:
-            ctx = {'no_recompute': True}
+            ctx = {'no_recompute': False}
+            ctx = {}
             env2 = op_obj.env(self._cr, user_id, ctx)
             op_obj_uid = op_obj.with_env(env2)
             #op_obj_uid.write(field_values)
@@ -577,6 +577,26 @@ class stock_pack_operation(models.Model):
                 op_obj_uid.unlink()
                 new_op = op_obj_uid.create(field_values)
                 res = new_op.id
+
+
+            # Lo hacemos a tarves del ERP
+            # import ipdb; ipdb.set_trace()
+            # if field_values.get('uos_qty', 0.00) or field_values.get('product_qty', 0.00):
+            #     #Si hay cantidades compruebo ...
+            #     domain = [('operation_id', '=', op_id)]
+            #     move_ids = self.env['stock.move.operation.link'].search ([('operation_id', '=', op_id)], limit = 1)
+            #     #move_ids = self.env['stock.move.operation.link'].search(domain, limit = 1)
+            #     # if len(move_ids) != 1:
+            #     #     raise ("Error")
+            #     move_id = move_ids.move_id#self.env['stock.move'].browse(move_ids[0].move_id)
+            #     vals = {'product_uom_qty' : field_values['product_qty'], 'product_uos_qty' : field_values['uos_qty']}
+            #     move_id.write (vals)
+            #
+            #     # Si pongo esta linea no crea un backorder
+            #     # move_id = move_ids.move_id.move_dest_id
+            #     # vals = {'product_uos_qty' : field_values['uos_qty']}
+            #     # move_id.write (vals)
+
             return res
         except Exception:
             return False

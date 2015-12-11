@@ -310,7 +310,7 @@ class StockTask(models.Model):
         new_cr = sql_db.db_connect(self.env.cr.dbname).cursor()
         with api.Environment.manage():  # class function
             uid, context = self.env.uid, self.env.context
-            env = api.Environment(new_cr, user_id, context)
+            env = api.Environment(new_cr, 1, context)
             #self.env = env
             task_obj = env['stock.task'].browse(task_id)
             #env2 = task_obj.env(self._cr, user_id, self._context)

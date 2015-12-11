@@ -860,10 +860,10 @@ class ScanGunProtocol(LineReceiver):
                 message = u'\nError:\nRevisa Ubicaciones y/o Cantidades\n%s para volver'%KEY_VOLVER
                 self._snd(message)
             else:
-
-
                 self.print_task(self.task_id)
                 self.handle_new_task()
+                self.state ='menu1'
+                self._snd(self.get_str_menu1())
             return
 
         if line == KEY_YES and self.step==10:
@@ -2186,8 +2186,6 @@ class ScanGunProtocol(LineReceiver):
                     self._snd(self.get_str_list_waves(), message)
                     return
 
-
-
             if self.step==5 and (line == KEY_CANCEL or line==KEY_VOLVER) :
                 self.step = 0
                 message =u"Cancelado"
@@ -2206,7 +2204,10 @@ class ScanGunProtocol(LineReceiver):
                 self.ops = False
                 self.task_id=False
                 self.reset_vals()
-                self.handle_new_task()
+                self.state ='menu1'
+                self._snd(self.get_str_menu1())
+                #
+                # self.handle_new_task()
                 return
 
 
@@ -2230,7 +2231,6 @@ class ScanGunProtocol(LineReceiver):
             return
 
         if order_line == PRE_PACK:
-
             one_package = 0
             order = False
             active_wave ='1'
@@ -2409,7 +2409,6 @@ class ScanGunProtocol(LineReceiver):
         uom_pedida = wave_['qty']
         uos_pedida = wave_['uos_qty']
         #tengo que una de las cantidades es menor que la pedida (uom para fijo y uos para variable):
-
         if not to_revised and not self.f1_ok:
             if  ((self.new_uom_qty < uom_pedida ) and not var_coeff) or \
                 ((check_ok + self.new_uos_qty < uos_pedida) and var_coeff):
@@ -2594,9 +2593,6 @@ class ScanGunProtocol(LineReceiver):
             message = u'A revisar ...'
             if wave_to_revised:
                 res = True
-
-
-
 
         self._snd(self.get_str_list_waves(), message)
         return res
