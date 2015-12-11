@@ -73,7 +73,8 @@ subgroup')])
         order_line_obj = self.pool.get('sale.order.line')
         for order_line in order.order_line:
             if order_line.product_id.code == eval(action.product_code)\
-                    and float_is_zero(order_line.discount, precision_digits=2):
+                    and float_is_zero(order_line.discount, precision_digits=2)\
+                    and not order_line.tourism:
                 return order_line_obj.write(cr,
                                      uid,
                                      order_line.id,
@@ -89,7 +90,8 @@ subgroup')])
         for order_line in order.order_line:
             if order_line.product_id.rappel_subgroup_id.code == \
                     eval(action.product_code) \
-                    and float_is_zero(order_line.discount, precision_digits=2):
+                    and float_is_zero(order_line.discount, precision_digits=2)\
+                    and not order_line.tourism:
                 order_line.write({'discount': eval(action.arguments)})
 
     @api.model
