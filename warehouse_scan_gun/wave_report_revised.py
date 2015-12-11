@@ -74,7 +74,9 @@ class wave_report(models.Model):
             op_package_id = vals['op_package_id']
         product = self.env['product.product'].browse(product_id)
         new_package_id = self.env['stock.quant.package'].browse(package_id)
-        new_quant_objs = [x for x in new_package_id.quant_ids]
+        domain = [('package_id', '=', package_id), ('reservation_id.id', '=', False)]
+        quant_ids = self.env['stock.quant'].search(domain)
+        new_quant_objs = quant_ids
         old_package_id = self.env['stock.quant.package'].browse(op_package_id)
         old_quant_ids = [x.id for x in old_package_id.quant_ids]
         #domain =

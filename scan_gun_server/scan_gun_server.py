@@ -50,6 +50,7 @@ KEY_QTY = "F8"##
 
 KEY_DESTINO = "F9"
 KEY_CALCULADORA = "F8"
+KEY_FORZAR = "F8"
 KEY_DO_PACK = "F7"
 KEY_DEBUG="F9"
 KEY_NO_REALIZADA = "F9"
@@ -2338,8 +2339,9 @@ class ScanGunProtocol(LineReceiver):
         packet_values = self.factory.odoo_con.get_quant_pack_gun_info_resumen(self.user_id, packet_id)
         qty = packet_values['qty']
         if self.new_uom_qty > qty:
+            self.step +=22
             message = u'%s %s: (max %s %s)\nInsuficiente. %s Forzar'%\
-                      (self.new_uom_qty, packet_values['uom'], qty, packet_values['uom'], KEY_FINISH)
+                      (self.new_uom_qty, packet_values['uom'], qty, packet_values['uom'], KEY_FORZAR)
             return message
         return False
 
@@ -2394,10 +2396,9 @@ class ScanGunProtocol(LineReceiver):
         # op_id = wave_['id']
         self.wave_id = wave_['wave_report_id']
         res = False
-        #Tengo que comprobar si
+        #Tengo que comprobar si en el paquete hay cantidad suficiente
         check_ok = 0.001
         if not force:
-
             message = self.check_max_packet_qty(wave_['package_id'])
             if message != False:
                 self._snd(self.get_str_form_wave(), message)
@@ -2428,7 +2429,6 @@ class ScanGunProtocol(LineReceiver):
         #Si llega aquei cantidades bien o cantidades a revisar.
         #tengo lo que piden ==>> han pulsado F1 directamen
         if self.f1_ok:
-
             print u"Proceso con F1"
             values = {'to_process': True}
             self.waves[str(self.active_wave)]['to_process'] = True
@@ -2500,8 +2500,8 @@ class ScanGunProtocol(LineReceiver):
 
             ###################
             #Sustituyo con change_op_values por acceso a sql
-            res = self.factory.odoo_con.sql_execute('stock_pack_operation','id = %s'%self.wave_id, values)
-            #res = self.factory.odoo_con.change_op_values(self.user_id, self.wave_id, values)
+            #res = self.factory.odoo_con.sql_execute('stock_pack_operation','id = %s'%self.wave_id, values)
+            res = self.factory.odoo_con.change_op_values(self.user_id, self.wave_id, values)
 
             self.step = 0
             self.reset_log_units()
@@ -2542,7 +2542,6 @@ class ScanGunProtocol(LineReceiver):
                     'product_uom_id': wave_['uom_id'],
                     'product_qty': self.new_uom_qty,
                     'uos_qty': self.new_uos_qty}
-
             res = self.factory.odoo_con.change_op_values(self.user_id, self.wave_id, values)
             self.step = 0
             self.reset_log_units()
@@ -2596,81 +2595,6 @@ class ScanGunProtocol(LineReceiver):
 
         self._snd(self.get_str_list_waves(), message)
         return res
-        # de aquei en adelante debereia sobrar.
-
-        #Si llego aquei son cantidades sin revisar
-
-        #
-        #
-        #
-        #
-        # if self.new_uom_qty == 0:
-        #     values = {
-        #             'to_process':True,
-        #             'to_revised':True,
-        #             'visited':True,
-        #             'wrong_qty': True,
-        #             'product_qty': 0,
-        #             'product_id': wave_['product_id']
-        #         }
-        #     if num_ops ==1:
-        #         self.factory.odoo_con.change_op_values(self.user_id, op_id, values)
-        #     else:
-        #         self.factory.odoo_con.change_wave_op_values(self.user_id , self.wave_id, op_id, values)
-        #     message= u'Falta Producto para OP'
-        #
-        #
-        # elif (wave_['uos_qty']== self.new_uos_qty and wave_['qty'] == self.new_uom_qty)\
-        #         or (wave_['uos_qty']== self.new_uos_qty and num_ops==1) or \
-        #         (wave_['qty']== self.new_uom_qty and num_ops==1):
-        #
-        #     if num_ops == 1 and self.new_uos_qty !=0:
-        #         if wave_['qty'] != self.new_uom_qty:
-        #             self.factory.odoo_con.change_op_value(self.user_id, op_id, 'product_qty', self.new_uom_qty)
-        #
-        #         if wave_['uos_qty'] != self.new_uos_qty:
-        #             self.factory.odoo_con.change_op_value(self.user_id, op_id, 'uos_qty', self.new_uos_qty)
-        #
-        #     #CASO 1
-        #     task_ops_finish = self.factory.odoo_con.set_wave_ops_values(self.user_id , self.wave_id, op_id, {'to_process':True})
-        #     self.step = 0
-        #     self.state = "list_waves"
-        #     message = u'Operacion Realizada'
-        #
-        # else:
-        #     if num_ops == 1 :
-        #         #CASO 2
-        #         #DEBEMOS ESCRIBIR EN LA OP
-        #         values = {
-        #             'uos_qty': self.new_uos_qty,
-        #             'product_qty':self.new_uom_qty,
-        #             'to_process':True,
-        #             'visited':True
-        #         }
-        #         self.factory.odoo_con.change_op_values(self.user_id, op_id, values)
-        #         #self.factory.odoo_con.change_op_value(self.user_id, op_id, 'product_qty', self.new_uom_qty)
-        #         #y finalizamos
-        #         #task_ops_finish = self.factory.odoo_con.set_wave_ops_values(self.user_id , self.wave_id, op_id, 'to_process', True)
-        #         self.step = 0
-        #         self.state = "list_waves"
-        #         message = u'Operacion Realizada'
-        #
-        #
-        #     elif num_ops>1:
-        #         #CASO 3
-        #         #Marcamos como to revised.
-        #         #Si las cantidades son distintas y hay as de una operacion ...
-        #         task_wave_not_ok = self.factory.odoo_con.new_wave_to_revised(self.user_id, self.new_uos_qty, self.new_uom_qty, self.wave_id, self.task_id)
-        #         #task_ops_finish = self.factory.odoo_con.set_wave_ops_values(self.user_id , self.wave_id, op_id, {'to_process':True})
-        #         self.step = 10
-        #         message =u"Pendiente de Revision"
-        #
-        # act = self.active_wave
-        # #self.waves = self.factory.odoo_con.get_wave_reports_from_task(self.user_id, self.task_id, self.type)
-        # self.active_wave = act
-        # #self.state= "list_waves"
-        # self._snd(self.get_str_list_waves(), message)
-        return
 
     def get_step_from_unit(self, uom_id, units, var = False):
         res =2
@@ -2936,7 +2860,7 @@ class ScanGunProtocol(LineReceiver):
 
         if line in [KEY_NEXT, KEY_PREV]:
             line = KEY_QTY
-        if line in [KEY_CONFIRM, KEY_CANCEL, KEY_NEXT, KEY_PREV, KEY_QTY, KEY_VOLVER, KEY_FINISH]:
+        if line in [KEY_CONFIRM, KEY_CANCEL, KEY_NEXT, KEY_PREV, KEY_QTY, KEY_VOLVER, KEY_FINISH, KEY_FORZAR]:
 
 
             if line == KEY_CANCEL:
@@ -3017,6 +2941,10 @@ class ScanGunProtocol(LineReceiver):
                 self._snd(self.get_str_form_wave(), '')
                 return
 
+            if line == KEY_FORZAR and self.step in (28,38,50,60):
+                res = self.finish_picking(force = True)
+                self._snd(self.get_str_form_wave(), '')
+                return
             if line == KEY_FINISH:
                 res = self.finish_picking(to_revised = True)
                 self._snd(self.get_str_form_wave(), '')
