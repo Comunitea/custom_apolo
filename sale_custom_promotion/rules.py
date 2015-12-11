@@ -19,7 +19,7 @@
 #
 ##############################################################################
 from openerp import models, fields, api, exceptions, _
-
+from openerp.tools.float_utils import float_is_zero
 
 class PromotionsRules(models.Model):
 
@@ -36,7 +36,8 @@ class PromotionsRules(models.Model):
     def evaluate(self, promotion_rule, order):
         res = False
         if not promotion_rule.customer_ids or order.partner_id in \
-                promotion_rule.customer_ids:
+                promotion_rule.customer_ids or (order.partner_id
+                and order.partner_id.parent_id in promotion_rule.customer_ids):
             res = super(PromotionsRules, self).evaluate(promotion_rule, order)
         return res
 
@@ -59,12 +60,38 @@ class PromotionsRulesActions(models.Model):
                                                    'Discount % on Product of \
 subgroup')])
 
+    def action_prod_disc_perc(self, cr, uid,
+                               action, order, context=None):
+        """
+        Action for 'Discount % on Product'
+        @param cr: Database cr
+        @param uid: ID of uid
+        @param action: Action to be taken on sale order
+        @param order: sale order
+        @param context: Context(no direct use).
+        """
+        order_line_obj = self.pool.get('sale.order.line')
+        for order_line in order.order_line:
+            if order_line.product_id.code == eval(action.product_code)\
+                    and float_is_zero(order_line.discount, precision_digits=2)\
+                    and not order_line.tourism:
+                return order_line_obj.write(cr,
+                                     uid,
+                                     order_line.id,
+                                     {
+                                      'discount':eval(action.arguments),
+                                      },
+                                     context
+                                     )
+
     @api.model
     def action_prod_disc_perc_sub(self, action, order):
         order_line_obj = self.env['sale.order.line']
         for order_line in order.order_line:
             if order_line.product_id.rappel_subgroup_id.code == \
-                    eval(action.product_code):
+                    eval(action.product_code) \
+                    and float_is_zero(order_line.discount, precision_digits=2)\
+                    and not order_line.tourism:
                 order_line.write({'discount': eval(action.arguments)})
 
     @api.model
