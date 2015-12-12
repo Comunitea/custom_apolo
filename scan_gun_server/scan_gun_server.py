@@ -175,7 +175,7 @@ class ScanGunProtocol(LineReceiver):
         """
         Metodo del framework. Mensaje al establecer la conexion
         """
-        self.factory.debug= True
+        self.factory.debug = False
         self._snd(u"Codigo de operador:")
 
     def connectionLost(self, reason = u"Se perdio la conexion"):
@@ -2817,7 +2817,7 @@ class ScanGunProtocol(LineReceiver):
                     act = self.active_wave
                     self.waves = self.factory.odoo_con.get_wave_reports_from_task(self.user_id, self.task_id, self.type)
                     for op_ in self.waves:
-                        if self.waves[op_]['package_id'] == package_id:
+                        if self.waves[op_]['package_id'] == self.new_package_id:
                             self.active_wave= op_
                             self.wave_id = self.waves[op_]['id']
                     self.new_package_id = False
@@ -3722,7 +3722,8 @@ class ScanGunProtocol(LineReceiver):
                 if op_['uom_id']!=op_['uos_id']:
                     strg+="%s%s %s\n"%(' ' * 7, op_['uos_qty'], op_['uos'])
             #Aqui pongo si es paquete completo
-            if op_['is_package']:
+            if op_['is_package'] or \
+                    (op_['uom_id'] == op_['uos_id']) and (op_['packed_qty'] == op_['qty']):
                 strg+=u"       (Paquete Completo)\n"
 
             #Si la operacion no es de ubicacion pongo DE: ...

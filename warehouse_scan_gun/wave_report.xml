@@ -34,6 +34,9 @@
                       <field name="wave_report_revised_id"/>
                   </group>
               </field>
+              <xpath expr="//field[@name='operation_ids']/tree/field[@name='to_process']" position="after">
+                <field name = "to_revised"/>
+              </xpath>
          </field>
     </record>
 

@@ -170,7 +170,6 @@ class wave_report(models.Model):
                 vals['product_id'] = op.product_id.id or op.package_id.product_id.id
                 vals['product_qty'] = qty
                 vals['uos_qty'] = product.uom_qty_to_uos_qty(qty, op.uos_id.id)
-                vals['op_package_id'] = False
                 if not op.write(vals):
                     res = False
                 print u"Escrimos en la operación con resultado %s"%res
@@ -362,7 +361,6 @@ class wave_report_revised(models.Model):
             'to_revised' : True,
             'new_uos_qty' : new_uos_qty,
             'new_uom_qty' : new_uom_qty,
-            'wave_report_id': wave_report_id,
             'product_id': product_id.id,
             'picked_qty': new_uom_qty,
             'pack_id': wave_report.pack_id.id,
@@ -371,8 +369,10 @@ class wave_report_revised(models.Model):
         }
         wave_ = wave_to_revised.search([('wave_report_id','=',wave_report_id)])
         if wave_:
+            print u"Modificando la wave para revisar de %s en %s"%(product_id.short_name, wave_report_id)
             wave_.write(vals)
         else:
+            print u"Creando la wave para revisar de %s en %s"%(product_id.short_name, wave_report_id)
             wave_ = wave_to_revised.create(vals)
 
         wave_report.operation_ids.write({'to_process': True, 'to_revised' : True, 'wave_revised_id' : wave_.id})
