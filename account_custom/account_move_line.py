@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Copyright (C) 2015 Comunitea All Rights Reserved
-#    $Omar Castiñeira Saavedra <omar@comunitea.com>$
+#    Copyright (c) 2008 Zikzakmedia S.L. (http://zikzakmedia.com)
+#                       Jordi Esteve <jesteve@zikzakmedia.com>
+#    Copyright (C) 2011 Domsense srl (<http://www.domsense.com>)
+#    Copyright (C) 2011-2013 Agile Business Group sagl
+#    (<http://www.agilebg.com>)
+#    Ported to Odoo by Andrea Cometa <info@andreacometa.it>
+#    Ported to v8 API by Eneko Lacunza <elacunza@binovo.es>
+#    Copyright (c) 2015 Serv. Tecnol. Avanzados - Pedro M. Baeza
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published
@@ -19,8 +25,12 @@
 #
 ##############################################################################
 
-from . import res_users
-from . import account_voucher
-from . import account_payment
-from . import sale
-from . import account_move_line
+from openerp import models, fields, api
+
+
+class AccountMoveLine(models.Model):
+    _inherit = 'account.move.line'
+
+    commercial_id = fields.Many2one('res.users',
+                                    related='invoice.user_id',
+                                    string='Comercial')
