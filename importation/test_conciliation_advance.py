@@ -265,12 +265,13 @@ class conciliation(object):
                                     ['id', 'credit', 'debit', 'ref'])
             print u"Buscando  para : %s cobro "%( len(move_credit_ids))
             for move_credit in move_credits:
-                ref_tosearch = move_credit['ref'][-9:]
+                ref_tosearch = move_credit['ref'][-10:]
                 print u"Buscando cobro %s"%( ref_tosearch)
                 found = False
                 move_debit_ids = self.search('account.move.line',
                                     [('account_id.type', '=','receivable'),
                                     ('ref', 'like', ref_tosearch),
+                                     ('partner_id', '=', customer['id']),
                                      ('reconcile_id', '=', False),
                                       ('debit','>',0.0)],
                                    order = 'date ASC, id ASC')
