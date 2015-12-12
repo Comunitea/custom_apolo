@@ -368,13 +368,18 @@
       <template id="invoice_top_part">
           <div class="row top_part">
               <div class="col-xs-7 top-border no-padd-left">
-                  <div class="col-xs-3 no-padd-left">
-                        <strong>INVOICE:</strong>
+                  <div class="col-xs-4 no-padd-left">
+                       <div t-if="o.type == 'out_invoice'">
+                           <strong>INVOICE:</strong>
+                       </div>
+                        <div t-if="o.type == 'out_refund'">
+                           <strong>F. RECTIFICATIVA:</strong>
+                       </div>
                   </div>
                   <div class="col-xs-4">
                       <strong><span t-field="o.number"/></strong>
                   </div>
-                  <div class="col-xs-5">
+                  <div class="col-xs-4">
                     <strong>DATE: <span t-esc="totals[o.id]['inv_date']"/></strong>
                   </div>
                   <div t-if="o.partner_id">

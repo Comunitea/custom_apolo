@@ -74,7 +74,9 @@ class wave_report(models.Model):
             op_package_id = vals['op_package_id']
         product = self.env['product.product'].browse(product_id)
         new_package_id = self.env['stock.quant.package'].browse(package_id)
-        new_quant_objs = [x for x in new_package_id.quant_ids]
+        domain = [('package_id', '=', package_id), ('reservation_id.id', '=', False)]
+        quant_ids = self.env['stock.quant'].search(domain)
+        new_quant_objs = quant_ids
         old_package_id = self.env['stock.quant.package'].browse(op_package_id)
         old_quant_ids = [x.id for x in old_package_id.quant_ids]
         #domain =
@@ -150,6 +152,16 @@ class wave_report(models.Model):
         if wave:
             for op in wave.operation_ids:
                 op.write (values)
+                #Calculate the operations for the next chained picking
+                related_pick = op.picking_id.move_lines and\
+                               op.picking_id.move_lines[0].move_dest_id and\
+                               op.picking_id.move_lines[0].move_dest_id.picking_id
+                if related_pick:
+                    #### CMNT REVISAR QUITAR  DE AQUI PARA AGILIZAR PISTOLA
+                    related_pick.do_prepare_partial()
+                    related_pick.write({'midban_operations': True})
+
+
             #res = wave.operation_ids.write(values)
         return res
 
@@ -224,17 +236,24 @@ class wave_report_revised(models.Model):
     _name = 'wave.report.revised'
     _rec_name='wave_report_id'
 
-    @api.one
-    #@api.depends('operation_ids')
-    def _get_to_revised(self):
 
+    @api.depends('operation_ids')
+    @api.one
+    def _get_to_revised(self):
         to_revised= False
         for op in self.operation_ids:
             if op.to_revised:
                 to_revised=True
-
         self.to_revised = to_revised
-        return to_revised
+
+    @api.depends('operation_ids')
+    @api.one
+    def _get_assigned_qtys(self):
+        res = 0.0
+        for l in self.operation_ids:
+            res += l.product_qty
+        self.picked_qty = res
+
 
     @api.multi
     def set_to_revised(self, value = False):
@@ -260,16 +279,9 @@ class wave_report_revised(models.Model):
     #         res['operation_ids'] = list(set(item_res))
     #     return res['operation_ids']
 
-    @api.depends('operation_ids')
-    @api.one
-    def _get_assigned_qtys(self):
-        res = 0.0
-        for l in self.operation_ids:
-            res += l.product_qty
-        self.picked_qty = res
 
 
-    to_revised = fields.Boolean(string = 'To Revised', compute='_get_to_revised')
+    to_revised = fields.Boolean(string = 'To Revised', compute=_get_to_revised)
     new_uos_qty = fields.Float('Picked Qty (uos)',compute=_get_assigned_qtys,
                                digits_compute=
                                dp.get_precision('Product Unit of Measure'))
@@ -291,16 +303,9 @@ class wave_report_revised(models.Model):
     operation_ids = fields.One2many ('stock.pack.operation', 'wave_revised_id', string = "Operation")
     stock = fields.Float(related = 'wave_report_id.product_id.qty_available', string = "Stock QTY")
     picked_qty = fields.Float('Picked Qty', readonly = True)
-
-
-    # @api.one
-    # def _get_operation_ids(self):
-    #     wave_id = self.wave_report_id
-    #     wave_repor = self.env['wave.report'].search([('id','=', wave_id)])
-    #     res = []
-    #     if wave_repor:
-    #         res = wave_repor.operation_ids
-    #     return res
+    #state = fields.Selection(related = 'wave_report_id.wave_id.state', string ="Wave Asociated State", readonly = True)
+    task_id = fields.Many2one('stock.task', readonly = True)
+    state = fields.Selection (related = 'task_id.state')
 
     @api.multi
     def new_wave_to_revised(self, my_args):
@@ -314,7 +319,6 @@ class wave_report_revised(models.Model):
         product_id = wave_report.product_id
         wave_to_revised = self.env['wave.report.revised']
         wave_report = self.env['wave.report'].browse(wave_report_id)
-
         vals = {
             'wave_report_id': wave_report_id,
             'to_revised' : True,
@@ -322,9 +326,10 @@ class wave_report_revised(models.Model):
             'new_uom_qty' : new_uom_qty,
             'wave_report_id': wave_report_id,
             'product_id': product_id.id,
-            'picked_qty': 0,
+            'picked_qty': new_uom_qty,
             'pack_id': wave_report.pack_id.id,
-            'uom_qty': uom_qty
+            'uom_qty': uom_qty,
+            'task_id' : task_id
         }
         wave_ = wave_to_revised.search([('wave_report_id','=',wave_report_id)])
         if wave_:
@@ -367,9 +372,6 @@ class wave_report_revised(models.Model):
         }
         self.write(vals)
 
-
-
-
     @api.multi
     def set_wave_to_revised(self, ctx, to_revised = True):
         self.set_wave_revised(ctx, to_revised)
@@ -383,7 +385,7 @@ class wave_report_revised(models.Model):
             revised = to_revised
             values = ({'to_revised': revised})
             wave.operation_ids.write(values)
-        self.refresh_qtys()
+        #self.refresh_qtys()
 
     @api.multi
     def finish_revised_task(self):
