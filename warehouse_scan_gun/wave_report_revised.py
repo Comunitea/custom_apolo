@@ -23,7 +23,7 @@ from openerp import models, fields, api
 from openerp.exceptions import except_orm
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
-from openerp.tools.float_utils import float_round
+from openerp.tools.float_utils import float_round, float_compare
 
 class wave_report(models.Model):
 
@@ -68,27 +68,43 @@ class wave_report(models.Model):
         env2 = wave_obj.env(self._cr, user_id, ctx)
         wave = wave_obj.with_env(env2)
         res = False
+        if not vals:
+            return False
+
+        package_id = vals['package_id']
+        op_package_id = vals['op_package_id']
+
         product_id = vals.get('product_id', False)
-        if vals:
-            package_id = vals['package_id']
-            op_package_id = vals['op_package_id']
         product = self.env['product.product'].browse(product_id)
-        new_package_id = self.env['stock.quant.package'].browse(package_id)
-        domain = [('package_id', '=', package_id), ('reservation_id.id', '=', False)]
-        quant_ids = self.env['stock.quant'].search(domain)
-        new_quant_objs = quant_ids
+        #miramos si en el paquete nuevo hay cantidad no reservada suficiente
         old_package_id = self.env['stock.quant.package'].browse(op_package_id)
+        new_package_id = self.env['stock.quant.package'].browse(package_id)
+        if float_compare(new_package_id.unreserved_qty, vals['qty_to_move'], precision_rounding = product.uom_id.rounding) == -1:
+            return False
+
+        #Cogemos la lista de quants no reservados en el nuevo paquete
+
+
+        domain = [('package_id', '=', new_package_id.id), ('reservation_id', '=', False)]
+        new_quant_objs = self.env['stock.quant'].search(domain)
+        print u"##########\nCambio de Paquete: %s por %s"%(old_package_id.name, new_package_id.name)
+        if not new_quant_objs:
+            return False
+
         old_quant_ids = [x.id for x in old_package_id.quant_ids]
+
         #domain =
         #1º ir desde op al movimiento
         #linked_move_operation_ids
-
         #2ª
         force_quants =[]
         qty_to_reassign = 0.0
         #quants_reserved = self.env['stock.quant'].search()
+        res = True
         if wave:
+            #tengo que cambiar el paquete para todas las operaciones dentro de la oleada
             for op in wave.operation_ids:
+                #esta comprobacion creo que sobra, la dejo por si acaso
                 if op.package_id.id != old_package_id.id:
                     continue
 
@@ -96,16 +112,19 @@ class wave_report(models.Model):
                 for move in moves2recalc:
                     force_quants =[]
                     for quant_id in move.reserved_quant_ids:
-
                         quant = self.env['stock.quant'].sudo().browse(quant_id.id)#quant.sudo(user_id=1)
+
                         if quant.id in old_quant_ids:
+                            print u"Quitamos la reserva a [%s] del paquete %s"%(quant.id, quant.package_id.name)
                             quant.reservation_id = False
                             qty_to_reassign += quant.qty
                         else:
-                            if quant.qty>0:
+                            if quant.qty > 0:
                                 force_quants.append((quant, quant.qty))
 
                     for quant in new_quant_objs:
+
+                        print u"Reservamos el quant [%s] del paquete %s"%(quant.id, quant.package_id)
                         if qty_to_reassign >= quant.qty:
                             force_quants.append((quant, quant.qty))
                             qty_to_reassign -= quant.qty
@@ -114,29 +133,48 @@ class wave_report(models.Model):
                                 force_quants.append((quant, qty_to_reassign))
                             break
                     #Anulamos la reserva
+                    print u"Anulamos reserva"
                     move.do_unreserve()
 
                     ctx = self._context.copy()
                     ctx.update({'force_quants_location': force_quants})
                     move = self.env['stock.move'].with_context(ctx).browse(move.id)
+                    print u"Action Assign para el movimiento %s"%move.name
                     move.action_assign()
 
-                #trato todos las operaciones como productos:
+                #trato todos las operaciones como productos (no puedo prever el order de las operaciones):
                 #escribo producto y product_qty en todas las ops de esta ola
                 #si el paquete queda vacío mala suerte...
+                #si hay un paquete para lo mismo
+                qty = 0.0
                 if op.product_id:
                     qty = op.product_qty
                 else:
                     qty = op.packed_qty
-                    vals['product_qty'] = qty
-                    vals['uos_qty'] = product.uom_qty_to_uos_qty(qty, op.uos_id.id)
-                #op.write(vals)
-                #no sobreescribe la uos_id
-                #entonces:
 
-                res = op.write(vals)
+                domain = [('package_id', '=', new_package_id.id),
+                          ('partner_id', '=' ,op.partner_id.id),
+                          ('picking_id', '=', op.picking_id.id),
+                          ('uos_id', '=', op.uos_id.id),
+                          ]
 
-        return res or False
+                ops_to_unlink = self.env['stock.pack.operation'].search(domain)
+                for op_in_wave in ops_to_unlink:
+                    if op_in_wave.product_id:
+                        qty += op_in_wave.product_qty
+                    else:
+                        qty += op_in_wave.packed_qty
+                    if op_in_wave.id != op.id:
+                        op_in_wave.unlink()
+
+                vals['product_id'] = op.product_id.id or op.package_id.product_id.id
+                vals['product_qty'] = qty
+                vals['uos_qty'] = product.uom_qty_to_uos_qty(qty, op.uos_id.id)
+                vals['op_package_id'] = False
+                if not op.write(vals):
+                    res = False
+                print u"Escrimos en la operación con resultado %s"%res
+        return res
 
     @api.multi
     def change_wave_op_values(self, my_args):

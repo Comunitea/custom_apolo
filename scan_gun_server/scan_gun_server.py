@@ -2802,28 +2802,24 @@ class ScanGunProtocol(LineReceiver):
 
                 product_id = wave_['product_id']
                 qty_to_move = wave_['qty']
-                ok_package = self.factory.odoo_con.check_package_for_picking_change(self.user_id,product_id,package_id,qty_to_move)
-
-                if ok_package:
-                    values = {'op_package_id' :wave_['package_id'],
+                #ok_package = self.factory.odoo_con.check_package_for_picking_change(self.user_id,product_id,package_id,qty_to_move)
+                values = {'op_package_id' :wave_['package_id'],
                               'package_id':self.new_package_id,
                               'packed_lot_id' : self.pack['lot_id'],
                               'lot_id' : self.pack['lot_id'],
                               'location_id' : self.pack['src_location_id'],
                               'product_id':self.pack['product_id'],
-                              'product_uom_id': self.pack['uom_id']
-                              }
-                    res = self.factory.odoo_con.change_wave_op_values_packed_change(self.user_id, wave_report_id, values)
+                              'product_uom_id': self.pack['uom_id'],
+                              'qty_to_move' : qty_to_move
+                            }
+                res = self.factory.odoo_con.change_wave_op_values_packed_change(self.user_id, wave_report_id, values)
+                if res:
                     act = self.active_wave
                     self.waves = self.factory.odoo_con.get_wave_reports_from_task(self.user_id, self.task_id, self.type)
-
-
                     for op_ in self.waves:
                         if self.waves[op_]['package_id'] == package_id:
                             self.active_wave= op_
                             self.wave_id = self.waves[op_]['id']
-
-
                     self.new_package_id = False
                     self.qty_calc = []
                     self.handle_form_wave(PRE_PACK + line)
