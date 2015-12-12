@@ -46,7 +46,6 @@ class stock_pack_operation(models.Model):
 
     visited = fields.Boolean('Visited', default=False)
     state= fields.Char()
-    op_package_id = fields.Many2one('stock.quant.package', 'Original Pack',  default = False)
     to_revised = fields.Boolean('To Revised')
     wrong_qty = fields.Boolean('Wrong Qty', default=False)
     wave_revised_id = fields.Many2one('wave.report.revised')
@@ -568,6 +567,7 @@ class stock_pack_operation(models.Model):
             #op_obj_uid.write(field_values)
             #Si cambiamos paquete, entonces hay que hacer un unlink y recalcular
             #de nuevo para ese picking
+
             if not 'package_id' in field_values.keys():
                 res = op_obj_uid.write(field_values)
 
