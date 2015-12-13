@@ -13,7 +13,7 @@ class invoice_move(object):
         try:
             self.url_template = "http://%s:%s/xmlrpc/%s"
             self.server = "localhost"
-            self.port = 9069
+            self.port = 8069
             self.dbname = dbname
             self.user_name = user
             self.user_passwd = passwd
@@ -181,28 +181,26 @@ class invoice_move(object):
                                                        'name', 'order_line'])
             print u"Iniciando calculo de impuestos para un total de: %s " \
                   u"ventas"%(total)
-            # for sale in sales:
-            #
-            #     print u"Recalculando %s"%(sale['name'])
-            #
-            #     #partner_ids = self.search('res.partner',[('id','=',partner_id)])
-            #
-            #     sols = self.read('sale.order.line',  sale['order_line'],
-            #                     ['id', 'product_id','tax_id'])
-            #     for line in sols:
-            #         taxes = self.execute('account.fiscal.position',
-            #                              'map_tax_id', 20,
-            #                      line['tax_id'])
-            #         vals = {
-            #             'tax_id': [(6,0,taxes)]
-            #         }
-            #         res= self.write('sale.order.line', line['id'], vals)
-            #     self.execute('sale.order','button_reset_taxes',
-            #                  sale['id'])
-            #     print u"HECHO para %s"%(sale['name'])
-            #     realizadas += 1
-            #     num +=1
-            #     print u"Procesado %s : %s/%s/%s"%(sale['name'],realizadas, num, total)
+            for sale in sales:
+
+                print u"Recalculando %s"%(sale['name'])
+
+                sols = self.read('sale.order.line',  sale['order_line'],
+                                ['id', 'product_id','tax_id'])
+                for line in sols:
+                    taxes = self.execute('account.fiscal.position',
+                                         'map_tax_id', 20,
+                                 line['tax_id'])
+                    vals = {
+                        'tax_id': [(6,0,taxes)]
+                    }
+                    res= self.write('sale.order.line', line['id'], vals)
+                self.execute('sale.order','button_reset_taxes',
+                             sale['id'])
+                print u"HECHO para %s"%(sale['name'])
+                realizadas += 1
+                num +=1
+                print u"Procesado %s : %s/%s/%s"%(sale['name'],realizadas, num, total)
 
         except Exception, e:
             print u"EXCEPTION: REC %s"%(e)
