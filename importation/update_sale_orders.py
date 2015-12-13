@@ -6,7 +6,7 @@ import xmlrpclib
 import socket
 import traceback
 
-class invoice_move(object):
+class update_sale(object):
     def __init__(self, dbname, user, passwd):
         """método incial"""
 
@@ -26,7 +26,7 @@ class invoice_move(object):
             self.user_id = login_facade.login(self.dbname, self.user_name, self.user_passwd)
             self.object_facade = xmlrpclib.ServerProxy(self.url_template % (self.server, self.port, 'object'))
 
-            res = self.invoice_move_link()
+            res = self.update_taxes()
             #con exito
             if res:
                 print ("!!!!!All concilied!!!!!!!")
@@ -169,7 +169,7 @@ class invoice_move(object):
         return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
 
-    def invoice_move_link(self):
+    def update_taxes(self):
         try:
             sale_ids = self.search('sale.order', [('fiscal_position', '=',
                                                    20),
@@ -213,4 +213,4 @@ if __name__ == "__main__":
     if len(sys.argv) < 4:
         print u"Uso: %s <dbname> <user> <password>" % sys.argv[0]
     else:
-        invoice_move(sys.argv[1], sys.argv[2], sys.argv[3])
+        update_sale(sys.argv[1], sys.argv[2], sys.argv[3])
