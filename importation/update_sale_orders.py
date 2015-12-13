@@ -13,7 +13,7 @@ class invoice_move(object):
         try:
             self.url_template = "http://%s:%s/xmlrpc/%s"
             self.server = "localhost"
-            self.port = 8069
+            self.port = 9069
             self.dbname = dbname
             self.user_name = user
             self.user_passwd = passwd
@@ -188,12 +188,15 @@ class invoice_move(object):
                 sols = self.read('sale.order.line',  sale['order_line'],
                                 ['id', 'product_id','tax_id'])
                 for line in sols:
+                    print "RECALCULA!!!"
                     taxes = self.execute('account.fiscal.position',
                                          'map_tax_id', 20,
                                  line['tax_id'])
+                    print taxes
                     vals = {
                         'tax_id': [(6,0,taxes)]
                     }
+                    print vals
                     res= self.write('sale.order.line', line['id'], vals)
                 print u"HECHO para %s"%(sale['name'])
                 realizadas += 1
