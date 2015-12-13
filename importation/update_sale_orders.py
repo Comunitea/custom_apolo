@@ -195,8 +195,6 @@ class invoice_move(object):
                         'tax_id': [(6,0,taxes)]
                     }
                     res= self.write('sale.order.line', line['id'], vals)
-                self.execute('sale.order','button_reset_taxes',
-                             sale['id'])
                 print u"HECHO para %s"%(sale['name'])
                 realizadas += 1
                 num +=1
