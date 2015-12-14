@@ -82,8 +82,9 @@ class SaleOrderLine(models.Model):
     def create(self, vals):
         res = super(SaleOrderLine, self).create(vals)
         if res.tourism:
-            if res.price_unit * (res.discount and res.discount / 100 or 1) < \
-                    res.tourism.get_box_price(res.product_id):
+            if float_compare(res.price_unit * (res.discount and res.discount
+                / 100 or 1), res.tourism.get_box_price(res.product_id),
+                             precision_digits=2) == -1:
                 raise exceptions.Warning(_('Price error'),
                                          _('can not sell below the \
 minimum price'))
