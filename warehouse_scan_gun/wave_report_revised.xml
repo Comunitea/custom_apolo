@@ -51,6 +51,7 @@
                          <group>
                             <field name="uom_qty" readonly = "True"/>
                             <field name="picked_qty" readonly = "True"/>
+                            <field name="new_picked_qty" readonly = "True"/>
                          </group>
 
                      </group>

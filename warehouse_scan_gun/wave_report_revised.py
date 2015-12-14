@@ -289,7 +289,7 @@ class wave_report_revised(models.Model):
         res = 0.0
         for l in self.operation_ids:
             res += l.product_qty
-        self.picked_qty = res
+        self.new_picked_qty = res
 
 
     @api.multi
@@ -340,6 +340,7 @@ class wave_report_revised(models.Model):
     operation_ids = fields.One2many ('stock.pack.operation', 'wave_revised_id', string = "Operation")
     stock = fields.Float(related = 'wave_report_id.product_id.qty_available', string = "Stock QTY")
     picked_qty = fields.Float('Picked Qty', readonly = True)
+    new_picked_qty = fields.Float('New Picked Qty', readonly = True)
     #state = fields.Selection(related = 'wave_report_id.wave_id.state', string ="Wave Asociated State", readonly = True)
     task_id = fields.Many2one('stock.task', readonly = True)
     state = fields.Selection (related = 'task_id.state')
@@ -363,6 +364,7 @@ class wave_report_revised(models.Model):
             'new_uom_qty' : new_uom_qty,
             'product_id': product_id.id,
             'picked_qty': new_uom_qty,
+            'new_picked_qty': new_uom_qty,
             'pack_id': wave_report.pack_id.id,
             'uom_qty': uom_qty,
             'task_id' : task_id
