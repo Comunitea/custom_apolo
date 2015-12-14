@@ -20,6 +20,8 @@
 ##############################################################################
 from openerp import models, fields, api, exceptions, _
 from datetime import date
+from openerp.tools.float_utils import float_compare
+
 
 
 class SaleOrderLine(models.Model):
@@ -92,9 +94,13 @@ minimum price'))
         res = super(SaleOrderLine, self).write(vals)
         for line in self:
             if line.tourism:
-                if line.price_unit * (line.discount and line.discount /
-                                      100 or 1) != \
-                        line.tourism.get_box_price(line.product_id):
+                # se introduce comparacion con float_compare
+                print "Compara por turismo"
+                if float_compare(line.price_unit * (line.discount and
+                                                       line.discount /
+                                      100 or 1) ,
+                                 line.tourism.get_box_price(
+                                     line.product_id), precision_digits=2):
                     raise exceptions.Warning(_('Price error'),
                                              _('can not sell below the \
 minimum price'))
