@@ -35,9 +35,12 @@ class PromotionsRules(models.Model):
     @api.model
     def evaluate(self, promotion_rule, order):
         res = False
-        if not promotion_rule.customer_ids or order.partner_id in \
-                promotion_rule.customer_ids or (order.partner_id
-                and order.partner_id.parent_id in promotion_rule.customer_ids):
+        if not (promotion_rule.customer_ids) or \
+                (order.partner_id in \
+                promotion_rule.customer_ids or
+                     (order.partner_id
+                and order.partner_id.parent_id in
+                        promotion_rule.customer_ids)):
             res = super(PromotionsRules, self).evaluate(promotion_rule, order)
         return res
 
