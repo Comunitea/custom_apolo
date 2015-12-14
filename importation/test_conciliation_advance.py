@@ -219,7 +219,7 @@ class conciliation(object):
 
         print u"Conciliar una lista de %s"%(len(move_list))
         res = self.sum_list(move_list)
-
+        print "DIFERENCIAS A BUSCAR %s - %s"%(customer['name'], res)
         #while not self.isclose(res[0], res[1], 0.0001, 0.0001) and len(move_list):
         print "Comienza pruebas"
         # diff = res[0] - res[1]
@@ -250,67 +250,57 @@ class conciliation(object):
             print u"Conciliación realizada para : %s con  %s movimientos"%(customer['name'], len(move_ids))
         else:
             self.no_conciliados.append(customer['name'])
-            print u"ATENCIÓN!!!! No se pudo conciliar : %s !!!!!!"%(customer['name'])
+            print u"ATENCIÓN!!!! No se pudo conciliar por saldo : %s !!!!!!"%(
+                customer['name'])
 
     def concile_by_ref(self, customer):
         print u"Concilia por referencias"
-        move_credit_ids = self.search('account.move.line',
+        move_debit_ids = self.search('account.move.line',
                                 [('account_id.type', '=','receivable'),
                                 ('partner_id', '=', customer['id']),
                                 ('reconcile_id', '=', False),
-                                ('credit','>',0.0)],
+                                ('debit','>',0.0)],
                                order = 'date ASC, id ASC')
-        if len(move_credit_ids):
-            move_credits = self.read('account.move.line', move_credit_ids,
+        if len(move_debit_ids):
+            move_debits = self.read('account.move.line', move_debit_ids,
                                     ['id', 'credit', 'debit', 'ref'])
-            print u"Buscando  para : %s cobro "%( len(move_credit_ids))
-            for move_credit in move_credits:
-                ref_tosearch = move_credit['ref'][-10:]
-                print u"Buscando cobro %s"%( ref_tosearch)
+            print u"Buscando  para : %s cobro "%( len(move_debit_ids))
+            for move_debit in move_debits:
                 found = False
-                move_debit_ids = self.search('account.move.line',
+                move_credit_ids = self.search('account.move.line',
                                     [('account_id.type', '=','receivable'),
-                                    ('ref', 'like', ref_tosearch),
                                      ('partner_id', '=', customer['id']),
                                      ('reconcile_id', '=', False),
-                                      ('debit','>',0.0)],
+                                      ('credit','>',0.0)],
                                    order = 'date ASC, id ASC')
-                if len(move_debit_ids):
-                    move_debits = self.read('account.move.line',
-                                       move_debit_ids,
-                                    ['id', 'credit', 'debit', 'ref'])
-                    print u"Encontradas %s coincidentes "%(len(move_debits))
-                    suma = self.sum_list(move_debits)[0]
-                    if self.isclose(move_credit['credit'], suma,
-                                    abs_tol=0.001):
-                        found = True
-                        move_debit_ids.append( move_credit['id'])
-                        self.execute('account.move.line', 'reconcile',
-                                     move_debit_ids, 'manual', False,
-                                    False, False)
-                        print u"Conciliación realizada para : %s con  %s " \
-                               u"movimientos"%(customer['name'],
-                                               len(move_debit_ids))
-                if not found:
-                # Buscamos un asiento con el importe exacto
-                    print u"Buscando por importe "
-                    move_debit_ids = self.search('account.move.line',
-                                    [('account_id.type', '=', 'receivable'),
-                                     ('partner_id', '=', customer['id']),
-                                     ('reconcile_id', '=', False),
-                                      ('debit','=',move_credit['credit'])],
-                                   order = 'date ASC, id ASC')
-                    if len(move_debit_ids):
-                        moves_to_concile = [move_credit['id'],
-                                            move_debit_ids[0]]
-                        self.execute('account.move.line', 'reconcile',
-                                     moves_to_concile, 'manual', False,
-                                    False, False)
-                        print u"Conciliación realizada para : %s con  %s " \
-                               u"movimientos"%(customer['name'],
-                                               len(moves_to_concile))
-
-
+                if found == False:
+                    if len(move_credit_ids):
+                        move_credits = self.read('account.move.line',
+                                           move_credit_ids,
+                                        ['id', 'move_credits', 'credit',
+                                         'ref'])
+                        move_comp =  move_credits
+                        if found == False:
+                            for move in move_credits:
+                                sum = 0
+                                testing = []
+                                for move2 in move_comp:
+                                    sum += move2['credit']
+                                    if sum > move_debit['debit']:
+                                        break
+                                    testing.append(move2['id'])
+                                    if self.isclose(move_debit['debit'], sum,
+                                            abs_tol=0.001):
+                                        found = True
+                                        testing.append(move_debit['id'])
+                                        self.execute('account.move.line', 'reconcile',
+                                             testing, 'manual', False,
+                                            False, False)
+                                        print u"Conciliación realizada para : %s con  %s " \
+                                                u"movimientos"%(customer['name'],
+                                                       len(move_debit_ids))
+                                        break
+                                move_comp.pop(0)
 
     def run_concilie(self):
         try:
