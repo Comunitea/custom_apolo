@@ -105,7 +105,7 @@ PREF_AGREE_MAP = {
 PRODUCT_FIX = {
     '200102': 12, '140606': 3, '140612': 2, '140614': 6, '140613': 3, '130113': 8, '130109': 12,
     '247201': 6, '101301': 6, '101303': 6, '101304': 6, '101305': 6, '4127': 6, '101401': 6,
-    '235112': 12, '130101': 16, '130116': 16, '130114': 8, '247231': 100, '205101': 6,
+    '235112': 10, '130101': 16, '130116': 16, '130114': 8, '247231': 100, '205101': 6,
     '4426': 5, '4791': 10, '4790': 10, '130115': 8, '302102': 12, '11130': 4, '247207': 6,
     '247206': 6, '247208': 6, '247209': 6, '100701': 6, '423': 6, '4634': 6, '4132': 12,
     '125': 4, '4131': 12, '140701': 4, '4112': 12, '4108': 12, '4111': 12, '247210': 6,
@@ -120,7 +120,7 @@ PRODUCT_FIX = {
     '428': 6, '427': 6, '113': 10, '4470': 3, '247101': 6, '89': 5, '302201': 6, '4801': 12,
     '230120': 12, '4121': 25, '100802': 6, '100804': 3, '247227': 6, '4820': 12, '245101': 12,
     '100201': 6, '3003': 24, '3004': 12, '3021': 10, '3008': 40, '3012': 40, '3033': 6, '3024': 10,
-    '3025': 1, '10173': 23, '61': 6
+    '3025': 1, '10173': 23, '61': 6, '403196': 6, '403212': 6
 }
 
 def ustr(text):
@@ -1475,6 +1475,17 @@ class DatabaseImport:
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
+    def update_product_weight(self):
+        cont = 0
+        num_rows = len(PRODUCT_FIX)
+        for product_code in PRODUCT_FIX:
+            product_ids = self.search('product.product', [('default_code', '=', product_code),'|',('active','=',True),('active','=',False)])
+            if product_ids:
+                product_data = self.read('product.product', product_ids[0], ['weight'])
+                self.write('product.product', [product_ids[0]], {'weight': product_data['weight'] * float(PRODUCT_FIX[product_code])})
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
     def process_data(self):
         """
         Importa la bbdd
@@ -1513,7 +1524,8 @@ class DatabaseImport:
             #self.import_rappels(cr)
             #self.import_product_rappel_groups(cr)
             #self.import_other_promotions(cr)
-            self.update_cost_product_price(cr)
+            #self.update_cost_product_price(cr)
+            self.update_product_weight()
 
 
         except Exception, ex:

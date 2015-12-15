@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Copyright (C) 2015 Comunitea Servicios Informáticos All Rights Reserved
-#    $Carlos Lombardía Rodríguez$ <carlos@comunitea.com>
-#    $Javier Colmenero Fernández$ <javier@comunitea.com>
+#    Copyright (C) 2015 Comunitea All Rights Reserved
+#    $Jesús Ventosinos Mayor <jesus@comunitea.com>$
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published
@@ -19,8 +18,15 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-import custom_picking_parser
-import custom_invoice_parser
-from . import picking_batch_parser
-import custom_purchase_order_parser
-from . import custom_rout_detail_parser
+
+{
+    'name': 'Stock customizations',
+    'version': '1.0',
+    'category': 'stock',
+    'description': """Se añade la referencia de pedido del proveedor a ventas y albaranes""",
+    'author': 'Comunitea',
+    'website': '',
+    "depends": ['sale_stock'],
+    "data": ['sale_order.xml', 'stock_view.xml'],
+    "installable": True
+}

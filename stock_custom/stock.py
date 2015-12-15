@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Copyright (C) 2015 Comunitea Servicios Informáticos All Rights Reserved
-#    $Carlos Lombardía Rodríguez$ <carlos@comunitea.com>
-#    $Javier Colmenero Fernández$ <javier@comunitea.com>
+#    Copyright (C) 2015 Comunitea All Rights Reserved
+#    $Jesús Ventosinos Mayor <jesus@comunitea.com>$
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published
@@ -19,8 +18,23 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-import custom_picking_parser
-import custom_invoice_parser
-from . import picking_batch_parser
-import custom_purchase_order_parser
-from . import custom_rout_detail_parser
+from openerp import models, fields, api, exceptions, _
+
+
+class StockPicking(models.Model):
+
+    _inherit = 'stock.picking'
+
+    supplier_ref = fields.Char(compute='_get_supplier_reference',
+                               search='_search_supp_ref', readonly=1)
+
+    @api.model
+    def _search_supp_ref(self, operator, operand):
+        sales = self.env['sale.order'].search([('supplier_ref', operator,
+                                                operand)])
+        return [('group_id', 'in', [x.procurement_group_id.id for x in sales])]
+
+    @api.multi
+    def _get_supplier_reference(self):
+        for pick in self:
+            pick.supplier_ref = pick.sale_id.supplier_ref
