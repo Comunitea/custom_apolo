@@ -194,8 +194,10 @@ class StockTask(models.Model):
         elif task_type == 'picking':
             task_id = wzd_obj_uid.with_context(gun=True).get_picking_task()
 
-        print u"te doy una creada: Id" +str(task_id)
-        return task_id
+        if task_id:
+            print u"te doy una creada: Id" +str(task_id)
+        res = task_id if task_id else False
+        return res
 
     @api.multi
     def check_task_ops_finished(self, my_args):
@@ -290,7 +292,8 @@ class StockTask(models.Model):
         thread = threading.Thread(
             target=self._gun_finish_task, args=(my_args,))
         thread.start()
-        task_obj.write({'state':'process'})
+
+        #task_obj.write({'state':'process'})
         return True
 
     @api.model
@@ -299,10 +302,17 @@ class StockTask(models.Model):
                        my_args)
         task_id = my_args.get('task_id', False)
         user_id = my_args.get('user_id', False)
+
+        sql = "update stock_task set state = 'process' where id = %s"%task_id
+        new_cr_ = sql_db.db_connect(self.env.cr.dbname).cursor()
+        new_cr_.execute (sql)
+        new_cr_.commit()
+        new_cr_.close()
+
         new_cr = sql_db.db_connect(self.env.cr.dbname).cursor()
         with api.Environment.manage():  # class function
             uid, context = self.env.uid, self.env.context
-            env = api.Environment(new_cr, user_id, context)
+            env = api.Environment(new_cr, 1, context)
             #self.env = env
             task_obj = env['stock.task'].browse(task_id)
             #env2 = task_obj.env(self._cr, user_id, self._context)
@@ -310,6 +320,7 @@ class StockTask(models.Model):
             try:
                 res = task_obj.finish_partial_task()
             except Exception:
+                print u'Error en el hilo'
                 _logger.debug("CMNT EXCEPCION EN EL HILO!!!!!!!!! args %s",
                        Exception)
                 new_cr.rollback()

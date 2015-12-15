@@ -6,7 +6,7 @@ import xmlrpclib
 import socket
 import traceback
 
-class invoice_move(object):
+class fix_promos(object):
     def __init__(self, dbname, user, passwd):
         """método incial"""
 
@@ -17,7 +17,6 @@ class invoice_move(object):
             self.dbname = dbname
             self.user_name = user
             self.user_passwd = passwd
-            self.no_conciliados =[]
 
             #
             # Conectamos con OpenERP
@@ -26,10 +25,10 @@ class invoice_move(object):
             self.user_id = login_facade.login(self.dbname, self.user_name, self.user_passwd)
             self.object_facade = xmlrpclib.ServerProxy(self.url_template % (self.server, self.port, 'object'))
 
-            res = self.invoice_move_link()
+            res = self.fix_promos()
             #con exito
             if res:
-                print ("!!!!!All concilied!!!!!!!")
+                print ("All created")
         except Exception, e:
             print ("ERROR: ", (e))
             sys.exit(1)
@@ -165,83 +164,34 @@ class invoice_move(object):
             categ_ids = [categ_id]
         return categ_ids and categ_ids[-1] or False
 
-    def isclose(self, a, b, rel_tol=1e-09, abs_tol=0.0):
-        return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
-
-
-    def invoice_move_link(self):
+    def fix_promos(self):
         try:
-            logfile_diff = open('log_invoices_amount_diff.csv', 'w') # Indicamos el valor 'w'.
-            logfile_no_found = open('log_invoices_no_found.csv', 'w')
+            condition_ids = self.search('promos.rules', [])
+            conditions = self.read('promos.rules', condition_ids,
+                                  ['id', 'expressions',
+                                  'actions' ])
+            print u"Iniciando: %s"%len(condition_ids)
+            cond_num = 1
+            for condition in conditions:
+                print u"Procesando : %s / %s"%(cond_num, len(condition_ids))
+                actions = self.read('promos.rules.actions', condition['actions'],
+                                  ['id', 'product_code','action_type'])
+                if actions[0]['action_type'] == 'prod_disc_perc_sub':
+                    recorre = 0
+                    for action in actions:
+                        cond_exp_id = condition['expressions'][recorre]
+                        self.write('promos.rules.conditions.exps', cond_exp_id,
+                                   {'value': action['product_code']})
+                        recorre += 1
+                cond_num += 1
 
-            invoice_ids = self.search('account.invoice', [('state','=','history'),
-                                                          ('type','=','out_invoice'),
-                                                          ('amount_total', '>', 0),
-                                                          ('move_id', '=', False),
-                                                          ('date_invoice', '<>', False)],
-                                      order="date_invoice DESC")
-            total = len(invoice_ids)
-            num=0
-            realizadas = 0
-            print u"Iniciando asociación  movimientos para un total de: %s facturas"%(total)
-            invoices = self.read('account.invoice', invoice_ids, ['number', 'id',
-                                                                    'amount_total', 'partner_id',
-                                                                    'date_invoice', 'date_due'])
-            for invoice in invoices:
-                separ = invoice['number'].split('/')
-                move_ref_pre = separ[0] + "/"
-                move_ref_post = "0000" + separ[1]
-                move_ref_post = move_ref_post[-7:]
-                move_ref = move_ref_pre + move_ref_post
-                domain = [('account_id.type', '=', 'receivable'),
-                        ('ref', 'like', move_ref)]
-                print "Buscando %s : %s - %s  "%(move_ref,invoice['date_invoice'], invoice['amount_total'])
-                move_ids = self.search('account.move.line',domain)
-
-                if move_ids:
-                    if len(move_ids) == 1:
-                        print u"ENCONTRADA REFERENCIA para %s"%(invoice['number'])
-                        moves = self.read('account.move.line', move_ids, ['move_id', 'debit'])
-                        if self.isclose(moves[0]['debit'], invoice['amount_total'],abs_tol=0.05):
-                            if invoice['date_due']:
-                                date_due = invoice['date_due']
-                            else:
-                                date_due = invoice['date_invoice']
-                            vals = {
-                                'move_id': moves[0]['move_id'][0],
-                                'date_due': date_due
-                            }
-                            self.write('account.invoice', invoice['id'], vals)
-                            vals = {
-                                'date_maturity': date_due
-                            }
-                            self.write('account.move.line', move_ids[0], vals)
-                            print u"HECHO   para %s %s"%(invoice['number'],invoice['amount_total'])
-                            realizadas += 1
-                        else:
-                            print u"IMPORTES DIFERENTES para %s: %s(asiento) -  %s(factura)"%(invoice['number'],
-                                                                                              moves[0]['debit'], invoice['amount_total'])
-                            logfile_diff.write("%s,%s,%s\n"%(invoice['number'],moves[0]['debit'], invoice['amount_total']))
-                    else:
-                        print u"Más de un Asiento no encontrado  para %s"%(invoice['number'])
-                else:
-                    print u"Asiento no encontrado  para %s"%(invoice['number'])
-                    logfile_no_found.write("%s\n"%(invoice['number']))
-                num +=1
-                print u"Procesado %s : %s/%s/%s"%(invoice['number'],realizadas, num, total)
-            print "FINALIZado!!. No conciliados procesados TOTAL:"
-            logfile_diff.close()
-            logfile_no_found.close()
         except Exception, e:
-            print u"EXCEPTION: REC %s"%(e)
-            print "No conciliados procesados hasta el momento:"
-            logfile_diff.close()
-            logfile_no_found.close()
+            print "EXCEPTION: REC: %s",(e)
         return True
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
-        print u"Uso: %s <dbname> <user> <password>" % sys.argv[0]
+        print u"Uso: %s <dbname> <user> <password> " % sys.argv[0]
     else:
-        invoice_move(sys.argv[1], sys.argv[2], sys.argv[3])
+        fix_promos(sys.argv[1], sys.argv[2], sys.argv[3])

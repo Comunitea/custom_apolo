@@ -23,3 +23,4 @@ from . import res_users
 from . import account_voucher
 from . import account_payment
 from . import sale
+from . import account_move_line

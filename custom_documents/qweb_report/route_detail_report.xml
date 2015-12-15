@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <template id="report_route_detail_doc">
+            <div class="header">
+                <div class="row">
+                    <div class="col-xs-12 text-center">
+                        <h3>LISTADO DE FACTURAS PENDIENTES</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="page">
+
+                <div class="oe_structure"/>
+                <div class="row">
+                    <div class="col-xs-3">
+                        <strong>AGENTE:</strong> <span t-field="o.comercial_id.name"/>
+                    </div>
+                    <div class="col-xs-3 col-xs-offset-6 text-right">
+                        Fecha: <span t-field="o.date"/>
+                    </div>
+                </div>
+                <div style="width:100%; border-bottom: 2px solid black;"/>
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th colspan="2" class="text-center">DATOS CLIENTE</th>
+                            <th>FACTURA</th>
+                            <th>FECHA</th>
+                            <th>IMPORTE FACTURA</th>
+                            <th>IMPORTE COBRADO</th>
+                            <th>IMPORTE PENDIENTE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="route_payments[o.id].keys()" t-as="customer">
+                            <tr>
+                                <td class="text-center"><strong><span t-field="customer.ref"/></strong></td>
+                                <td class="text-center"><strong><span t-field="customer.comercial"/></strong></td>
+                                <td class="text-center"></td>
+                                <td class="text-center"></td>
+                                <td class="text-center"><strong><span t-esc="totals[o.id][customer]['debit']"/></strong></td>
+                                <td class="text-center"><strong><span t-esc="totals[o.id][customer]['credit']"/></strong></td>
+                                <td class="text-center"><strong><span t-field="customer.credit"/></strong></td>
+                            </tr>
+                            <t t-foreach="route_payments[o.id][customer]" t-as="move">
+                                <tr class="text-center">
+                                    <td></td>
+                                    <td></td>
+                                    <td class="text-center"><span t-field="move.invoice.number"/></td>
+                                    <td class="text-center"><span t-field="move.invoice.date_invoice"/></td>
+                                    <td class="text-center"><span t-field="move.debit"/></td>
+                                    <td class="text-center"><span t-field="move.credit"/></td>
+                                    <td></td>
+                                </tr>
+                            </t>
+                        </t>
+                    </tbody>
+                </table>
+
+                <div class="oe_structure"/>
+            </div>
+            <div class="footer">
+            </div>
+        </template>
+
+        <template id="report_route_detail">
+            <t t-call="report.html_container">
+                <t t-foreach="doc_ids" t-as="doc_id">
+                    <t t-raw="translate_doc(doc_id, doc_model, 'comercial_id.lang', 'custom_documents.report_route_detail_doc')"/>
+                </t>
+            </t>
+        </template>
+    </data>
+</openerp>

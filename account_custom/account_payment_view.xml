@@ -24,5 +24,16 @@
             </field>
         </record>
 
+        <record id="view_payments_comercial_filter" model="ir.ui.view">
+        <field name="model">account.move.line</field>
+        <field name="inherit_id" ref="account_due_list.view_payments_filter"/>
+        <field name="arch" type="xml">
+            <field name="date_maturity" position="after">
+                <field name="commercial_id" />
+           </field>
+        </field>
+    </record>
+
+
     </data>
 </openerp>

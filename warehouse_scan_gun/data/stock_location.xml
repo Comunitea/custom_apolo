@@ -6,7 +6,7 @@
              <field name="usage">view</field>
              <field name="sequence">0</field>
              <field name="bcd_name">Virtual Pick Loc</field>
-             <field name="bcd_code">00 000 00 00</field>
+             <field name="bcd_code">111111111</field>
              <field name ="width">100</field>
              <field name ="length">100</field>
              <field name ="heigth">100</field>

@@ -29,6 +29,7 @@
                              <field name="wave" readonly = "True"/>
                              <field name="pack_id" readonly = "True"/>
                              <field name="packed_qty" readonly = "True"/>
+                             <field name="state" readonly = "True"/>
                              <field name="to_revised" readonly = "True"/>
                              <!--<field name="wave_report_id"/>-->
                          </group>
@@ -50,14 +51,15 @@
                          <group>
                             <field name="uom_qty" readonly = "True"/>
                             <field name="picked_qty" readonly = "True"/>
+                            <field name="new_picked_qty" readonly = "True"/>
                          </group>
 
                      </group>
-                     <group>
-                             <button name="set_wave_revised" string="Revisado" type="object" class="oe_highlight" attrs="{'invisible': [('to_revised','=',False)]}"/>
-                             <button name="set_wave_to_revised" string="Para Revisar" type="object" class="oe_highlight" attrs="{'invisible': [('to_revised','=',True)]}"/>
-                             <button name="finish_revised_task" string="Finalizar Tarea" type="object" class="oe_highlight" attrs="{'invisible': [('to_revised','=',True)]}"/>
-                     </group>
+
+                     <button name="set_wave_revised" string="Revisado" type="object" class="oe_highlight" attrs="{'invisible': [('to_revised','=',False)]}"/>
+                     <button name="set_wave_to_revised" string="Para Revisar" type="object" class="oe_highlight" attrs="{'invisible': [('to_revised','=',True)]}"/>
+                     <button name="finish_revised_task" string="Finalizar Tarea" type="object" class="oe_highlight" attrs="{'invisible': [('to_revised','=', True)]}"/>
+
                      <separator string="Operations" colspan="4"/>
                      <field name="operation_ids" colspan="4" nolabel="1">
                         <tree editable="top">
@@ -68,7 +70,7 @@
 
                             <field name="uos_qty"/>
                             <field name="uos_id" readonly="1"/>
-                            <field name="to_process" readonly="1"/>
+                            <field name="to_process" />
                             <field name="packed_qty" invisible="1" readonly="1"/>
                             <field name="package_id" groups="stock.group_tracking_lot" readonly="1"/>
 

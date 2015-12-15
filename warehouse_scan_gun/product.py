@@ -267,6 +267,71 @@ class product_product (models.Model):
         print u"          >> %s\n"%conv
         return conv
 
+
+    @api.multi
+    def get_uom_conversions3(self, uom_qty, product_id = False, uom_id = False):
+
+        ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': 1}
+        if product_id:
+            domain = [('id', '=', product_id)]
+            product = self.search(domain)
+        else:
+            product = self.ensure_one()
+
+        product= self.env['product.product'].browse(product.id).with_context(ctx)
+        base_qty = 0.00
+        if not uom_id:
+            uom_id = product.uom_id.id
+
+        unit_to = self.env['product.uom'].browse(uom_id)
+        #base_qty = float_round(base_qty,  precision_rounding = rounding)
+        conv =[]
+        rest = uom_qty
+        rounding = 2
+        box_qty=0
+        unit_qty=0
+        base_qty=0
+        unit_id = product.log_unit_id.name
+        box_id = product.log_box_id.name
+        base_id = product.log_base_id.name
+        unit_append = (False, 0, False, 1)
+        base_append = (False, 0, False, 1)
+        box_append = (False, 0, False, 1)
+        #Pasamos unidades todo a log_base_id
+        if product.log_base_id.id == uom_id:
+            rest = uom_qty
+        elif product.log_unit_id.id == uom_id:
+            rest = uom_qty * product.kg_un
+        elif product.log_box_id.id == uom_id:
+            rest = uom_qty * product.kg_un * product.un_ca
+        #si hay unidades
+        box_qty = rest
+        #
+        # if product.log_base_id:
+        #     box_qty = rest
+        # else:
+        #     box_qty = 0
+        #
+        # if product.log_unit_id:
+        #
+        #
+        #
+        # box_qty = rest
+        # while rest > product.kg_un:
+        #     rest -= product.kg_un
+        #     unit_qty +=1
+        # box_qty = rest
+        #     else:
+        #         unit_qty = rest
+        #
+        # if product.log_box_id:
+        #
+        #     while rest > product.un_ca:
+        #         rest -= product.un_ca
+        #         box_qty +=1
+        #
+
+
     #Esta es la nueva NO OK
     @api.multi
     def get_uom_conversions(self, uom_qty, product_id = False, uom_id = False):
@@ -310,42 +375,46 @@ class product_product (models.Model):
         unit_append = (False, 0, False, 1)
         base_append = (False, 0, False, 1)
         box_append = (False, 0, False, 1)
-
         #Pasamos unidades todo a log_base_id
         if product.log_base_id.id == uom_id:
-            rest = float_round(uom_qty, precision_rounding = product.log_base_id.rounding)
-
+            #rest = float_round(uom_qty, precision_rounding = product.log_base_id.rounding)
+            rest = uom_qty
         elif product.log_unit_id.id == uom_id:
-            rest = float_round(uom_qty * product.kg_un, precision_rounding = product.log_base_id.rounding)
-
-        elif product.log_box_id.id ==uom_id:
-            rest = float_round(uom_qty * product.kg_un * product.un_ca, precision_rounding = product.log_base_id.rounding)
-
+            #rest = float_round(uom_qty * product.kg_un, precision_rounding = product.log_unit_id.rounding)
+            rest = uom_qty * product.kg_un
+        elif product.log_box_id.id == uom_id:
+            #rest = float_round(uom_qty * product.kg_un * product.un_ca, precision_rounding = product.log_box_id.rounding)
+            rest = uom_qty * product.kg_un * product.un_ca
         #si hay unidades
 
-        if product.log_box_id:
-            if product.log_unit_id or product.log_base_id:
+
+        if product.log_box_id :
+            rest = float_round(rest, precision_rounding =0.00001)
+            if (product.log_unit_id or product.log_base_id) and not (product.var_coeff_ca and product.log_box_id.id == uom_id):
+
                 box_qty = int(rest / (product.kg_un * product.un_ca))
                 box_qty = float_round (box_qty, precision_rounding = product.log_box_id.rounding)
                 rest = rest - (box_qty * product.kg_un * product.un_ca)
             else:
                 box_qty = rest / (product.kg_un * product.un_ca)
 
-            box_append = (product.log_box_id.name, box_qty, product.log_box_id.id, 1)
+            box_append = (product.log_box_id.name, box_qty, product.log_box_id.id, 1, product.var_coeff_ca)
 
         if product.log_unit_id:
+            rest = float_round(rest, precision_rounding = 0.00001)
             if product.log_base_id:
                 unit_qty = int(rest / product.kg_un)
                 unit_qty = float_round (unit_qty, precision_rounding = product.log_unit_id.rounding)
                 rest = rest - (unit_qty * product.kg_un)
             else:
                 unit_qty= rest / product.kg_un
-            unit_append = (unit_id, unit_qty, product.log_unit_id.id, product.un_ca)
+            unit_append = (unit_id, unit_qty, product.log_unit_id.id, product.un_ca, product.var_coeff_un)
 
         if product.log_base_id:
+            rest = float_round(rest, precision_rounding = 0.00001)
             base_qty = rest
             base_qty = float_round (base_qty, precision_rounding = product.log_base_id.rounding)
-            base_append = (base_id, base_qty, product.log_base_id.id, product.kg_un )
+            base_append = (base_id, base_qty, product.log_base_id.id, product.kg_un, False, False)
 
         conv.append(base_append)
         conv.append(unit_append)
