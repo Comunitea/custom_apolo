@@ -171,7 +171,7 @@ class AccountIntegrateWzd(models.TransientModel):
                             partner_ids = [partner]
                     else:
                         partner_ids = []
-                    if partner_ids:
+                    if partner_ids and not row['Cuenta'].startswith('4009') and not row['Cuenta'].startswith('4309'):
                         account_code = row['Cuenta'][:3].ljust(9, '0')
                     else:
                         account_code = row['Cuenta']

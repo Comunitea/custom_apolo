@@ -39,7 +39,7 @@ TEMP_TYPE_MAP = {
 PRODUCT_FIX = {
     '200102': 12, '140606': 3, '140612': 2, '140614': 6, '140613': 3, '130113': 8, '130109': 12,
     '247201': 6, '101301': 6, '101303': 6, '101304': 6, '101305': 6, '4127': 6, '101401': 6,
-    '235112': 12, '130101': 16, '130116': 16, '130114': 8, '247231': 100, '205101': 6,
+    '235112': 10, '130101': 16, '130116': 16, '130114': 8, '247231': 100, '205101': 6,
     '4426': 5, '4791': 10, '4790': 10, '130115': 8, '302102': 12, '11130': 4, '247207': 6,
     '247206': 6, '247208': 6, '247209': 6, '100701': 6, '423': 6, '4634': 6, '4132': 12,
     '125': 4, '4131': 12, '140701': 4, '4112': 12, '4108': 12, '4111': 12, '247210': 6,
@@ -54,7 +54,7 @@ PRODUCT_FIX = {
     '428': 6, '427': 6, '113': 10, '4470': 3, '247101': 6, '89': 5, '302201': 6, '4801': 12,
     '230120': 12, '4121': 25, '100802': 6, '100804': 3, '247227': 6, '4820': 12, '245101': 12,
     '100201': 6, '3003': 24, '3004': 12, '3021': 10, '3008': 40, '3012': 40, '3033': 6, '3024': 10,
-    '3025': 1, '10173': 23, '61': 6
+    '3025': 10, '10173': 23, '61': 6, '403196': 6, '403212': 6
 }
 
 def ustr(text):
@@ -413,20 +413,20 @@ class DatabaseImport:
         #           "numero_carga as picking_info from dbo.cabecera_pedido_copia where cast(fecha_carga as date) >= '2015-08-17 00:00:00'")
         ###################################################################
         ## Se importan sólo pedidos vivos
-        #cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
-        #            "observacion_pedido as customer_comment, observacion_reparto as note, pedido_sam as client_order_ref, 'draft' as state, '' as invoice_info, "
-        #            "'' as picking_info from dbo.cabecera_pedido_ventas")
+        cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
+                    "observacion_pedido as customer_comment, observacion_reparto as note, pedido_sam as client_order_ref, 'draft' as state, '' as invoice_info, "
+                    "'' as picking_info from dbo.cabecera_pedido_ventas")
         ###################################################################
         ## Se importan sólo pedidos históricos
-        cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha_carga as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
-                   "'' as customer_comment, '' as note, '' as client_order_ref, 'history' as state, serie_factura + CONVERT(varchar, numero_factura) as invoice_info, "
-                   "numero_carga as picking_info from dbo.cabecera_pedido_copia")
+        #cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha_carga as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
+        #           "'' as customer_comment, '' as note, '' as client_order_ref, 'history' as state, serie_factura + CONVERT(varchar, numero_factura) as invoice_info, "
+        #           "numero_carga as picking_info from dbo.cabecera_pedido_copia")
         ###################################################################
         ## Se importan sólo pedidos históricos que faltan
-        sale_ids = self.search('sale.order', [('state', '=', 'history'),('chanel', '!=', "other")])
-        sales_data = self.read('sale.order', sale_ids, ['name'])
-        sale_numbers = [x['name'] for x in sales_data]
-        current = True
+        #sale_ids = self.search('sale.order', [('state', '=', 'history'),('chanel', '!=', "other")])
+        #sales_data = self.read('sale.order', sale_ids, ['name'])
+        #sale_numbers = [x['name'] for x in sales_data]
+        #current = True
         ###################################################################
         #cr.execute("select numero_pedido as name, cliente as partner_id_map, fecha as date_order, Dia_reparto as date_planned, proveedor as supplier_id_map, "
         #          "observacion_pedido as customer_comment, observacion_reparto as note, pedido_sam as client_order_ref, 'draft' as state, '' as invoice_info, "
@@ -435,12 +435,12 @@ class DatabaseImport:
         #           "'' as customer_comment, '' as note, '' as client_order_ref, 'history' as state, serie_factura + CONVERT(varchar, numero_factura) as invoice_info, "
         #           "numero_carga as picking_info from dbo.cabecera_pedido_copia")
         data = cr.fetchall()
-        #num_rows = len(data)
-        num_rows = len(data) - len(sale_numbers)
+        num_rows = len(data)
+        #num_rows = len(data) - len(sale_numbers)
         cont = 0
         for row in data:
-            if str(int(row.name)) in sale_numbers:
-                continue
+            #if str(int(row.name)) in sale_numbers:
+            #    continue
 
             partner_ids = self.search("res.partner", [('ref', '=', str(int(row.partner_id_map))),('customer','=',True),'|',('active','=',True),('active','=',False)])
             if not partner_ids:
@@ -879,24 +879,43 @@ class DatabaseImport:
 
     def fix_product_histories(self):
         cont = 0
+        PRODUCT_FIX = {'9267': 10}
         for product_code in PRODUCT_FIX:
             product_ids = self.search("product.product", [('default_code', '=', product_code),'|',('active', '=', False),('active', '=', True)])
+            print "Product: ", product_code
             if product_ids:
-                sale_line_ids = self.search('sale.order.line', [('product_id', '=', product_ids[0]),('order_id.state', '=', 'history'),('write_date', '<', '2015-11-30 00:00:01')])
+                #product_data = self.read('product.product', product_ids[0], ['lst_price'])
+                sale_line_ids = self.search('sale.order.line', [('product_id', '=', product_ids[0]),('order_id.state', '=', 'history'),('price_unit', '<', 15)])
                 if sale_line_ids:
                     for sale_line_id in sale_line_ids:
                         line_data = self.read("sale.order.line", sale_line_id, ['product_uom_qty', 'price_unit'])
-                        self.write("sale.order.line", [sale_line_id], {'product_uom_qty': (int(line_data['product_uom_qty']) / float(PRODUCT_FIX[product_code])),
-                                                                       'product_uos_qty': (int(line_data['product_uom_qty']) / float(PRODUCT_FIX[product_code])),
+                        self.write("sale.order.line", [sale_line_id], {#'product_uom_qty': (int(line_data['product_uom_qty']) / float(PRODUCT_FIX[product_code])),
+                                                                       #'product_uos_qty': (int(line_data['product_uom_qty']) / float(PRODUCT_FIX[product_code])),
                                                                        'price_unit': line_data['price_unit'] * float(PRODUCT_FIX[product_code]),
                                                                        'price_udv': line_data['price_unit'] * float(PRODUCT_FIX[product_code])})
-
-                invoice_line_ids = self.search('account.invoice.line', [('product_id', '=', product_ids[0]),('invoice_id.state', '=', 'history'),('write_date', '<', '2015-11-30 00:00:01')])
+                #coeff = float(PRODUCT_FIX[product_code])
+                #if coeff > 2:
+                #    coeff -= 1
+                #min_price_to_search = product_data['lst_price'] / (float(PRODUCT_FIX[product_code]) - 1)
+                #max_price_to_search = product_data['lst_price'] * (float(PRODUCT_FIX[product_code]) - 1)
+                invoice_line_ids = self.search('account.invoice.line',
+                                               [('product_id', '=', product_ids[0]),
+                                                ('invoice_id.state', '=', 'history'),
+                                                ('price_unit', '!=', 0.0),('price_unit', '<', 15.0)])
+                #                                '|',('price_unit', '<', min_price_to_search),
+                #                                ('price_unit', '>', max_price_to_search)])
                 if invoice_line_ids:
                     for invoice_line in invoice_line_ids:
                         line_data = self.read("account.invoice.line", invoice_line, ['quantity', 'price_unit', 'invoice_id'])
-                        self.write("account.invoice.line", [invoice_line], {'quantity': (int(line_data['quantity']) / float(PRODUCT_FIX[product_code])),
-                                                                            'price_unit': line_data['price_unit'] * float(PRODUCT_FIX[product_code])})
+                        print "Orig price", line_data['price_unit']
+                        #if line_data['price_unit'] > max_price_to_search:
+                        #    calc = line_data['price_unit'] / float(PRODUCT_FIX[product_code])
+                        #else:
+                        #    calc = line_data['price_unit'] * float(PRODUCT_FIX[product_code])
+                        calc = line_data['price_unit'] * float(PRODUCT_FIX[product_code])
+                        print "Final price", calc
+                        self.write("account.invoice.line", [invoice_line], {#'quantity': (int(line_data['quantity']) / float(PRODUCT_FIX[product_code])),
+                                                                            'price_unit': calc})
                         self.execute("account.invoice", "button_reset_taxes", [[line_data['invoice_id'][0]]])
             cont += 1
             print "%s de %s" % (str(cont), str(len(PRODUCT_FIX)))
@@ -999,6 +1018,199 @@ class DatabaseImport:
             cont +=1
             print "%s de %s" % (str(cont), str(num_rows))
 
+    def fix_var_products_qty(self, cr):
+        #Lineas de venta históricas variables
+        cr.execute("select dbo.lineas_pedido_copia.numero_pedido as order_id_map, numero_linea as sequence, producto as product_id_map, composicion as unit_qty from dbo.lineas_pedido_copia "
+                   "where producto in (select pr1_codi from dbo.adsd_art where pr1_tcom = 'V') and composicion != 0")
+        hist_lines = cr.fetchall()
+        cont = 0
+        num_rows = len(hist_lines)
+        for row in hist_lines:
+            product_ids = self.search('product.product', [('default_code', '=', str(int(row.product_id_map))),'|',('active','=',True),('active','=',False)])
+            order_ids = self.search('sale.order', [('name', '=', str(int(row.order_id_map)))])
+            if product_ids and order_ids:
+                line_ids = self.search('sale.order.line', [('product_id', '=', product_ids[0]),('order_id', '=', order_ids[0])])
+                if line_ids:
+                    if len(line_ids) > 1:
+                        line_ids2 = self.search('sale.order.line', [('product_id', '=', product_ids[0]),('order_id', '=', order_ids[0]),('sequence', '=', int(row.sequence))])
+                        if line_ids2:
+                            sale_line_id = line_ids2[0]
+                        else:
+                            sale_line_id = line_ids[0]
+                    else:
+                        sale_line_id = line_ids[0]
+
+                    self.write('sale.order.line', [sale_line_id], {'product_uom_qty': float(row.unit_qty),
+                                                                   'product_uos_qty': float(row.unit_qty)})
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+        #Lineas de factura de venta históricas de peso variable
+        cr.execute("select serie as number_pref, numero as number, composicion as base_qty, producto as product_id_map, precio as price_unit from dbo.lineas_mensual "
+                   "where producto in (select pr1_codi from dbo.adsd_art where pr1_tcom = 'V') and composicion != 0")
+        hist_inv_lines = cr.fetchall()
+        cont = 0
+        visited_lines = []
+        num_rows = len(hist_inv_lines)
+        for row in hist_inv_lines:
+            product_ids = self.search('product.product', [('default_code', '=', str(int(row.product_id_map))),'|',('active','=',True),('active','=',False)])
+            invoice_ids = self.search('account.invoice', [('number', '=', ustr(row.number_pref) + "/" + str(int(row.number)))])
+            if product_ids and invoice_ids:
+                line_ids = self.search('account.invoice.line', [('product_id', '=', product_ids[0]),('invoice_id', '=', invoice_ids[0]),
+                                                                ('price_unit', '=', float(row.price_unit)),('id', 'not in', visited_lines)])
+                if line_ids:
+                    visited_lines.append(line_ids[0])
+                    self.write('account.invoice.line', [line_ids[0]], {'quantity': float(row.base_qty)})
+                    self.execute("account.invoice", "button_reset_taxes", [[invoice_ids[0]]])
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+        #Lineas de autoventa de peso variable
+        cr.execute("SELECT hal_prod as product_id_map, hal_canc as unit_qty, hal_prec as price_unit, hal_seri + '/' + cast(hal_docu as CHAR) as name "
+                   "FROM dbo.adsd_hal where hal_prod in (select pr1_codi from dbo.adsd_art where pr1_tcom = 'V') and hal_canc != 0")
+        auto_lines = cr.fetchall()
+        cont = 0
+        num_rows = len(auto_lines)
+        for row in auto_lines:
+            product_ids = self.search('product.product', [('default_code', '=', str(int(row.product_id_map))),'|',('active','=',True),('active','=',False)])
+            order_ids = self.search('sale.order', [('name', '=', row.name.strip())])
+            if product_ids and order_ids:
+                line_ids = self.search('sale.order.line', [('product_id', '=', product_ids[0]),('order_id', '=', order_ids[0])])
+                if line_ids:
+                    if line_ids:
+                        if len(line_ids) > 1:
+                            line_ids2 = self.search('sale.order.line', [('product_id', '=', product_ids[0]),('order_id', '=', order_ids[0]),('price_unit', '=', float(row.price_unit))])
+                            if line_ids2:
+                                sale_line_id = line_ids2[0]
+                            else:
+                                sale_line_id = line_ids[0]
+                        else:
+                            sale_line_id = line_ids[0]
+
+                self.write('sale.order.line', [sale_line_id], {'product_uom_qty': float(row.unit_qty),
+                                                               'product_uos_qty': float(row.unit_qty)})
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+        #Lineas de venta vivas de peso variable
+        cr.execute("select numero_pedido as order_id_map, numero_linea as sequence, producto as product_id_map, cajas as unit_qty "
+                   "from dbo.lineas_pedido_ventas where producto in (select pr1_codi from dbo.adsd_art where pr1_tcom = 'V') and composicion != 0")
+        open_lines = cr.fetchall()
+        cont = 0
+        num_rows = len(open_lines)
+        for row in open_lines:
+            product_ids = self.search('product.product', [('default_code', '=', str(int(row.product_id_map))),'|',('active','=',True),('active','=',False)])
+            order_ids = self.search('sale.order', [('name', '=', str(int(row.order_id_map)))])
+            if product_ids and order_ids:
+                product_data = self.read('product.product', product_ids[0], ['log_unit_id', 'uom_id'])
+                line_ids = self.search('sale.order.line', [('product_id', '=', product_ids[0]),('order_id', '=', order_ids[0])])
+                if line_ids:
+                    if len(line_ids) > 1:
+                        line_ids2 = self.search('sale.order.line', [('product_id', '=', product_ids[0]),('order_id', '=', order_ids[0]),('sequence', '=', int(row.sequence))])
+                        if line_ids2:
+                            sale_line_id = line_ids2[0]
+                        else:
+                            sale_line_id = line_ids[0]
+                    else:
+                        sale_line_id = line_ids[0]
+
+                    self.write('sale.order.line', [sale_line_id], {'product_uom_qty': float(row.unit_qty),
+                                                                   'product_uos_qty': float(row.unit_qty),
+                                                                   'product_uom': product_data['log_unit_id'] and product_data['log_unit_id'][0] or product_data['uom_id'][0],
+                                                                   'product_uos': product_data['log_unit_id'] and product_data['log_unit_id'][0] or product_data['uom_id'][0]})
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+    def import_rappel_invoices(self, cr):
+        account_id = self.search("account.account", [('code', '=', "700000000")])[0]
+        journal_id = self.search("account.journal", [('name', '=', "Diario de ventas")])[0]
+        cr.execute("select serie as number_pref, documento as number, fecha_contabilizacion as invoice_date, "
+                   "cli_codi as partner_id_map, vencimiento as due_date from dbo.diario_ventas inner join "
+                   "dbo.adsd_clie on dbo.adsd_clie.id_cliente = dbo.diario_ventas.cliente_id where serie = 'RP'")
+        #######################################################################
+        ###### Diferencias
+        #invoice_ids = self.search('account.invoice', [('state', '=', 'history'),('type', '=', "out_invoice")])
+        #sales_data = self.read('account.invoice', invoice_ids, ['number'])
+        #invoice_numbers = [x['number'] for x in sales_data]
+        #current = True
+
+        ######################################################################
+        invoice_data = cr.fetchall()
+        num_rows = len(invoice_data)
+        #num_rows = len(invoice_data) - len(invoice_numbers)
+        cont = 0
+        for row in invoice_data:
+            #if ustr(row.number_pref) + "/" + str(int(row.number)) in invoice_numbers:
+            #    continue
+            invoice_ids = self.search("account.invoice", [('type','=','out_invoice'),("number",'=',ustr(row.number_pref) + "/" + str(int(row.number)))])
+            if invoice_ids:
+                cont += 1
+                continue
+            customer_ids = self.search("res.partner", [('customer', '=', True),('ref', '=', str(int(row.partner_id_map))),'|',('active', '=', True),('active', '=', False)])
+            if customer_ids:
+                cust_data = self.read("res.partner", customer_ids[0], ["property_account_receivable"])
+
+                invoice_vals = {
+                    "number": ustr(row.number_pref) + "/" + str(int(row.number)),
+                    "invoice_number": ustr(row.number_pref) + "/" + str(int(row.number)),
+                    "account_id": cust_data["property_account_receivable"][0],
+                    "partner_id": customer_ids[0],
+                    "date_invoice": row.invoice_date and row.invoice_date.strftime("%Y-%m-%d") or False,
+                    "date_due": row.due_date and row.due_date.strftime("%Y-%m-%d") or False,
+                    "state": "history",
+                    "journal_id": journal_id,
+                    "type": "out_invoice"
+                }
+                invoice_id = self.create("account.invoice", invoice_vals)
+                cr.execute("select importe as price_unit, iva as tax_id_map, descripcion as name from "
+                           "dbo.lineas_mensual where serie = 'RP' and numero = ?", (int(row.number),))
+                lines_data = cr.fetchall()
+                for line in lines_data:
+                    line_vals = {
+                        "name": ustr(line.name),
+                        "account_id": account_id,
+                        "quantity": 1,
+                        "uos_id": 1,
+                        "price_unit": float(line.price_unit),
+                        "invoice_line_tax_id": [(6, 0, self._getTaxes(IVAA_MAP[str(int(line.tax_id_map))][0]))],
+                        "invoice_id": invoice_id
+                    }
+                    self.create("account.invoice.line", line_vals)
+                self.execute("account.invoice", "button_reset_taxes", [[invoice_id]])
+                cont += 1
+                print "%s de %s" % (str(cont), str(num_rows))
+
+    def fix_invoices_without_date(self, cr):
+        # Facturas de venta sin fecha
+        cont = 0
+        sale_invoice_ids = self.search("account.invoice", [('date_invoice', '=', False),('type', '=', 'out_invoice'),('state', '=', 'history')])
+        num_rows = len(sale_invoice_ids)
+        for invoice in sale_invoice_ids:
+            invoice_data = self.read('account.invoice', invoice, ['number'])
+            serie, numero = invoice_data['number'].split('/')
+            cr.execute("select fecha_contabilizacion as invoice_date "
+                       "from dbo.diario_ventas where serie = ? and documento = ?", (serie,numero,))
+            row = cr.fetchone()
+            if row and row.invoice_date:
+                self.write('account.invoice', [invoice], {'date_invoice': row.invoice_date.strftime("%Y-%m-%d")})
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
+        # Facturas de compra sin fecha
+        cont = 0
+        purchase_invoice_ids = self.search("account.invoice", [('date_invoice', '=', False),('type', '=', 'in_invoice'),('state', '=', 'history')])
+        num_rows = len(purchase_invoice_ids)
+        for invoice in purchase_invoice_ids:
+            invoice_data = self.read('account.invoice', invoice, ['reference', 'partner_id'])
+            partner_data = self.read('res.partner', invoice_data['partner_id'][0], ['ref'])
+            number = invoice_data['reference']
+            partner_ref = partner_data['ref']
+            cr.execute("select dic_femi as invoice_date from dbo.adsd_dic where dic_prov = ? and dic_nume = ?", (partner_ref,number,))
+            row = cr.fetchone()
+            if row and row.invoice_date:
+                self.write('account.invoice', [invoice], {'date_invoice': row.invoice_date.strftime("%Y-%m-%d")})
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
     def process_data(self):
         """
         Importa la bbdd
@@ -1011,15 +1223,18 @@ class DatabaseImport:
             conn = pyodbc.connect("DRIVER={FreeTDS};SERVER=" + self.sql_server_host + ";UID=midban;PWD=midban2015;DATABASE=" + self.sql_server_dbname + ";Port=1433;TDS_Version=10.0")
             cr = conn.cursor()
 
-            self.import_sale_orders(cr)
+            #self.import_sale_orders(cr)
             #self.import_sale_order_lines_open(cr)
             #self.import_sale_order_lines_history(cr)
             #self.import_active_purchase_order(cr)
-            self.import_purchase_invoice(cr)
-            self.import_sale_invoice(cr)
-            #self.fix_product_histories()
+            #self.import_purchase_invoice(cr)
+            #self.import_sale_invoice(cr)
+            self.fix_product_histories()
             #self.open_sale_orders()
             #self.import_autosale_orders(cr)
+            #self.fix_var_products_qty(cr)
+            #self.import_rappel_invoices(cr)
+            #self.fix_invoices_without_date(cr)
 
         except Exception, ex:
             print u"Error al conectarse a las bbdd: ", repr(ex)

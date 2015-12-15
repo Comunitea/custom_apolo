@@ -208,7 +208,7 @@ class integrate_accounting(object):
                     elif posted:
                         continue
 
-                    ref = (row['Documento'] or "") + " " + (row['Ampliacion'] or "") 
+                    ref = (row['Documento'] or "") + " " + (row['Ampliacion'] or "")
                     #if not ref:
                     #    ref = row.get('Ampliacion', "")
                     #elif row.get('Ampliacion'):
