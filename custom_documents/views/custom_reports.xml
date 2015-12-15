@@ -98,5 +98,35 @@
         <record id="stock_picking_batch.action_report_picking_batch" model="ir.actions.report.xml">
             <field name="paperformat_id" ref="my_A4_paperformat"/>
         </record>
+
+        <!-- Informe cobros rutas reparto -->
+        <record id="a4_report_payment_list" model="report.paperformat">
+          <field name="name">A4 payment list</field>
+          <field name="default" eval="False"/>
+          <field name="format">A4</field>
+          <field name="orientation">Portrait</field>
+
+           <field name="margin_top">15</field>
+           <field name="margin_bottom">23</field>
+           <field name="margin_left">7</field>
+           <field name="margin_right">7</field>
+           <field name="header_line" eval="False"/>
+           <field name="header_spacing">10</field>
+           <field name="dpi">90</field>
+        </record>
+
+
+        <report
+            string="Listado cobros"
+            id="action_report_payment_list"
+            model="route.detail"
+            report_type="qweb-pdf"
+            name="custom_documents.report_route_detail"
+            file="custom_documents.report_route_detail"
+        />
+
+        <record id="action_report_payment_list" model="ir.actions.report.xml">
+            <field name="paperformat_id" ref="a4_report_payment_list"/>
+        </record>
     </data>
 </openerp>

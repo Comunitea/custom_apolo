@@ -23,3 +23,4 @@ import custom_picking_parser
 import custom_invoice_parser
 from . import picking_batch_parser
 import custom_purchase_order_parser
+from . import custom_rout_detail_parser
