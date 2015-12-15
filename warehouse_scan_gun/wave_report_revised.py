@@ -62,6 +62,7 @@ class wave_report(models.Model):
         #se usa cuando ca,biamos el paquete de una operación dentro de un wave_report
         id = my_args.get('id', False)
         user_id = my_args.get('user_id', False)
+        user_id = 1
         vals = my_args.get('values', False)
         wave_obj = self.browse(id)
         ctx = {'no_recompute': True}
@@ -172,7 +173,7 @@ class wave_report(models.Model):
                 vals['uos_qty'] = product.uom_qty_to_uos_qty(qty, op.uos_id.id)
                 if not op.write(vals):
                     res = False
-                print u"Escrimos en la operación con resultado %s"%res
+            print u"Escrimos en la operacin con resultado %s"%res
         return res
 
     @api.multi

@@ -194,8 +194,10 @@ class StockTask(models.Model):
         elif task_type == 'picking':
             task_id = wzd_obj_uid.with_context(gun=True).get_picking_task()
 
-        print u"te doy una creada: Id" +str(task_id)
-        return task_id
+        if task_id:
+            print u"te doy una creada: Id" +str(task_id)
+        res = task_id if task_id else False
+        return res
 
     @api.multi
     def check_task_ops_finished(self, my_args):
