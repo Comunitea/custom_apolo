@@ -813,7 +813,7 @@ class ScanGunProtocol(LineReceiver):
             self._snd(self.get_str_menu1())
             return
 
-        if line == KEY_CANCEL and pausar == True:
+        if line == KEY_CANCEL and pausar == True and False:
             res = self.factory.odoo_con.gun_cancel_task(self.user_id, self.task_id)
             self.check_task()
 
@@ -2859,7 +2859,7 @@ class ScanGunProtocol(LineReceiver):
         if line in [KEY_CONFIRM, KEY_CANCEL, KEY_NEXT, KEY_PREV, KEY_QTY, KEY_VOLVER, KEY_FINISH, KEY_FORZAR]:
 
 
-            if line == KEY_CANCEL:
+            if line == KEY_CANCEL and False:
 
                 if wave_['to_process']==True:
 
@@ -3531,7 +3531,7 @@ class ScanGunProtocol(LineReceiver):
             order_line = False
 
 
-        if line == KEY_CANCEL:
+        if line == KEY_CANCEL and False:
             res = self.factory.odoo_con.gun_cancel_task(self.user_id, self.task_id)
             self.check_task()
             self.active_task = self.get_active_task()
@@ -5540,6 +5540,12 @@ class ScanGunProtocol(LineReceiver):
         return op_str
 
     def cancel_operation(self):
+        message = "Opcionde cancelar anulada"
+        self.step = 0
+        self.state = "menu1"
+        self._snd(self.get_str_menu1(), message)
+        return
+
         """
         Cancela la operacion marcandola como visitada pero no para procesar
         y muestra la siguiente.
