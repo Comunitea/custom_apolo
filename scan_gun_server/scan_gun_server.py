@@ -433,16 +433,16 @@ class ScanGunProtocol(LineReceiver):
                 u'\nDeb.(%s): %s'%(KEY_DEBUG, str(self.factory.debug))+\
                 u'\nFiltrar : %s'%self.show_op_processed+\
                 u'\n' * 25
-
-
+        cabecera = self.user_name or ''
         self.last = '-'
         if not self.factory.debug:
             clean = u'\n' * 25
+        if self.tasks and self.active_task:
+            if self.tasks[self.active_task]:
+                cabecera = self.tasks[self.active_task]['route_id'] or self.user_name or ''
 
-        if self.user_id:
-            cabecera = self.user_name
-        else:
-            cabecera=''
+        #     else:
+        #         cabecera=''
 
         delimiter = u"\n" + u'*'*25 + u'\n'
 
@@ -720,19 +720,21 @@ class ScanGunProtocol(LineReceiver):
         if not self.tasks:
             self.check_task()
         strg_data = ''
-        for task_ in self.tasks:
-            task = self.tasks[task_]
-            data =  u"\n%s -> %s (%s op)"%(task_, task['ref'], str(task['ops']))
+        if self.tasks:
+            for a in range(1, len(self.tasks)+1):
+                task_ = str(a)
+                task = self.tasks[task_]
+                data =  u"\n%s -> %s (%s op)"%(task_, task['ref'], str(task['ops']))
 
-            if task['paused']:
-                strg_data += data
-            else:
-                strg_data += self.inverse(data)
-                self.type = task['type']
-                self.task_id = task['id']
-                self.active_task = task_
+                if task['paused']:
+                    strg_data += data
+                else:
+                    strg_data += self.inverse(data)
+                    self.type = task['type']
+                    self.task_id = task['id']
+                    self.active_task = task_
 
-        strg += strg_data
+            strg += strg_data
 
         if not self.tasks:
             strg += U"\nSin Tareas Asignadas"
@@ -2460,6 +2462,13 @@ class ScanGunProtocol(LineReceiver):
 
         #Todo el peso variable debe de entrar por aquí
         elif (num_ops == 1 and var_coeff):
+            if self.new_uom_qty == 0 or self.new_uos_qty == 0:
+                message = u"Revisa las cantidades introducidas"
+                self._snd(self.get_str_form_wave(), message)
+                return
+
+
+
             values = {'to_process': True,
                 'product_id': wave_['product_id'],
                 'lot_id': wave_['lot_id'],
@@ -2861,7 +2870,7 @@ class ScanGunProtocol(LineReceiver):
         if line in [KEY_CONFIRM, KEY_CANCEL, KEY_NEXT, KEY_PREV, KEY_QTY, KEY_VOLVER, KEY_FINISH, KEY_FORZAR]:
 
 
-            if line == KEY_CANCEL and False:
+            if line == KEY_CANCEL:
 
                 if wave_['to_process']==True:
 
@@ -2993,6 +3002,7 @@ class ScanGunProtocol(LineReceiver):
                             units_ = [self.log_base_qty, 0 , 0]
                         else:
                             units_ = [0, self.log_unit, self.log_box]
+
                         self.new_uos_qty = self.factory.odoo_con.get_uom_from_conversions_from_gun(units_, product_id, uos_id)
 
 
@@ -5174,8 +5184,6 @@ class ScanGunProtocol(LineReceiver):
         message = u"No te entiendo"
         self._snd(self.get_manual_picking_reposition(), message)
         return
-
-
 
     def handle_ops(self, line='0', confirm = False):
 

@@ -106,7 +106,7 @@ class StockTask(models.Model):
             ('state', '=', 'assigned')
         ]
         task_id = False
-        task_obj = self.search(domain)
+        task_obj = self.search(domain, order = "date_start")
         vals = {}
         ind = 0
         ref =''
@@ -123,14 +123,14 @@ class StockTask(models.Model):
                 'paused' : task.paused,
                 'ref' : task.wave_id.name or task.picking_id.name or ref or '',
                 'ops': num_ops,
-                'wave_id': task.wave_id.id or False
+                'wave_id': task.wave_id.id or False,
+                'route_id': task.route_detail_id.detail_name_str or '',
                    }
-            if task.paused:
-                ind += 1
-                vals[format(ind)] = values
 
-            else:
-                vals[format(0)] = values
+            ind += 1
+            vals[format(ind)] = values
+            if not task.paused:
+                #vals[format(0)] = values
                 task_id = task.id
         return task_id, vals
 
