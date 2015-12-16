@@ -174,7 +174,7 @@
         min-height:162mm;
         }
         .middle_part_summary{
-        min-height:172mm;
+        min-height:162mm;
         }
         .top-border {
         border-top: solid 2px #000000;
@@ -199,7 +199,7 @@
         .my_margin_top {
         min-height: 50mm;
         }
-                .summary-table{
+        .summary-table{
         width: 100%;
         }
         .summary-table td{
