@@ -390,8 +390,8 @@
                       <p><span t-field="o.partner_id.zip"/> - <span t-field="o.partner_id.city"/></p>
                       <p><strong>Tlfo.</strong> <span t-field="o.partner_id.phone"/></p>
                   </div>
-                  <div class="col-xs-6">
-                      <table class="table1 no-padd-left">
+                  <div class="col-xs-6  no-padd-left-p">
+                      <table class="table1">
                       <thead>
                           <tr>
                               <th><strong>Agent</strong></th>
