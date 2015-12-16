@@ -30,13 +30,13 @@
          width: 100%;
         }
         .table2-p td{
-         font-size: 12px;
+         font-size: 11px;
         }
         .table2-p .col-ref{
           width: 10%;
         }
         .table2-p .col-des{
-          width: 20%;
+          width: 30%;
         }
         .table2-p .col-iva{
           width: 10%;
@@ -45,7 +45,7 @@
           width: 10%;
         }
         .table2-p .col-unit{
-          width: 20%;
+          width: 10%;
         }
         .table2-p .col-pp{
           width: 10%;
@@ -240,36 +240,38 @@
         .summary-table .col-sp-empty2{
         width: 20%;
         }
-                  .table-del{
-          width: 100%;
-        }
-        .table-del td span{
-          font-size: 10px;
-        }
-        .table-del .col-ref{
-          width: 5%;
-        }
-        .table-del .col-des{
-          width: 25%;
-        }
-        .table-del .col-iva{
-          width: 10%;
-        }
-        .table-del .col-qty{
-          width: 10%;
-        }
-        .table-del .col-unit{
-          width: 20%;
-        }
-        .table-del .col-pp{
-          width: 10%;
-        }
-        .table-del .col-ap{
-          width: 10%;
-        }
-        .table-del .col-net{
-          width: 10%;
-        }
+            .table-del{
+              width: 100%;
+            }
+            .table-del td span{
+              font-size: 10px;
+            }
+            .table-del .col-ref{
+              width: 8%;
+            }
+            .table-del .col-des{
+              width: 35%;
+            }
+
+            .table-del .col-qty{
+              width: 8%;
+            }
+            .table-del .col-unit{
+              width: 3%;
+            }
+            .table-del .col-pp{
+              width: 12%;
+            }
+            .table-del .col-ap{
+              width: 12%;
+            }
+           .table-del .col-iva{
+              width: 14%;
+            }
+            .table-del .col-net{
+              width: 14%;
+            }
+
 
         .table-del td{
          padding-right:4px;
@@ -395,7 +397,7 @@
         width:20%;
         }
         .table_totals td{
-        font-size: 9px;
+        font-size: 11px;
         }
         .table_totals .full-border{
         border-top: solid 1px #000000;
@@ -436,11 +438,11 @@
               <tr>
                   <th class="col-ref"><strong>Ref.</strong></th>
                   <th class="col-des"><strong>Description</strong></th>
-                  <th class="col-iva text-right"><strong>% IVA</strong></th>
                   <th class="col-qty text-right"><strong>Qty.</strong></th>
                   <th class="col-unit"><strong>Unit</strong></th>
                   <th class="col-pp text-right"><strong t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing' and o.partner_id.pick_print_op">Pricelist Price</strong></th>
                   <th class="col-ap text-right"><strong t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing' and o.partner_id.pick_print_op">Applied Price</strong></th>
+                  <th class="col-iva text-right"><strong>% IVA</strong></th>
                   <th class="col-net text-right"><strong t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing' and o.partner_id.pick_print_op">Net import</strong></th>
               </tr>
 
@@ -453,9 +455,6 @@
                   </td>
                   <td>
                       <span t-esc="l['des']"/>
-                  </td>
-                  <td class="text-right">
-                      <span t-esc="l['iva']"/>
                   </td>
                   <td class="text-right">
                       <span t-esc="l['qty']"/>
@@ -472,6 +471,9 @@
                     <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing' and o.partner_id.pick_print_op">
                       <span t-esc="l['app_price']"/>
                     </div>
+                  </td>
+                  <td class="text-right">
+                      <span t-esc="l['iva']"/>
                   </td>
                   <td class="text-right">
                     <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing' and o.partner_id.pick_print_op">
@@ -502,14 +504,15 @@
             <tfoot>
               <td>
               </td>
-              <td>
-              </td>
               <td class="text-right">
                 TOTALS:
               </td>
               <td class="text-right">
                 <span t-esc="tfoot[o.id]['sum_qty']"/>
               </td>
+              <td>
+              </td>
+
               <td>
 
               </td>
