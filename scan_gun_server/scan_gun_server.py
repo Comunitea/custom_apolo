@@ -372,6 +372,8 @@ class ScanGunProtocol(LineReceiver):
             self.handle_list_packages(line)
         elif self.state == 'info_producto':
             self.handle_info_product(line)
+        elif self.state == 'handle_quants':
+            self.handle_quants_menu_from_stock(line)
 
 
 
@@ -3531,7 +3533,7 @@ class ScanGunProtocol(LineReceiver):
             order_line = False
 
 
-        if line == KEY_CANCEL and False:
+        if line == KEY_CANCEL:
             res = self.factory.odoo_con.gun_cancel_task(self.user_id, self.task_id)
             self.check_task()
             self.active_task = self.get_active_task()
@@ -5405,15 +5407,22 @@ class ScanGunProtocol(LineReceiver):
         delimiter = "\n********************\n"
         #str_menu = "0 -> Volver\n"
         str_menu=""
+        hay = False
         self.routes = self.factory.odoo_con.get_routes_menu(self.user_id, type)
         inc=1
         if self.routes:
+            if self.num_order_list_ops > 1:
+                    str_menu += u'(......)\n'
             for key in range(1, len(self.routes)+1):
                 ruta = self.routes[str(key)][1]
-                print u'%s > %s'%(key, ruta)
-                if key>= self.num_order_list_ops and key<= self.num_order_list_ops + MAX_NUM_ONE:
-                    str_menu += "%s -> %s\n"%(key, ruta)
+                transporter = self.routes[str(key)][2]
+                print u'%s > %s\n %s'%(key, ruta, transporter)
+                if key>= self.num_order_list_ops and key<= self.num_order_list_ops + MAX_NUM_ONE/2:
+                    hay = True
+                    str_menu += "%s -> %s\n%s  (%s Pendientes)\n"%(key, ruta, transporter, self.routes[str(key)][3])
 
+            if self.num_order_list_ops<=len(self.routes):
+                str_menu += u'(......)'
         else:
             str_menu +=u"\nNo hay rutas validadas\n"
         keys = u"%s Volver"%KEY_VOLVER
@@ -5433,12 +5442,12 @@ class ScanGunProtocol(LineReceiver):
 
         if line == KEY_NEXT:
             if len(self.routes)>self.num_order_list_ops:
-                self.num_order_list_ops +=MAX_NUM_ONE
+                self.num_order_list_ops +=MAX_NUM_ONE/2
             self._snd(self.get_routes_menu(self.type))
             return
 
         if line == KEY_PREV:
-            self.num_order_list_ops -=MAX_NUM_ONE
+            self.num_order_list_ops -=MAX_NUM_ONE/2
             if self.num_order_list_ops <1:
                 self.num_order_list_ops ==1
             self._snd(self.get_routes_menu(self.type))
@@ -5914,6 +5923,7 @@ class ScanGunProtocol(LineReceiver):
                    u"4 >Info Producto\n" \
                    u"5 >Info Paquete\n" \
                    u"6 >Imprimir Etiquetas\n"\
+                   u"7 >Mover desde Salida\n"\
                    u"8 >Parametros\n"\
                    u"9 >Volver\n"
         # if self.show_keys:
@@ -5924,7 +5934,7 @@ class ScanGunProtocol(LineReceiver):
     def handle_menu_tool(self, line):
 
         print "Menu Tools"
-        if line not in ["1", "3", "4", "6", "8", "9"] and line != KEY_VOLVER:
+        if line not in ["1", "3", "4", "6", "7", "8", "9"] and line != KEY_VOLVER:
             str_error = u"La opcion %s no es valida.\nReintentar:\n" % line
             self.state='tools'
             self._snd(self.get_menu_tools(), str_error)
@@ -5959,6 +5969,11 @@ class ScanGunProtocol(LineReceiver):
             self.num_order_list_ops = 1
             self.packs = []
             self._snd(self.get_str_print_tags())
+        elif line == '7':
+            self.state = 'handle_quants'
+            self.step=0
+            self.quants = []
+            self._snd(self.get_str_menu_quants())
         elif line == '8':
             self.state = 'parametros'
             self.step=0
@@ -6703,6 +6718,77 @@ class ScanGunProtocol(LineReceiver):
                     message = u'\nOk. Etiqueta Nueva'
 
         return self.inverse(message), print_tag
+
+
+
+
+    def get_str_menu_quants(self):
+
+        menu_strg = u'Movimiento de Salida a Almacen\nUsar con cuidadooooo'
+
+        if self.quants:
+            ind=0
+            for quant in self.quants:
+                ind +=1
+                line = u'%s > %s %s\n'%(ind, quant[1], quant[2])
+                menu_strg += line
+        else:
+            menu_strg += "\nScanea un pacquete\n"
+
+        menu_strg += u'%s Mover\n'%KEY_CONFIRM
+        menu_strg += u'%s Volver\n'%KEY_VOLVER
+
+
+        return menu_strg
+
+    def handle_quants_menu_from_stock(self, line):
+        order_line = line[0:2]
+        if order_line in (PRE_LOC, PRE_LOT, PRE_PACK, PRE_PROD):
+            line = line [2:]
+        else:
+            order_line = False
+        line_int = self.int_(line)
+
+        if order_line == PRE_PACK and self.step ==0:
+            self.pack_for_gun = self.factory.odoo_con.get_pack_gun_info(self.user_id, line_int)
+            if self.pack_for_gun['exist']:
+                self.step == 1
+                self.quant =[]
+                message = ""
+                self._snd(self.get_str_menu_quants(), message)
+                return
+            else:
+                self.step == 0
+                self.quant =[]
+                message = u"No encuentro el paquete"
+                self._snd(self.get_str_menu_quants(), message)
+                return
+
+        if line == KEY_VOLVER:
+            self.step = 0
+            self.quants = []
+            self.state='tools'
+            self._snd(self.get_menu_tools())
+            return
+
+        if line_int and self.step == 1:
+            quant = self.quant(line_int)
+            self.step = 2
+            message = u"\nConfirma mover"
+            self._snd(self.get_str_menu_quants(), message)
+            return
+
+        if line == KEY_CONFIRM and self.step ==2:
+            res = self.factory_odoo.conn.get_stock_from_output_stock(self.quant[line_int])
+            self.step = 0
+            message = u"\nMovido"
+            self._snd(self.get_str_menu_quants(), message)
+            return
+
+        self.step = 0
+        message = u"\nNo te entiendo"
+        self._snd(self.get_str_menu_quants(), message)
+        return
 
 # Asigna a cada conexion un protocolo ScanGunProtocol
 class ScanGunFactory(Factory):
