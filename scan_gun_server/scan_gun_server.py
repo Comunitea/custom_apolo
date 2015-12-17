@@ -5427,7 +5427,7 @@ class ScanGunProtocol(LineReceiver):
                 print u'%s > %s\n %s'%(key, ruta, transporter)
                 if key>= self.num_order_list_ops and key<= self.num_order_list_ops + MAX_NUM_ONE/2:
                     hay = True
-                    str_menu += "%s -> %s\n%s  (%s Pendientes)\n"%(key, ruta, transporter, self.routes[str(key)][3])
+                    str_menu += "%s -> %s\n     %s\n"%(key, ruta, transporter)
 
             if self.num_order_list_ops<=len(self.routes):
                 str_menu += u'(......)'
