@@ -190,7 +190,7 @@ class custom_picking_parser(models.AbstractModel):
                 #     new_qty_sc = ind_total_units[unit][1] + qty_sc
                 #     ind_total_units[unit] = (new_qty, new_qty_sc)
 
-        tfoot['sum_qty'] = '{0:.4f}'.format(move_qty)
+        tfoot['sum_qty'] = '{0:.2f}'.format(move_qty)
         tfoot['sum_net'] = '{0:.2f}'.format(move_net)
         # Calc indirect totals
         rem_num_units = len(ind_total_units.keys())

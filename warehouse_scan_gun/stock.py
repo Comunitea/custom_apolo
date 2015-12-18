@@ -22,6 +22,39 @@
 from openerp import models, fields, api
 import time
 
+
+class stock_quant(models.Model):
+
+    _inherit = "stock.quant"
+
+    def get_stock_from_output_stock(self,package_id, write = False, quant_id = False):
+
+        #añadimos la cantidad indicada en el paquete leido
+        output_stock_loc_id = self.env['stock.warehouse'].browse(1).wh_output_stock_loc_id.id
+
+        domain = [('package_id', '=', package_id)]
+        package_id = self.env['stock.quant.package'].search(domain)
+        domain = [('product_id', '=', package_id.product_id.id), ('location_id', '=', output_stock_loc_id), ('reservation_id', '=', False)]
+        quant_ids = self.env['stock.quant'].sudo().search(domain)
+        if write and quant_id:
+            res = False
+            quant_ids = self.env['stock.quant'].sudo().browse(quant_id)
+            values = {
+                'package_id': package_id.id,
+                'location_id': package_id.location_id.id,
+
+                }
+            res = quant_ids.write(values)
+            return res
+        else:
+            res = []
+            for quant in quant_ids:
+                quant_ = [quant.id, quant.qty, quant.product_id.uom_id.name]
+                res.append(quant_)
+            return res
+
+
+
 class stock_picking_wave(models.Model):
     _inherit ='stock.picking.wave'
 

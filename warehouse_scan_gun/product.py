@@ -339,7 +339,7 @@ class product_product (models.Model):
         # uom_id = my_args.get("uom_id", False)
         # uom_qty = my_args.get("uom_qty", 0.00)
         ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': 1}
-
+        #import ipdb; ipdb.set_trace()
 
 
         if product_id:

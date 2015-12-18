@@ -28,6 +28,7 @@ class stock_picking(models.Model):
 
     @api.multi
     def get_routes_menu(self):
+
         res = {}
         domain = [('picking_type_id', '=',5),('pack_operation_ids', '!=', False),
                   ('validated_state', '=', 'loaded'), ('state', 'not in', ('draft','done','cancel'))]
@@ -37,15 +38,32 @@ class stock_picking(models.Model):
         indx = 1
         name_pool = []
         for x in route_ids:
-
+            transporter = x.route_detail_id.comercial_id.name or False
             name = x.route_detail_id.detail_name_str
             id = x.route_detail_id.id
             if not name in name_pool:
-                res[str(indx)] = (id, name)
+                res[str(indx)] = (id, name, transporter, self.get_free_waves(id))
                 name_pool.append(name)
                 indx += 1
 
         return res
+
+    def get_free_waves(self, route_id):
+
+        pick_obj = self.env['stock.picking']
+        # wave_obj = self.env['stock.picking.wave']
+        # task_obj = self.env["stock.task"]
+        # oper_obj = self.pool.get("stock.pack.operation")
+        warehouse = self.env['stock.warehouse'].browse(1)
+
+        domain = [
+            ('picking_type_id', '=', warehouse.pick_type_id.id),
+            ('state', 'in', ['assigned', 'partially_available']),
+            ('trans_route_id', '=', route_id),
+            ('wave_id', "=", False),
+            ('validated_state', '=', 'loaded')]
+        pickings_to_wave = pick_obj.search(domain)
+        return len(pickings_to_wave) or 0
 
 
     @api.multi
