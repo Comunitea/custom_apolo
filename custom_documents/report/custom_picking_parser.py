@@ -42,7 +42,7 @@ class custom_picking_parser(models.AbstractModel):
             'base': '{0:.2f}'.format(pick.amount_untaxed_acc),
             'iva_import': '{0:.2f}'.format(pick.amount_tax_acc),
             'total_doc': '{0:.2f}'.format(pick.amount_total_acc),
-            'acc_paid': '{0:.2f}'.format(pick.receipt_amount),
+            'acc_paid': '{0:.2f}'.format(0.0),
             'total_paid': '{0:.2f}'.format(pick.amount_total_acc - pick.receipt_amount),
             'pick_date': pick_date
         }
