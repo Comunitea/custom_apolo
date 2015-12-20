@@ -376,8 +376,8 @@ class OdooDao:
         res = self.connection.execute('stock.task', 'gun_begin_task', [], my_args)
         return res
 
-    def finish_task(self, user_id, task_id):
-        my_args = {'user_id': user_id, 'task_id': task_id}
+    def finish_task(self, user_id, task_id, picking_task = False):
+        my_args = {'user_id': user_id, 'task_id': task_id, 'picking_task': picking_task}
         op_data = self.connection.execute('stock.task', 'gun_finish_task', [], my_args)
         return op_data
 
