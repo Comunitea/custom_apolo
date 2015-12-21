@@ -30,31 +30,31 @@
          width: 100%;
         }
         .table2-p td{
-         font-size: 11px;
+         font-size: 10px;
         }
         .table2-p .col-ref{
-          width: 10%;
+          width: 8%;
         }
         .table2-p .col-des{
-          width: 30%;
+          width: 35%;
         }
         .table2-p .col-iva{
-          width: 10%;
+          width: 14%;
         }
         .table2-p .col-qty{
-          width: 10%;
+          width: 8%;
         }
         .table2-p .col-unit{
-          width: 10%;
+          width: 3%;
         }
         .table2-p .col-pp{
-          width: 10%;
+          width: 12%;
         }
         .table2-p .col-ap{
-          width: 10%;
+          width: 12%;
         }
         .table2-p .col-net{
-          width: 10%;
+          width: 14%;
         }
         .table2-p td{
           padding-right:4px;
@@ -439,10 +439,12 @@
                   <th class="col-ref"><strong>Ref.</strong></th>
                   <th class="col-des"><strong>Description</strong></th>
                   <th class="col-qty text-right"><strong>Qty.</strong></th>
-                  <th class="col-unit"><strong>Unit</strong></th>
+                  <th class="col-unit"><strong>Unidad venta</strong></th>
+                  <th class="col-qty text-right"><strong>Qty.</strong></th>
+                  <th class="col-unit"><strong>Unidad stock</strong></th>
                   <th class="col-pp text-right"><strong t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing' and o.partner_id.pick_print_op">Pricelist Price</strong></th>
                   <th class="col-ap text-right"><strong t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing' and o.partner_id.pick_print_op">Applied Price</strong></th>
-                  <th class="col-iva text-right"><strong>% IVA</strong></th>
+                  <th class="col-iva text-center"><strong>% IVA</strong></th>
                   <th class="col-net text-right"><strong t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing' and o.partner_id.pick_print_op">Net import</strong></th>
               </tr>
 
@@ -463,6 +465,12 @@
                       <span t-esc="l['unit']"/>
                   </td>
                   <td class="text-right">
+                      <span t-esc="l['uom_qty']"/>
+                  </td>
+                  <td>
+                      <span t-esc="l['uom_unit']"/>
+                  </td>
+                  <td class="text-right">
                     <div  t-if="o.partner_id.pick_print_op != 'not_valued' and o.picking_type_id.code == 'outgoing' and o.partner_id.pick_print_op">
                       <span t-esc="l['pric_price']"/>
                     </div>
@@ -472,7 +480,7 @@
                       <span t-esc="l['app_price']"/>
                     </div>
                   </td>
-                  <td class="text-right">
+                  <td class="text-center">
                       <span t-esc="l['iva']"/>
                   </td>
                   <td class="text-right">

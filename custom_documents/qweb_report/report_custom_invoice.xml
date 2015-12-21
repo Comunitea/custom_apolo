@@ -60,48 +60,48 @@
             width: 100%;
             font-size: 10px;
         }
-        table2-p{
+                .table2-p{
          width: 100%;
         }
         .table2-p td{
-         font-size: 11px;
+         font-size: 10px;
         }
         .table2-p .col-ref{
-          width: 10%;
+          width: 8%;
         }
         .table2-p .col-des{
-          width: 30%;
+          width: 35%;
         }
         .table2-p .col-iva{
-          width: 10%;
+          width: 14%;
         }
         .table2-p .col-qty{
-          width: 10%;
+          width: 8%;
         }
         .table2-p .col-unit{
-          width: 10%;
+          width: 3%;
         }
         .table2-p .col-pp{
-          width: 10%;
+          width: 12%;
         }
         .table2-p .col-ap{
-          width: 10%;
+          width: 12%;
         }
         .table2-p .col-net{
-          width: 10%;
+          width: 14%;
         }
         .table2-p td{
-            padding-right:4px;
+          padding-right:4px;
         }
         .table2-p th{
-            padding-right:4px;
+          padding-right:4px;
          }
         .table2-p thead{
-            border-top: solid 2px #000000;
-            border-bottom: solid 2px #000000;
+          border-top: solid 2px #000000;
+          border-bottom: solid 2px #000000;
         }
         .table2-p tfoot{
-            border-top: solid 2px #000000;
+          border-top: solid 2px #000000;
         }
         .top_part-p{
             min-height:30mm;
@@ -526,9 +526,9 @@
                         <th class="col-ref"><strong>Ref.</strong></th>
                         <th class="col-des"><strong>Description</strong></th>
                         <th class="col-qty text-right"><strong>Qty.</strong></th>
-                        <th class="col-unit"><strong>Sale Unit</strong></th>
+                        <th class="col-unit"><strong>Unidad venta</strong></th>
                         <th class="col-qty text-right"><strong>Qty.</strong></th>
-                        <th class="col-unit"><strong>Unit</strong></th>
+                        <th class="col-unit"><strong>Unidad stock</strong></th>
                         <th class="col-pp text-right"><strong>Pricelist Price</strong></th>
                         <th class="col-ap text-right"><strong>Applied Price</strong></th>
                         <th class="col-iva text-center"><strong>% IVA</strong></th>

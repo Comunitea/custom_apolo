@@ -101,6 +101,8 @@ class custom_picking_parser(models.AbstractModel):
                 'iva': iva,
                 'qty': '{0:.4f}'.format(move.accepted_qty),
                 'unit': move.product_uos.name,
+                'uom_qty': '{0:.4f}'.format(move.product_uom_acc_qty),
+                'uom_unit': move.product_uom.name,
                 'pric_price': '{0:.2f}'.format(pu),
                 'app_price': '{0:.2f}'.format(p_app),
                 'net': '{0:.2f}'.format(move.price_subtotal_accepted),

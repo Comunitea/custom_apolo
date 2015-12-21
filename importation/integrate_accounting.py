@@ -16,7 +16,7 @@ class integrate_accounting(object):
         try:
             self.url_template = "http://%s:%s/xmlrpc/%s"
             self.server = "localhost"
-            self.port = 9069
+            self.port = 8069
             self.dbname = dbname
             self.user_name = user
             self.user_passwd = passwd
@@ -187,14 +187,16 @@ class integrate_accounting(object):
                         last_move = int(row['Referencia'])
                         move_ids = self.search("account.move", [('name', '=', str(last_move)),('date', '=', last_date),('journal_id', '=', journal_id[0])])
                         if move_ids:
-                            move_state = self.read("account.move", move_ids[0], ["state"])["state"]
-                            if move_state == "posted":
-                                last_move_id = move_ids[0]
-                                posted = True
-                                continue
-                            else:
-                                posted = False
-                                self.unlink("account.move", move_ids[0])
+                            #move_state = self.read("account.move", move_ids[0], ["state"])["state"]
+                            #if move_state == "posted":
+                            #    last_move_id = move_ids[0]
+                            #    posted = True
+                            #    continue
+                            #else:
+                            #    posted = False
+                            #    self.unlink("account.move", move_ids[0])
+                            last_move = False
+                            continue
                         else:
                             posted = False
                         move_vals = {

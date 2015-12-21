@@ -54,7 +54,7 @@ PRODUCT_FIX = {
     '428': 6, '427': 6, '113': 10, '4470': 3, '247101': 6, '89': 5, '302201': 6, '4801': 12,
     '230120': 12, '4121': 25, '100802': 6, '100804': 3, '247227': 6, '4820': 12, '245101': 12,
     '100201': 6, '3003': 24, '3004': 12, '3021': 10, '3008': 40, '3012': 40, '3033': 6, '3024': 10,
-    '3025': 10, '10173': 23, '61': 6, '403196': 6, '403212': 6
+    '3025': 10, '10173': 23, '61': 6, '403196': 6, '403212': 6, '9267': 10
 }
 
 def ustr(text):
@@ -879,40 +879,41 @@ class DatabaseImport:
 
     def fix_product_histories(self):
         cont = 0
-        PRODUCT_FIX = {'9267': 10}
         for product_code in PRODUCT_FIX:
+            print "product_code: ", product_code
             product_ids = self.search("product.product", [('default_code', '=', product_code),'|',('active', '=', False),('active', '=', True)])
-            print "Product: ", product_code
             if product_ids:
-                #product_data = self.read('product.product', product_ids[0], ['lst_price'])
-                sale_line_ids = self.search('sale.order.line', [('product_id', '=', product_ids[0]),('order_id.state', '=', 'history'),('price_unit', '<', 15)])
-                if sale_line_ids:
-                    for sale_line_id in sale_line_ids:
-                        line_data = self.read("sale.order.line", sale_line_id, ['product_uom_qty', 'price_unit'])
-                        self.write("sale.order.line", [sale_line_id], {#'product_uom_qty': (int(line_data['product_uom_qty']) / float(PRODUCT_FIX[product_code])),
+                product_data = self.read('product.product', product_ids[0], ['lst_price','doorstep_price'])
+                #sale_line_ids = self.search('sale.order.line', [('product_id', '=', product_ids[0]),('order_id.state', '=', 'history')])
+                #if sale_line_ids:
+                #    for sale_line_id in sale_line_ids:
+                #        line_data = self.read("sale.order.line", sale_line_id, ['product_uom_qty', 'price_unit'])
+                #        self.write("sale.order.line", [sale_line_id], {#'product_uom_qty': (int(line_data['product_uom_qty']) / float(PRODUCT_FIX[product_code])),
                                                                        #'product_uos_qty': (int(line_data['product_uom_qty']) / float(PRODUCT_FIX[product_code])),
-                                                                       'price_unit': line_data['price_unit'] * float(PRODUCT_FIX[product_code]),
-                                                                       'price_udv': line_data['price_unit'] * float(PRODUCT_FIX[product_code])})
-                #coeff = float(PRODUCT_FIX[product_code])
-                #if coeff > 2:
-                #    coeff -= 1
-                #min_price_to_search = product_data['lst_price'] / (float(PRODUCT_FIX[product_code]) - 1)
-                #max_price_to_search = product_data['lst_price'] * (float(PRODUCT_FIX[product_code]) - 1)
+                #                                                       'price_unit': line_data['price_unit'] * float(PRODUCT_FIX[product_code]),
+                #                                                       'price_udv': line_data['price_unit'] * float(PRODUCT_FIX[product_code])})
+                coeff = float(PRODUCT_FIX[product_code])
+                if coeff > 2:
+                    coeff = coeff / 2
+                else:
+                    coeff -= 0.5
+                min_price_to_search = product_data['lst_price'] / coeff
+                max_price_to_search = (product_data['doorstep_price'] or product_data['lst_price']) * coeff
                 invoice_line_ids = self.search('account.invoice.line',
                                                [('product_id', '=', product_ids[0]),
                                                 ('invoice_id.state', '=', 'history'),
-                                                ('price_unit', '!=', 0.0),('price_unit', '<', 15.0)])
-                #                                '|',('price_unit', '<', min_price_to_search),
-                #                                ('price_unit', '>', max_price_to_search)])
+                                                ('price_unit', '!=', 0.0),
+                                                '|',('price_unit', '<', min_price_to_search),
+                                                ('price_unit', '>', max_price_to_search)])
                 if invoice_line_ids:
                     for invoice_line in invoice_line_ids:
                         line_data = self.read("account.invoice.line", invoice_line, ['quantity', 'price_unit', 'invoice_id'])
                         print "Orig price", line_data['price_unit']
-                        #if line_data['price_unit'] > max_price_to_search:
-                        #    calc = line_data['price_unit'] / float(PRODUCT_FIX[product_code])
-                        #else:
-                        #    calc = line_data['price_unit'] * float(PRODUCT_FIX[product_code])
-                        calc = line_data['price_unit'] * float(PRODUCT_FIX[product_code])
+                        if line_data['price_unit'] > max_price_to_search:
+                            calc = line_data['price_unit'] / float(PRODUCT_FIX[product_code])
+                        else:
+                            calc = line_data['price_unit'] * float(PRODUCT_FIX[product_code])
+                        #calc = line_data['price_unit'] * float(PRODUCT_FIX[product_code])
                         print "Final price", calc
                         self.write("account.invoice.line", [invoice_line], {#'quantity': (int(line_data['quantity']) / float(PRODUCT_FIX[product_code])),
                                                                             'price_unit': calc})
