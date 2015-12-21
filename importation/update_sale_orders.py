@@ -26,7 +26,7 @@ class update_sale(object):
             self.user_id = login_facade.login(self.dbname, self.user_name, self.user_passwd)
             self.object_facade = xmlrpclib.ServerProxy(self.url_template % (self.server, self.port, 'object'))
 
-            res = self.update_taxes()
+            res = self.update_comercial()
             #con exito
             if res:
                 print ("!!!!!All concilied!!!!!!!")
@@ -167,6 +167,39 @@ class update_sale(object):
 
     def isclose(self, a, b, rel_tol=1e-09, abs_tol=0.0):
         return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
+
+    def update_comercial(self):
+        try:
+            sale_ids = self.search('sale.order', [('date_order', '>=',
+                                                   '01/10/2015')])
+            total = len(sale_ids)
+            print total
+            sols = self.read('sale.order',  sale_ids,
+                                ['id', 'partner_id', 'user_id','tax_id'])
+            realizadas =0
+            num = 0
+            for sale in sols:
+                partner = self.read('res.partner',  sale['partner_id'][0],
+                                ['user_id'])
+                if partner['user_id']:
+                    if partner['user_id'] != sale['user_id']:
+
+                        print "Cambiando " + str(partner['user_id'][0])
+                        vals = {'user_id': partner['user_id'][0]}
+                        print vals
+                        print sale['id']
+                        self.write('sale.order', sale['id'], vals)
+                realizadas += 1
+                num +=1
+                print u"Procesado %s : %s/%s/%s"%(sale['id'],realizadas, num,
+                                                  total)
+
+        except Exception, e:
+            print u"EXCEPTION: REC %s"%(e)
+            print "No procesados hasta el momento:"
+
+
 
 
     def update_taxes(self):
