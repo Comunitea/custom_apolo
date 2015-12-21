@@ -145,7 +145,7 @@ class DatabaseImport:
 
         self.url_template = "http://%s:%s/xmlrpc/%s"
         self.server = "localhost"
-        self.port = 8069
+        self.port = 7069
         self.dbname = dbname
         self.user_name = user
         self.user_passwd = passwd
@@ -1486,6 +1486,20 @@ class DatabaseImport:
             cont += 1
             print "%s de %s" % (str(cont), str(num_rows))
 
+    def reimport_customer_street(self, cr):
+        cr.execute("select direccion as street, cliente as ref from dbo.LG_clientes")
+        partners_data = cr.fetchall()
+        num_rows = len(partners_data)
+        cont = 0
+        for row in partners_data:
+            partner_ids = self.search("res.partner", [('ref','=',str(int(row.ref))),('customer', '=', True),'|',('active', '=', True),('active', '=', False)])
+            if partner_ids:
+                vals = {'street': ustr(row.street)}
+                self.write("res.partner", [partner_ids[0]], vals)
+
+            cont += 1
+            print "%s de %s" % (str(cont), str(num_rows))
+
     def process_data(self):
         """
         Importa la bbdd
@@ -1525,7 +1539,8 @@ class DatabaseImport:
             #self.import_product_rappel_groups(cr)
             #self.import_other_promotions(cr)
             #self.update_cost_product_price(cr)
-            self.update_product_weight()
+            #self.update_product_weight()
+            self.reimport_customer_street(cr)
 
 
         except Exception, ex:
