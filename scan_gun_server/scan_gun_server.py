@@ -4717,7 +4717,6 @@ class ScanGunProtocol(LineReceiver):
 
 
         if self.step == 10 and line ==KEY_CONFIRM:
-
             self.move = {}
             k=str(self.active_task)
             package_=False
