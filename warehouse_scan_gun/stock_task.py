@@ -106,7 +106,7 @@ class StockTask(models.Model):
             ('state', '=', 'assigned')
         ]
         task_id = False
-        task_obj = self.search(domain)
+        task_obj = self.search(domain, order = "date_start")
         vals = {}
         ind = 0
         ref =''
@@ -117,20 +117,28 @@ class StockTask(models.Model):
                 num_ops = len(task.wave_id.wave_report_ids)
             else:
                 num_ops = len(task.operation_ids)
+            route_id = task.route_detail_id.detail_name_str or False
+            if route_id:
+                c1, c2, c3, c4 = route_id.replace(" ","-").split('-')
+                detail_name = u'%s %s (%s)'%(c1, c4, task.wave_id.id)
+            else:
+                detail_name = "Ubic. (%s)"%task.id
+
             values = {
                 'id': task.id,
                 'type' : task.type,
                 'paused' : task.paused,
-                'ref' : task.wave_id.name or task.picking_id.name or ref or '',
+                'ref' : detail_name, #detail_name task.wave_id.name or task.picking_id.name or ref or '',
                 'ops': num_ops,
-                'wave_id': task.wave_id.id or False
-                   }
-            if task.paused:
-                ind += 1
-                vals[format(ind)] = values
+                'wave_id': task.wave_id.id or False,
+                'route_id': ref,
+                'route_man_id': task.route_detail_id.comercial_id.name or u'Tarea de Ubicacion'
+                }
 
-            else:
-                vals[format(0)] = values
+            ind += 1
+            vals[format(ind)] = values
+            if not task.paused:
+                #vals[format(0)] = values
                 task_id = task.id
         return task_id, vals
 
@@ -286,15 +294,20 @@ class StockTask(models.Model):
         #new_cr = sql_db.db_connect(self.env.cr.dbname).cursor()
 
         task_id = my_args.get('task_id', False)
-        task_obj = self.browse(task_id)
+        picking_task = my_args.get('picking_task', False)
+        if picking_task:
+            task_obj = self.browse(task_id)
+            task_obj.write({'state':'process'})
+            return True
 
-        uid, context = self.env.uid, self.env.context
-        thread = threading.Thread(
-            target=self._gun_finish_task, args=(my_args,))
-        thread.start()
-
-        #task_obj.write({'state':'process'})
-        return True
+        else:
+            task_obj = self.browse(task_id)
+            uid, context = self.env.uid, self.env.context
+            thread = threading.Thread(
+                target=self._gun_finish_task, args=(my_args,))
+            thread.start()
+            #task_obj.write({'state':'process'})
+            return True
 
     @api.model
     def _gun_finish_task(self, my_args):

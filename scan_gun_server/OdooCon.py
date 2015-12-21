@@ -248,6 +248,10 @@ class OdooDao:
         ops_data = self.connection.execute('stock.picking', 'create_multipack_from_pick', [], my_args)
         return ops_data
 
+    def get_stock_from_output_stock(self, package_id, write = False, quant_id = False):
+        my_args = {'package_id': package_id, 'write': write, 'quant_id': quant_id}
+        res = self.connection.execute('stock.quant', 'get_stock_from_output_stock', [], my_args)
+        return res
 
     def get_machines_menu(self, type):
 
@@ -372,8 +376,8 @@ class OdooDao:
         res = self.connection.execute('stock.task', 'gun_begin_task', [], my_args)
         return res
 
-    def finish_task(self, user_id, task_id):
-        my_args = {'user_id': user_id, 'task_id': task_id}
+    def finish_task(self, user_id, task_id, picking_task = False):
+        my_args = {'user_id': user_id, 'task_id': task_id, 'picking_task': picking_task}
         op_data = self.connection.execute('stock.task', 'gun_finish_task', [], my_args)
         return op_data
 

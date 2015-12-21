@@ -47,7 +47,7 @@ class SaleOrder(models.Model):
         partner_t = self.pool.get('res.partner')
         part = partner_t.browse(cr, uid, part, context=context)
         if part and part.indirect_customer and part.supplier_ids:
-            res['value']['supplier_id'] = part.supplier_ids[0]
+            res['value']['supplier_id'] = part.supplier_ids[0].id
         return res
 
     @api.onchange('supplier_id')
