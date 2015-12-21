@@ -26,6 +26,7 @@ from openerp.tools.translate import _
 class stock_picking(models.Model):
     _inherit ='stock.picking'
 
+
     @api.multi
     def get_routes_menu(self):
 
@@ -43,18 +44,19 @@ class stock_picking(models.Model):
         name_pool = []
         for x in route_ids:
             transporter = x.route_detail_id.comercial_id.name or False
-            name_ = x.route_detail_id.detail_name_str
+            name = x.route_detail_id.detail_name_str
             id = x.route_detail_id.id
-            ops_to_process = self.get_free_waves(id)
-            print u"%s > Nombre para id=%s: %s >> %s (%s)"\
-                  %(indx, x.route_detail_id.id, x.route_detail_id.comercial_id.name, x.route_detail_id.detail_name_str, ops_to_process)
-            name_ = name_.replace(' ', '-')
-            name_ = name_.split("-")
-            if len(name_) == 4:
-                route, year, month, day =  name_
-                name = u"%s %s %s"%(route, day, month)
-            else:
-                name = x.route_detail_id.detail_name_str or "Sin Nombre"
+            ops_to_process = 0# self.get_free_waves(id)
+            print u"Nombre Ruta: %s para %s "%(name, transporter)
+            # print u"%s > Nombre para id=%s: %s >> %s (%s)"\
+            #       %(indx, x.route_detail_id.id, x.route_detail_id.comercial_id.name, x.route_detail_id.detail_name_str, ops_to_process)
+            # name_ = name_.replace(' ', '-')
+            # name_ = name_.split("-")
+            # if len(name_) == 4:
+            #     route, year, month, day =  name_
+            #     name = u"%s %s %s"%(route, day, month)
+            # else:
+            #     name = x.route_detail_id.detail_name_str or "Sin Nombre"
 
             if not name in name_pool:
                 res[str(indx)] = (id, name, transporter, ops_to_process)
