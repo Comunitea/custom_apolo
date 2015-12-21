@@ -473,6 +473,7 @@ class LineOnlyReceiver(protocol.Protocol):
         @param line: The line to send, not including the delimiter.
         @type line: C{bytes}
         """
+
         return self.transport.writeSequence((line, self.delimiter))
 
 

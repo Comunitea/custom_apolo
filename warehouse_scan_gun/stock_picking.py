@@ -30,7 +30,11 @@ class stock_picking(models.Model):
     def get_routes_menu(self):
 
         res = {}
-        domain = [('picking_type_id', '=',5),('pack_operation_ids', '!=', False),
+        warehouse = self.env['stock.warehouse'].search([('pick_type_id', '!=', False)])
+        pick_type_ids= []
+        for wh in warehouse:
+            pick_type_ids.append (wh.pick_type_id.id)
+        domain = [('picking_type_id', 'in',pick_type_ids),('pack_operation_ids', '!=', False),
                   ('validated_state', '=', 'loaded'), ('state', 'not in', ('draft','done','cancel'))]
         route_ids = self.search(domain, order = 'route_detail_id')#.detail_name_str')#,  order ='name asc')
         if not route_ids:
@@ -39,10 +43,21 @@ class stock_picking(models.Model):
         name_pool = []
         for x in route_ids:
             transporter = x.route_detail_id.comercial_id.name or False
-            name = x.route_detail_id.detail_name_str
+            name_ = x.route_detail_id.detail_name_str
             id = x.route_detail_id.id
+            ops_to_process = self.get_free_waves(id)
+            print u"%s > Nombre para id=%s: %s >> %s (%s)"\
+                  %(indx, x.route_detail_id.id, x.route_detail_id.comercial_id.name, x.route_detail_id.detail_name_str, ops_to_process)
+            name_ = name_.replace(' ', '-')
+            name_ = name_.split("-")
+            if len(name_) == 4:
+                route, year, month, day =  name_
+                name = u"%s %s %s"%(route, day, month)
+            else:
+                name = x.route_detail_id.detail_name_str or "Sin Nombre"
+
             if not name in name_pool:
-                res[str(indx)] = (id, name, transporter, self.get_free_waves(id))
+                res[str(indx)] = (id, name, transporter, ops_to_process)
                 name_pool.append(name)
                 indx += 1
 
@@ -54,16 +69,25 @@ class stock_picking(models.Model):
         # wave_obj = self.env['stock.picking.wave']
         # task_obj = self.env["stock.task"]
         # oper_obj = self.pool.get("stock.pack.operation")
-        warehouse = self.env['stock.warehouse'].browse(1)
+        warehouse = self.env['stock.warehouse'].search([('pick_type_id', '!=', False)])
+        pick_type_ids= []
+        for wh in warehouse:
+            pick_type_ids.append (wh.pick_type_id.id)
 
-        domain = [
-            ('picking_type_id', '=', warehouse.pick_type_id.id),
-            ('state', 'in', ['assigned', 'partially_available']),
-            ('trans_route_id', '=', route_id),
-            ('wave_id', "=", False),
-            ('validated_state', '=', 'loaded')]
+            domain = [('picking_type_id', 'in', pick_type_ids),
+                      ('route_detail_id', '=', route_id),
+                      ('state', 'not in', ('draft','done','cancel')),
+                      ('validated_state', '=', 'loaded')
+                      ]
+
         pickings_to_wave = pick_obj.search(domain)
-        return len(pickings_to_wave) or 0
+        ops_to_process = 0
+        for pick in pickings_to_wave:
+            domain = [('to_process', '=', False), ('picking_id', '=', pick.id),('task_id', '=', False)]
+            ops_to_process += len(self.env['stock.pack.operation'].search(domain))
+
+        return ops_to_process
+
 
 
     @api.multi
