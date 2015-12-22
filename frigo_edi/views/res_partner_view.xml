@@ -7,11 +7,13 @@
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="midban_partner.midban_view_partner_form"/>
             <field name="arch" type="xml">
-                <field name="ref" position="after">
-                    <field name="unilever_code"/>
-                    <field name="is_parent_chain" invisible="1"/>
-                    <field name="concession_code" attrs="{'invisible': [('is_parent_chain', '=', False)]}"/>
-                </field>
+
+                <xpath expr="//field[@name='ref']/.." position="after">
+                        <field name="unilever_code"/>
+                        <field name="is_parent_chain" invisible="1"/>
+                        <field name="concession_code" attrs="{'invisible': [('is_parent_chain', '=', False)]}"/>
+                </xpath>
+
                 <!-- <field name="invoice_method" position="before">
                     <field name="indirect_customer"/>
                 </field> -->
