@@ -4548,7 +4548,7 @@ class ScanGunProtocol(LineReceiver):
 
         if self.step==10 or self.step == 8:
             #Ya tenemos destino
-            menu_str+= u'\n[%s] Fusionar Etiqueta (%s)\n'%(do_pack, KEY_DO_PACK)
+            menu_str+= u'\n[%s] Fusionar Etiqueta (%s)\nNO FUSIONA PAQUETES'%(do_pack, KEY_DO_PACK)
             menu_str += self.inverse(u'\n%s Mover'%KEY_CONFIRM)
 
         keys = u"\n%s Atras %s Cancelar"%(KEY_VOLVER, KEY_CANCEL)
@@ -4573,6 +4573,11 @@ class ScanGunProtocol(LineReceiver):
             return
 
         if line == KEY_DO_PACK:
+            self.pack_type = 'no_pack'
+            self.do_pack = False
+            message =u'\nAnulada. No fusiona paquete.'
+            self._snd(self.get_manual_transfer_packet(), message)
+            return
             self.do_pack= not self.do_pack
             if self.do_pack:
                 self.pack_type = 'do_pack'
@@ -4622,7 +4627,8 @@ class ScanGunProtocol(LineReceiver):
         #Si en ccualquier momento meto un opaquete reinicio la operacion
         if order_line == PRE_PACK:
 
-            self.do_pack = True
+            self.pack_type = 'no_pack'
+            self.do_pack = False
             package_id = line_int
             self.vals={}
             self.vals = self.factory.odoo_con.get_pack_gun_info(self.user_id, package_id)
@@ -4745,7 +4751,6 @@ class ScanGunProtocol(LineReceiver):
                     message, print_tag = self.get_tags_message(op['do_pack'], pack_destino, op['product_id'])
                     if print_tag:
                         tag.append(op['result_package_id'])
-
                 if tag:
                     res_print = self.print_packs(tag)
 
@@ -5428,7 +5433,7 @@ class ScanGunProtocol(LineReceiver):
         if self.routes:
             len_routes = len(self.routes)
             #import ipdb; ipdb.set_trace()
-            str_menu="Hay %s rutas\n"%len_routes
+            str_menu=u"Hay %s rutas\n"%len_routes
             print u"Numero de lista: %s de %s"%(self.num_order_list_ops,len_routes)
             if self.num_order_list_ops > 1:
                     str_menu += u'(...)\n'
