@@ -27,6 +27,7 @@
                       <th class="center" colspan="2">Address</th>
                       <th class="center">City</th>
                       <th class="center">Phone</th>
+                      <th class="center">Notes</th>
                     </tr>
                     <t t-foreach="docs" t-as="o">
                       <t t-set="expr" t-value="'%s:%s' % (str(o.end_hour).split('.')[0], int(float(str('%.2f' % o.end_hour).split('.')[1])/100*60))"/>
