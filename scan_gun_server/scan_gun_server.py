@@ -74,7 +74,7 @@ PRE_PACK = 'PK'
 PRE_LOC = 'LC'
 PRE_PROD = 'PR'
 PRE_LOT = 'LT'
-MAX_NUM = 4
+MAX_NUM = 3
 MAX_NUM_ONE = 5
 MAX_NUM_QTYS = 5
 ERROR_TAREA_EN_PAUSA = u'\n[x] Tarea en pausa'
@@ -2090,19 +2090,33 @@ class ScanGunProtocol(LineReceiver):
 
             for k in range(self.num_order_list_ops, total + 1):
                 k_ = str(k)
-                print u'Linea para %s con ubic. %s'%(data_[k_]['package'],data_[k_][after_PAQUETE])
+                print 'Linea para %s con ubic. %s'%(data_[k_]['package'],data_[k_][after_PAQUETE])
 
                 if k_ in data_:
                     op_processed = data_[k_]['to_process']
+
                     if k <= total:
                         k_ = str(k)
                         op = u'%s> %s'%(k_, data_[k_]['package'])
                         if not op_processed:
                             op = self.inverse(op)
-                        op +=u'>> %s\n[%s]:%s\n'%(data_[k_][after_PAQUETE], data_[k_]['default_code'], data_[k_]['product'])
+                        op +=u'>> %s\n > [%s]:%s'%(data_[k_][after_PAQUETE], data_[k_]['default_code'], data_[k_]['product'])
+                        #Aqui añado la cantidad que vamos a picar de este paquete
+                        units = data_[k_]['units']
+                        qty_str = ''
+                        if units[2][1] > 0:
+                            qty_str += " %s %s"%(units[2][1], units[2][0])
+                        if units[1][1] > 0:
+                            qty_str += " %s %s"%(units[1][1], units[1][0])
+                        if units[0][1] > 0:
+                            qty_str += " %s %s"%(units[0][1], units[0][0])
+                        if qty_str:
+                            op += u'\n >%s'%qty_str
+                        op += "\n"
                     if self.show_op_processed or not op_processed:
                         strg += op
                         inc+=1
+
                     if inc>=MAX_NUM:
                         break
             if self.num_order_list_ops + MAX_NUM < total+1:
@@ -2679,7 +2693,7 @@ class ScanGunProtocol(LineReceiver):
 
     def create_operations_on_the_fly(self, last_qty = 0.00):
 
-        print u'operations on the fly'
+        print 'operations on the fly'
         print self.list_packages
         print last_qty
 
@@ -5434,7 +5448,7 @@ class ScanGunProtocol(LineReceiver):
             len_routes = len(self.routes)
             #import ipdb; ipdb.set_trace()
             str_menu=u"Hay %s rutas\n"%len_routes
-            print u"Numero de lista: %s de %s"%(self.num_order_list_ops,len_routes)
+            #print u"Numero de lista: %s de %s"%(self.num_order_list_ops,len_routes)
             if self.num_order_list_ops > 1:
                     str_menu += u'(...)\n'
 
@@ -5442,7 +5456,7 @@ class ScanGunProtocol(LineReceiver):
                 ruta = self.routes[str(key)][1]
                 transporter = self.routes[str(key)][2]
 
-                print u'%s > %s\n %s'%(key, ruta, transporter)
+                print '%s > %s\n %s'%(key, ruta, transporter)
                 if key>= self.num_order_list_ops and key<self.num_order_list_ops + self.routes_to_display:
                     hay = True
                     str_menu += u'%s -> %s\n>(%s) %s\n'%(key, ruta, self.routes[str(key)][3], transporter)

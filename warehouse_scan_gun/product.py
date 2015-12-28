@@ -263,8 +263,11 @@ class product_product (models.Model):
         conv.append(base_append)
         conv.append(unit_append)
         conv.append(box_append)
-        print u"Conversion para %s de %s de %s. Conv %s/%s" %(uom_qty, unit_to.name, product.name, product.un_ca, product.kg_un)
-        print u"          >> %s\n"%conv
+        try:
+            print u"Conversion para %s de %s de %s. Conv %s/%s" %(uom_qty, unit_to.name, product.name, product.un_ca, product.kg_un)
+            print u"          >> %s\n"%conv
+        except:
+            print u"Error al imprimir unidades"
         return conv
 
 
@@ -339,9 +342,6 @@ class product_product (models.Model):
         # uom_id = my_args.get("uom_id", False)
         # uom_qty = my_args.get("uom_qty", 0.00)
         ctx = {'lang': 'es_ES', 'tz': 'Europe/Madrid', 'uid': 1}
-        #import ipdb; ipdb.set_trace()
-
-
         if product_id:
             domain = [('id', '=', product_id)]
             product = self.search(domain)
@@ -357,7 +357,6 @@ class product_product (models.Model):
         #
         # if product.is_var_coeff or product.consignment:
         #     import ipdb; ipdb.set_trace()
-
         if not uom_id:
             uom_id = product.uom_id.id
 
@@ -389,7 +388,7 @@ class product_product (models.Model):
 
 
         if product.log_box_id :
-            rest = float_round(rest, precision_rounding =0.00001)
+            rest = float_round(rest,  precision_rounding =product.log_box_id.rounding)
             if (product.log_unit_id or product.log_base_id) and not (product.var_coeff_ca and product.log_box_id.id == uom_id):
 
                 box_qty = int(rest / (product.kg_un * product.un_ca))
@@ -401,7 +400,7 @@ class product_product (models.Model):
             box_append = (product.log_box_id.name, box_qty, product.log_box_id.id, 1, product.var_coeff_ca)
 
         if product.log_unit_id:
-            rest = float_round(rest, precision_rounding = 0.00001)
+            rest = float_round(rest,  precision_rounding =product.log_unit_id.rounding)
             if product.log_base_id:
                 unit_qty = int(rest / product.kg_un)
                 unit_qty = float_round (unit_qty, precision_rounding = product.log_unit_id.rounding)
@@ -411,7 +410,7 @@ class product_product (models.Model):
             unit_append = (unit_id, unit_qty, product.log_unit_id.id, product.un_ca, product.var_coeff_un)
 
         if product.log_base_id:
-            rest = float_round(rest, precision_rounding = 0.00001)
+            rest = float_round(rest,  precision_rounding =product.log_base_id.rounding)
             base_qty = rest
             base_qty = float_round (base_qty, precision_rounding = product.log_base_id.rounding)
             base_append = (base_id, base_qty, product.log_base_id.id, product.kg_un, False, False)
@@ -492,7 +491,7 @@ class product_product (models.Model):
             pack_objs = t_pack.search(domain)
 
             for p in pack_objs:
-                print u'Etiqueta: %s Cantidad: %s (%s Reserv)'%(p.name, p.packed_qty,  p.packed_qty - p.unreserved_qty)
+                print 'Etiqueta: %s Cantidad: %s (%s Reserv)'%(p.name, p.packed_qty,  p.packed_qty - p.unreserved_qty)
                 if not float_compare(p.unreserved_qty, min_qty, precision_rounding =  p.uom_id.rounding) > -1:
                     continue
                 dic = {
