@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+      <template id="report_route_sheet">
+        <style type="text/css">
+          .center{
+            text-align: center;
+          }
+          .table1{
+            width: 100%;
+          }
+          .table1 td{
+            border: 1px solid #000000;
+          }
+        </style>
+            <div class="page">
+              <h2 class="center">Route Sheet</h2>
+                  <table class="table1 table-bordered">
+                    <tr>
+                      <th class="center">Ref.</th>
+                      <!-- <th>Delivery Note</th> -->
+                      <th class="center">Customer</th>
+                      <th class="center">Amount Total</th>
+                      <th class="center">Since</th>
+                      <th class="center">To</th>
+                      <th class="center" colspan="2">Address</th>
+                      <th class="center">City</th>
+                      <th class="center">Phone</th>
+                    </tr>
+                    <t t-foreach="docs" t-as="o">
+                      <t t-set="expr" t-value="'%s:%s' % (str(o.end_hour).split('.')[0], int(float(str('%.2f' % o.end_hour).split('.')[1])/100*60))"/>
+                      <t t-set="h" t-value="int(expr.split(':')[0])"/>
+                      <t t-set="m" t-value="int(expr.split(':')[1])"/>
+                      <t t-if="h &lt; 10">
+                        <t t-set="end_hour" t-value="'0' + str(h)"/>
+                      </t>
+                      <t t-if="h &gt; 9">
+                        <t t-set="end_hour" t-value="str(h)"/>
+                      </t>
+                      <t t-if="m &lt; 10">
+                        <t t-set="end_minute" t-value="'0' + str(m)"/>
+                      </t>
+                      <t t-if="m &gt; 9">
+                        <t t-set="end_minute" t-value="str(m)"/>
+                      </t>
+                      <t t-set="expr" t-value="'%s:%s' % (str(o.init_hour).split('.')[0], int(float(str('%.2f' % o.init_hour).split('.')[1])/100*60))"/>
+                      <t t-set="h" t-value="int(expr.split(':')[0])"/>
+                      <t t-set="m" t-value="int(expr.split(':')[1])"/>
+                      <t t-if="h &lt; 10">
+                        <t t-set="init_hour" t-value="'0' + str(h)"/>
+                      </t>
+                      <t t-if="h &gt; 9">
+                        <t t-set="init_hour" t-value="str(h)"/>
+                      </t>
+                      <t t-if="m &lt; 10">
+                        <t t-set="init_minute" t-value="'0' + str(m)"/>
+                      </t>
+                      <t t-if="m &gt; 9">
+                        <t t-set="init_minute" t-value="str(m)"/>
+                      </t>
+                            <tr>
+                              <td class="center"><span t-esc="o.partner_id.ref"/></td>
+                              <!-- <td><span t-esc="o.name"/></td> -->
+                              <td><span t-esc="o.partner_id.comercial"/></td>
+                              <td class="center"><span t-esc="str('%.2f' % o.amount_total)"/></td>
+                              <td class="center"><span t-esc="init_hour + ':' + init_minute"/></td>
+                              <td class="center"><span t-esc="end_hour + ':' + end_minute"/></td>
+                              <td><span t-esc="o.partner_id.street"/></td>
+                              <td><span t-esc="o.partner_id.street2"/></td>
+                              <td><span t-esc="o.partner_id.city"/></td>
+                              <td class="center"><span t-esc="o.partner_id.phone"/></td>
+                              <td><span t-esc="o.sale_note"/></td>
+                            </tr>
+                    </t>
+                </table>
+            </div>
+      </template>
+    </data>
+</openerp>
