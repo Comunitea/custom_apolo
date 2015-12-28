@@ -71,8 +71,11 @@ class StockPicking(models.Model):
                 unit_price_line = move_line.purchase_line_id.price_unit
                 discount_line = move_line.purchase_line_id.discount or 0.0
             else:
-                raise Warning("There is no purchase line related. Can not "
-                              "calculate price for accounting pending invoice")
+                unit_price_line = move_line.product_id.standard_price
+                discount_line = 0
+                #raise Warning("There is no purchase line related. Can not "
+                #              "calculate price for accounting pending
+            # invoice")
 
             price_line = unit_price_line * (1 - (discount_line or 0.0) / 100.0)
             price_line = price_line * move_line.product_qty

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-08 01:40+0000\n"
-"PO-Revision-Date: 2015-12-08 01:40+0000\n"
+"POT-Creation-Date: 2015-12-28 09:21+0000\n"
+"PO-Revision-Date: 2015-12-28 09:21+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -44,6 +44,11 @@ msgid "ACCOUNT PAID"
 msgstr "PAGADO A CUENTA"
 
 #. module: custom_documents
+#: view:website:custom_documents.report_route_detail_doc
+msgid "AGENTE:"
+msgstr "AGENTE:"
+
+#. module: custom_documents
 #: view:website:custom_documents.picking_top_part-p
 msgid "ALBERTO POLO DIST. S.A."
 msgstr "ALBERTO POLO DIST. S.A."
@@ -59,6 +64,12 @@ msgid "Add a page to the invoice with the summary of invoiced products"
 msgstr "Añade un página a la factura con el resumen de productos facturados"
 
 #. module: custom_documents
+#: view:website:custom_documents.report_route_sheet
+msgid "Address"
+msgstr "Dirección"
+
+#. module: custom_documents
+#: view:website:custom_documents.invoice_top_part
 #: view:website:custom_documents.picking_top_part-p
 msgid "Agent"
 msgstr "Agente"
@@ -72,6 +83,11 @@ msgstr "Agente / Repartidor:"
 #: view:website:custom_documents.op_group_by_partner
 msgid "Amount"
 msgstr "Importe"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_route_sheet
+msgid "Amount Total"
+msgstr "Importe total"
 
 #. module: custom_documents
 #: view:website:custom_documents.op_give_deliver
@@ -100,6 +116,11 @@ msgid "Cajas."
 msgstr "Cajas."
 
 #. module: custom_documents
+#: view:website:custom_documents.report_route_sheet
+msgid "City"
+msgstr "Población"
+
+#. module: custom_documents
 #: view:website:custom_documents.invoice_summary_products
 #: view:website:custom_documents.op_group_pick
 msgid "Code"
@@ -109,6 +130,11 @@ msgstr "Código"
 #: view:website:custom_documents.picking_top_part-p
 msgid "Concesionario autorizado para distribución en la zona"
 msgstr "Concesionario autorizado para distribución en la zona"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_route_sheet
+msgid "Customer"
+msgstr "Cliente"
 
 #. module: custom_documents
 #: view:website:custom_documents.picking_header_part-p
@@ -127,11 +153,17 @@ msgid "DATE:"
 msgstr "FECHA:"
 
 #. module: custom_documents
+#: view:website:custom_documents.report_route_detail_doc
+msgid "DATOS CLIENTE"
+msgstr "DATOS CLIENTE"
+
+#. module: custom_documents
 #: view:website:custom_documents.picking_header_part-p
 msgid "Date Of Delivery"
 msgstr "Fecha de entrega"
 
 #. module: custom_documents
+#: view:website:custom_documents.invoice_top_part
 #: view:website:custom_documents.picking_top_part-p
 msgid "Delivery Man"
 msgstr "Repartidor"
@@ -175,9 +207,29 @@ msgid "Expiration:"
 msgstr "Vencimiento:"
 
 #. module: custom_documents
+#: view:website:custom_documents.invoice_top_part
+msgid "F. RECTIFICATIVA:"
+msgstr "F. RECTIFICATIVA:"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_route_detail_doc
+msgid "FACTURA"
+msgstr "FACTURA"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_route_detail_doc
+msgid "FECHA"
+msgstr "FECHA"
+
+#. module: custom_documents
 #: view:website:custom_documents.picking_bottom_part
 msgid "FIRMA, SELLO CONFORME CLIENTE Y FECHA RECEPCIÓN DE MERCANCIA"
 msgstr "FIRMA, SELLO CONFORME CLIENTE Y FECHA RECEPCIÓN DE MERCANCIA"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_route_detail_doc
+msgid "Fecha:"
+msgstr "Fecha:"
 
 #. module: custom_documents
 #: selection:res.partner,inv_print_op:0
@@ -198,6 +250,7 @@ msgstr "Resumen de albaranes"
 #: field:report.custom_documents.report_custom_invoice,id:0
 #: field:report.custom_documents.report_custom_picking,id:0
 #: field:report.custom_documents.report_purchase_order,id:0
+#: field:report.custom_documents.report_route_detail,id:0
 #: field:report.stock_picking_batch.report_picking_batch,id:0
 msgid "ID"
 msgstr "ID"
@@ -212,6 +265,21 @@ msgstr "BASE IMPONIBLE"
 #: view:website:custom_documents.picking_bottom_part
 msgid "IMPORT IVA"
 msgstr "IMPORTE IVA"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_route_detail_doc
+msgid "IMPORTE COBRADO"
+msgstr "IMPORTE COBRADO"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_route_detail_doc
+msgid "IMPORTE FACTURA"
+msgstr "IMPORTE FACTURA"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_route_detail_doc
+msgid "IMPORTE PENDIENTE"
+msgstr "IMPORTE PENDIENTE"
 
 #. module: custom_documents
 #: view:website:custom_documents.purchase_order_middle_part
@@ -235,9 +303,19 @@ msgid "Invoice Printing"
 msgstr "Impresión de facturas"
 
 #. module: custom_documents
+#: view:website:custom_documents.report_route_detail_doc
+msgid "LISTADO DE FACTURAS PENDIENTES"
+msgstr "LISTADO DE FACTURAS PENDIENTES"
+
+#. module: custom_documents
 #: view:website:custom_documents.picking_direct_table
 msgid "Life Date:"
 msgstr "Caducidad:"
+
+#. module: custom_documents
+#: model:ir.actions.report.xml,name:custom_documents.action_report_payment_list
+msgid "Listado cobros"
+msgstr "Listado cobros"
 
 #. module: custom_documents
 #: view:website:custom_documents.picking_direct_table
@@ -275,6 +353,11 @@ msgstr "Importe Neto"
 #: selection:res.partner,pick_print_op:0
 msgid "Not Valued Picking"
 msgstr "Albarán sin valorar"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_route_sheet
+msgid "Notes"
+msgstr "Notas"
 
 #. module: custom_documents
 #: view:website:custom_documents.purchase_order_middle_part
@@ -320,6 +403,11 @@ msgstr "Página 1 de 1"
 #: model:ir.model,name:custom_documents.model_res_partner
 msgid "Partner"
 msgstr "Empresa"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_route_sheet
+msgid "Phone"
+msgstr "Teléfono"
 
 #. module: custom_documents
 #: view:website:custom_documents.op_group_by_partner
@@ -410,6 +498,7 @@ msgstr "Fecha recepción:"
 #: view:website:custom_documents.op_give_deliver
 #: view:website:custom_documents.picking_direct_table
 #: view:website:custom_documents.picking_indirect_table
+#: view:website:custom_documents.report_route_sheet
 msgid "Ref."
 msgstr "Ref."
 
@@ -417,6 +506,17 @@ msgstr "Ref."
 #: view:res.partner:custom_documents.custom_documents_view_form
 msgid "Reports Preferences"
 msgstr "Preferencias informes"
+
+#. module: custom_documents
+#: model:ir.actions.report.xml,name:custom_documents.action_report_route_sheet
+#: view:website:custom_documents.report_route_sheet
+msgid "Route Sheet"
+msgstr "Hoja de Ruta"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_route_detail_doc
+msgid "Ruta:"
+msgstr "Ruta:"
 
 #. module: custom_documents
 #: view:website:custom_documents.picking_indirect_table
@@ -430,14 +530,14 @@ msgid "SOLICITANT"
 msgstr "SOLICITANTE"
 
 #. module: custom_documents
-#: view:website:custom_documents.op_give_deliver
-msgid "Sale Unit"
-msgstr "Un. Venta"
-
-#. module: custom_documents
 #: view:website:custom_documents.picking_direct_table
 msgid "Sale units:"
 msgstr "Un. Venta:"
+
+#. module: custom_documents
+#: view:website:custom_documents.report_route_sheet
+msgid "Since"
+msgstr "Desde"
 
 #. module: custom_documents
 #: view:website:custom_documents.picking_direct_table
@@ -559,10 +659,20 @@ msgid "Unid"
 msgstr "Unid."
 
 #. module: custom_documents
-#: view:website:custom_documents.invoice_summary_products
 #: view:website:custom_documents.op_give_deliver
-#: view:website:custom_documents.op_group_pick
 #: view:website:custom_documents.picking_direct_table
+msgid "Unidad stock"
+msgstr "Unidad stock"
+
+#. module: custom_documents
+#: view:website:custom_documents.op_give_deliver
+#: view:website:custom_documents.picking_direct_table
+msgid "Unidad venta"
+msgstr "Unidad venta"
+
+#. module: custom_documents
+#: view:website:custom_documents.invoice_summary_products
+#: view:website:custom_documents.op_group_pick
 msgid "Unit"
 msgstr "Unidad"
 

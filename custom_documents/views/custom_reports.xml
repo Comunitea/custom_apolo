@@ -128,5 +128,28 @@
         <record id="action_report_payment_list" model="ir.actions.report.xml">
             <field name="paperformat_id" ref="a4_report_payment_list"/>
         </record>
+
+        <record id="route_sheet_paperformat" model="report.paperformat">
+              <field name="name">Route Sheet LandScape paper</field>
+              <field name="default" eval="True"/>
+              <field name="format">A4</field>
+              <field name="orientation">Landscape</field>
+              <field name="margin_top">5</field>
+              <field name="margin_bottom">5</field>
+        </record>
+
+        <report
+            string="Route Sheet"
+            id="action_report_route_sheet"
+            model="stock.picking"
+            report_type="qweb-pdf"
+            name="custom_documents.report_route_sheet"
+            file="custom_documents.report_route_sheet"
+        />
+
+        <record id="action_report_route_sheet" model="ir.actions.report.xml">
+            <field name="paperformat_id" ref="route_sheet_paperformat"/>
+        </record>
+
     </data>
 </openerp>
