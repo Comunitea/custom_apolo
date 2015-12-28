@@ -13,21 +13,45 @@
           .table1 td{
             border: 1px solid #000000;
           }
+          .5{
+            width: 5%;
+          }
+          .10{
+            width: 10%;
+          }
+          .12{
+            width: 12%;
+          }
+          .15{
+            width: 15%;
+          }
+          .18{
+            width: 18%;
+          }
+          .20{
+            width: 20%;
+          }
+          .30{
+            width: 30%;
+          }
+          span{
+            font-size: 10px;
+          }
         </style>
             <div class="page">
               <h2 class="center">Route Sheet</h2>
                   <table class="table1 table-bordered">
                     <tr>
-                      <th class="center">Ref.</th>
+                      <th class="center 5">Ref.</th>
                       <!-- <th>Delivery Note</th> -->
-                      <th class="center">Customer</th>
-                      <th class="center">Amount Total</th>
-                      <th class="center">Since</th>
-                      <th class="center">To</th>
-                      <th class="center" colspan="2">Address</th>
-                      <th class="center">City</th>
-                      <th class="center">Phone</th>
-                      <th class="center">Notes</th>
+                      <th class="center 20">Customer</th>
+                      <th class="center 5">Amount Total</th>
+                      <th class="center 5">Since</th>
+                      <th class="center 5">To</th>
+                      <th class="center 20">Address</th>
+                      <th class="center 10">City</th>
+                      <th class="center 12">Phone</th>
+                      <th class="center 18">Notes</th>
                     </tr>
                     <t t-foreach="docs" t-as="o">
                       <t t-set="expr" t-value="'%s:%s' % (str(o.end_hour).split('.')[0], int(float(str('%.2f' % o.end_hour).split('.')[1])/100*60))"/>
@@ -61,17 +85,16 @@
                         <t t-set="init_minute" t-value="str(m)"/>
                       </t>
                             <tr>
-                              <td class="center"><span t-esc="o.partner_id.ref"/></td>
+                              <td class="center 5"><span t-esc="o.partner_id.ref"/></td>
                               <!-- <td><span t-esc="o.name"/></td> -->
-                              <td><span t-esc="o.partner_id.comercial"/></td>
-                              <td class="center"><span t-esc="str('%.2f' % o.amount_total)"/></td>
-                              <td class="center"><span t-esc="init_hour + ':' + init_minute"/></td>
-                              <td class="center"><span t-esc="end_hour + ':' + end_minute"/></td>
-                              <td><span t-esc="o.partner_id.street"/></td>
-                              <td><span t-esc="o.partner_id.street2"/></td>
-                              <td><span t-esc="o.partner_id.city"/></td>
-                              <td class="center"><span t-esc="o.partner_id.phone"/></td>
-                              <td><span t-esc="o.sale_note"/></td>
+                              <td class="20"><span t-esc="o.partner_id.comercial"/></td>
+                              <td class="center 5"><span t-esc="str('%.2f' % o.amount_total)"/></td>
+                              <td class="center 5"><span t-esc="init_hour + ':' + init_minute"/></td>
+                              <td class="center 5"><span t-esc="end_hour + ':' + end_minute"/></td>
+                              <td class="20"><span t-esc="o.partner_id.street"/><br/><span t-esc="o.partner_id.street2"/></td>
+                              <td class="10"><span t-esc="o.partner_id.city"/></td>
+                              <td class="center 12"><span t-esc="o.partner_id.phone"/></td>
+                              <td class="18"><span t-esc="o.sale_note"/></td>
                             </tr>
                     </t>
                 </table>
